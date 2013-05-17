@@ -30,7 +30,12 @@ SUCH DAMAGE.
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+#ifdef __FreeBSD__
 #include <sys/gpio.h>
+#else
+#error	"Unsupported operating system, please send a patch to the author"
+/* __linux__ or something else */
+#endif
 #include "input.h"
 
 int bitpos; /* second */
@@ -46,8 +51,6 @@ int margin; /* absolute error margin */
 int
 set_mode(int live, char *filename)
 {
-	char gpioname[80];
-
 	islive = live;
 	bitpos = 0;
 	state = 0;
@@ -57,10 +60,6 @@ set_mode(int live, char *filename)
 		infile = fopen("hardware.txt", "r");
 		if (infile == NULL) {
 			printf("set_mode (hardware.txt): %s\n", strerror(errno));
-			return errno;
-		}
-		if (fscanf(infile, "%s\n", gpioname) != 1) {
-			printf("set_mode (gpio name): %s\n", strerror(errno));
 			return errno;
 		}
 		if (fscanf(infile, "%i\n", &freq) != 1) {
@@ -79,11 +78,15 @@ set_mode(int live, char *filename)
 			return errno;
 		}
 		fprintf(logfile, "\n--new log--\n\n");
-		fd = open(gpioname, O_RDONLY);
+
+		/* intialize the GPIO hardware */
+#ifdef __FreeBSD__
+		fd = open("/dev/gpioc0", O_RDONLY);
 		if (fd < 0) {
-			printf("set_mode (%s): %s\n", gpioname, strerror(errno));
+			printf("set_mode (/dev/gpioc0): %s\n", strerror(errno));
 			return errno;
 		}
+#endif
 	} else {
 		infile = fopen(filename, "r");
 		if (infile == NULL) {
@@ -100,8 +103,10 @@ cleanup(void)
 	if (islive) {
 		if (fclose(logfile) == EOF)
 			printf("cleanup (logfile): %s\n", strerror(errno));
+#ifdef __FreeBSD__
 		if (close(fd) == -1)
 			printf("cleanup (gpioc0): %s\n", strerror(errno));
+#endif
 	} else if (fclose(infile) == EOF)
 			printf("cleanup (infile): %s\n", strerror(errno));
 }
@@ -140,7 +145,9 @@ get_bit(void)
 		oldval = 2; /* initially invalid */
 		high = low = 0;
 		for (count = 0; count < freq; count++) {
+#ifdef __FreeBSD__
 			if (ioctl(fd, GPIOGET, &req) < 0)
+#endif
 				state |= GETBIT_IO; /* ioctl error */
 			/*
 			* result in req.gp_value
