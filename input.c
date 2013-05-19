@@ -47,6 +47,7 @@ FILE *logfile; /* auto-appended in live mode */
 int fd; /* gpio file */
 int freq; /* number of samples per second */
 int margin; /* absolute error margin */
+int pin; /* GPIO pin number */
 
 int
 set_mode(int live, char *filename)
@@ -68,6 +69,10 @@ set_mode(int live, char *filename)
 		}
 		if (fscanf(infile, "%i\n", &margin) != 1) {
 			printf("set_mode (gpio margin): %s\n", strerror(errno));
+			return errno;
+		}
+		if (fscanf(infile, "%i\n", &pin) != 1) {
+			printf("set_mode (gpio pin): %s\n", strerror(errno));
 			return errno;
 		}
 		if (fclose(infile) == EOF)
@@ -141,7 +146,7 @@ get_bit(void)
  *
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
  */
-		req.gp_pin = -1; /* TODO */
+		req.gp_pin = pin;
 		oldval = 2; /* initially invalid */
 		high = low = 0;
 		for (count = 0; count < freq; count++) {
@@ -184,10 +189,10 @@ get_bit(void)
 			state |= GETBIT_EOM; /* ideally completely low */
 		if (high >= (freq / 10.0) - margin &&
 		    high <= (freq / 10.0) + margin)
-			state |= 0; /* NOP, a zero bit */
+			state |= 0; /* NOP, a zero bit, ~100 ms active signal */
 		else if (high >= (freq / 5.0) - margin &&
 		    high <= (freq / 5.0) + margin)
-			state |= GETBIT_ONE;	
+			state |= GETBIT_ONE; /* one bit, ~200 ms active signal */
 		else
 			state |= GETBIT_READ; /* something went wrong */
 		
