@@ -120,7 +120,7 @@ add_minute(struct tm *time, int flags)
 int
 decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 {
-	int rval = 0;
+	int rval = 0, generr = 0, p1 = 0, p2 = 0, p3 = 0;
 
 	if (minlen < 59)
 		rval |= DT_SHORT;
@@ -132,26 +132,37 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 	if (buffer[20] == 0)
 		rval |= DT_B20;
 
+	if (buffer[17] == buffer[18])
+		rval |= DT_DSTERR;
+
+	generr = rval; /* do not decode if set */
+
 	if (buffer[15] == 1)
 		rval |= DT_XMIT;
 
-	if (getpar(buffer, 21, 28)) {
-		time->tm_min = (time->tm_min + 1) % 60;
+	p1 = getpar(buffer, 21, 28);
+	if (p1)
 		rval |= DT_MIN;
-	} else
+	if (p1 || generr)
+		time->tm_min = (time->tm_min + 1) % 60;
+	else
 		time->tm_min = getbcd(buffer, 21, 27);
 
-	if (getpar(buffer, 29, 35)) {
+	p2 = getpar(buffer, 29, 35);
+	if (p2)
+		rval |= DT_HOUR;
+	if (p2 || generr) {
 		if (time->tm_min == 0)
 			time->tm_hour = (time->tm_hour + 1) % 24;
-		rval |= DT_HOUR;
 	} else
 		time->tm_hour = getbcd(buffer, 29, 34);
 
-	if (getpar(buffer, 36, 58)) {
+	p3 = getpar(buffer, 36, 58);
+	if (p3)
+		rval |= DT_DATE;
+	if (p3 || generr) {
 		if (time->tm_min == 0 && time->tm_hour == 0)
 			add_day(time);
-		rval |= DT_DATE;
 	} else {
 		time->tm_mday = getbcd(buffer, 36, 41);
 		time->tm_wday = getbcd(buffer, 42, 44) % 7;
@@ -160,9 +171,9 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 	}
 
 	/* these flags are saved between invocations: */
-	if (buffer[16] == 1)
+	if (buffer[16] == 1 && generr == 0) /* sz->wz -> h==2 .. wz->sz -> h==1 */
 		announce |= ANN_CHDST;
-	if (buffer[19] == 1)
+	if (buffer[19] == 1 && generr == 0) /* h==0 (UTC) */
 		announce |= ANN_LEAP;
 
 	if (minlen == 59) {
@@ -181,9 +192,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 			rval |= DT_LONG;
 	}
 
-	if (buffer[17] == buffer[18])
-		rval |= DT_DSTERR;
-	else if (buffer[17] != time->tm_isdst) {
+	if (buffer[17] != time->tm_isdst) {
 		if (init2 || ((announce & ANN_CHDST) && time->tm_min == 0))
 			time->tm_isdst = buffer[17]; /* expected change */
 		else
