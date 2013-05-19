@@ -35,9 +35,9 @@ SUCH DAMAGE.
 #define DT_DATE		8
 #define DT_B0		16
 #define DT_B20		32
-#define DT_XMIT		64
-#define DT_SHORT	128
-#define DT_LONG		256
+#define DT_SHORT	64
+#define DT_LONG		128
+#define DT_XMIT		256
 #define DT_CHDST	512
 #define DT_LEAP		1024
 
