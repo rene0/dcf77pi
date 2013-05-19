@@ -43,7 +43,7 @@ main(int argc, char *argv[])
 	uint8_t civbuf[40];
 	struct tm time, oldtime;
 	uint8_t civ1, civ2;
-	int dt, bit, bitpos, minlen = 0, init = 1, init2 = 0;
+	int dt, bit, bitpos, minlen = 0, init = 1, init2 = 1;
 
 	if (argc != 2) {
 		printf("usage: %s infile\n", argv[0]);
@@ -108,20 +108,17 @@ main(int argc, char *argv[])
 					printf("Civil warning error\n");
 			}
 
-			if (!init) {
+			if (!init)
 				dt = add_minute(&oldtime, dt);
-				display_time(init2, dt, oldtime, time);
-			}
+			display_time(init2, dt, oldtime, time);
 			printf("\n");
 
 			memcpy((void *)&oldtime, (const void *)&time,
 			    sizeof(struct tm));
-			if (init2)
+			if (!init && init2)
 				init2 = 0;
-			if (init) {
-				init2 = 1;
+			if (init)
 				init = 0;
-			}
 		}
 	}
 
