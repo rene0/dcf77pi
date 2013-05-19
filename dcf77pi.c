@@ -101,11 +101,12 @@ main(int argc, char *argv[])
 			printf(" %d %c\n", minlen, dt & DT_LONG ? '>' :
 			    dt & DT_SHORT ? '<' : ' ');
 
-			if (civ1 == 1 && civ2 == 1)
-				display_alarm(civbuf); /* no real decoding */
-			else
+			if (time.tm_min % 3 == 0) {
+				if (civ1 == 1 && civ2 == 1)
+					display_alarm(civbuf);
 				if (civ1 != civ2)
 					printf("Civil warning error\n");
+			}
 
 			if (!init) {
 				dt = add_minute(&oldtime, dt);
