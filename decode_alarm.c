@@ -45,10 +45,10 @@ display_alarm(uint8_t *buf)
 	    256 * buf[35] + 512 * buf[37];
 	pl2 = buf[32] + 2 * buf[36] + 4 * buf[38] + 8 * buf[39];
 
-	printf("\nCivil warning (Germany): ");
+	printf("Civil warning (Germany): ");
 	if (ds1 == ds2 && ps1 == ps2 && dl1 == dl2 && pl1 == pl2)
-		printf("short: data=%d parity=0x%x long: data=%d parity=0x%x\n",
+		printf("short: data=0x%x parity=0x%x long: data=0x%x parity=0x%x\n",
 		    ds1, ps1, dl1, pl1);
 	else /* should not happen */
-		printf("differences: %x %x %x %x\n", ds1-ds2, ps1-ps2, dl1-dl2, pl1-pl2);
+		printf("DIFFERENCES: short: data=0x%x parity=0x%x long: data=0x%x parity=0x%x\n", ds1-ds2, ps1-ps2, dl1-dl2, pl1-pl2);
 }
