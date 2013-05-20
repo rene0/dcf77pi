@@ -42,7 +42,7 @@ main(int argc, char *argv[])
 	uint8_t indata[40];
 	uint8_t civbuf[40];
 	struct tm time, oldtime;
-	uint8_t civ1, civ2;
+	uint8_t civ1 = 0, civ2 = 0;
 	int dt, bit, bitpos, minlen = 0, init = 1, init2 = 1;
 
 	if (argc != 2) {
@@ -57,7 +57,6 @@ main(int argc, char *argv[])
 
 	/* no weird values please */
 	bzero(indata, sizeof(indata));
-	civ1 = civ2 = 2; /* initial invalid values */
 	bzero(&time, sizeof(time));
 
 	for (;;) {
@@ -76,18 +75,33 @@ main(int argc, char *argv[])
 		if (!init) {
 			switch (time.tm_min % 3) {
 			case 0:
-				/* copy civil warning bits */
+				/* copy civil warning data */
+				if (bitpos > 1 && bitpos < 8)
+					indata[bitpos - 2] = bit & GETBIT_ONE;
+					/* 2..7 -> 0..5 */
+				if (bitpos > 8 && bitpos < 15)
+					indata[bitpos - 3] = bit & GETBIT_ONE;
+					/* 9..14 -> 6..11 */
+
+				/* copy civil warning flags */
 				if (bitpos == 1)
 					civ1 = bit & GETBIT_ONE;
 				if (bitpos == 8)
 					civ2 = bit & GETBIT_ONE;
 				break;
+			case 1:
+				/* copy civil warning data */
+				if (bitpos > 0 && bitpos < 15)
+					indata[bitpos + 11] = bit & GETBIT_ONE;
+					/* 1..14 -> 11..24 */
 			case 2:
+				/* copy civil warning data */
+				if (bitpos > 0 && bitpos < 15)
+					indata[bitpos + 25] = bit & GETBIT_ONE;
+					/* 1..14 -> 25..39 */
 				if (bitpos == 15)
 					memcpy(civbuf, indata, sizeof(civbuf));
-					/* save civil warning buffer */
-				break;
-			default:
+					/* take snapshot of civil warning buffer */
 				break;
 			}
 		}
