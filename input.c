@@ -32,9 +32,10 @@ SUCH DAMAGE.
 #include <unistd.h>
 #ifdef __FreeBSD__
 #include <sys/gpio.h>
+#elif defined(__linux__)
+#error Linux is WIP
 #else
-#error	"Unsupported operating system, please send a patch to the author"
-/* __linux__ or something else */
+#error Unsupported operating system, please send a patch to the author
 #endif
 #include "input.h"
 
@@ -122,8 +123,10 @@ get_bit(void)
 	char inch;
 	int count, high, low;
 	uint32_t oldval;
-	struct gpio_req req;
 	int seenlow = 0, seenhigh = 0;
+#ifdef __FreeBSD__
+	struct gpio_req req;
+#endif
 
 	state = 0; /* clear previous flags */
 	if (islive) {
@@ -146,7 +149,9 @@ get_bit(void)
  *
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
  */
+#ifdef __FreeBSD__
 		req.gp_pin = pin;
+#endif
 		oldval = 2; /* initially invalid */
 		high = low = 0;
 		for (count = 0; count < freq; count++) {
@@ -169,19 +174,33 @@ get_bit(void)
 			* if no / happens, then state |= GETBIT_EOM;
 			*/
 			if (oldval == 2)
+#ifdef __FreeBSD__
 				oldval = req.gp_value;
 			if (oldval == req.gp_value) {
 				if (req.gp_value == GPIO_PIN_HIGH)
+#else
+				oldval = oldval; /* TODO */
+			if (oldval == oldval) { /* TODO */
+				if (0) /* TODO */
+#endif
 					high++;
 				else
 					low++;
+#if __FreeBSD__
 			} else if (oldval == GPIO_PIN_HIGH &&
 			    req.gp_value == GPIO_PIN_LOW)
+#else
+			} else if (0) /* TODO */
+#endif
 				seenlow++;
 			else
 				seenhigh++;
 			
+#ifdef __FreeBSD__
 			oldval = req.gp_value;
+#else
+			oldval = oldval; /* TODO */
+#endif
 			(void)usleep(1000000.0 / freq);
 		}
 		printf(" [%i %i %i %i %i]", freq, low, high, seenlow, seenhigh); /* freq should be low+high */
