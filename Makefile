@@ -8,9 +8,7 @@ obj = dcf77pi.o input.o decode_time.o decode_alarm.o
 input.o: input.h
 decode_time.o: decode_time.h
 decode_alarm.o: decode_alarm.h
-
-dcf77pi.o: dcf77pi.c $(hdr)
-	$(CC) $(CFLAGS) -c $<
+dcf77pi.o: $(hdr)
 
 dcf77pi: $(obj)
 	$(CC) -o $@ $(obj)
