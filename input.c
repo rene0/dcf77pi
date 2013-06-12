@@ -36,7 +36,7 @@ int bitpos; /* second */
 uint8_t buffer[60]; /* wrap after 60 positions */
 int state; /* any errors, or high bit */
 int islive; /* live input or pre-recorded data */
-FILE *infile; /* input file (recorded data or hardware parameters) */
+FILE *datafile; /* input file (recorded data) */
 FILE *logfile; /* auto-appended in live mode */
 int fd; /* gpio file */
 
@@ -105,7 +105,7 @@ set_mode(int live, char *filename)
 	if (live) {
 		logfile = fopen("dcf77pi.log", "a");
 		if (logfile == NULL) {
-			printf("set_mode (logfile): %s\n", strerror(errno));
+			perror("set_mode (logfile)");
 			return errno;
 		}
 		fprintf(logfile, "\n--new log--\n\n");
@@ -121,9 +121,9 @@ set_mode(int live, char *filename)
 			return res;
 		}
 	} else {
-		infile = fopen(filename, "r");
-		if (infile == NULL) {
-			printf("set_mode (infile): %s\n", strerror(errno));
+		datafile = fopen(filename, "r");
+		if (datafile == NULL) {
+			perror("set_mode (datafile)");
 			return errno;
 		}
 	}
@@ -135,13 +135,13 @@ cleanup(void)
 {
 	if (islive) {
 		if (fclose(logfile) == EOF)
-			printf("cleanup (logfile): %s\n", strerror(errno));
+			perror("cleanup (logfile)");
 #ifdef __FreeBSD__
 		if (close(fd) == -1)
-			printf("cleanup (gpioc0): %s\n", strerror(errno));
+			perror("cleanup (gpioc0)");
 #endif
-	} else if (fclose(infile) == EOF)
-			printf("cleanup (infile): %s\n", strerror(errno));
+	} else if (fclose(datafile) == EOF)
+			perror("cleanup (datafile)");
 }
 
 int
@@ -254,11 +254,11 @@ get_bit(void)
 			inch = '0';
 		fprintf(logfile, "%c", inch);
 	} else {
-		if (feof(infile)) {
+		if (feof(datafile)) {
 			state |= GETBIT_EOD;
 			return state;
 		}
-		if (fscanf(infile, "%c", &inch) == 1) {
+		if (fscanf(datafile, "%c", &inch) == 1) {
 			switch (inch) {
 			case '0':
 			case '1':
