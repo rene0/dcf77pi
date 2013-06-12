@@ -39,38 +39,50 @@ int islive; /* live input or pre-recorded data */
 FILE *infile; /* input file (recorded data or hardware parameters) */
 FILE *logfile; /* auto-appended in live mode */
 int fd; /* gpio file */
-int freq; /* number of samples per second */
-int margin; /* absolute error margin */
-int pin; /* GPIO pin number */
+
+struct hardware hw;
+
+int
+read_hardware_parameters(char *filename, struct hardware *_hw)
+{
+	FILE *hwfile;
+
+	hwfile = fopen(filename, "r");
+	if (hwfile == NULL) {
+		perror("fopen");
+		return errno;
+	}
+	if (fscanf(hwfile, "%li\n", &(_hw->freq)) != 1) {
+		perror("gpio freq");
+		return errno;
+	}
+	if (fscanf(hwfile, "%li\n", &(_hw->margin)) != 1) {
+		perror("gpio margin");
+		return errno;
+	}
+	if (fscanf(hwfile, "%i\n", &(_hw->pin)) != 1) {
+		perror("gpio pin");
+		return errno;
+	}
+	if (fclose(hwfile) == EOF) {
+		perror("fclose");
+		return errno;
+	}
+	return 0;
+}
+
 
 int
 set_mode(int live, char *filename)
 {
+	int res;
+
 	islive = live;
 	bitpos = 0;
 	state = 0;
 	bzero(buffer, sizeof(buffer));
 
 	if (live) {
-		infile = fopen("hardware.txt", "r");
-		if (infile == NULL) {
-			printf("set_mode (hardware.txt): %s\n", strerror(errno));
-			return errno;
-		}
-		if (fscanf(infile, "%i\n", &freq) != 1) {
-			printf("set_mode (gpio freq): %s\n", strerror(errno));
-			return errno;
-		}
-		if (fscanf(infile, "%i\n", &margin) != 1) {
-			printf("set_mode (gpio margin): %s\n", strerror(errno));
-			return errno;
-		}
-		if (fscanf(infile, "%i\n", &pin) != 1) {
-			printf("set_mode (gpio pin): %s\n", strerror(errno));
-			return errno;
-		}
-		if (fclose(infile) == EOF)
-			printf("set_mode (hardware.txt): %s\n", strerror(errno));
 		logfile = fopen("dcf77pi.log", "a");
 		if (logfile == NULL) {
 			printf("set_mode (logfile): %s\n", strerror(errno));
@@ -78,6 +90,11 @@ set_mode(int live, char *filename)
 		}
 		fprintf(logfile, "\n--new log--\n\n");
 
+		res = read_hardware_parameters("hardware.txt", &hw);
+		if (res) {
+			cleanup();
+			return res;
+		}
 		/* intialize the GPIO hardware */
 #ifdef __FreeBSD__
 		fd = open("/dev/gpioc0", O_RDONLY);
@@ -143,11 +160,11 @@ get_bit(void)
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
  */
 #ifdef __FreeBSD__
-		req.gp_pin = pin;
+		req.gp_pin = hw.pin;
 #endif
 		oldval = 2; /* initially invalid */
 		high = low = 0;
-		for (count = 0; count < freq; count++) {
+		for (count = 0; count < hw.freq; count++) {
 #ifdef __FreeBSD__
 			if (ioctl(fd, GPIOGET, &req) < 0)
 #endif
@@ -194,16 +211,16 @@ get_bit(void)
 #else
 			oldval = oldval; /* TODO */
 #endif
-			(void)usleep(1000000.0 / freq);
+			(void)usleep(1000000.0 / hw.freq);
 		}
-		printf(" [%i %i %i %i %i]", freq, low, high, seenlow, seenhigh); /* freq should be low+high */
-		if (high < margin)
+		printf(" [%lu %i %i %i %i]", hw.freq, low, high, seenlow, seenhigh); /* hw.freq should be low+high */
+		if (high < hw.margin)
 			state |= GETBIT_EOM; /* ideally completely low */
-		if (high >= (freq / 10.0) - margin &&
-		    high <= (freq / 10.0) + margin)
+		if (high >= (hw.freq / 10.0) - hw.margin &&
+		    high <= (hw.freq / 10.0) + hw.margin)
 			state |= 0; /* NOP, a zero bit, ~100 ms active signal */
-		else if (high >= (freq / 5.0) - margin &&
-		    high <= (freq / 5.0) + margin)
+		else if (high >= (hw.freq / 5.0) - hw.margin &&
+		    high <= (hw.freq / 5.0) + hw.margin)
 			state |= GETBIT_ONE; /* one bit, ~200 ms active signal */
 		else
 			state |= GETBIT_READ; /* something went wrong */

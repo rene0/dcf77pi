@@ -41,6 +41,11 @@ SUCH DAMAGE.
 #define GETBIT_TOOLONG	16
 #define GETBIT_IO	32
 
+struct hardware {
+	unsigned long freq, margin;
+	int pin;
+};
+
 int set_mode(int live, char *filename);
 void cleanup(void);
 int get_bit(void); /* stores result in internal buffer */
@@ -48,5 +53,6 @@ void display_bit(void);
 int next_bit(void); /* prepare for next bit */
 int get_bitpos(void);
 uint8_t *get_buffer(void);
+int read_hardware_parameters(char *filename, struct hardware *_hw);
 
 #endif
