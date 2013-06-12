@@ -179,7 +179,7 @@ get_bit(void)
 #ifdef __FreeBSD__
 		req.gp_pin = hw.pin;
 #endif
-		oldval = 2; /* initially invalid */
+		oldval = 0;
 		high = low = 0;
 		for (count = 0; count < hw.freq; count++) {
 #ifdef __FreeBSD__
@@ -200,13 +200,10 @@ get_bit(void)
 			*
 			* if no / happens, then state |= GETBIT_EOM;
 			*/
-			if (oldval == 2)
 #ifdef __FreeBSD__
-				oldval = req.gp_value;
 			if (oldval == req.gp_value) {
 				if (req.gp_value == GPIO_PIN_HIGH)
 #else
-				oldval = oldval; /* TODO */
 			if (oldval == oldval) { /* TODO */
 				if (0) /* TODO */
 #endif
