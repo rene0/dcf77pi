@@ -158,8 +158,6 @@ get_bit(void)
 	state = 0; /* clear previous flags */
 	if (islive) {
 /*
- * TODO nothing yet to actually receive the signal (DCF77 antenna over GPIO)
- *
  * One pulse is either 1000 ms or 2000 ms long (normal or padding for last)
  * Active part is either 100 ms ('0') or 200 ms ('1') long, with an error
  * certain margin (e.g. 30 ms), so:
@@ -181,6 +179,7 @@ get_bit(void)
 #endif
 		oldval = 0;
 		high = low = 0;
+//XXX wrong, we have to detect the edges
 		for (count = 0; count < hw.freq; count++) {
 #ifdef __FreeBSD__
 			if (ioctl(fd, GPIOGET, &req) < 0)
