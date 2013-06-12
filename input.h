@@ -26,6 +26,14 @@ SUCH DAMAGE.
 #ifndef DCF77PI_INPUT_H
 #define DCF77PI_INPUT_H
 
+#ifdef __FreeBSD__
+#include <sys/gpio.h>
+#elif defined(__linux__)
+#error Linux is WIP
+#else
+#error Unsupported operating system, please send a patch to the author
+#endif
+
 #define GETBIT_ONE	1
 #define GETBIT_EOM	2
 #define GETBIT_EOD	4
