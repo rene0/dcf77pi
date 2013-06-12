@@ -89,7 +89,7 @@ init_hardware(int pin_nr)
 		return errno;
 	}
 
-	return 0;
+	return fd;
 }
 
 int
