@@ -71,6 +71,26 @@ read_hardware_parameters(char *filename, struct hardware *_hw)
 	return 0;
 }
 
+int
+init_hardware(int pin_nr)
+{
+	struct gpio_pin pin;
+	int fd;
+
+	fd = open("/dev/gpioc0", O_RDONLY);
+	if (fd < 0) {
+		perror("open");
+		return errno;
+	}
+
+	pin.gp_pin = pin_nr;
+	if (ioctl(fd, GPIOGETCONFIG, &pin) < 0) {
+		perror("ioctl(GPIOGETCONFIG)");
+		return errno;
+	}
+
+	return 0;
+}
 
 int
 set_mode(int live, char *filename)
@@ -95,14 +115,11 @@ set_mode(int live, char *filename)
 			cleanup();
 			return res;
 		}
-		/* intialize the GPIO hardware */
-#ifdef __FreeBSD__
-		fd = open("/dev/gpioc0", O_RDONLY);
-		if (fd < 0) {
-			printf("set_mode (/dev/gpioc0): %s\n", strerror(errno));
-			return errno;
+		res = init_hardware(hw.pin);
+		if (res) {
+			cleanup();
+			return res;
 		}
-#endif
 	} else {
 		infile = fopen(filename, "r");
 		if (infile == NULL) {
