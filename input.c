@@ -109,7 +109,7 @@ set_mode(int live, char *filename)
 			return res;
 		}
 		res = init_hardware(hw.pin);
-		if (res) {
+		if (res < 0) {
 			cleanup();
 			return res;
 		}
