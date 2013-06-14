@@ -36,9 +36,9 @@ int bitpos; /* second */
 uint8_t buffer[60]; /* wrap after 60 positions */
 int state; /* any errors, or high bit */
 int islive; /* live input or pre-recorded data */
-FILE *datafile; /* input file (recorded data) */
-FILE *logfile; /* auto-appended in live mode */
-int fd; /* gpio file */
+FILE *datafile = NULL; /* input file (recorded data) */
+FILE *logfile = NULL; /* auto-appended in live mode */
+int fd = 0; /* gpio file */
 
 struct hardware hw;
 
@@ -133,15 +133,15 @@ set_mode(int live, char *filename)
 void
 cleanup(void)
 {
-	if (islive) {
-		if (fclose(logfile) == EOF)
-			perror("cleanup (logfile)");
+
 #ifdef __FreeBSD__
-		if (close(fd) == -1)
-			perror("cleanup (gpioc0)");
+	if (fd > 0 && close(fd) == -1)
+		perror("close (gpioc0)");
 #endif
-	} else if (fclose(datafile) == EOF)
-			perror("cleanup (datafile)");
+	if (logfile != NULL && fclose(logfile) == EOF)
+		perror("fclose (logfile)");
+	if (datafile != NULL && fclose(datafile) == EOF)
+		perror("fclose (datafile)");
 }
 
 int
