@@ -285,7 +285,7 @@ display_bit(void)
 	    bitpos == 19 || bitpos == 20 || bitpos == 27 || bitpos == 28 ||
 	    bitpos == 34 || bitpos == 35 || bitpos == 41 || bitpos == 44 ||
 	    bitpos == 49 || bitpos == 57 || bitpos == 58)
-		printf("%c", ' ');
+		printf(" ");
 }
 
 int
