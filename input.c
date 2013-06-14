@@ -103,13 +103,6 @@ set_mode(int live, char *filename)
 	bzero(buffer, sizeof(buffer));
 
 	if (live) {
-		logfile = fopen("dcf77pi.log", "a");
-		if (logfile == NULL) {
-			perror("set_mode (logfile)");
-			return errno;
-		}
-		fprintf(logfile, "\n--new log--\n\n");
-
 		res = read_hardware_parameters("hardware.txt", &hw);
 		if (res) {
 			cleanup();
@@ -120,6 +113,13 @@ set_mode(int live, char *filename)
 			cleanup();
 			return res;
 		}
+		logfile = fopen("dcf77pi.log", "a");
+		if (logfile == NULL) {
+			perror("fopen (logfile)");
+			cleanup();
+			return errno;
+		}
+		fprintf(logfile, "\n--new log--\n\n");
 	} else {
 		datafile = fopen(filename, "r");
 		if (datafile == NULL) {
