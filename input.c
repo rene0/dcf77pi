@@ -49,7 +49,7 @@ read_hardware_parameters(char *filename, struct hardware *_hw)
 
 	hwfile = fopen(filename, "r");
 	if (hwfile == NULL) {
-		perror("fopen");
+		perror("fopen (hwfile)");
 		return errno;
 	}
 	if (fscanf(hwfile, "%li\n", &(_hw->freq)) != 1) {
@@ -65,7 +65,7 @@ read_hardware_parameters(char *filename, struct hardware *_hw)
 		return errno;
 	}
 	if (fclose(hwfile) == EOF) {
-		perror("fclose");
+		perror("fclose (hwfile)");
 		return errno;
 	}
 	return 0;
@@ -79,7 +79,7 @@ init_hardware(int pin_nr)
 
 	fd = open("/dev/gpioc0", O_RDONLY);
 	if (fd < 0) {
-		perror("open");
+		perror("open (gpioc0)");
 		return errno;
 	}
 
@@ -123,7 +123,7 @@ set_mode(int live, char *filename)
 	} else {
 		datafile = fopen(filename, "r");
 		if (datafile == NULL) {
-			perror("set_mode (datafile)");
+			perror("fopen (datafile)");
 			return errno;
 		}
 	}
