@@ -29,7 +29,8 @@ main(int argc, char **argv)
 		req.gp_pin = hw.pin;
 		if (ioctl(fd, GPIOGET, &req) < 0) {
 			perror("ioctl(GPIOGET)"); /* whoops */
-			exit(1);
+			cleanup();
+			return 1;
 		}
 		if ((req.gp_value != old && old == 0) ||
 		    (high + low > hw.freq)) {
