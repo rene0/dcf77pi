@@ -75,7 +75,6 @@ int
 init_hardware(int pin_nr)
 {
 	struct gpio_pin pin;
-	int fd;
 
 	fd = open("/dev/gpioc0", O_RDONLY);
 	if (fd < 0) {
