@@ -39,7 +39,6 @@ int islive; /* live input or pre-recorded data */
 FILE *datafile = NULL; /* input file (recorded data) */
 FILE *logfile = NULL; /* auto-appended in live mode */
 int fd = 0; /* gpio file */
-
 struct hardware hw;
 
 int
@@ -78,7 +77,7 @@ init_hardware(int pin_nr)
 
 	fd = open("/dev/gpioc0", O_RDONLY);
 	if (fd < 0) {
-		perror("open (gpioc0)");
+		perror("open (/dev/gpioc0)");
 		return errno;
 	}
 
@@ -135,7 +134,7 @@ cleanup(void)
 
 #ifdef __FreeBSD__
 	if (fd > 0 && close(fd) == -1)
-		perror("close (gpioc0)");
+		perror("close (/dev/gpioc0)");
 #endif
 	if (logfile != NULL && fclose(logfile) == EOF)
 		perror("fclose (logfile)");
