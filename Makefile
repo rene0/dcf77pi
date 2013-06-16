@@ -1,5 +1,7 @@
 .PHONY: all clean
 
+CFLAGS+=-Wall
+
 all: dcf77pi readpin
 
 hdr = input.h decode_time.h decode_alarm.h
