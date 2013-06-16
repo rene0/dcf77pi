@@ -79,13 +79,13 @@ init_hardware(int pin_nr)
 	fd = open("/dev/gpioc0", O_RDONLY);
 	if (fd < 0) {
 		perror("open (/dev/gpioc0)");
-		return errno;
+		return -errno;
 	}
 
 	pin.gp_pin = pin_nr;
 	if (ioctl(fd, GPIOGETCONFIG, &pin) < 0) {
 		perror("ioctl(GPIOGETCONFIG)");
-		return errno;
+		return -errno;
 	}
 
 	return fd;
