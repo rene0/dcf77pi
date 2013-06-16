@@ -73,6 +73,7 @@ read_hardware_parameters(char *filename, struct hardware *_hw)
 int
 init_hardware(int pin_nr)
 {
+#ifdef __FreeBSD__
 	struct gpio_pin pin;
 
 	fd = open("/dev/gpioc0", O_RDONLY);
@@ -88,6 +89,7 @@ init_hardware(int pin_nr)
 	}
 
 	return fd;
+#endif
 }
 
 int
@@ -132,8 +134,8 @@ void
 cleanup(void)
 {
 
-#ifdef __FreeBSD__
 	if (fd > 0 && close(fd) == -1)
+#ifdef __FreeBSD__
 		perror("close (/dev/gpioc0)");
 #endif
 	if (logfile != NULL && fclose(logfile) == EOF)
