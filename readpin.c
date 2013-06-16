@@ -83,7 +83,6 @@ main(int argc, char **argv)
 #endif
 		(void)usleep(1000000.0 / hw.freq); /* us */
 	}
-	if (close(fd))
-		perror("close");
+	cleanup();
 	return 0;
 }
