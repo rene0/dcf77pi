@@ -34,11 +34,13 @@ int
 main(int argc, char **argv)
 {
 	unsigned long high, low, err;
-	struct gpio_req req;
 	int fd;
 	int old;
 	int res;
 	struct hardware hw;
+#ifdef __FreeBSD__
+	struct gpio_req req;
+#endif
 
 	res = read_hardware_parameters("hardware.txt", &hw);
 	if (res)
@@ -51,24 +53,34 @@ main(int argc, char **argv)
 	high = low = err = 0;
 	old = 0;
 	for (;;) {
+#ifdef __FreeBSD__
 		req.gp_pin = hw.pin;
 		if (ioctl(fd, GPIOGET, &req) < 0) {
-			perror("ioctl(GPIOGET)"); /* whoops */
+			perror("ioctl(GPIOGET)");
+#endif
 			cleanup();
 			return 1;
 		}
+#ifdef __FreeBSD__
 		if ((req.gp_value != old && old == 0) ||
+#endif
 		    (high + low > hw.freq)) {
 			printf("%lu %lu %lu\n", err, high, low);
 			high = low = 0;
 		}
+#ifdef __FreeBSD__
 		if (req.gp_value == GPIO_PIN_HIGH)
+#endif
 			high++;
+#ifdef __FreeBSD__
 		else if (req.gp_value == GPIO_PIN_LOW)
+#endif
 			low++;
 		else
 			err++; /* Houston? */
+#ifdef __FreeBSD__
 		old = req.gp_value;
+#endif
 		(void)usleep(1000000.0 / hw.freq); /* us */
 	}
 	if (close(fd))
