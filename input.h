@@ -29,7 +29,7 @@ SUCH DAMAGE.
 #ifdef __FreeBSD__
 #include <sys/gpio.h>
 #elif defined(__linux__)
-#error Linux is WIP
+#include <stdint.h>
 #else
 #error Unsupported operating system, please send a patch to the author
 #endif
