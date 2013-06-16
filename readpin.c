@@ -37,7 +37,7 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	unsigned long high, low, err;
+	unsigned long high, low;
 	int fd;
 	int old;
 	int res;
@@ -56,7 +56,7 @@ main(int argc, char **argv)
 	if (fd < 0)
 		return fd; /* errno */
 
-	high = low = err = 0;
+	high = low = 0;
 	old = 0;
 
 	for (;;) {
@@ -78,7 +78,7 @@ main(int argc, char **argv)
 		if ((buf
 #endif
 		    != old && old == 0) || (high + low > hw.freq)) {
-			printf("%lu %lu %lu\n", err, high, low);
+			printf("%lu %lu %lu %5.3f\n", high, low, high+low, (double)high/(high+low));
 			high = low = 0;
 		}
 #ifdef __FreeBSD__
@@ -94,10 +94,12 @@ main(int argc, char **argv)
 #endif
 			low++;
 		else
-			err++; /* Houston? */
+			printf("pin value = %d\n",
 #ifdef __FreeBSD__
+			    req.gp_value);
 		old = req.gp_value;
 #elif defined(__linux__)
+			    buf);
 		lseek(fd, 0, SEEK_SET);
 		old = buf;
 #endif
