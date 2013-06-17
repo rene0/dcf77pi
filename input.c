@@ -30,6 +30,13 @@ SUCH DAMAGE.
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+#ifdef __FreeBSD__
+#include <sys/gpio.h>
+#elif defined(__linux__)
+#error Linux is WIP
+#else
+#error Unsupported operating system, please send a patch to the author
+#endif
 #include "input.h"
 
 int bitpos; /* second */

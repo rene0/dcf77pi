@@ -26,20 +26,16 @@ SUCH DAMAGE.
 #ifndef DCF77PI_INPUT_H
 #define DCF77PI_INPUT_H
 
-#ifdef __FreeBSD__
-#include <sys/gpio.h>
-#elif defined(__linux__)
-#include <stdint.h>
-#else
-#error Unsupported operating system, please send a patch to the author
-#endif
-
 #define GETBIT_ONE	1
 #define GETBIT_EOM	2
 #define GETBIT_EOD	4
 #define GETBIT_READ	8
 #define GETBIT_TOOLONG	16
 #define GETBIT_IO	32
+
+#ifdef __linux__
+#include <stdint.h> /* uint8_t */
+#endif
 
 struct hardware {
 	unsigned long freq, margin;
