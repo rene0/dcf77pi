@@ -30,13 +30,13 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	if (set_mode(1, NULL)) {
+	if (set_mode(2, NULL)) {
 		cleanup();
 		return 0;
 	}
 
 	for (;;) {
-		printf("%d\n", get_bit());
+		printf(" %d\n", get_bit());
 	}
 	cleanup();
 	return 0;

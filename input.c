@@ -273,7 +273,8 @@ get_bit(void)
 				oldval = inch; /* initialize */
 			if ((inch != oldval && oldval == 0) || (high + low > hw.freq)) {
 				count = 100 * high / (high + low);
-				printf("[%i %i %i] ", high, low, count);
+				if (islive == 2)
+					printf("[%i %i %i]", high, low, count);
 				break;
 			}
 			oldval = inch;

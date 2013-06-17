@@ -44,12 +44,19 @@ main(int argc, char *argv[])
 	struct tm time, oldtime;
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt, bit, bitpos, minlen = 0, init = 1, init2 = 1;
+	int res;
 
 	if (argc != 2) {
 		printf("usage: %s infile\n", argv[0]);
 		return EX_USAGE;
 	}
-	if (strcmp(argv[1], "-") ? set_mode(0, argv[1]) : set_mode(1, NULL)) {
+	if (!strcmp(argv[1], "-"))
+		res = set_mode(1, NULL);
+	else if (!strcmp(argv[1], "+"))
+		res = set_mode(2, NULL);
+	else
+		res = set_mode(0, argv[1]);
+	if (res) {
 		/* something went wrong */
 		cleanup();
 		return 0;
