@@ -33,9 +33,7 @@ SUCH DAMAGE.
 #define GETBIT_TOOLONG	16
 #define GETBIT_IO	32
 
-#ifdef __linux__
 #include <stdint.h> /* uint8_t */
-#endif
 
 struct hardware {
 	unsigned long freq, margin;
