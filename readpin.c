@@ -23,87 +23,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include <fcntl.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-
 #include "input.h"
-
-#ifdef __linux__
-#include <sys/types.h>
-#endif
 
 int
 main(int argc, char **argv)
 {
-	unsigned long high, low;
-	int fd;
-	int old;
-	int res;
-	struct hardware hw;
-#ifdef __FreeBSD__
-	struct gpio_req req;
-#elif defined(__linux__)
-	char buf;
-#endif
-
-	res = read_hardware_parameters("hardware.txt", &hw);
-	if (res)
-		return res;
-
-	fd = init_hardware(hw.pin);
-	if (fd < 0)
-		return fd; /* errno */
-
-	high = low = 0;
-	old = 0;
+	if (set_mode(1, NULL)) {
+		cleanup();
+		return 0;
+	}
 
 	for (;;) {
-#ifdef __FreeBSD__
-		req.gp_pin = hw.pin;
-		if (ioctl(fd, GPIOGET, &req) < 0) {
-			perror("ioctl(GPIOGET)");
-#elif defined(__linux__)
-		if (read(fd, &buf, sizeof(buf)) != sizeof(buf)) {
-			perror("read(fd)");
-#endif
-			cleanup();
-			return 1;
-		}
-#ifdef __FreeBSD__
-		if ((req.gp_value
-#elif defined(__linux__)
-		buf -= '0';
-		if ((buf
-#endif
-		    != old && old == 0) || (high + low > hw.freq)) {
-			printf("%lu %lu %lu %5.3f\n", high, low, high+low, (double)high/(high+low));
-			high = low = 0;
-		}
-#ifdef __FreeBSD__
-		if (req.gp_value == GPIO_PIN_HIGH)
-#elif defined(__linux__)
-		if (buf == 1)
-#endif
-			high++;
-#ifdef __FreeBSD__
-		else if (req.gp_value == GPIO_PIN_LOW)
-#elif defined(__linux__)
-		else if (buf == 0)
-#endif
-			low++;
-		else
-			printf("pin value = %d\n",
-#ifdef __FreeBSD__
-			    req.gp_value);
-		old = req.gp_value;
-#elif defined(__linux__)
-			    buf);
-		lseek(fd, 0, SEEK_SET); /* rewind to prevent EBUSY/no read */
-		old = buf;
-#endif
-		(void)usleep(1000000.0 / hw.freq); /* us */
+		printf("%d\n", get_bit());
 	}
 	cleanup();
 	return 0;
