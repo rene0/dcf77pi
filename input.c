@@ -33,7 +33,7 @@ SUCH DAMAGE.
 #ifdef __FreeBSD__
 #include <sys/gpio.h>
 #elif defined(__linux__)
-#error Linux is WIP
+#include <sys/types.h>
 #else
 #error Unsupported operating system, please send a patch to the author
 #endif
@@ -208,10 +208,11 @@ get_bit(void)
 {
 	char inch;
 	int count, high, low;
-	uint32_t oldval;
-	int seenlow = 0, seenhigh = 0;
+	int oldval;
 #ifdef __FreeBSD__
 	struct gpio_req req;
+#elif defined(__linux__)
+	char buf;
 #endif
 
 	state = 0; /* clear previous flags */
@@ -233,69 +234,59 @@ get_bit(void)
  *
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
  */
-#ifdef __FreeBSD__
-		req.gp_pin = hw.pin;
-#endif
-		oldval = 0;
 		high = low = 0;
-//XXX wrong, we have to detect the edges
-		for (count = 0; count < hw.freq; count++) {
+		oldval = 0;
+		count = 0;
+
+		for (;;) {
 #ifdef __FreeBSD__
-			if (ioctl(fd, GPIOGET, &req) < 0)
+			req.gp_pin = hw.pin;
+			if (ioctl(fd, GPIOGET, &req) < 0) {
+#elif defined(__linux__)
+			if (read(fd, &buf, sizeof(buf)) != sizeof(buf)) {
 #endif
 				state |= GETBIT_IO; /* ioctl error */
-			/*
-			* result in req.gp_value
-			* TODO
-			* remaining low
-			* detect /
-			* count high (A above)
-			* detect \
-			* count low (~A above)
-			*
-			* / and \ should only happen once each loop,
-			* otherwise state |= GETBIT_READ;
-			*
-			* if no / happens, then state |= GETBIT_EOM;
-			*/
+				break;
+			}
 #ifdef __FreeBSD__
-			if (oldval == req.gp_value) {
-				if (req.gp_value == GPIO_PIN_HIGH)
-#else
-			if (oldval == oldval) { /* TODO */
-				if (0) /* TODO */
+			if ((req.gp_value
+#elif defined(__linux__)
+			buf -= '0';
+			if ((buf
 #endif
-					high++;
-				else
-					low++;
-#if __FreeBSD__
-			} else if (oldval == GPIO_PIN_HIGH &&
-			    req.gp_value == GPIO_PIN_LOW)
-#else
-			} else if (0) /* TODO */
+			    != oldval && oldval == 0) || (high + low > hw.freq)) {
+				count = (high + low > 0) ? 100 * high / (high + low) : 0;
+				printf("[%i %i %i]", high, low, count);
+				break;
+			}
+#ifdef __FreeBSD__
+			if (req.gp_value == GPIO_PIN_HIGH)
+#elif defined(__linux__)
+			if (buf == 1)
 #endif
-				seenlow++;
-			else
-				seenhigh++;
-			
+				high++;
+#ifdef __FreeBSD__
+			else if (req.gp_value == GPIO_PIN_LOW)
+#elif defined(__linux__)
+			else if (buf == 0)
+#endif
+				low++;
 #ifdef __FreeBSD__
 			oldval = req.gp_value;
-#else
-			oldval = oldval; /* TODO */
+#elif defined(__linux__)
+			oldval = buf;
+			lseek(fd, 0, SEEK_SET); /* rewind to prevent EBUSY/no read */
 #endif
 			(void)usleep(1000000.0 / hw.freq);
 		}
-		printf(" [%lu %i %i %i %i]", hw.freq, low, high, seenlow, seenhigh); /* hw.freq should be low+high */
-		if (high < hw.margin)
-			state |= GETBIT_EOM; /* ideally completely low */
-		if (high >= (hw.freq / 10.0) - hw.margin &&
-		    high <= (hw.freq / 10.0) + hw.margin)
+		if (count == 0)
+			state |= GETBIT_EOM;
+		else if (count >= (10 - hw.margin) && count <= (10 + hw.margin))
 			state |= 0; /* NOP, a zero bit, ~100 ms active signal */
-		else if (high >= (hw.freq / 5.0) - hw.margin &&
-		    high <= (hw.freq / 5.0) + hw.margin)
+		else if (count >= (20 - hw.margin) && count <= (20 + hw.margin))
 			state |= GETBIT_ONE; /* one bit, ~200 ms active signal */
 		else
-			state |= GETBIT_READ; /* something went wrong */
+			state |= GETBIT_READ; /* bad radio signal */
 		
 		if (state & GETBIT_EOM)
 			inch = '\n';
