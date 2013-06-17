@@ -247,7 +247,7 @@ get_bit(void)
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
  */
 		high = low = 0;
-		oldval = 0;
+		oldval = 2; /* initial bogus value to prevent immediate break */
 
 		for (;;) {
 #ifdef __FreeBSD__
@@ -265,15 +265,17 @@ get_bit(void)
 				break;
 			}
 			inch = tmpch;
-			if ((inch != oldval && oldval == 0) || (high + low > hw.freq)) {
-				count = (high + low > 0) ? 100 * high / (high + low) : 0;
-				printf("[%i %i %i]", high, low, count);
-				break;
-			}
 			if (inch == 1)
 				high++;
 			else if (inch == 0)
 				low++;
+			if (inch != oldval && oldval == 2)
+				oldval = inch; /* initialize */
+			if ((inch != oldval && oldval == 0) || (high + low > hw.freq)) {
+				count = 100 * high / (high + low);
+				printf("[%i %i %i] ", high, low, count);
+				break;
+			}
 			oldval = inch;
 			(void)usleep(1000000.0 / hw.freq);
 		}
