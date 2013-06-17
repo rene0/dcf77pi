@@ -220,7 +220,7 @@ cleanup(void)
 int
 get_bit(void)
 {
-	char inch;
+	char inch, tmpch;
 	int count, high, low;
 	int oldval;
 #ifdef __FreeBSD__
@@ -253,17 +253,18 @@ get_bit(void)
 #ifdef __FreeBSD__
 			req.gp_pin = hw.pin;
 			count = ioctl(fd, GPIOGET, &req);
-			inch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
+			tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
 			if (count < 0) {
 #elif defined(__linux__)
-			count = read(fd, &inch, sizeof(inch));
-			inch -= '0';
+			count = read(fd, &tmpch, sizeof(tmpch));
+			tmpch -= '0';
 			lseek(fd, 0, SEEK_SET); /* rewind to prevent EBUSY/no read */
-			if (count != sizeof(inch)) {
+			if (count != sizeof(tmpch)) {
 #endif
 				state |= GETBIT_IO; /* ioctl error */
 				break;
 			}
+			inch = tmpch;
 			if ((inch != oldval && oldval == 0) || (high + low > hw.freq)) {
 				count = (high + low > 0) ? 100 * high / (high + low) : 0;
 				printf("[%i %i %i]", high, low, count);
