@@ -211,8 +211,6 @@ get_bit(void)
 	int oldval;
 #ifdef __FreeBSD__
 	struct gpio_req req;
-#elif defined(__linux__)
-	char buf;
 #endif
 
 	state = 0; /* clear previous flags */
@@ -236,47 +234,32 @@ get_bit(void)
  */
 		high = low = 0;
 		oldval = 0;
-		count = 0;
 
 		for (;;) {
 #ifdef __FreeBSD__
 			req.gp_pin = hw.pin;
-			if (ioctl(fd, GPIOGET, &req) < 0) {
+			count = ioctl(fd, GPIOGET, &req);
+			inch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
+			if (count < 0) {
 #elif defined(__linux__)
-			if (read(fd, &buf, sizeof(buf)) != sizeof(buf)) {
+			count = read(fd, &inch, sizeof(inch));
+			inch -= '0';
+			lseek(fd, 0, SEEK_SET); /* rewind to prevent EBUSY/no read */
+			if (count != sizeof(inch)) {
 #endif
 				state |= GETBIT_IO; /* ioctl error */
 				break;
 			}
-#ifdef __FreeBSD__
-			if ((req.gp_value
-#elif defined(__linux__)
-			buf -= '0';
-			if ((buf
-#endif
-			    != oldval && oldval == 0) || (high + low > hw.freq)) {
+			if ((inch != oldval && oldval == 0) || (high + low > hw.freq)) {
 				count = (high + low > 0) ? 100 * high / (high + low) : 0;
 				printf("[%i %i %i]", high, low, count);
 				break;
 			}
-#ifdef __FreeBSD__
-			if (req.gp_value == GPIO_PIN_HIGH)
-#elif defined(__linux__)
-			if (buf == 1)
-#endif
+			if (inch == 1)
 				high++;
-#ifdef __FreeBSD__
-			else if (req.gp_value == GPIO_PIN_LOW)
-#elif defined(__linux__)
-			else if (buf == 0)
-#endif
+			else if (inch == 0)
 				low++;
-#ifdef __FreeBSD__
-			oldval = req.gp_value;
-#elif defined(__linux__)
-			oldval = buf;
-			lseek(fd, 0, SEEK_SET); /* rewind to prevent EBUSY/no read */
-#endif
+			oldval = inch;
 			(void)usleep(1000000.0 / hw.freq);
 		}
 		if (count == 0)
