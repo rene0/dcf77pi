@@ -100,7 +100,7 @@ main(int argc, char **argv)
 		old = req.gp_value;
 #elif defined(__linux__)
 			    buf);
-		lseek(fd, 0, SEEK_SET);
+		lseek(fd, 0, SEEK_SET); /* rewind to prevent EBUSY/no read */
 		old = buf;
 #endif
 		(void)usleep(1000000.0 / hw.freq); /* us */
