@@ -25,8 +25,10 @@ SUCH DAMAGE.
 
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
@@ -47,6 +49,14 @@ FILE *datafile = NULL; /* input file (recorded data) */
 FILE *logfile = NULL; /* auto-appended in live mode */
 int fd = 0; /* gpio file */
 struct hardware hw;
+
+void
+signal_callback_handler(int signum)
+{
+	printf("Caught signal %d\n", signum);
+	cleanup();
+	exit(signum);
+}
 
 int
 read_hardware_parameters(char *filename, struct hardware *_hw)
@@ -158,6 +168,8 @@ set_mode(int live, char *filename)
 	bitpos = 0;
 	state = 0;
 	bzero(buffer, sizeof(buffer));
+
+	signal(SIGINT, signal_callback_handler);
 
 	if (live) {
 		res = read_hardware_parameters("hardware.txt", &hw);
