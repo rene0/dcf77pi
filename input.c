@@ -195,7 +195,7 @@ cleanup(void)
 #ifdef __FreeBSD__
 		perror("close (/dev/gpioc0)");
 #elif defined(__linux__)
-		perror("close (/sys/class/gpio/gpio*");
+		perror("close (/sys/class/gpio/*");
 #endif
 	if (logfile != NULL && fclose(logfile) == EOF)
 		perror("fclose (logfile)");
