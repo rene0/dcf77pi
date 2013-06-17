@@ -208,10 +208,13 @@ cleanup(void)
 #elif defined(__linux__)
 		perror("close (/sys/class/gpio/*");
 #endif
+	fd = 0;
 	if (logfile != NULL && fclose(logfile) == EOF)
 		perror("fclose (logfile)");
+	logfile = NULL;
 	if (datafile != NULL && fclose(datafile) == EOF)
 		perror("fclose (datafile)");
+	datafile = NULL;
 }
 
 int
