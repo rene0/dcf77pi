@@ -308,7 +308,7 @@ get_bit(void)
 			goto report;
 		}
 
-		if (count == 0)
+		if (high < 2)
 			state |= GETBIT_EOM;
 		else if (count >= (10 - hw.margin) && count <= (10 + hw.margin))
 			state |= 0; /* NOP, a zero bit, ~100 ms active signal */
