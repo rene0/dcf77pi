@@ -308,28 +308,26 @@ get_bit(void)
 			goto report;
 		}
 
-		if (high < 2)
+		if (high < 2) {
 			state |= GETBIT_EOM;
-		else if (count >= (10 - hw.margin) && count <= (10 + hw.margin))
-			state |= 0; /* NOP, a zero bit, ~100 ms active signal */
-		else if (count >= (20 - hw.margin) && count <= (20 + hw.margin))
-			state |= GETBIT_ONE; /* one bit, ~200 ms active signal */
-		else
-			state |= GETBIT_READ; /* bad radio signal */
-		
-		if (state & GETBIT_EOM)
 			inch = '\n';
-		else if (state & GETBIT_IO)
-			inch = '*';
-		else if (state & GETBIT_READ)
-			inch = '_';
-		else if (state & GETBIT_ONE)
-			inch = '1';
-		else
-			inch = '0';
+		}
 		if (low < 2) {
 			state |= GETBIT_XMIT;
 			inch = 'x';
+		}
+		if (high > 1 && low > 1) {
+			if (count >= (10 - hw.margin) && count <= (10 + hw.margin)) {
+				/* zero bit, ~100 ms active signal */
+				inch = '0';
+			} else if (count >= (20 - hw.margin) && count <= (20 + hw.margin)) {
+				/* one bit, ~200 ms active signal */
+				state |= GETBIT_ONE;
+				inch = '1';
+			} else {
+				state |= GETBIT_READ; /* bad radio signal */
+				inch = '_';
+			}
 		}
 report:
 		fprintf(logfile, "%c", inch);
