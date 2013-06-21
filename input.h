@@ -32,6 +32,7 @@ SUCH DAMAGE.
 #define GETBIT_READ	8
 #define GETBIT_TOOLONG	16
 #define GETBIT_IO	32
+#define GETBIT_XMIT	64
 
 #include <stdint.h> /* uint8_t */
 

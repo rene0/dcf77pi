@@ -299,6 +299,10 @@ get_bit(void)
 			inch = '1';
 		else
 			inch = '0';
+		if (low < 2) {
+			state |= GETBIT_XMIT;
+			inch = 'x';
+		}
 		fprintf(logfile, "%c", inch);
 	} else {
 		if (feof(datafile)) {
@@ -315,6 +319,9 @@ get_bit(void)
 				break;
 			case '\n' :
 				state |= GETBIT_EOM;
+				break;
+			case 'x' :
+				state |= GETBIT_XMIT;
 				break;
 			case '*' :
 				state |= GETBIT_IO;
