@@ -78,6 +78,7 @@ main(int argc, char *argv[])
 			minlen = bitpos;
 		else
 			display_bit();
+			fflush(stdout);
 
 		if (!init) {
 			switch (time.tm_min % 3) {
