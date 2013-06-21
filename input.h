@@ -37,8 +37,9 @@ SUCH DAMAGE.
 #include <stdint.h> /* uint8_t */
 
 struct hardware {
-	unsigned long freq, margin;
-	int pin;
+	unsigned long freq;
+	unsigned int margin, pin, min_len, active_high;
+
 };
 
 int set_mode(int live, char *filename);
