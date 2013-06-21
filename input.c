@@ -261,16 +261,16 @@ get_bit(void)
 	state = 0; /* clear previous flags */
 	if (islive) {
 /*
- * One pulse is either 1000 ms or 2000 ms long (normal or padding for last)
+ * One period is either 1000 ms or 2000 ms long (normal or padding for last)
  * Active part is either 100 ms ('0') or 200 ms ('1') long, with an error
- * certain margin (e.g. 2%), so:
+ * margin (e.g. 2%), so:
  *         A <   80 : too short    -> 920 <  ~A		GETBIT_READ
  *   80 <= A <= 120 : '0'          -> 880 <= ~A <= 920  -
  *  120 <  A <  180 : undetermined -> 820 <  ~A <  880  GETBIT_READ
  *  180 <= A <= 220 : '1'          -> 780 <= ~A <= 820  GETBIT_ONE
  *  220 <  A        : too long     ->        ~A <  780  GETBIT_READ
  *
- *  ~A > 1000 : value = 2 GETBIT_EOM
+ *  ~A > 1000 : value = GETBIT_EOM
  *  It is also possible that the signal is random active/passive, which means
  *  pulses shorter than 1000 ms or longer than 2000 ms e.g. due to thunderstorm,
  *  resulting in GETBIT_READ
@@ -293,6 +293,7 @@ get_bit(void)
 			if (inch != oldval && oldval == 2)
 				oldval = inch; /* initialize */
 			if ((inch != oldval && oldval == 0) || (high + low > hw.freq)) {
+				/* TODO ragged signal (seems rather OK) , false GETBIT_XMIT */
 				count = 100 * high / (high + low);
 				if (islive == 2)
 					printf("[%i %i %i]", high, low, count);
