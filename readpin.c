@@ -30,13 +30,31 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
+	int i, p, act;
+	struct hardware hw;
+
 	if (set_mode(0, NULL, NULL)) {
 		cleanup();
 		return 0;
 	}
 
-	for (;;) {
-		printf(" %d\n", get_bit());
+	(void)read_hardware_parameters("hardware.txt", &hw);
+	/* get our own copy, error handling in set_mode() */
+
+	printf("%i\n", (int)(hw.freq * hw.min_len / 100));
+	for (i = act = 0;; i++) {
+		p = get_pulse();
+		if (p & GETBIT_IO) {
+			printf("IO error!\n");
+			break;
+		}
+		act += p;
+		printf("%d", p);
+		if (i == (int)(hw.freq * hw.min_len / 100)) {
+			printf(" %i\n", act);
+			i = act = 0;
+		}
+		(void)usleep(1000000.0 / hw.freq);
 	}
 	cleanup();
 	return 0;
