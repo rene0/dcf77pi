@@ -302,6 +302,12 @@ get_bit(void)
 			oldval = inch;
 			(void)usleep(1000000.0 / hw.freq);
 		}
+
+		if (state & GETBIT_IO) {
+			inch = '*';
+			goto report;
+		}
+
 		if (count == 0)
 			state |= GETBIT_EOM;
 		else if (count >= (10 - hw.margin) && count <= (10 + hw.margin))
@@ -325,6 +331,7 @@ get_bit(void)
 			state |= GETBIT_XMIT;
 			inch = 'x';
 		}
+report:
 		fprintf(logfile, "%c", inch);
 	} else {
 		if (feof(datafile)) {
