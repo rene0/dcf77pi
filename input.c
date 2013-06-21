@@ -44,6 +44,7 @@ int bitpos; /* second */
 uint8_t buffer[60]; /* wrap after 60 positions */
 int state; /* any errors, or high bit */
 int islive; /* live input or pre-recorded data */
+int isverbose; /* verbose live information */
 FILE *datafile = NULL; /* input file (recorded data) */
 FILE *logfile = NULL; /* auto-appended in live mode */
 int fd = 0; /* gpio file */
@@ -168,18 +169,19 @@ init_hardware(int pin_nr)
 }
 
 int
-set_mode(int live, char *filename)
+set_mode(int verbose, char *infilename, char *logfilename)
 {
 	int res;
 
-	islive = live;
+	isverbose = verbose;
+	islive = (infilename == NULL);
 	bitpos = 0;
 	state = 0;
 	bzero(buffer, sizeof(buffer));
 
 	signal(SIGINT, signal_callback_handler);
 
-	if (live) {
+	if (islive) {
 		res = read_hardware_parameters("hardware.txt", &hw);
 		if (res) {
 			cleanup();
@@ -190,15 +192,17 @@ set_mode(int live, char *filename)
 			cleanup();
 			return res;
 		}
-		logfile = fopen("dcf77pi.log", "a");
-		if (logfile == NULL) {
-			perror("fopen (logfile)");
-			cleanup();
-			return errno;
+		if (logfilename != NULL) {
+			logfile = fopen(logfilename, "a");
+			if (logfile == NULL) {
+				perror("fopen (logfile)");
+				cleanup();
+				return errno;
+			}
+			fprintf(logfile, "\n--new log--\n\n");
 		}
-		fprintf(logfile, "\n--new log--\n\n");
 	} else {
-		datafile = fopen(filename, "r");
+		datafile = fopen(infilename, "r");
 		if (datafile == NULL) {
 			perror("fopen (datafile)");
 			return errno;
@@ -295,7 +299,7 @@ get_bit(void)
 			if ((inch != oldval && oldval == 0) || (high + low > hw.freq)) {
 				/* TODO ragged signal (seems rather OK) , false GETBIT_XMIT */
 				count = 100 * high / (high + low);
-				if (islive == 2)
+				if (isverbose)
 					printf("[%i %i %i]", high, low, count);
 				break;
 			}
@@ -332,7 +336,8 @@ get_bit(void)
 			}
 		}
 report:
-		fprintf(logfile, "%c", inch);
+		if (logfile)
+			fprintf(logfile, "%c", inch);
 	} else {
 		if (feof(datafile)) {
 			state |= GETBIT_EOD;

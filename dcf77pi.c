@@ -31,6 +31,7 @@ SUCH DAMAGE.
 #include <strings.h>
 #include <sysexits.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "input.h"
 #include "decode_time.h"
@@ -45,17 +46,32 @@ main(int argc, char *argv[])
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt, bit, bitpos, minlen = 0, init = 1, init2 = 1;
 	int res;
+	int opt;
+	int verbose;
+	char *infilename, *logfilename;
 
-	if (argc != 2) {
-		printf("usage: %s infile\n", argv[0]);
-		return EX_USAGE;
+	verbose = 0;
+	infilename = logfilename = NULL;
+	while ((opt = getopt(argc, argv, "f:l:v")) != -1) {
+		switch (opt) {
+		case 'f' :
+			infilename = strdup(optarg);
+			if (infilename == NULL)
+				perror("infilename");
+		case 'l' :
+			logfilename = strdup(optarg);
+			if (logfilename == NULL)
+				perror("logfilename");
+		case 'v' :
+			verbose = 1;
+			break;
+		default:
+			printf("usage: %s [-f infile] [-l logfile] [-v]\n", argv[0]);
+			return EX_USAGE;
+		}
 	}
-	if (!strcmp(argv[1], "-"))
-		res = set_mode(1, NULL);
-	else if (!strcmp(argv[1], "+"))
-		res = set_mode(2, NULL);
-	else
-		res = set_mode(0, argv[1]);
+
+	res = set_mode(verbose, infilename, logfilename);
 	if (res) {
 		/* something went wrong */
 		cleanup();

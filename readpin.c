@@ -30,7 +30,7 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	if (set_mode(2, NULL)) {
+	if (set_mode(0, NULL, NULL)) {
 		cleanup();
 		return 0;
 	}

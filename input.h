@@ -42,7 +42,7 @@ struct hardware {
 
 };
 
-int set_mode(int live, char *filename);
+int set_mode(int verbose, char *infilename, char *logfilename);
 void cleanup(void);
 int get_pulse(void);
 int get_bit(void); /* stores result in internal buffer */
