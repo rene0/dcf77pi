@@ -44,6 +44,7 @@ struct hardware {
 
 int set_mode(int live, char *filename);
 void cleanup(void);
+int get_pulse(void);
 int get_bit(void); /* stores result in internal buffer */
 void display_bit(void);
 int next_bit(void); /* prepare for next bit */

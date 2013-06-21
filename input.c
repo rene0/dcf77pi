@@ -227,14 +227,36 @@ cleanup(void)
 }
 
 int
-get_bit(void)
+get_pulse(void)
 {
-	char inch, tmpch;
-	int count, high, low;
-	int oldval;
+	int count;
+	char tmpch;
 #ifdef __FreeBSD__
 	struct gpio_req req;
+
+	req.gp_pin = hw.pin;
+	count = ioctl(fd, GPIOGET, &req);
+	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
+	if (count < 0)
+#elif defined(__linux__)
+	count = read(fd, &tmpch, sizeof(tmpch));
+	tmpch -= '0';
+	lseek(fd, 0, SEEK_SET); /* rewind to prevent EBUSY/no read */
+	if (count != sizeof(tmpch))
 #endif
+		return GETBIT_IO; /* hardware failure? */
+
+	if (!hw.active_high)
+		tmpch = 1 - tmpch;
+	return tmpch;
+}
+
+int
+get_bit(void)
+{
+	char inch;
+	int count, high, low;
+	int oldval;
 
 	state = 0; /* clear previous flags */
 	if (islive) {
@@ -259,21 +281,11 @@ get_bit(void)
 		oldval = 2; /* initial bogus value to prevent immediate break */
 
 		for (;;) {
-#ifdef __FreeBSD__
-			req.gp_pin = hw.pin;
-			count = ioctl(fd, GPIOGET, &req);
-			tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
-			if (count < 0) {
-#elif defined(__linux__)
-			count = read(fd, &tmpch, sizeof(tmpch));
-			tmpch -= '0';
-			lseek(fd, 0, SEEK_SET); /* rewind to prevent EBUSY/no read */
-			if (count != sizeof(tmpch)) {
-#endif
-				state |= GETBIT_IO; /* ioctl error */
+			inch = get_pulse();
+			if (inch == GETBIT_IO) {
+				state |= GETBIT_IO;
 				break;
 			}
-			inch = tmpch;
 			if (inch == 1)
 				high++;
 			else if (inch == 0)
