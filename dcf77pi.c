@@ -95,9 +95,15 @@ main(int argc, char *argv[])
 			break;
 
 		bitpos = get_bitpos();
-		if (bit & GETBIT_EOM)
-			minlen = bitpos + 1; /* add one for the missing minute marker */
-		display_bit();
+		if (bit & GETBIT_EOM) {
+			minlen = bitpos;
+			if (infilename == NULL) {
+				minlen++;
+				display_bit();
+				/* handle the missing minute marker */
+			}
+		} else
+			display_bit();
 		fflush(stdout);
 
 		if (!init) {
