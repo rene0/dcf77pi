@@ -30,5 +30,5 @@ The end of the minute is noted by the absence of high pulses. An absence of
 low pulses means that the transmitter is out of range. Any other situation  
 will result in a logical read error.
 
-Currently a high pulse after a low pulse always starts a new second,  
-even when in the middle of a second in case of bad radio reception.
+To combat bad radio reception, pulses with holes are concatenated by insisting  
+on a minimum pulse length.
