@@ -47,10 +47,9 @@ main(int argc, char *argv[])
 	int dt, bit, bitpos, minlen = 0, init = 1, init2 = 1;
 	int res;
 	int opt;
-	int verbose;
+	int verbose = 0;
 	char *infilename, *logfilename;
 
-	verbose = 0;
 	infilename = logfilename = NULL;
 	while ((opt = getopt(argc, argv, "f:l:v")) != -1) {
 		switch (opt) {
@@ -58,10 +57,12 @@ main(int argc, char *argv[])
 			infilename = strdup(optarg);
 			if (infilename == NULL)
 				perror("infilename");
+			break;
 		case 'l' :
 			logfilename = strdup(optarg);
 			if (logfilename == NULL)
 				perror("logfilename");
+			break;
 		case 'v' :
 			verbose = 1;
 			break;
