@@ -93,6 +93,10 @@ main(int argc, char *argv[])
 			bit = get_bit(); /* when reading from log file */
 		if (bit & GETBIT_EOD)
 			break;
+		if (bit & GETBIT_XMIT)
+			printf("x");
+		if (bit & GETBIT_RECV)
+			printf("r");
 
 		bitpos = get_bitpos();
 		if (bit & GETBIT_EOM) {
