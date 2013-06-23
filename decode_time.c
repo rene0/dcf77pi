@@ -27,6 +27,7 @@ SUCH DAMAGE.
 #include "decode_time.h"
 
 uint8_t announce = 0; /* save DST change and leap second announcements */
+int olderr = 0; /* save error state to determine if DST change might be valid */
 
 uint8_t
 getpar(uint8_t *buffer, int start, int stop)
@@ -208,13 +209,21 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 	}
 
 	if (buffer[17] != time->tm_isdst) {
-		if (init2 || ((announce & ANN_CHDST) && time->tm_min == 0))
+		/* Time offset change is OK if:
+		 * there was an error but not any more
+		 * initial state
+		 * actually announced and minute = 0
+		 */
+		if ((olderr && !generr && !p1 && !p2 && !p3) || init2 || ((announce & ANN_CHDST) && time->tm_min == 0)) {
+			olderr = 0;
 			time->tm_isdst = buffer[17]; /* expected change */
-		else
+		} else
 			rval |= DT_DSTERR; /* sudden change */
 	}
 	time->tm_gmtoff = time->tm_isdst ? 7200 : 3600;
 
+	if (generr || p1 || p2 || p3)
+		olderr = 1;
 	return rval;
 }
 
