@@ -309,8 +309,10 @@ get_bit(void)
 					}
 				}
 			}
+			if (i > limit * 5/2) {
 				if (isverbose)
-					printf("[%i %i %i]", high, low, count);
+					printf("{%i %i}", high, i); /* timeout */
+				state |= GETBIT_RECV;
 				break;
 			}
 			p0 = p;
@@ -325,6 +327,10 @@ get_bit(void)
 		if (low < 2) {
 			state |= GETBIT_XMIT;
 			inch = 'x';
+			goto report;
+		}
+		if (state & GETBIT_RECV) {
+			inch = 'r';
 			goto report;
 		}
 		if (high > 1 && low > 1) {
@@ -366,6 +372,9 @@ report:
 				break;
 			case 'x' :
 				state |= GETBIT_XMIT;
+				break;
+			case 'r':
+				state |= GETBIT_RECV;
 				break;
 			case '*' :
 				state |= GETBIT_IO;
