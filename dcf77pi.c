@@ -55,13 +55,17 @@ main(int argc, char *argv[])
 		switch (opt) {
 		case 'f' :
 			infilename = strdup(optarg);
-			if (infilename == NULL)
+			if (infilename == NULL) {
 				perror("infilename");
+				return errno;
+			}
 			break;
 		case 'l' :
 			logfilename = strdup(optarg);
-			if (logfilename == NULL)
+			if (logfilename == NULL) {
 				perror("logfilename");
+				return errno;
+			}
 			break;
 		case 'v' :
 			verbose = 1;
