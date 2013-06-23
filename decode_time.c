@@ -121,6 +121,7 @@ int
 decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 {
 	int rval = 0, generr = 0, p1 = 0, p2 = 0, p3 = 0;
+	unsigned int tmp, tmp1, tmp2, tmp3;
 
 	if (minlen < 59)
 		rval |= DT_SHORT;
@@ -141,33 +142,45 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 		rval |= DT_XMIT;
 
 	p1 = getpar(buffer, 21, 28);
-	if (p1)
+	tmp = getbcd(buffer, 21, 27);
+	if (p1 || tmp > 59) {
 		rval |= DT_MIN;
+		p1 = 1;
+	}
 	if (p1 || generr)
 		time->tm_min = (time->tm_min + 1) % 60;
 	else
-		time->tm_min = getbcd(buffer, 21, 27);
+		time->tm_min = tmp;
 
 	p2 = getpar(buffer, 29, 35);
-	if (p2)
+	tmp = getbcd(buffer, 29, 34);
+	if (p2 || tmp > 23) {
 		rval |= DT_HOUR;
+		p2 = 1;
+	}
 	if (p2 || generr) {
 		if (time->tm_min == 0)
 			time->tm_hour = (time->tm_hour + 1) % 24;
 	} else
-		time->tm_hour = getbcd(buffer, 29, 34);
+		time->tm_hour = tmp;
 
 	p3 = getpar(buffer, 36, 58);
-	if (p3)
+	tmp = getbcd(buffer, 36, 41);
+	tmp1 = getbcd(buffer, 42, 44);
+	tmp2 = getbcd(buffer, 45, 49);
+	tmp3 = getbcd(buffer, 50, 57);
+	if (p3 || tmp == 0 || tmp > 31 || tmp1 == 0 || tmp2 == 0 || tmp2 > 12 || tmp3 > 99) {
 		rval |= DT_DATE;
+		p3 = 1;
+	}
 	if (p3 || generr) {
 		if (time->tm_min == 0 && time->tm_hour == 0)
 			add_day(time);
 	} else {
-		time->tm_mday = getbcd(buffer, 36, 41);
-		time->tm_wday = getbcd(buffer, 42, 44) % 7;
-		time->tm_mon = getbcd(buffer, 45, 49) - 1;
-		time->tm_year = getbcd(buffer, 50, 57) + 100 * get_century() - 1900;
+		time->tm_mday = tmp;
+		time->tm_wday = tmp1 % 7;
+		time->tm_mon = tmp2 - 1;
+		time->tm_year = tmp3 + 100 * get_century() - 1900;
 	}
 
 	/* these flags are saved between invocations: */
@@ -212,15 +225,15 @@ display_time(int init2, int dt, struct tm oldtime, struct tm time)
 	if (dt & DT_DSTERR)
 		printf("Time offset error\n");
 	if (dt & DT_MIN)
-		printf("Minute parity error\n");
+		printf("Minute parity/value error\n");
 	if (!init2 && oldtime.tm_min != time.tm_min)
 		printf("Minute value error\n");
 	if (dt & DT_HOUR)
-		printf("Hour parity error\n");
+		printf("Hour parity/value error\n");
 	if (!init2 && oldtime.tm_hour != time.tm_hour)
 		printf("Hour value error\n");
 	if (dt & DT_DATE)
-		printf("Date parity error\n");
+		printf("Date parity/value error\n");
 	if (!init2 && oldtime.tm_wday != time.tm_wday)
 		printf("Day-of-week value error\n");
 	if (!init2 && oldtime.tm_mday != time.tm_mday)
