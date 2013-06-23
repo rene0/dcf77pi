@@ -227,27 +227,27 @@ display_time(int init2, int dt, struct tm oldtime, struct tm time)
 	if (dt & DT_MIN)
 		printf("Minute parity/value error\n");
 	if (!init2 && oldtime.tm_min != time.tm_min)
-		printf("Minute value error\n");
+		printf("Minute value jump\n");
 	if (dt & DT_HOUR)
 		printf("Hour parity/value error\n");
 	if (!init2 && oldtime.tm_hour != time.tm_hour)
-		printf("Hour value error\n");
+		printf("Hour value jump\n");
 	if (dt & DT_DATE)
 		printf("Date parity/value error\n");
 	if (!init2 && oldtime.tm_wday != time.tm_wday)
-		printf("Day-of-week value error\n");
+		printf("Day-of-week value jump\n");
 	if (!init2 && oldtime.tm_mday != time.tm_mday)
-		printf("Day-of-month value error\n");
+		printf("Day-of-month value jump\n");
 	if (!init2 && oldtime.tm_mon != time.tm_mon)
-		printf("Month value error\n");
+		printf("Month value jump\n");
 	if (!init2 && oldtime.tm_year != time.tm_year)
-		printf("Year value error\n");
+		printf("Year value jump\n");
 	if (dt & DT_B0)
 		printf("Minute marker error\n");
 	if (dt & DT_B20)
 		printf("Date/time start marker error\n");
 	if (dt & DT_XMIT)
-		printf("Transmitter error\n");
+		printf("Transmitter call bit set\n");
 	if (announce & ANN_CHDST)
 		printf("Time offset change announced\n");
 	if (announce & ANN_LEAP)
