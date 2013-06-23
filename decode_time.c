@@ -188,6 +188,8 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 			announce &= ~ANN_LEAP;
 			rval |= DT_LEAP;
 			/* leap second processed */
+			if (buffer[59] == 1)
+				rval |= DT_LEAPONE;
 		} else
 			rval |= DT_LONG;
 	}
@@ -239,6 +241,10 @@ display_time(int init2, int dt, struct tm oldtime, struct tm time)
 		printf("Leap second announced\n");
 	if (dt & DT_CHDST)
 		printf("Time offset changed\n");
-	if (dt & DT_LEAP)
-		printf("Leap second processed\n");
+	if (dt & DT_LEAP) {
+		printf("Leap second processed");
+		if (dt & DT_LEAPONE)
+			printf(", value is one instead of zero");
+		printf("\n");
+	}
 }
