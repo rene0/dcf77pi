@@ -403,7 +403,7 @@ display_bit(void)
 	if (bitpos == 0 || bitpos == 14 || bitpos == 15 || bitpos == 18 ||
 	    bitpos == 19 || bitpos == 20 || bitpos == 27 || bitpos == 28 ||
 	    bitpos == 34 || bitpos == 35 || bitpos == 41 || bitpos == 44 ||
-	    bitpos == 49 || bitpos == 57 || bitpos == 58)
+	    bitpos == 49 || bitpos == 57 || bitpos == 58 || bitpos == 59)
 		printf(" ");
 }
 
