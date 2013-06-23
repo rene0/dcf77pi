@@ -49,9 +49,9 @@ main(int argc, char **argv)
 			break;
 		}
 		act += p;
-		printf("%d", p);
+		printf("%c", p == 1 ? '+' : ' ');
 		if (i == (int)(hw.freq * hw.min_len / 100)) {
-			printf(" %i\n", act);
+			printf(" %lu\n", act*hw.freq/hw.min_len);
 			i = act = 0;
 		}
 		(void)usleep(1000000.0 / hw.freq);
