@@ -358,12 +358,16 @@ report:
 			case '*' :
 				state |= GETBIT_IO;
 				break;
-			default:
+			case '_' :
+				/* retain old value in buffer[bitpos] */
 				state |= GETBIT_READ;
+				break;
+			default:
+				state |= GETBIT_IGNORE;
 				break;
 			}
 		} else
-			state |= GETBIT_READ;
+			state |= GETBIT_IGNORE;
 	}
 	return state;
 }
@@ -371,7 +375,10 @@ report:
 void
 display_bit(void)
 {
-	printf("%d", buffer[bitpos]);
+	if (state & GETBIT_READ)
+		printf("_");
+	else
+		printf("%d", buffer[bitpos]);
 	if (bitpos == 0 || bitpos == 14 || bitpos == 15 || bitpos == 18 ||
 	    bitpos == 19 || bitpos == 20 || bitpos == 27 || bitpos == 28 ||
 	    bitpos == 34 || bitpos == 35 || bitpos == 41 || bitpos == 44 ||
@@ -388,7 +395,7 @@ next_bit(void)
 	}
 	if (state & GETBIT_EOM)
 		bitpos = 0;
-	else if ((state & GETBIT_READ) == 0)
+	else
 		bitpos++;
 	return state;
 }
