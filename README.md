@@ -23,8 +23,8 @@ The format for hardware.txt is:
 
 The margin can be used to adjust the valid ranges for '0' and '1' bits by
 defining the allowed ranges of initial high pulses of each second:
-0 bit -> [(10 - margin) % .. (10 + margin) %]
-1 bit -> [(10 - margin) % .. (10 + margin) %]
+0 bit -> [ .. (10 + margin) %]  
+1 bit -> [(10 - margin) % .. ]
 
 The end of the minute is noted by the absence of high pulses. An absence of
 low pulses means that the transmitter is out of range. Any other situation

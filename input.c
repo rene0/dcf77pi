@@ -268,11 +268,9 @@ get_bit(void)
  * One period is either 1000 ms or 2000 ms long (normal or padding for last)
  * Active part is either 100 ms ('0') or 200 ms ('1') long, with an error
  * margin (e.g. 2%), so:
- *         A <   80 : too short    -> 920 <  ~A		GETBIT_READ
- *   80 <= A <= 120 : '0'          -> 880 <= ~A <= 920  -
+ *         A <= 120 : '0'          -> 880 <= ~A <= 920  -
  *  120 <  A <  180 : undetermined -> 820 <  ~A <  880  GETBIT_READ
- *  180 <= A <= 220 : '1'          -> 780 <= ~A <= 820  GETBIT_ONE
- *  220 <  A        : too long     ->        ~A <  780  GETBIT_READ
+ *  180 <= A        : '1'          -> 780 <= ~A <= 820  GETBIT_ONE
  *
  *  ~A > 1000 : value = GETBIT_EOM
  *  It is also possible that the signal is random active/passive, which means
@@ -321,11 +319,11 @@ get_bit(void)
 			inch = 'x';
 		}
 		if (high > 1 && low > 1) {
-			if (count >= (10 - hw.margin) && count <= (10 + hw.margin)) {
+			if (count <= (10 + hw.margin)) {
 				/* zero bit, ~100 ms active signal */
 				inch = '0';
 				buffer[bitpos] = 0;
-			} else if (count >= (20 - hw.margin) && count <= (20 + hw.margin)) {
+			} else if (count >= (20 - hw.margin)) {
 				/* one bit, ~200 ms active signal */
 				state |= GETBIT_ONE;
 				inch = '1';
