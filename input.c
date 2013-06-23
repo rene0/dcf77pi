@@ -260,7 +260,7 @@ get_bit(void)
 {
 	char inch;
 	int count, high, low;
-	int oldval;
+	int i, p, p0, limit;
 
 	state = 0; /* clear previous flags */
 	if (islive) {
@@ -273,35 +273,47 @@ get_bit(void)
  *  180 <= A        : '1'          -> 780 <= ~A <= 820  GETBIT_ONE
  *
  *  ~A > 1000 : value = GETBIT_EOM
- *  It is also possible that the signal is random active/passive, which means
- *  pulses shorter than 1000 ms or longer than 2000 ms e.g. due to thunderstorm,
- *  resulting in GETBIT_READ
+ * Short pulses (< min_len^2 %% of the sampling frequency) are concatenated.
  *
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
  */
 		high = low = 0;
-		oldval = 2; /* initial bogus value to prevent immediate break */
+		p0 = -1;
+		limit = hw.freq * hw.min_len / 100;
 
-		for (;;) {
-			inch = get_pulse();
-			if (inch == GETBIT_IO) {
+		for (i = 0; ; i++) {
+			p = get_pulse();
+			if (p == GETBIT_IO) {
 				state |= GETBIT_IO;
 				break;
 			}
-			if (inch == 1)
-				high++;
-			else if (inch == 0)
+			if (p == 0)
 				low++;
-			if (inch != oldval && oldval == 2)
-				oldval = inch; /* initialize */
-			if ((inch != oldval && oldval == 0) || (high + low > hw.freq)) {
-				/* TODO ragged signal (seems rather OK) , false GETBIT_XMIT */
-				count = 100 * high / (high + low);
+			else { /* p == 1 */
+				high++;
+				if (p0 == 0) { /* skip initial situation */
+					if (i > limit * 3/2 && i < limit * 5/2) {
+						i /= 2;
+						state |= GETBIT_EOM;
+						if (isverbose)
+							printf(" M"); /* new minute */
+					}
+					count = high * hw.freq/i;
+					if (isverbose)
+						printf("[%i %d]", i, count); /* new second? */
+					if (i > limit * hw.min_len/100)
+						break;
+					else { /* merge short second */
+						high++;
+						//low--;
+					}
+				}
+			}
 				if (isverbose)
 					printf("[%i %i %i]", high, low, count);
 				break;
 			}
-			oldval = inch;
+			p0 = p;
 			(void)usleep(1000000.0 / hw.freq);
 		}
 
@@ -310,13 +322,10 @@ get_bit(void)
 			goto report;
 		}
 
-		if (high < 2) {
-			state |= GETBIT_EOM;
-			inch = '\n';
-		}
 		if (low < 2) {
 			state |= GETBIT_XMIT;
 			inch = 'x';
+			goto report;
 		}
 		if (high > 1 && low > 1) {
 			if (count <= (10 + hw.margin)) {
@@ -329,13 +338,16 @@ get_bit(void)
 				inch = '1';
 				buffer[bitpos] = 1;
 			} else {
-				state |= GETBIT_READ; /* bad radio signal */
+				state |= GETBIT_READ; /* bad radio signal, retain old value */
 				inch = '_';
 			}
 		}
 report:
-		if (logfile)
+		if (logfile) {
 			fprintf(logfile, "%c", inch);
+			if (state & GETBIT_EOM)
+				fprintf(logfile, "\n");
+		}
 	} else {
 		if (feof(datafile)) {
 			state |= GETBIT_EOD;

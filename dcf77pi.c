@@ -92,10 +92,9 @@ main(int argc, char *argv[])
 
 		bitpos = get_bitpos();
 		if (bit & GETBIT_EOM)
-			minlen = bitpos;
-		else
-			display_bit();
-			fflush(stdout);
+			minlen = bitpos + 1; /* add one for the missing minute marker */
+		display_bit();
+		fflush(stdout);
 
 		if (!init) {
 			switch (time.tm_min % 3) {
