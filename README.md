@@ -15,10 +15,10 @@ Allowed parameters are:
 To stop the program, send a SIGINT (Ctrl-C) to it.
 
 The format for hardware.txt is:  
-	sample frequency in Hz
-	margin for detection of bit values
-	GPIO pin number
-	minimum length of a second expressed as percentage of the received samples
+	sample frequency in Hz  
+	margin for detection of bit values  
+	GPIO pin number  
+	minimum length of a second expressed as percentage of the received samples  
 	active high (1) or passive high (0)
 
 The margin can be used to adjust the valid ranges for '0' and '1' bits by  
