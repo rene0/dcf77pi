@@ -56,6 +56,34 @@ getbcd(uint8_t *buffer, int start, int stop)
 	return val;
 }
 
+/* based on: xx00-02-28 is a Monday if and only if xx00 is a leap year */
+int
+isleap(struct tm time)
+{
+	int d, nw, nd;
+	int dayinleapyear[12] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
+
+	if (time.tm_year % 4 > 0)
+		return 0;
+	else if (time.tm_year % 4 == 0 && time.tm_year > 0)
+		return 1;
+	else {	/* year == 0 */
+		/* weekday 1 is a Monday, assume this is a leap year */
+		/* if leap, we should reach Monday 02-28 */
+
+		d = dayinleapyear[time.tm_mon - 1] + time.tm_mday;
+		if (d < 60) { /* at or before 02-28 (day 59) */
+			nw = (59 - d) / 7;
+			nd = time.tm_wday == 1 ? 0 : 8 - time.tm_wday;
+			return d + (nw * 7) + nd == 59;
+		} else { /* after 02-28 (day 59) */
+			nw = (d - 59) / 7;
+			nd = time.tm_wday == 1 ? 0 : time.tm_wday - 1;
+			return d - (nw * 7) - nd == 59;
+		}
+	}
+}
+
 int
 lastday(int year, int month)
 {
