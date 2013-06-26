@@ -94,19 +94,6 @@ lastday(struct tm time)
 	return 31;
 }
 
-/* returns current century (0-based) */
-int
-get_century(void)
-{
-	time_t t;
-	struct tm *lt;
-
-	t = time(&t);
-	lt = localtime(&t);
-
-	return lt->tm_year / 100 + 19;
-}
-
 void
 add_day(struct tm *time)
 {
@@ -206,7 +193,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 		time->tm_mday = tmp;
 		time->tm_wday = tmp1;
 		time->tm_mon = tmp2;
-		time->tm_year = tmp3 + 100 * get_century() - 1900;
+		time->tm_year = tmp3;
 	}
 
 	/* these flags are saved between invocations: */
