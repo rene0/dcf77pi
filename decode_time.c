@@ -86,11 +86,12 @@ get_century(void)
 void
 add_day(struct tm *time)
 {
-	time->tm_wday = (time->tm_wday + 1) % 7;
+	if (++time->tm_wday == 8)
+		time->tm_wday = 1;
 	if (++time->tm_mday > lastday(time->tm_year + 1900, time->tm_mon + 1)) {
 		time->tm_mday = 1;
-		if (++time->tm_mon > 11) {
-			time->tm_mon = 0;
+		if (++time->tm_mon == 13) {
+			time->tm_mon = 1;
 			time->tm_year++;
 		}
 	}
@@ -179,8 +180,8 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 			add_day(time);
 	} else {
 		time->tm_mday = tmp;
-		time->tm_wday = tmp1 % 7;
-		time->tm_mon = tmp2 - 1;
+		time->tm_wday = tmp1;
+		time->tm_mon = tmp2;
 		time->tm_year = tmp3 + 100 * get_century() - 1900;
 	}
 
@@ -230,7 +231,11 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 void
 display_time(int init2, int dt, struct tm oldtime, struct tm time)
 {
-	printf("%s %s", time.tm_isdst ? "summer" : "winter", asctime(&time));
+	char *wday[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+
+	printf("%s %02d-%02d-%02d %s %02d:%02d",
+	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
+	    time.tm_mday, wday[time.tm_wday-1], time.tm_hour, time.tm_min);
 	if (dt & DT_DSTERR)
 		printf("Time offset error\n");
 	if (dt & DT_MIN)
