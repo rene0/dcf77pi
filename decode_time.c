@@ -85,16 +85,12 @@ isleap(struct tm time)
 }
 
 int
-lastday(int year, int month)
+lastday(struct tm time)
 {
-	if (month == 4 || month == 6 || month == 9 || month == 11)
+	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 || time.tm_mon == 11)
 		return 30;
-	if (month == 2) {
-		if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
-			return 29;
-		else
-			return 28;
-	}
+	if (time.tm_mon == 2)
+		return 28 + isleap(time);
 	return 31;
 }
 
@@ -116,7 +112,7 @@ add_day(struct tm *time)
 {
 	if (++time->tm_wday == 8)
 		time->tm_wday = 1;
-	if (++time->tm_mday > lastday(time->tm_year + 1900, time->tm_mon + 1)) {
+	if (++time->tm_mday > lastday(*time)) {
 		time->tm_mday = 1;
 		if (++time->tm_mon == 13) {
 			time->tm_mon = 1;
