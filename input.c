@@ -285,7 +285,8 @@ get_bit(void)
 			p = get_pulse();
 			if (p == GETBIT_IO) {
 				state |= GETBIT_IO;
-				break;
+				inch = '*';
+				goto report;
 			}
 			if (p == 0)
 				low++;
@@ -313,24 +314,16 @@ get_bit(void)
 				if (isverbose)
 					printf("{%i %i}", high, i); /* timeout */
 				state |= GETBIT_RECV;
-				break;
+				inch = 'r';
+				goto report;
 			}
 			p0 = p;
 			(void)usleep(1000000.0 / hw.freq);
 		}
 
-		if (state & GETBIT_IO) {
-			inch = '*';
-			goto report;
-		}
-
 		if (low < 2) {
 			state |= GETBIT_XMIT;
 			inch = 'x';
-			goto report;
-		}
-		if (state & GETBIT_RECV) {
-			inch = 'r';
 			goto report;
 		}
 		if (high > 1 && low > 1) {
