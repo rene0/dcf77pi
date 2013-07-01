@@ -43,7 +43,7 @@ main(int argc, char *argv[])
 	uint8_t indata[40], civbuf[40];
 	struct tm time, oldtime;
 	uint8_t civ1 = 0, civ2 = 0;
-	int dt, bit, bitpos, minlen = 0, init = 1, init2 = 1;
+	int dt, bit, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1;
 	int res, opt, verbose = 0;
 	char *infilename, *logfilename;
 
@@ -90,14 +90,19 @@ main(int argc, char *argv[])
 			bit = get_bit(); /* when reading from log file */
 		if (bit & GETBIT_EOD)
 			break;
-		if (bit & GETBIT_XMIT)
-			printf("x");
-		if (bit & GETBIT_RECV)
+		if (bit & GETBIT_RECV) {
 			printf("r");
+			acc_minlen += 2500;
+		} else if (bit & GETBIT_XMIT) {
+			printf("x");
+			acc_minlen += 0; /* value unknown? or ~ 1 second? */
+		} else
+			acc_minlen += 1000;
 
 		bitpos = get_bitpos();
 		if (bit & GETBIT_EOM) {
 			minlen = bitpos;
+			acc_minlen += 1000;
 			if (infilename == NULL) {
 				minlen++;
 				display_bit();
@@ -146,6 +151,7 @@ main(int argc, char *argv[])
 			printf(" >");
 
 		if (bit & GETBIT_EOM) {
+			printf("acc_minlen=%i ms\n", acc_minlen); /* TODO continue if <59 ? */
 			dt = decode_time(init2, minlen, get_buffer(), &time);
 			printf(" %d %c\n", minlen, dt & DT_LONG ? '>' :
 			    dt & DT_SHORT ? '<' : ' ');
