@@ -326,20 +326,18 @@ get_bit(void)
 				printf("(%i %i)", low, i);
 			state |= GETBIT_XMIT;
 			inch = 'x';
-			goto report;
-		}
-			if (count <= (10 + hw.margin)) {
-				/* zero bit, ~100 ms active signal */
-				inch = '0';
-				buffer[bitpos] = 0;
-			} else if (count >= (20 - hw.margin)) {
-				/* one bit, ~200 ms active signal */
-				state |= GETBIT_ONE;
-				inch = '1';
-				buffer[bitpos] = 1;
-			} else {
-				state |= GETBIT_READ; /* bad radio signal, retain old value */
-				inch = '_';
+		} else if (count <= (10 + hw.margin)) {
+			/* zero bit, ~100 ms active signal */
+			inch = '0';
+			buffer[bitpos] = 0;
+		} else if (count >= (20 - hw.margin)) {
+			/* one bit, ~200 ms active signal */
+			state |= GETBIT_ONE;
+			inch = '1';
+			buffer[bitpos] = 1;
+		} else {
+			state |= GETBIT_READ; /* bad radio signal, retain old value */
+			inch = '_';
 		}
 report:
 		if (logfile) {
