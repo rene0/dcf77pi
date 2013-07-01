@@ -305,7 +305,7 @@ get_bit(void)
 						break;
 					else { /* merge short second */
 						high++;
-						//low--;
+						low--;
 					}
 				}
 			}
