@@ -40,14 +40,11 @@ SUCH DAMAGE.
 int
 main(int argc, char *argv[])
 {
-	uint8_t indata[40];
-	uint8_t civbuf[40];
+	uint8_t indata[40], civbuf[40];
 	struct tm time, oldtime;
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt, bit, bitpos, minlen = 0, init = 1, init2 = 1;
-	int res;
-	int opt;
-	int verbose = 0;
+	int res, opt, verbose = 0;
 	char *infilename, *logfilename;
 
 	infilename = logfilename = NULL;
