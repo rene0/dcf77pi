@@ -328,7 +328,6 @@ get_bit(void)
 			inch = 'x';
 			goto report;
 		}
-		if (high > 1 && low > 1) {
 			if (count <= (10 + hw.margin)) {
 				/* zero bit, ~100 ms active signal */
 				inch = '0';
@@ -341,7 +340,6 @@ get_bit(void)
 			} else {
 				state |= GETBIT_READ; /* bad radio signal, retain old value */
 				inch = '_';
-			}
 		}
 report:
 		if (logfile) {
