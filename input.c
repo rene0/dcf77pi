@@ -322,6 +322,8 @@ get_bit(void)
 		}
 
 		if (low < 2) {
+			if (isverbose)
+				printf("(%i %i)", low, i);
 			state |= GETBIT_XMIT;
 			inch = 'x';
 			goto report;
