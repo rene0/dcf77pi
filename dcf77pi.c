@@ -95,7 +95,7 @@ main(int argc, char *argv[])
 			acc_minlen += 2500;
 		} else if (bit & GETBIT_XMIT) {
 			printf("x");
-			acc_minlen += 0; /* value unknown? or ~ 1 second? */
+			acc_minlen += 2500;
 		} else
 			acc_minlen += 1000;
 
