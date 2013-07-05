@@ -102,9 +102,9 @@ main(int argc, char *argv[])
 		bitpos = get_bitpos();
 		if (bit & GETBIT_EOM) {
 			minlen = bitpos;
-			acc_minlen += 1000;
 			if (infilename == NULL) {
 				minlen++;
+				acc_minlen += 1000;
 				display_bit();
 				/* handle the missing minute marker */
 			}
