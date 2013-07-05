@@ -153,8 +153,8 @@ main(int argc, char *argv[])
 		if (bit & GETBIT_EOM) {
 			printf("acc_minlen=%i ms\n", acc_minlen); /* TODO continue if <59 ? */
 			dt = decode_time(init2, minlen, get_buffer(), &time);
-			printf(" %d %c\n", minlen, dt & DT_LONG ? '>' :
-			    dt & DT_SHORT ? '<' : ' ');
+			printf(" %d %d %c\n", minlen, acc_minlen,
+			    dt & DT_LONG ? '>' : dt & DT_SHORT ? '<' : ' ');
 
 			if (time.tm_min % 3 == 0) {
 				if (civ1 == 1 && civ2 == 1)
