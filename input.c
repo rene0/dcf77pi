@@ -313,20 +313,23 @@ get_bit(void)
 			if (i > limit * 5/2) {
 				if (isverbose)
 					printf("{%i %i}", high, i); /* timeout */
-				state |= GETBIT_RECV;
-				inch = 'r';
+				if (high < 2) {
+					state |= GETBIT_RECV;
+					inch = 'r';
+				} else if (low < 2) {
+					state |= GETBIT_XMIT;
+					inch = 'x';
+				} else {
+					state |= GETBIT_READ;
+					inch = '_';
+				}
 				goto report;
 			}
 			p0 = p;
 			(void)usleep(1000000.0 / hw.freq);
 		}
 
-		if (low < 2) {
-			if (isverbose)
-				printf("(%i %i)", low, i);
-			state |= GETBIT_XMIT;
-			inch = 'x';
-		} else if (count <= (10 + hw.margin)) {
+		if (count <= (10 + hw.margin)) {
 			/* zero bit, ~100 ms active signal */
 			inch = '0';
 			buffer[bitpos] = 0;
