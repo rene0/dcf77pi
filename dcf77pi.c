@@ -150,11 +150,11 @@ main(int argc, char *argv[])
 		if (bit & GETBIT_TOOLONG)
 			printf(" >");
 
-		if (bit & GETBIT_EOM) {
-			printf("acc_minlen=%i ms\n", acc_minlen); /* TODO continue if <59 ? */
+		if (bit & GETBIT_EOM && (acc_minlen >= 59500 || init)) {
 			dt = decode_time(init2, minlen, get_buffer(), &time);
 			printf(" %d %d %c\n", minlen, acc_minlen,
 			    dt & DT_LONG ? '>' : dt & DT_SHORT ? '<' : ' ');
+			acc_minlen = 0;
 
 			if (time.tm_min % 3 == 0) {
 				if (civ1 == 1 && civ2 == 1)
