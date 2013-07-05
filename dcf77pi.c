@@ -150,6 +150,9 @@ main(int argc, char *argv[])
 		if (bit & GETBIT_TOOLONG)
 			printf(" >");
 
+		if (bit & GETBIT_EOM && acc_minlen < 59500 && !init)
+			printf("(%d)", acc_minlen);
+
 		if (bit & GETBIT_EOM && (acc_minlen >= 59500 || init)) {
 			dt = decode_time(init2, minlen, get_buffer(), &time);
 			printf(" %d %d %c\n", minlen, acc_minlen,
