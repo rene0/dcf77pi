@@ -35,6 +35,7 @@ SUCH DAMAGE.
 #define GETBIT_XMIT	64
 #define GETBIT_RECV	128
 #define GETBIT_IGNORE	256
+#define GETBIT_RND	512
 
 #include <stdint.h> /* uint8_t */
 

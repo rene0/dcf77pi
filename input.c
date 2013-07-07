@@ -320,8 +320,8 @@ get_bit(void)
 					state |= GETBIT_XMIT;
 					inch = 'x';
 				} else {
-					state |= GETBIT_READ;
-					inch = '_';
+					state |= GETBIT_RND;
+					inch = '-';
 				}
 				goto report;
 			}
@@ -369,6 +369,9 @@ report:
 				break;
 			case 'r':
 				state |= GETBIT_RECV;
+				break;
+			case '-' :
+				state |= GETBIT_RND;
 				break;
 			case '*' :
 				state |= GETBIT_IO;
