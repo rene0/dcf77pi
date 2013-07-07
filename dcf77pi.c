@@ -90,13 +90,9 @@ main(int argc, char *argv[])
 			bit = get_bit(); /* when reading from log file */
 		if (bit & GETBIT_EOD)
 			break;
-		if (bit & GETBIT_RECV) {
-			printf("r");
+		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
 			acc_minlen += 2500;
-		} else if (bit & GETBIT_XMIT) {
-			printf("x");
-			acc_minlen += 2500;
-		} else
+		else
 			acc_minlen += 1000;
 
 		bitpos = get_bitpos();

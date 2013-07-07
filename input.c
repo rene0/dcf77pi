@@ -393,7 +393,13 @@ report:
 void
 display_bit(void)
 {
-	if (state & GETBIT_READ)
+	if (state & GETBIT_RECV)
+		printf("r");
+	else if (state & GETBIT_XMIT)
+		printf("x");
+	else if (state & GETBIT_RND)
+		printf("-");
+	else if (state & GETBIT_READ)
 		printf("_");
 	else
 		printf("%d", buffer[bitpos]);
