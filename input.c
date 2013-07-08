@@ -258,7 +258,7 @@ get_pulse(void)
 int
 get_bit(void)
 {
-	char inch;
+	char outch;
 	int count, high, low;
 	int i, p, p0, limit;
 
@@ -285,7 +285,7 @@ get_bit(void)
 			p = get_pulse();
 			if (p == GETBIT_IO) {
 				state |= GETBIT_IO;
-				inch = '*';
+				outch = '*';
 				goto report;
 			}
 			if (p == 0)
@@ -315,13 +315,13 @@ get_bit(void)
 					printf("{%i %i}", high, i); /* timeout */
 				if (high < 2) {
 					state |= GETBIT_RECV;
-					inch = 'r';
+					outch = 'r';
 				} else if (low < 2) {
 					state |= GETBIT_XMIT;
-					inch = 'x';
+					outch = 'x';
 				} else {
 					state |= GETBIT_RND;
-					inch = '-';
+					outch = '-';
 				}
 				goto report;
 			}
@@ -331,20 +331,20 @@ get_bit(void)
 
 		if (count <= (10 + hw.margin)) {
 			/* zero bit, ~100 ms active signal */
-			inch = '0';
+			outch = '0';
 			buffer[bitpos] = 0;
 		} else if (count >= (20 - hw.margin)) {
 			/* one bit, ~200 ms active signal */
 			state |= GETBIT_ONE;
-			inch = '1';
+			outch = '1';
 			buffer[bitpos] = 1;
 		} else {
 			state |= GETBIT_READ; /* bad radio signal, retain old value */
-			inch = '_';
+			outch = '_';
 		}
 report:
 		if (logfile) {
-			fprintf(logfile, "%c", inch);
+			fprintf(logfile, "%c", outch);
 			if (state & GETBIT_EOM)
 				fprintf(logfile, "\n");
 		}
