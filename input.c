@@ -413,7 +413,7 @@ display_bit(void)
 int
 next_bit(void)
 {
-	if (bitpos == sizeof(buffer) && ((state & GETBIT_EOM) == 0)) {
+	if (bitpos == sizeof(buffer) && (state & GETBIT_EOM) == 0) {
 		bitpos = 0;
 		state |= GETBIT_TOOLONG | GETBIT_EOM;
 	}
