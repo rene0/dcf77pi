@@ -244,7 +244,7 @@ display_time(int init2, int dt, struct tm oldtime, struct tm time)
 {
 	char *wday[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
-	printf("%s %02d-%02d-%02d %s %02d:%02d",
+	printf("%s %02d-%02d-%02d %s %02d:%02d\n",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
 	    time.tm_mday, wday[time.tm_wday-1], time.tm_hour, time.tm_min);
 	if (dt & DT_DSTERR)
