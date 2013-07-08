@@ -258,6 +258,7 @@ get_pulse(void)
 int
 get_bit(void)
 {
+	int inch;
 	char outch;
 	int count, high, low;
 	int i, p, p0, limit;
@@ -349,11 +350,11 @@ report:
 				fprintf(logfile, "\n");
 		}
 	} else {
+		inch = getc(datafile);
 		if (feof(datafile)) {
 			state |= GETBIT_EOD;
 			return state;
 		}
-		if (fscanf(datafile, "%c", &inch) == 1) {
 			switch (inch) {
 			case '0':
 			case '1':
@@ -384,8 +385,6 @@ report:
 				state |= GETBIT_IGNORE;
 				break;
 			}
-		} else
-			state |= GETBIT_IGNORE;
 	}
 	return state;
 }
