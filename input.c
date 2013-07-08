@@ -362,7 +362,7 @@ report:
 					state |= GETBIT_ONE;
 				break;
 			case '\n' :
-				state |= GETBIT_EOM;
+				state |= GETBIT_EOM; /* otherwise empty bit */
 				break;
 			case 'x' :
 				state |= GETBIT_XMIT;
@@ -383,6 +383,14 @@ report:
 			default:
 				state |= GETBIT_IGNORE;
 				break;
+		}
+		inch = getc(datafile);
+		if (inch == '\n')
+			state |= GETBIT_EOM;
+		else {
+			/* push back, not an EOM marker */
+			if (ungetc(inch, datafile) == EOF)
+				state |= GETBIT_EOD;
 		}
 	}
 	return state;
