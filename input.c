@@ -351,11 +351,10 @@ report:
 		}
 	} else {
 		inch = getc(datafile);
-		if (feof(datafile)) {
-			state |= GETBIT_EOD;
-			return state;
-		}
 			switch (inch) {
+			case EOF:
+				state |= GETBIT_EOD;
+				return state;
 			case '0':
 			case '1':
 				buffer[bitpos] = (uint8_t)(inch - '0');
