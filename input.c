@@ -351,7 +351,7 @@ report:
 		}
 	} else {
 		inch = getc(datafile);
-			switch (inch) {
+		switch (inch) {
 			case EOF:
 				state |= GETBIT_EOD;
 				return state;
@@ -383,7 +383,7 @@ report:
 			default:
 				state |= GETBIT_IGNORE;
 				break;
-			}
+		}
 	}
 	return state;
 }
