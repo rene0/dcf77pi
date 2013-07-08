@@ -258,7 +258,7 @@ get_pulse(void)
 int
 get_bit(void)
 {
-	int inch;
+	int inch, valid = 0;
 	char outch;
 	int count, high, low;
 	int i, p, p0, limit;
@@ -350,8 +350,9 @@ report:
 				fprintf(logfile, "\n");
 		}
 	} else {
-		inch = getc(datafile);
-		switch (inch) {
+		while (!valid) {
+			inch = getc(datafile);
+			switch (inch) {
 			case EOF:
 				state |= GETBIT_EOD;
 				return state;
@@ -360,29 +361,36 @@ report:
 				buffer[bitpos] = (uint8_t)(inch - '0');
 				if (inch == '1')
 					state |= GETBIT_ONE;
+				valid = 1;
 				break;
 			case '\n' :
 				state |= GETBIT_EOM; /* otherwise empty bit */
+				valid = 1;
 				break;
 			case 'x' :
 				state |= GETBIT_XMIT;
+				valid = 1;
 				break;
 			case 'r':
 				state |= GETBIT_RECV;
+				valid = 1;
 				break;
 			case '#' :
 				state |= GETBIT_RND;
+				valid = 1;
 				break;
 			case '*' :
 				state |= GETBIT_IO;
+				valid = 1;
 				break;
 			case '_' :
 				/* retain old value in buffer[bitpos] */
 				state |= GETBIT_READ;
+				valid = 1;
 				break;
 			default:
-				state |= GETBIT_IGNORE;
 				break;
+			}
 		}
 		inch = getc(datafile);
 		if (inch == '\n')
