@@ -363,6 +363,7 @@ report:
 					state |= GETBIT_ONE;
 				valid = 1;
 				break;
+			case '\r' :
 			case '\n' :
 				state |= GETBIT_EOM; /* otherwise empty bit */
 				valid = 1;
@@ -396,9 +397,15 @@ report:
 		if (inch == '\n')
 			state |= GETBIT_EOM;
 		else {
-			/* push back, not an EOM marker */
-			if (ungetc(inch, datafile) == EOF)
+			if (inch == '\r') {
+				state |= GETBIT_EOM;
+				inch = getc(datafile);
+				if (inch != '\n' && ungetc(inch, datafile) == EOF)
+					state |= GETBIT_EOD;
+					/* push back, not an EOM marker */
+			} else if (ungetc(inch, datafile) == EOF)
 				state |= GETBIT_EOD;
+				/* push back, not an EOM marker */
 		}
 	}
 	return state;
