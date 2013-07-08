@@ -322,7 +322,7 @@ get_bit(void)
 					outch = 'x';
 				} else {
 					state |= GETBIT_RND;
-					outch = '-';
+					outch = '#';
 				}
 				goto report;
 			}
@@ -370,7 +370,7 @@ report:
 			case 'r':
 				state |= GETBIT_RECV;
 				break;
-			case '-' :
+			case '#' :
 				state |= GETBIT_RND;
 				break;
 			case '*' :
@@ -404,7 +404,7 @@ display_bit(void)
 	else if (state & GETBIT_XMIT)
 		printf("x");
 	else if (state & GETBIT_RND)
-		printf("-");
+		printf("#");
 	else if (state & GETBIT_READ)
 		printf("_");
 	else
