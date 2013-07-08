@@ -86,8 +86,6 @@ main(int argc, char *argv[])
 
 	for (;;) {
 		bit = get_bit();
-		while (bit & GETBIT_IGNORE)
-			bit = get_bit(); /* when reading from log file */
 		if (bit & GETBIT_EOD)
 			break;
 		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
