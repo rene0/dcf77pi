@@ -32,7 +32,12 @@ SUCH DAMAGE.
 #include <strings.h>
 #include <unistd.h>
 #ifdef __FreeBSD__
+#include <sys/param.h>
+#if __FreeBSD_version >= 900022
 #include <sys/gpio.h>
+#else
+#define NOLIVE 1
+#endif
 #elif defined(__linux__)
 #include <sys/types.h>
 #else
@@ -100,6 +105,7 @@ int
 init_hardware(int pin_nr)
 {
 #ifdef __FreeBSD__
+#ifndef NOLIVE
 	struct gpio_pin pin;
 
 	fd = open("/dev/gpioc0", O_RDONLY);
@@ -113,6 +119,7 @@ init_hardware(int pin_nr)
 		perror("ioctl(GPIOGETCONFIG)");
 		return -errno;
 	}
+#endif
 #elif defined(__linux__)
 	char buf[64];
 	int res;
@@ -175,6 +182,13 @@ set_mode(int verbose, char *infilename, char *logfilename)
 
 	isverbose = verbose;
 	islive = (infilename == NULL);
+#ifdef NOLIVE
+	if (islive) {
+		printf("No GPIO interface available, disabling live decoding\n");
+		cleanup();
+		return 1;
+	}
+#endif
 	bitpos = 0;
 	state = 0;
 	bzero(buffer, sizeof(buffer));
@@ -236,12 +250,14 @@ get_pulse(void)
 	int count;
 	char tmpch;
 #ifdef __FreeBSD__
+#ifndef NOLIVE
 	struct gpio_req req;
 
 	req.gp_pin = hw.pin;
 	count = ioctl(fd, GPIOGET, &req);
 	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
 	if (count < 0)
+#endif
 #elif defined(__linux__)
 	count = read(fd, &tmpch, sizeof(tmpch));
 	tmpch -= '0';
