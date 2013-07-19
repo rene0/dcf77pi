@@ -247,8 +247,8 @@ cleanup(void)
 int
 get_pulse(void)
 {
-	int count;
-	char tmpch;
+	char tmpch = 0;
+	int count = 0;
 #ifdef __FreeBSD__
 #ifndef NOLIVE
 	struct gpio_req req;
