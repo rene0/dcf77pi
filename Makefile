@@ -1,6 +1,7 @@
 .PHONY: all clean install
 
-CFLAGS+=-Wall
+PREFIX?=.
+CFLAGS+=-Wall -DPREFIX=\"$(PREFIX)\"
 
 all: dcf77pi readpin
 

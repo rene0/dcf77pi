@@ -196,7 +196,7 @@ set_mode(int verbose, char *infilename, char *logfilename)
 	signal(SIGINT, signal_callback_handler);
 
 	if (islive) {
-		res = read_hardware_parameters("hardware.txt", &hw);
+		res = read_hardware_parameters(PREFIX"/hardware.txt", &hw);
 		if (res) {
 			cleanup();
 			return res;
@@ -228,7 +228,6 @@ set_mode(int verbose, char *infilename, char *logfilename)
 void
 cleanup(void)
 {
-
 	if (fd > 0 && close(fd) == -1)
 #ifdef __FreeBSD__
 		perror("close (/dev/gpioc0)");
