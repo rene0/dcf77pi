@@ -246,7 +246,8 @@ display_time(int init2, int dt, struct tm oldtime, struct tm time)
 
 	printf("%s %02d-%02d-%02d %s %02d:%02d\n",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
-	    time.tm_mday, wday[time.tm_wday-1], time.tm_hour, time.tm_min);
+	    time.tm_mday, time.tm_wday > 0 && time.tm_wday < 8 ?
+	    wday[time.tm_wday - 1] : "???", time.tm_hour, time.tm_min);
 	if (dt & DT_DSTERR)
 		printf("Time offset error\n");
 	if (dt & DT_MIN)
