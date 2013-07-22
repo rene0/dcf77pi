@@ -28,4 +28,4 @@ clean:
 install:
 	install dcf77pi readpin $(PREFIX)/bin
 	mkdir -p $(ETCDIR)
-	install hardware.txt $(ETCDIR)/hardware.txt.sample
+	install etc/dcf77pi/hardware.txt $(ETCDIR)/hardware.txt.sample
