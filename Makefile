@@ -1,7 +1,8 @@
 .PHONY: all clean install
 
 PREFIX?=.
-CFLAGS+=-Wall -DPREFIX=\"$(PREFIX)\"
+ETCDIR?=$(PREFIX)/etc/dcf77pi
+CFLAGS+=-Wall -DETCDIR=\"$(ETCDIR)\"
 
 all: dcf77pi readpin
 
@@ -26,5 +27,5 @@ clean:
 
 install:
 	install dcf77pi readpin $(PREFIX)/bin
-	mkdir -p $(PREFIX)/etc/dcf77pi
-	install hardware.txt $(PREFIX)/etc/dcf77pi/hardware.txt.sample
+	mkdir -p $(ETCDIR)
+	install hardware.txt $(ETCDIR)/hardware.txt.sample

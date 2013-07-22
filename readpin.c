@@ -38,7 +38,7 @@ main(int argc, char **argv)
 		return 0;
 	}
 
-	(void)read_hardware_parameters(PREFIX"/hardware.txt", &hw);
+	(void)read_hardware_parameters(ETCDIR"/hardware.txt", &hw);
 	/* get our own copy, error handling in set_mode() */
 
 	printf("%i\n", (int)(hw.freq * hw.min_len / 100));
