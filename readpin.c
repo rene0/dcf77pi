@@ -30,7 +30,7 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	int i, p, act;
+	int i, p, p0, act, pas, minlimit, maxlimit, count, sec, init;
 	struct hardware hw;
 
 	if (set_mode(0, NULL, NULL)) {
@@ -41,19 +41,39 @@ main(int argc, char **argv)
 	(void)read_hardware_parameters(ETCDIR"/hardware.txt", &hw);
 	/* get our own copy, error handling in set_mode() */
 
-	printf("%i\n", (int)(hw.freq * hw.min_len / 100));
-	for (i = act = 0;; i++) {
+	p0 = -1;
+	minlimit = hw.freq * hw.min_len / 100;
+	maxlimit = hw.freq * hw.max_len / 100;
+	init = 1;
+	printf("limit=[%i..%i]\n", minlimit, maxlimit);
+
+	for (i = act = pas = 0;; i++) {
 		p = get_pulse();
 		if (p & GETBIT_IO) {
 			printf("IO error!\n");
 			break;
 		}
-		act += p;
-		printf("%c", p == 1 ? '+' : ' ');
-		if (i == (int)(hw.freq * hw.min_len / 100)) {
-			printf(" %lu\n", act*hw.freq/hw.min_len);
-			i = act = 0;
+		if (p == 0) {
+			pas++;
+			//printf("-");
+		} else { /* p == 1 */
+			act++;
+			if (p0 == 0) {
+				count = act * 100/i;
+				if (i > minlimit * 2 && i < maxlimit * 2)
+					count *= 2;
+				printf(" (%i %i %i) %i ", act, pas, i, count);
+				if (i > minlimit && (init || i < maxlimit)) {
+					i = act = pas = 0;
+					init = 0;
+				} else if (i > minlimit * 2 && (init || i < maxlimit * 2)) {
+					i = act = pas = 0;
+					init = 0;
+				}
+			}
+			//printf("+");
 		}
+		p0 = p;
 		(void)usleep(1000000.0 / hw.freq);
 	}
 	cleanup();
