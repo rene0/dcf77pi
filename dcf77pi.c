@@ -144,7 +144,6 @@ main(int argc, char *argv[])
 			dt = decode_time(init2, minlen, get_buffer(), &time);
 			printf(" (%d) %d %c\n", acc_minlen, minlen,
 			    dt & DT_LONG ? '>' : dt & DT_SHORT ? '<' : ' ');
-			acc_minlen = 0;
 
 			if (time.tm_min % 3 == 0) {
 				if (civ1 == 1 && civ2 == 1)
@@ -153,8 +152,12 @@ main(int argc, char *argv[])
 					printf("Civil warning error\n");
 			}
 
-			if (!init)
+			while (!init && acc_minlen >= 60000) {
 				dt = add_minute(&oldtime, dt);
+				acc_minlen -= 60000;
+			}
+			acc_minlen = 0;
+
 			display_time(init2, dt, oldtime, time);
 			printf("\n");
 
