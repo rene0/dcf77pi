@@ -44,6 +44,7 @@ main(int argc, char **argv)
 	p0 = -1;
 	minlimit = hw.freq * hw.min_len / 100;
 	maxlimit = hw.freq * hw.max_len / 100;
+	sec = -1;
 	init = 1;
 	printf("limit=[%i..%i]\n", minlimit, maxlimit);
 
@@ -64,11 +65,14 @@ main(int argc, char **argv)
 					count *= 2;
 				printf(" (%i %i %i) %i ", act, pas, i, count);
 				if (i > minlimit && (init || i < maxlimit)) {
+					printf(" === %i\n", ++sec); /* new second */
 					i = act = pas = 0;
 					init = 0;
 				} else if (i > minlimit * 2 && (init || i < maxlimit * 2)) {
+					printf(" === %i\n", ++sec); /* new second */
 					i = act = pas = 0;
 					init = 0;
+					sec = -1; /* new minute */
 				} else {
 					if (count > 95) /* maybe parametrize */
 						printf("P"); /* act already increased */
