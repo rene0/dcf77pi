@@ -89,7 +89,7 @@ main(int argc, char *argv[])
 		if (bit & GETBIT_EOD)
 			break;
 		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
-			acc_minlen += 2500;
+			acc_minlen += 2500; /* approximately */
 		else
 			acc_minlen += 1000;
 
