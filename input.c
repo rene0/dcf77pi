@@ -365,7 +365,7 @@ get_bit(void)
 			/* zero bit, ~100 ms active signal */
 			outch = '0';
 			buffer[bitpos] = 0;
-		} else if (count >= (20 - hw.margin)) {
+		} else if (count >= 20 - hw.margin) {
 			/* one bit, ~200 ms active signal */
 			state |= GETBIT_ONE;
 			outch = '1';
