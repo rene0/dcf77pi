@@ -294,7 +294,7 @@ get_bit(void)
  *  180 <= A        : '1'          -> 780 <= ~A <= 820  GETBIT_ONE
  *
  *  ~A > 1000 : value = GETBIT_EOM
- * Short pulses (< min_len^2 %% of the sampling frequency) are concatenated.
+ * Short pulses (< min_len % of the sampling frequency) are concatenated.
  *
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
  */
