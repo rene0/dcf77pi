@@ -40,7 +40,7 @@ SUCH DAMAGE.
 
 struct hardware {
 	unsigned long freq;
-	unsigned int margin, pin, min_len, active_high;
+	unsigned int margin, pin, min_len, active_high, max_len;
 
 };
 

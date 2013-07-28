@@ -93,11 +93,15 @@ read_hardware_parameters(char *filename, struct hardware *_hw)
 		perror("gpio active_high");
 		return errno;
 	}
+	if (fscanf(hwfile, "%i\n", &(_hw->max_len)) != 1) {
+		perror("gpio max_len");
+		return errno;
+	}
 	if (fclose(hwfile) == EOF) {
 		perror("fclose (hwfile)");
 		return errno;
 	}
-	printf("hardware: freq=%li margin=%i pin=%i min_len=%i active_high=%i\n", _hw->freq, _hw->margin, _hw->pin, _hw->min_len, _hw->active_high);
+	printf("hardware: freq=%li margin=%i pin=%i min_len=%i active_high=%i max_len=%i\n", _hw->freq, _hw->margin, _hw->pin, _hw->min_len, _hw->active_high, _hw->max_len);
 	return 0;
 }
 
