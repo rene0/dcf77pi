@@ -86,6 +86,10 @@ main(int argc, char **argv)
 			}
 			//printf("+");
 		}
+		if (i > maxlimit * 2) {
+			printf(" (%i %i %i) >>>\n", act, pas, i); /* timeout */
+			i = act = pas = 0;
+		}
 		p0 = p;
 		(void)usleep(1000000.0 / hw.freq);
 	}
