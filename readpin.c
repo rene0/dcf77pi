@@ -69,6 +69,19 @@ main(int argc, char **argv)
 				} else if (i > minlimit * 2 && (init || i < maxlimit * 2)) {
 					i = act = pas = 0;
 					init = 0;
+				} else {
+					if (count > 95) /* maybe parametrize */
+						printf("P"); /* act already increased */
+					else if (init) {
+						/* end of partial second? */
+						printf(" (%i %i %i) <<<\n", act, pas, i);
+						i = act = pas = 0;
+						init = 0;
+					} else {
+						printf("M");
+						act--;
+						pas++;
+					}
 				}
 			}
 			//printf("+");
