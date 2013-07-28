@@ -280,7 +280,8 @@ get_bit(void)
 	int inch, valid = 0;
 	char outch;
 	int count, high, low;
-	int i, p, p0, limit;
+	int i, p, p0, minlimit, maxlimit;
+	static int init = 1;
 
 	state = 0; /* clear previous flags */
 	if (islive) {
@@ -299,7 +300,8 @@ get_bit(void)
  */
 		high = low = 0;
 		p0 = -1;
-		limit = hw.freq * hw.min_len / 100;
+		minlimit = hw.freq * hw.min_len / 100;
+		maxlimit = hw.freq * hw.max_len / 100;
 
 		for (i = 0; ; i++) {
 			p = get_pulse();
@@ -313,24 +315,34 @@ get_bit(void)
 			else { /* p == 1 */
 				high++;
 				if (p0 == 0) { /* skip initial situation */
-					if (i > limit * 3/2 && i < limit * 5/2) {
-						i /= 2;
+					count = high * 100/i;
+					if (i > minlimit * 2 && i < maxlimit * 2)
+						count *= 2;
+					if (isverbose)
+						printf("[%i %d]", i, count);
+					if (i > minlimit && (init || i < maxlimit)) {
+						/* new second */
+						init = 0;
+						break;
+					} else if (i > minlimit * 2 && (init || i < maxlimit * 2)) {
 						state |= GETBIT_EOM;
+						init = 0;
 						if (isverbose)
 							printf(" M"); /* new minute */
-					}
-					count = high * hw.freq/i;
-					if (isverbose)
-						printf("[%i %d]", i, count); /* new second? */
-					if (i > limit * hw.min_len/100)
 						break;
-					else { /* merge short second */
-						high++;
-						low--;
+					} else {
+						if (init) {
+							/* end of partial second */
+							init = 0;
+							break;
+						} else if (count < 95) {
+							high--;
+							low++;
+						} /* other case already handled implicitly */
 					}
 				}
 			}
-			if (i > limit * 5/2) {
+			if (i > maxlimit * 2) {
 				if (isverbose)
 					printf("{%i %i}", high, i); /* timeout */
 				if (high < 2) {
