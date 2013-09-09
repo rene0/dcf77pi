@@ -392,8 +392,10 @@ get_bit(void)
 report:
 		if (logfile) {
 			fprintf(logfile, "%c", outch);
-			if (state & GETBIT_EOM)
+			if (state & GETBIT_EOM) {
 				fprintf(logfile, "\n");
+				fflush(logfile);
+			}
 		}
 	} else {
 		while (!valid) {
