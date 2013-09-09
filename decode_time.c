@@ -210,9 +210,9 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	}
 
 	/* these flags are saved between invocations: */
-	if (buffer[16] == 1 && generr == 0) /* sz->wz -> h==2 .. wz->sz -> h==1 */
+	if (buffer[16] == 1 && !generr && !p1 && !p2 && !p3) /*  h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1, last sunday of month */
 		announce |= ANN_CHDST;
-	if (buffer[19] == 1 && generr == 0) /* h==0 (UTC) */
+	if (buffer[19] == 1 && !generr && !p1 && !p2 && !p3) /* h==23 (UTC), last day of month */
 		announce |= ANN_LEAP;
 
 	if (minlen == 59) {
