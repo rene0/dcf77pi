@@ -159,13 +159,15 @@ main(int argc, char *argv[])
 				dt = add_minute(&oldtime, dt);
 				acc_minlen -= 60000;
 			}
-			acc_minlen = 0;
 
 			display_time(init2, dt, oldtime, time, tmp >= 60000);
 			printf("\n");
 
-			memcpy((void *)&oldtime, (const void *)&time,
-			    sizeof(struct tm));
+			if (init || !((dt & DT_LONG) || (dt & DT_SHORT))) {
+				acc_minlen = 0; /* really a new minute */
+				memcpy((void *)&oldtime, (const void *)&time,
+				    sizeof(struct tm));
+			}
 			if (!init && init2)
 				init2 = 0;
 			if (init)
