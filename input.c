@@ -101,7 +101,9 @@ read_hardware_parameters(char *filename, struct hardware *_hw)
 		perror("fclose (hwfile)");
 		return errno;
 	}
-	printf("hardware: freq=%li margin=%i pin=%i min_len=%i active_high=%i max_len=%i\n", _hw->freq, _hw->margin, _hw->pin, _hw->min_len, _hw->active_high, _hw->max_len);
+	printf("hardware: freq=%li margin=%i pin=%i min_len=%i active_high=%i"
+	    " max_len=%i\n", _hw->freq, _hw->margin, _hw->pin, _hw->min_len,
+	    _hw->active_high, _hw->max_len);
 	return 0;
 }
 
@@ -147,7 +149,8 @@ init_hardware(int pin_nr)
 		perror("close(export)");
 		return -errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/direction", pin_nr);
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/direction",
+	    pin_nr);
 	if (res < 0 || res > sizeof(buf)-1) {
 		printf("pin_nr too high? (%i)\n", res);
 		return -1;
@@ -165,7 +168,8 @@ init_hardware(int pin_nr)
 		perror("close(direction)");
 		return -errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/value", pin_nr);
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/value",
+	    pin_nr);
 	if (res < 0 || res > sizeof(buf)-1) {
 		printf("pin_nr too high? (%i)\n", res);
 		return -1;
@@ -316,25 +320,29 @@ get_bit(void)
 				high++;
 				if (p0 == 0) { /* skip initial situation */
 					count = high * 100/i;
-					if (i > minlimit * 2 && i < maxlimit * 2)
+					if (i > minlimit * 2 &&
+					    i < maxlimit * 2)
 						count *= 2;
 					if (isverbose)
 						printf("[%i %d]", i, count);
-					if (i > minlimit && (init || i < maxlimit)) {
+					if (i > minlimit && (init ||
+					    i < maxlimit)) {
 						/* new second */
 						init = 0;
 						break;
-					} else if (i > minlimit * 2 && (init || i < maxlimit * 2)) {
+					} else if (i > minlimit * 2 && (init ||
+					    i < maxlimit * 2)) {
 						state |= GETBIT_EOM;
 						init = 0;
 						if (isverbose)
-							printf(" M"); /* new minute */
+							printf(" M");
+							/* new minute */
 						break;
 					} else {
 						if (init) {
-							/* end of partial second */
 							init = 0;
 							break;
+							/* end of partial second */
 						} else if (count < 95) {
 							high--;
 							low++;
@@ -377,7 +385,8 @@ get_bit(void)
 			outch = '1';
 			buffer[bitpos] = 1;
 		} else {
-			state |= GETBIT_READ; /* bad radio signal, retain old value */
+			/* bad radio signal, retain old value */
+			state |= GETBIT_READ;
 			outch = '_';
 		}
 report:
@@ -437,7 +446,8 @@ report:
 			if (inch == '\r') {
 				state |= GETBIT_EOM;
 				inch = getc(datafile);
-				if (inch != '\n' && ungetc(inch, datafile) == EOF)
+				if (inch != '\n' &&
+				    ungetc(inch, datafile) == EOF)
 					state |= GETBIT_EOD;
 					/* push back, not an EOM marker */
 			} else if (ungetc(inch, datafile) == EOF)

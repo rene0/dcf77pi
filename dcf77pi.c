@@ -68,7 +68,8 @@ main(int argc, char *argv[])
 			verbose = 1;
 			break;
 		default:
-			printf("usage: %s [-f infile] [-l logfile] [-v]\n", argv[0]);
+			printf("usage: %s [-f infile] [-l logfile] [-v]\n",
+			    argv[0]);
 			return EX_USAGE;
 		}
 	}

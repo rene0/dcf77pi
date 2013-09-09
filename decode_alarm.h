@@ -30,7 +30,7 @@ SUCH DAMAGE.
 
 /*
  * From German wikipedia mostly, long regions and parities are unspecified
- * short regions: 1=nord, 2=middle, 4=south
+ * short regions: 1=north, 2=middle, 4=south
  */
 void display_alarm(uint8_t *buf);
 

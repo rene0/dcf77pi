@@ -61,7 +61,8 @@ int
 isleap(struct tm time)
 {
 	int d, nw, nd;
-	int dayinleapyear[12] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
+	int dayinleapyear[12] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274,
+	    305, 335};
 
 	if (time.tm_year % 4 > 0)
 		return 0;
@@ -87,7 +88,8 @@ isleap(struct tm time)
 int
 lastday(struct tm time)
 {
-	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 || time.tm_mon == 11)
+	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 ||
+	    time.tm_mon == 11)
 		return 30;
 	if (time.tm_mon == 2)
 		return 28 + isleap(time);

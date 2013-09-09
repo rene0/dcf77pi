@@ -50,5 +50,7 @@ display_alarm(uint8_t *buf)
 		printf("short: data=0x%x parity=0x%x long: data=0x%x parity=0x%x\n",
 		    ds1, ps1, dl1, pl1);
 	else /* should not happen */
-		printf("DIFFERENCES: short: data=0x%x parity=0x%x long: data=0x%x parity=0x%x\n", ds1-ds2, ps1-ps2, dl1-dl2, pl1-pl2);
+		printf("DIFFERENCES: short: data=0x%x parity=0x%x long: "
+		    "data=0x%x parity=0x%x\n", ds1 - ds2, ps1 - ps2, dl1 - dl2,
+		    pl1 - pl2);
 }
