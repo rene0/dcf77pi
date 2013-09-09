@@ -44,7 +44,7 @@ main(int argc, char *argv[])
 	struct tm time, oldtime;
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt, bit, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1;
-	int res, opt, verbose = 0;
+	int tmp, res, opt, verbose = 0;
 	char *infilename, *logfilename;
 
 	infilename = logfilename = NULL;
@@ -142,7 +142,8 @@ main(int argc, char *argv[])
 			printf(" >");
 
 		if (bit & GETBIT_EOM) {
-			dt = decode_time(init2, minlen, get_buffer(), &time);
+			dt = decode_time(init2, minlen, get_buffer(), &time,
+			    acc_minlen >= 60000);
 			printf(" (%d) %d %c\n", acc_minlen, minlen,
 			    dt & DT_LONG ? '>' : dt & DT_SHORT ? '<' : ' ');
 
@@ -153,13 +154,14 @@ main(int argc, char *argv[])
 					printf("Civil warning error\n");
 			}
 
+			tmp = acc_minlen;
 			while (!init && acc_minlen >= 60000) {
 				dt = add_minute(&oldtime, dt);
 				acc_minlen -= 60000;
 			}
 			acc_minlen = 0;
 
-			display_time(init2, dt, oldtime, time);
+			display_time(init2, dt, oldtime, time, tmp >= 60000);
 			printf("\n");
 
 			memcpy((void *)&oldtime, (const void *)&time,
