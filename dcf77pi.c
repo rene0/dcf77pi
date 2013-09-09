@@ -163,11 +163,11 @@ main(int argc, char *argv[])
 			display_time(init2, dt, oldtime, time, tmp >= 60000);
 			printf("\n");
 
-			if (init || !((dt & DT_LONG) || (dt & DT_SHORT))) {
+			if (init || !((dt & DT_LONG) || (dt & DT_SHORT)))
 				acc_minlen = 0; /* really a new minute */
+			if (init || !(dt & DT_SHORT))
 				memcpy((void *)&oldtime, (const void *)&time,
 				    sizeof(struct tm));
-			}
 			if (!init && init2)
 				init2 = 0;
 			if (init)
