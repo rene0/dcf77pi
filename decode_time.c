@@ -50,8 +50,6 @@ getbcd(uint8_t *buffer, int start, int stop)
 	for (i = start; i <= stop; i++) {
 		val += mul * buffer[i];
 		mul *= 2;
-		if (mul == 16)
-			mul = 10;
 	}
 	return val;
 }
@@ -136,7 +134,7 @@ int
 decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 {
 	int rval = 0, generr = 0, p1 = 0, p2 = 0, p3 = 0;
-	unsigned int tmp, tmp1, tmp2, tmp3;
+	unsigned int tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
 
 	if (minlen < 59)
 		rval |= DT_SHORT;
@@ -157,19 +155,21 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 		rval |= DT_XMIT;
 
 	p1 = getpar(buffer, 21, 28);
-	tmp = getbcd(buffer, 21, 27);
-	if (p1 || tmp > 59) {
+	tmp = getbcd(buffer, 21, 24);
+	tmp1 = getbcd(buffer, 25, 27);
+	if (p1 || tmp > 9 || tmp1 > 5) {
 		rval |= DT_MIN;
 		p1 = 1;
 	}
 	if (p1 || generr)
 		time->tm_min = (time->tm_min + 1) % 60;
 	else
-		time->tm_min = tmp;
+			time->tm_min = tmp + 10 * tmp1;
 
 	p2 = getpar(buffer, 29, 35);
-	tmp = getbcd(buffer, 29, 34);
-	if (p2 || tmp > 23) {
+	tmp = getbcd(buffer, 29, 32);
+	tmp1 = getbcd(buffer, 33, 34);
+	if (p2 || tmp > 9 || tmp1 > 2 || tmp + 10 * tmp1 > 23) {
 		rval |= DT_HOUR;
 		p2 = 1;
 	}
@@ -177,14 +177,18 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 		if (time->tm_min == 0)
 			time->tm_hour = (time->tm_hour + 1) % 24;
 	} else
-		time->tm_hour = tmp;
+			time->tm_hour = tmp + 10 * tmp1;
 
 	p3 = getpar(buffer, 36, 58);
-	tmp = getbcd(buffer, 36, 41);
-	tmp1 = getbcd(buffer, 42, 44);
-	tmp2 = getbcd(buffer, 45, 49);
-	tmp3 = getbcd(buffer, 50, 57);
-	if (p3 || tmp == 0 || tmp > 31 || tmp1 == 0 || tmp2 == 0 || tmp2 > 12 || tmp3 > 99) {
+	tmp = getbcd(buffer, 36, 39);
+	tmp1 = getbcd(buffer, 40, 41);
+	tmp2 = getbcd(buffer, 42, 44);
+	tmp3 = getbcd(buffer, 45, 48);
+	tmp4 = getbcd(buffer, 50, 53);
+	tmp5 = getbcd(buffer, 54, 57);
+	if (p3 || tmp > 9 || tmp + 10 * tmp1 == 0 || tmp + 10 * tmp1 > 31 ||
+	    tmp2 == 0 || tmp3 > 9 || tmp3 + 10 * buffer[49] == 0 ||
+	    tmp3 + 10 * buffer[49] > 12 || tmp4 > 9 || tmp5 > 9) {
 		rval |= DT_DATE;
 		p3 = 1;
 	}
@@ -192,10 +196,10 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time)
 		if (time->tm_min == 0 && time->tm_hour == 0)
 			add_day(time);
 	} else {
-		time->tm_mday = tmp;
-		time->tm_wday = tmp1;
-		time->tm_mon = tmp2;
-		time->tm_year = tmp3;
+			time->tm_mday = tmp + 10 * tmp1;
+			time->tm_wday = tmp2;
+			time->tm_mon = tmp3 + 10 * buffer[49];
+			time->tm_year = tmp4 + 10 * tmp5;
 	}
 
 	/* these flags are saved between invocations: */
