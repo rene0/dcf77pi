@@ -244,7 +244,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 			olderr = 0;
 			time->tm_isdst = buffer[17]; /* expected change */
 		} else
-			rval |= DT_DSTERR; /* sudden change */
+			rval |= DT_DSTJUMP; /* sudden change, ignore */
 	}
 	time->tm_gmtoff = time->tm_isdst ? 7200 : 3600;
 
@@ -265,6 +265,8 @@ display_time(int init2, int dt, struct tm oldtime, struct tm time,
 	    wday[time.tm_wday - 1] : "???", time.tm_hour, time.tm_min);
 	if (dt & DT_DSTERR)
 		printf("Time offset error\n");
+	if (dt & DT_DSTJUMP)
+		printf("Time offset jump (ignored)\n");
 	if (dt & DT_MIN)
 		printf("Minute parity/value error\n");
 	if (!init2 && increase && oldtime.tm_min != time.tm_min)

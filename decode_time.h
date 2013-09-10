@@ -41,6 +41,7 @@ SUCH DAMAGE.
 #define DT_CHDST	512
 #define DT_LEAP		1024
 #define DT_LEAPONE	2048 /* leap second should always be zero if present */
+#define DT_DSTJUMP	4096
 
 #define ANN_CHDST	1
 #define ANN_LEAP	2
