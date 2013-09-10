@@ -217,23 +217,21 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	if (buffer[19] == 1 && ok) /* h==23 (UTC), last day of month */
 		announce |= ANN_LEAP;
 
-	if (minlen == 59) {
-		if ((announce & ANN_LEAP) && (time->tm_min == 0)) {
-			announce &= ~ANN_LEAP;
-			rval |= DT_LEAP | DT_SHORT;
-			/* leap second processed, but missing */	
-		}
-	}
-	if (minlen == 60) {
-		if ((announce & ANN_LEAP) && (time->tm_min == 0)) {
-			announce &= ~ANN_LEAP;
-			rval |= DT_LEAP;
-			/* leap second processed */
+	if ((announce & ANN_LEAP) && (time->tm_min == 0) && ok) {
+		announce &= ~ANN_LEAP;
+		rval |= DT_LEAP;
+		if (minlen == 59)
+			rval |= DT_SHORT;
+			/* leap second processed, but missing */
+		else {
+			/* minlen == 60 because !generr */
 			if (buffer[59] == 1)
 				rval |= DT_LEAPONE;
-		} else
-			rval |= DT_LONG;
+		}
 	}
+
+	if ((minlen == 60) && !(rval & DT_LEAP))
+		rval |= DT_LONG; /* leap second not processed, so bad minute */
 
 	if (buffer[17] != time->tm_isdst) {
 		/* Time offset change is OK if:
