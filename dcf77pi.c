@@ -138,8 +138,12 @@ main(int argc, char *argv[])
 		}
 
 		bit = next_bit();
-		if (bit & GETBIT_TOOLONG)
+		if (bit & GETBIT_TOOLONG) {
 			printf(" >");
+			minlen = 61;
+			/* leave acc_minlen alone,
+			 * any missing marker already processed */
+		}
 
 		if (bit & GETBIT_EOM) {
 			dt = decode_time(init2, minlen, get_buffer(), &time,
