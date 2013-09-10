@@ -134,7 +134,7 @@ int
 decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
     int increase)
 {
-	int rval = 0, generr = 0, p1 = 0, p2 = 0, p3 = 0;
+	int rval = 0, generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
 	unsigned int tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
 
 	if (minlen < 59)
@@ -209,10 +209,12 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		}
 	}
 
+	ok = !generr && !p1 && !p2 && !p3; /* shorthand */
+
 	/* these flags are saved between invocations: */
-	if (buffer[16] == 1 && !generr && !p1 && !p2 && !p3) /*  h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1, last sunday of month */
+	if (buffer[16] == 1 && ok) /*  h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1, last sunday of month */
 		announce |= ANN_CHDST;
-	if (buffer[19] == 1 && !generr && !p1 && !p2 && !p3) /* h==23 (UTC), last day of month */
+	if (buffer[19] == 1 && ok) /* h==23 (UTC), last day of month */
 		announce |= ANN_LEAP;
 
 	if (minlen == 59) {
@@ -240,8 +242,8 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		 * initial state
 		 * actually announced and minute = 0
 		 */
-		if ((olderr && !generr && !p1 && !p2 && !p3) || init2 ||
 		    ((announce & ANN_CHDST) && time->tm_min == 0)) {
+		if ((olderr && ok) || init2 ||
 			olderr = 0;
 			time->tm_isdst = buffer[17]; /* expected change */
 		} else
@@ -249,7 +251,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	}
 	time->tm_gmtoff = time->tm_isdst ? 7200 : 3600;
 
-	if (generr || p1 || p2 || p3)
+	if (!ok)
 		olderr = 1;
 	return rval;
 }
