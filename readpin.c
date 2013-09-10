@@ -30,7 +30,7 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	int i, p, p0, act, pas, minlimit, maxlimit, count, sec, init;
+	int i, p, p0, act, pas, minlimit, maxlimit, sec, init;
 	struct hardware hw;
 
 	if (set_mode(0, NULL, NULL)) {
@@ -56,42 +56,51 @@ main(int argc, char **argv)
 		}
 		if (p == 0) {
 			pas++;
-			//printf("-");
-		} else { /* p == 1 */
+			printf("-");
+		}
+		if (p == 1) {
 			act++;
+			printf("+");
+		}
+		if (p0 != p) {
+			printf(" (%i %i %i) %i ", act, pas, i, act*100/i);
 			if (p0 == 0) {
-				count = act * 100/i;
-				if (i > minlimit * 2 && i < maxlimit * 2)
-					count *= 2;
-				printf(" (%i %i %i) %i ", act, pas, i, count);
+				/* theoretically a new second */
 				if (i > minlimit && (init || i < maxlimit)) {
-					printf(" === %i\n", ++sec); /* new second */
+					printf(" === %i\n", ++sec);
+					/* new second */
 					i = act = pas = 0;
 					init = 0;
-				} else if (i > minlimit * 2 && (init || i < maxlimit * 2)) {
-					printf(" === %i\n", ++sec); /* new second */
+				} else if (i > minlimit * 2 && (init ||
+				    i < maxlimit * 2)) {
+					printf(" $$$ %i\n", ++sec);
+					sec = -1; /* new second and new minute */
 					i = act = pas = 0;
 					init = 0;
-					sec = -1; /* new minute */
-				} else {
-					if (count > 95) /* maybe parametrize */
-						printf("P"); /* act already increased */
-					else if (init) {
-						/* end of partial second? */
-						printf(" (%i %i %i) <<<\n", act, pas, i);
-						i = act = pas = 0;
-						init = 0;
-					} else {
-						printf("M");
-						act--;
-						pas++;
-					}
+				} else if (init) {
+					/* end of partial second? */
+					printf(" <<<\n");
+					i = act = pas = 0;
+					init = 0;
 				}
+				if (i > maxlimit/5) {
+					printf("M");
+					act--;
+					pas++;
+				} else
+					printf("/");
 			}
-			//printf("+");
+			if (p0 == 1) {
+				if (i < maxlimit/10) {
+					printf("P");
+					act++;
+					pas--;
+				} else
+					printf("\\");
+			}
 		}
 		if (i > maxlimit * 2) {
-			printf(" (%i %i %i) >>>\n", act, pas, i); /* timeout */
+			printf(" {%i %i %i} %i >>>\n", act, pas, i, act*100/i); /* timeout */
 			i = act = pas = 0;
 		}
 		p0 = p;
