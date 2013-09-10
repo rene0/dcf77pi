@@ -235,7 +235,8 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 
 	if (buffer[17] != time->tm_isdst) {
 		/* Time offset change is OK if:
-		 * there was an error but not any more
+		 * there was an error but not any more (needed if decoding at
+		 * startup is problematic)
 		 * initial state
 		 * actually announced and minute = 0
 		 */
