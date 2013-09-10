@@ -287,7 +287,9 @@ get_bit(void)
 	int i, p, p0, minlimit, maxlimit;
 	static int init = 1;
 
-	state = 0; /* clear previous flags */
+	/* clear previous flags, except GETBIT_TOOLONG */
+	i = state;
+	state = (i & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
 	if (islive) {
 /*
  * One period is either 1000 ms or 2000 ms long (normal or padding for last)
@@ -483,13 +485,16 @@ display_bit(void)
 int
 next_bit(void)
 {
-	if (bitpos == sizeof(buffer) && (state & GETBIT_EOM) == 0) {
+	if (bitpos == sizeof(buffer) && !(state & GETBIT_EOM)) {
 		bitpos = 0;
 		state |= GETBIT_TOOLONG | GETBIT_EOM;
+		return state;
 	}
-	if (state & GETBIT_EOM)
+	if (state & GETBIT_EOM) {
+		if (bitpos < sizeof(buffer))
+			state &= ~GETBIT_TOOLONG; /* this minute fits */
 		bitpos = 0;
-	else
+	} else
 		bitpos++;
 	return state;
 }
