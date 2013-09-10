@@ -115,9 +115,9 @@ add_minute(struct tm *time, int flags)
 	if (++time->tm_min == 60) {
 		if (announce & ANN_CHDST) {
 			if (time->tm_isdst)
-				time->tm_hour--; /* will become DST */
+				time->tm_hour--; /* will become non-DST */
 			else
-				time->tm_hour++; /* will become non-DST */
+				time->tm_hour++; /* will become DST */
 			flags |= DT_CHDST;	
 			announce &= ~ANN_CHDST;
 		}
