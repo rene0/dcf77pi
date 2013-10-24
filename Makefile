@@ -3,7 +3,7 @@
 PREFIX?=.
 FULLPREFIX?=$(PREFIX)
 ETCDIR?=etc/dcf77pi
-CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\"
+CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
 
 all: dcf77pi readpin
 
