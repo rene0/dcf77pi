@@ -125,12 +125,12 @@ main(int argc, char *argv[])
 				/* copy civil warning data */
 				if (bitpos > 0 && bitpos < 15)
 					indata[bitpos + 11] = bit & GETBIT_ONE;
-					/* 1..14 -> 11..24 */
+					/* 1..14 -> 12..25 */
 			case 2:
 				/* copy civil warning data */
 				if (bitpos > 0 && bitpos < 15)
 					indata[bitpos + 25] = bit & GETBIT_ONE;
-					/* 1..14 -> 25..39 */
+					/* 1..14 -> 26..39 */
 				if (bitpos == 15)
 					memcpy(civbuf, indata, sizeof(civbuf));
 					/* take snapshot of civil warning buffer */
