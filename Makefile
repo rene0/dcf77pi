@@ -27,7 +27,7 @@ clean:
 	rm dcf77pi $(obj)
 	rm readpin readpin.o
 
-install:
+install: dcf77pi readpin
 	install dcf77pi readpin $(FULLPREFIX)/bin
 	mkdir -p $(FULLPREFIX)/$(ETCDIR)
 	install etc/dcf77pi/hardware.txt $(FULLPREFIX)/$(ETCDIR)/hardware.txt.sample
