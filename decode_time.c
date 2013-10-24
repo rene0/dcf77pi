@@ -241,9 +241,9 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		 * actually announced and minute = 0
 		 */
 		if ((olderr && ok) || init2 ||
-		    ((announce & ANN_CHDST) && (time->tm_min == 0) && ok)) {
+		    ((announce & ANN_CHDST) && (time->tm_min == 0) && ok))
 			time->tm_isdst = buffer[17]; /* expected change */
-		} else
+		else
 			rval |= DT_DSTJUMP; /* sudden change, ignore */
 	}
 	time->tm_gmtoff = time->tm_isdst ? 7200 : 3600;
