@@ -330,7 +330,7 @@ get_bit(void)
 					    i < maxlimit * 2)
 						count *= 2;
 					if (isverbose)
-						printf("[%i %d]", i, count);
+						printf("[%i %d %i", i, count, bitpos);
 					if (i > minlimit && (init ||
 					    i < maxlimit)) {
 						/* new second */
@@ -396,6 +396,8 @@ get_bit(void)
 			outch = '_';
 		}
 report:
+		if (isverbose)
+			printf(" %i]", state);
 		if (logfile) {
 			fprintf(logfile, "%c", outch);
 			if (state & GETBIT_EOM)
