@@ -140,13 +140,13 @@ main(int argc, char *argv[])
 
 		bit = next_bit();
 		if (bit & GETBIT_TOOLONG) {
-			printf(" >");
+			printf(" L");
 			minlen = 61;
 			/* leave acc_minlen alone,
 			 * any missing marker already processed */
 		}
 
-		if (bit & GETBIT_EOM) {
+		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			dt = decode_time(init2, minlen, get_buffer(), &time,
 			    acc_minlen >= 60000);
 			printf(" (%d) %d %c\n", acc_minlen, minlen,
