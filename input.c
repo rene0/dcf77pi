@@ -289,7 +289,9 @@ get_bit(void)
 	static int init = 1;
 	uint16_t i;
 
-	/* clear previous flags, except GETBIT_TOOLONG */
+	/* clear previous flags, except GETBIT_TOOLONG to be able
+	 * to determine if this flag can be cleared again.
+	 */
 	i = state;
 	state = (i & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
 	if (islive) {
