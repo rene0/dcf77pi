@@ -118,7 +118,7 @@ add_minute(struct tm *time, int flags)
 				time->tm_hour--; /* will become non-DST */
 			else
 				time->tm_hour++; /* will become DST */
-			flags |= DT_CHDST;	
+			flags |= DT_CHDST;
 			announce &= ~ANN_CHDST;
 		}
 		time->tm_min = 0;
@@ -212,7 +212,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	ok = !generr && !p1 && !p2 && !p3; /* shorthand */
 
 	/* these flags are saved between invocations: */
-	if (buffer[16] == 1 && ok) /*  h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1, last sunday of month */
+	if (buffer[16] == 1 && ok) /*  h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1, last Sunday of month */
 		announce |= ANN_CHDST;
 	if (buffer[19] == 1 && ok) /* h==23 (UTC), last day of month */
 		announce |= ANN_LEAP;
