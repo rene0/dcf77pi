@@ -46,11 +46,11 @@ struct hardware {
 
 int set_mode(int verbose, char *infilename, char *logfilename);
 void cleanup(void);
-int get_pulse(void);
-int get_bit(void); /* stores result in internal buffer */
+uint8_t get_pulse(void);
+uint16_t get_bit(void); /* stores result in internal buffer */
 void display_bit(void);
-int next_bit(void); /* prepare for next bit */
-int get_bitpos(void);
+uint16_t next_bit(void); /* prepare for next bit */
+uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
 int read_hardware_parameters(char *filename, struct hardware *_hw);
 int init_hardware(int pin_nr);

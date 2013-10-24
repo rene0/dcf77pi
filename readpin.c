@@ -30,7 +30,8 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	int i, p, p0, act, pas, minlimit, maxlimit, sec, init;
+	int i, act, pas, minlimit, maxlimit, sec, init;
+	uint8_t p, p0;
 	struct hardware hw;
 
 	if (set_mode(0, NULL, NULL)) {
@@ -41,7 +42,7 @@ main(int argc, char **argv)
 	(void)read_hardware_parameters(ETCDIR"/hardware.txt", &hw);
 	/* get our own copy, error handling in set_mode() */
 
-	p0 = -1;
+	p0 = 255;
 	minlimit = hw.freq * hw.min_len / 100;
 	maxlimit = hw.freq * hw.max_len / 100;
 	sec = -1;

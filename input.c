@@ -45,9 +45,9 @@ SUCH DAMAGE.
 #endif
 #include "input.h"
 
-int bitpos; /* second */
+uint8_t bitpos; /* second */
 uint8_t buffer[60]; /* wrap after 60 positions */
-int state; /* any errors, or high bit */
+uint16_t state; /* any errors, or high bit */
 int islive; /* live input or pre-recorded data */
 int isverbose; /* verbose live information */
 FILE *datafile = NULL; /* input file (recorded data) */
@@ -251,10 +251,10 @@ cleanup(void)
 	datafile = NULL;
 }
 
-int
+uint8_t
 get_pulse(void)
 {
-	char tmpch = 0;
+	uint8_t tmpch = 0;
 	int count = 0;
 #ifdef __FreeBSD__
 #ifndef NOLIVE
@@ -278,14 +278,16 @@ get_pulse(void)
 	return tmpch;
 }
 
-int
+uint16_t
 get_bit(void)
 {
 	int inch, valid = 0;
 	char outch;
 	int count, high, low;
-	int i, p, p0, minlimit, maxlimit;
+	uint8_t p, p0;
+	int minlimit, maxlimit;
 	static int init = 1;
+	uint16_t i;
 
 	/* clear previous flags, except GETBIT_TOOLONG */
 	i = state;
@@ -305,7 +307,7 @@ get_bit(void)
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
  */
 		high = low = 0;
-		p0 = -1;
+		p0 = 255;
 		minlimit = hw.freq * hw.min_len / 100;
 		maxlimit = hw.freq * hw.max_len / 100;
 
@@ -480,7 +482,7 @@ display_bit(void)
 		printf(" ");
 }
 
-int
+uint16_t
 next_bit(void)
 {
 	if (bitpos == sizeof(buffer) && !(state & GETBIT_EOM)) {
@@ -497,7 +499,7 @@ next_bit(void)
 	return state;
 }
 
-int
+uint8_t
 get_bitpos(void)
 {
 	return bitpos;
