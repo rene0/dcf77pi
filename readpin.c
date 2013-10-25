@@ -88,16 +88,14 @@ main(int argc, char **argv)
 					printf("M");
 					act--;
 					pas++;
-				} else
-					printf("/");
+				}
 			}
 			if (p0 == 1) {
 				if (i < maxlimit/10) {
 					printf("P");
 					act++;
 					pas--;
-				} else
-					printf("\\");
+				}
 			}
 		}
 		if (i > maxlimit * 2) {
