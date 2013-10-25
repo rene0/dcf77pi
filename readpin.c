@@ -37,6 +37,8 @@ main(int argc, char **argv)
 	uint8_t p, p0;
 	struct hardware hw;
 	struct timespec tp0, tp1, slp;
+	long twait;
+	long long diff;
 
 	if (set_mode(0, NULL, NULL)) {
 		cleanup();
@@ -51,6 +53,7 @@ main(int argc, char **argv)
 	maxlimit = hw.freq * hw.max_len / 100;
 	sec = -1;
 	init = 1;
+	diff = 0;
 	printf("limit=[%i..%i]\n", minlimit, maxlimit);
 
 	for (i = act = pas = 0;; i++) {
@@ -72,25 +75,27 @@ main(int argc, char **argv)
 			printf("+");
 		}
 		if (p0 != p) {
-			printf(" (%i %i %i) %i ", act, pas, i, act*100/i);
 			if (p0 == 0) {
 				/* theoretically a new second */
 				if (i > minlimit && (init || i < maxlimit)) {
-					printf(" === %i\n", ++sec);
+					printf(" (%i %i %i) %i %lli %lli === %i\n", act, pas, i, act*100/i, diff, diff / i / 1000, ++sec);
 					/* new second */
 					i = act = pas = 0;
 					init = 0;
+					diff = 0;
 				} else if (i > minlimit * 2 && (init ||
 				    i < maxlimit * 2)) {
-					printf(" $$$ %i\n", ++sec);
+					printf(" (%i %i %i) %i %lli %lli $$$ %i\n", act, pas, i, act*100/i, diff, diff / i / 1000, ++sec);
 					sec = -1; /* new second and new minute */
 					i = act = pas = 0;
 					init = 0;
+					diff = 0;
 				} else if (init) {
 					/* end of partial second? */
-					printf(" <<<\n");
+					printf(" (%i %i %i) %i <<<\n", act, pas, i, act*100/i);
 					i = act = pas = 0;
 					init = 0;
+					diff = 0;
 				}
 				if (i > maxlimit/5) {
 					printf("M");
@@ -121,6 +126,12 @@ main(int argc, char **argv)
 			slp.tv_nsec = twait % 1000000000;
 			while (nanosleep(&slp, &slp))
 				;
+			if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
+				printf("%s\n", strerror(errno));
+				break;
+			}
+			twait = (tp0.tv_sec - tp1.tv_sec) * 1e9 + (tp0.tv_nsec - tp1.tv_nsec) - twait;
+			diff += twait;
 		}
 	}
 	cleanup();
