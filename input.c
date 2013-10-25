@@ -489,17 +489,16 @@ display_bit(void)
 uint16_t
 next_bit(void)
 {
-	if (bitpos == sizeof(buffer) && !(state & GETBIT_EOM)) {
-		bitpos = 0;
-		state |= GETBIT_TOOLONG | GETBIT_EOM;
-		return state;
-	}
 	if (state & GETBIT_EOM) {
-		if (bitpos < sizeof(buffer))
-			state &= ~GETBIT_TOOLONG; /* this minute fits */
 		bitpos = 0;
 	} else
 		bitpos++;
+	if (bitpos == sizeof(buffer)) {
+		state |= GETBIT_TOOLONG;
+		bitpos = 0;
+		return state;
+	}
+		state &= ~GETBIT_TOOLONG; /* fits again */
 	return state;
 }
 
