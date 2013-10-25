@@ -33,5 +33,5 @@ install: dcf77pi readpin
 	install etc/dcf77pi/hardware.txt $(FULLPREFIX)/$(ETCDIR)/hardware.txt.sample
 
 lint:
-	lint -aabcehrsxgz -D__linux__ -DETCDIR=\"$(ETCDIR)\" $(src)
-	lint -aabcehrsxgz -D__FreeBSD__ -D__FreeBSD_version=900022 -DETCDIR=\"$(ETCDIR)\" $(src)
+	lint -aabcehrsxgz -D__linux__ -DETCDIR=\"$(ETCDIR)\" $(src) readpin.c
+	lint -aabcehrsxgz -D__FreeBSD__ -D__FreeBSD_version=900022 -DETCDIR=\"$(ETCDIR)\" $(src) readpin.c
