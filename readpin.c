@@ -23,8 +23,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
+#include <errno.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include "input.h"
 
 int
@@ -33,6 +36,7 @@ main(int argc, char **argv)
 	int i, act, pas, minlimit, maxlimit, sec, init;
 	uint8_t p, p0;
 	struct hardware hw;
+	struct timespec tp0, tp1, slp;
 
 	if (set_mode(0, NULL, NULL)) {
 		cleanup();
@@ -50,6 +54,10 @@ main(int argc, char **argv)
 	printf("limit=[%i..%i]\n", minlimit, maxlimit);
 
 	for (i = act = pas = 0;; i++) {
+		if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
+			printf("%s\n", strerror(errno));
+			break;
+		}
 		p = get_pulse();
 		if (p & GETBIT_IO) {
 			printf("IO error!\n");
@@ -103,7 +111,17 @@ main(int argc, char **argv)
 			i = act = pas = 0;
 		}
 		p0 = p;
-		(void)usleep(1000000.0 / hw.freq);
+		if (clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
+			printf("%s\n", strerror(errno));
+			break;
+		}
+		twait = 1e9 / hw.freq - (tp1.tv_sec - tp0.tv_sec) * 1e9 - (tp1.tv_nsec - tp0.tv_nsec);
+		if (twait > 0) { /* 1000 Hz, 80..105 -> -713 us seen ... */
+			slp.tv_sec = twait / 1e9;
+			slp.tv_nsec = twait % 1000000000;
+			while (nanosleep(&slp, &slp))
+				;
+		}
 	}
 	cleanup();
 	return 0;
