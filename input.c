@@ -498,7 +498,7 @@ next_bit(void)
 		bitpos = 0;
 		return state;
 	}
-		state &= ~GETBIT_TOOLONG; /* fits again */
+	state &= ~GETBIT_TOOLONG; /* fits again */
 	return state;
 }
 
