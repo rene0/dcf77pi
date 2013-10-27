@@ -53,7 +53,5 @@ void display_bit(void);
 uint16_t next_bit(void); /* prepare for next bit */
 uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
-int read_hardware_parameters(char *filename, struct hardware *_hw);
-int init_hardware(int pin_nr);
 
 #endif
