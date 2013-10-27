@@ -218,18 +218,23 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	/* h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
 	 * last Sunday of month (reference?) */
 	if (buffer[16] == 1 && ok) {
-		if (time->tm_min > 0 && utchour == 0 && time->tm_wday == 7 &&
-		    time->tm_mday > lastday(*time) - 7)
+		if ((time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7) &&
+		    ((time->tm_min > 0 && utchour == 0) ||
+		    (time->tm_min == 0 && utchour == 1 + buffer[17] - buffer[18]))) {
 			announce |= ANN_CHDST; /* TODO check month */
-		else
+			if (time->tm_min == 0)
+				utchour = 1; /* time zone just changed */
+		} else
 			rval |= DT_CHDSTERR;
 	}
 
-	/* h==23 (UTC), last day of month according to IERS Bulletin C */
+	/* h==23, last day of month (UTC) or h==0, first day of next month (UTC)
+	 * according to IERS Bulletin C */
 	if (buffer[19] == 1 && ok) {
-		if (time->tm_min > 0 && utchour == 23 &&
-		    time->tm_mday == lastday(*time))
-			announce |= ANN_LEAP; /* TODO check month */
+		if (time->tm_mday == 1 &&
+		    ((time->tm_min > 0 && utchour == 23) ||
+		    (time->tm_min == 0 && utchour == 0)))
+			announce |= ANN_LEAP; /* TODO check month-1 */
 		else
 			rval |= DT_LEAPERR;
 	}
