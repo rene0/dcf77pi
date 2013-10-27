@@ -136,6 +136,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 {
 	int rval = 0, generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
 	unsigned int tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
+	int utchour;
 
 	if (minlen < 59)
 		rval |= DT_SHORT;
@@ -211,13 +212,26 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 
 	ok = !generr && !p1 && !p2 && !p3; /* shorthand */
 
+	utchour = time->tm_hour - 1;
+	if (time->tm_isdst)
+		utchour--;
+
 	/* these flags are saved between invocations: */
 	if (buffer[16] == 1 && ok) /*  h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1, last Sunday of month */
 		announce |= ANN_CHDST;
-	if (buffer[19] == 1 && ok) /* h==23 (UTC), last day of month */
-		announce |= ANN_LEAP;
 
-	if ((announce & ANN_LEAP) && (time->tm_min == 0) && ok) {
+	/* h==23 (UTC), last day of month according to IERS Bulletin C */
+	if (buffer[19] == 1 && ok) {
+		if (time->tm_min > 0 && utchour == 23 &&
+		    time->tm_mday == lastday(*time))
+			announce |= ANN_LEAP; /* TODO check month */
+		else
+			rval |= DT_LEAPERR;
+	}
+
+	/* process possible leap second */
+	if ((announce & ANN_LEAP) && ok && time->tm_min == 0 && utchour == 0 &&
+		time->tm_mday == 1) { /* TODO check month-1 */
 		announce &= ~ANN_LEAP;
 		rval |= DT_LEAP;
 		if (minlen == 59)
