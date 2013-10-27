@@ -109,24 +109,17 @@ add_day(struct tm *time)
 }
 
 void
-add_minute(struct tm *time)
+add_minute(struct tm *time, int flags)
 {
-	int utchour;
-
 	/* time->tm_isdst indicates the old situation */
 	if (++time->tm_min == 60) {
-		if (announce & ANN_CHDST) {
-			utchour = time->tm_hour - 1;
+		if ((flags & DT_CHDST) && get_utchour(*time) == 0 &&
+		    time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7) {
+			/* TODO check month */
 			if (time->tm_isdst)
-				utchour--;
-			if (utchour == 0 && time->tm_wday == 7 &&
-			    time->tm_mday > lastday(*time) - 7) {
-				/* TODO check month */
-				if (time->tm_isdst)
-					time->tm_hour--; /* will become non-DST */
-				else
-					time->tm_hour++; /* will become DST */
-			}
+				time->tm_hour--; /* will become non-DST */
+			else
+				time->tm_hour++; /* will become DST */
 		}
 		time->tm_min = 0;
 		if (++time->tm_hour == 24) {
