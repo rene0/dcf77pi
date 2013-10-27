@@ -305,4 +305,8 @@ display_time(int init2, int dt, struct tm oldtime, struct tm time,
 			printf(", value is one instead of zero");
 		printf("\n");
 	}
+	if (dt & DT_CHDSTERR)
+		printf("Spurious time offset change announcement\n");
+	if (dt & DT_LEAPERR)
+		printf("Spurious leap second announcement\n");
 }
