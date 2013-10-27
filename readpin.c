@@ -25,7 +25,6 @@ SUCH DAMAGE.
 
 #include <errno.h>
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 #include <time.h>
 #include "input.h"
@@ -58,7 +57,7 @@ main(int argc, char **argv)
 
 	for (i = act = pas = 0;; i++) {
 		if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
-			printf("%s\n", strerror(errno));
+			perror("before pulse");
 			break;
 		}
 		p = get_pulse();
@@ -117,7 +116,7 @@ main(int argc, char **argv)
 		}
 		p0 = p;
 		if (clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
-			printf("%s\n", strerror(errno));
+			perror("before sleep");
 			break;
 		}
 		twait = 1e9 / hw.freq - (tp1.tv_sec - tp0.tv_sec) * 1e9 - (tp1.tv_nsec - tp0.tv_nsec);
@@ -127,7 +126,7 @@ main(int argc, char **argv)
 			while (nanosleep(&slp, &slp))
 				;
 			if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
-				printf("%s\n", strerror(errno));
+				perror("after sleep");
 				break;
 			}
 			twait = (tp0.tv_sec - tp1.tv_sec) * 1e9 + (tp0.tv_nsec - tp1.tv_nsec) - twait;
