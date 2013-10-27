@@ -338,11 +338,9 @@ get_bit(void)
 						break;
 					} else if (i > minlimit * 2 && (init ||
 					    i < maxlimit * 2)) {
+						/* new minute */
 						state |= GETBIT_EOM;
 						init = 0;
-						if (isverbose)
-							printf(" M");
-							/* new minute */
 						break;
 					} else {
 						if (init) {
