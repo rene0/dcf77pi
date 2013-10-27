@@ -218,9 +218,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 
 	ok = !generr && !p1 && !p2 && !p3; /* shorthand */
 
-	utchour = time->tm_hour - 1;
-	if (time->tm_isdst)
-		utchour--;
+	utchour = get_utchour(*time);
 
 	/* these flags are saved between invocations: */
 
@@ -287,6 +285,19 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	if (!ok)
 		olderr = 1;
 	return rval;
+}
+
+int
+get_utchour(struct tm time)
+{
+	int utchour;
+
+	utchour = time.tm_hour - 1;
+	if (time.tm_isdst)
+		utchour--;
+	if (utchour < 0)
+		utchour += 24;
+	return utchour;
 }
 
 void

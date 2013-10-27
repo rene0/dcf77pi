@@ -53,5 +53,6 @@ int decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
     int increase);
 void display_time(int init2, int dt, struct tm oldtime, struct tm time,
     int increase);
+int get_utchour(struct tm time);
 
 #endif
