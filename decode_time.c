@@ -127,8 +127,6 @@ add_minute(struct tm *time, int flags)
 				else
 					time->tm_hour++; /* will become DST */
 			}
-			flags |= DT_CHDST;
-			announce &= ~ANN_CHDST;
 		}
 		time->tm_min = 0;
 		if (++time->tm_hour == 24) {
@@ -276,6 +274,10 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 			/* TODO check month */
 		if ((olderr && ok) || init2 || tmp) {
 			time->tm_isdst = buffer[17]; /* expected change */
+			if (tmp) {
+				announce &= ~ANN_CHDST;
+				rval |= DT_CHDST;
+			}
 		} else
 			rval |= DT_DSTJUMP; /* sudden change, ignore */
 	}
