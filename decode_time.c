@@ -108,8 +108,8 @@ add_day(struct tm *time)
 	}
 }
 
-int
-add_minute(struct tm *time, int flags)
+void
+add_minute(struct tm *time)
 {
 	int utchour;
 
@@ -134,7 +134,6 @@ add_minute(struct tm *time, int flags)
 			add_day(time);
 		}
 	}
-	return flags;
 }
 
 int

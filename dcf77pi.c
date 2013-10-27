@@ -161,7 +161,7 @@ main(int argc, char *argv[])
 
 			tmp = acc_minlen;
 			while (!init && acc_minlen >= 60000) {
-				dt = add_minute(&oldtime, dt);
+				add_minute(&oldtime);
 				acc_minlen -= 60000;
 			}
 

@@ -48,7 +48,7 @@ SUCH DAMAGE.
 #define ANN_CHDST	1
 #define ANN_LEAP	2
 
-int add_minute(struct tm *time, int flags);
+void add_minute(struct tm *time);
 int decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
     int increase);
 void display_time(int init2, int dt, struct tm oldtime, struct tm time,
