@@ -45,6 +45,7 @@ struct hardware {
 };
 
 int set_mode(int verbose, char *infilename, char *logfilename);
+struct hardware *get_hardware_parameters(void);
 void cleanup(void);
 uint8_t get_pulse(void);
 uint16_t get_bit(void); /* stores result in internal buffer */

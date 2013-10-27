@@ -513,3 +513,9 @@ get_buffer(void)
 {
 	return buffer;
 }
+
+struct hardware*
+get_hardware_parameters(void)
+{
+	return &hw;
+}
