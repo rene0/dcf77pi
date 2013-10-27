@@ -34,7 +34,7 @@ main(int argc, char **argv)
 {
 	int i, act, pas, minlimit, maxlimit, sec, init;
 	uint8_t p, p0;
-	struct hardware hw;
+	struct hardware *hw;
 	struct timespec tp0, tp1, slp;
 	long twait;
 	long long diff;
@@ -44,12 +44,11 @@ main(int argc, char **argv)
 		return 0;
 	}
 
-	(void)read_hardware_parameters(ETCDIR"/hardware.txt", &hw);
-	/* get our own copy, error handling in set_mode() */
+	hw = get_hardware_parameters();
 
 	p0 = 255;
-	minlimit = hw.freq * hw.min_len / 100;
-	maxlimit = hw.freq * hw.max_len / 100;
+	minlimit = hw->freq * hw->min_len / 100;
+	maxlimit = hw->freq * hw->max_len / 100;
 	sec = -1;
 	init = 1;
 	diff = 0;
@@ -119,7 +118,7 @@ main(int argc, char **argv)
 			perror("before sleep");
 			break;
 		}
-		twait = 1e9 / hw.freq - (tp1.tv_sec - tp0.tv_sec) * 1e9 - (tp1.tv_nsec - tp0.tv_nsec);
+		twait = 1e9 / hw->freq - (tp1.tv_sec - tp0.tv_sec) * 1e9 - (tp1.tv_nsec - tp0.tv_nsec);
 		if (twait > 0) { /* 1000 Hz, 80..105 -> -713 us seen ... */
 			slp.tv_sec = twait / 1e9;
 			slp.tv_nsec = twait % 1000000000;
