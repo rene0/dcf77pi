@@ -217,9 +217,16 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		utchour--;
 
 	/* these flags are saved between invocations: */
-	if (buffer[16] == 1 && ok) /*  h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1, last Sunday of month */
-		announce |= ANN_CHDST;
 
+	/* h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
+	 * last Sunday of month (reference?) */
+	if (buffer[16] == 1 && ok) {
+		if (time->tm_min > 0 && utchour == 0 && time->tm_wday == 7 &&
+		    time->tm_mday > lastday(*time) - 7)
+			announce |= ANN_CHDST; /* TODO check month */
+		else
+			rval |= DT_CHDSTERR;
+	}
 	/* h==23 (UTC), last day of month according to IERS Bulletin C */
 	if (buffer[19] == 1 && ok) {
 		if (time->tm_min > 0 && utchour == 23 &&
@@ -252,12 +259,15 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		 * there was an error but not any more (needed if decoding at
 		 * startup is problematic)
 		 * initial state
-		 * actually announced and minute = 0
+		 * actually announced and time is Sunday, lastday, 01:00 UTC
 		 */
-		if ((olderr && ok) || init2 ||
-		    ((announce & ANN_CHDST) && (time->tm_min == 0) && ok))
+		tmp = (announce & ANN_CHDST) && ok && time->tm_min == 0 &&
+		    utchour == 1 && time->tm_wday == 7 &&
+		    time->tm_mday > lastday(*time) - 7;
+			/* TODO check month */
+		if ((olderr && ok) || init2 || tmp) {
 			time->tm_isdst = buffer[17]; /* expected change */
-		else
+		} else
 			rval |= DT_DSTJUMP; /* sudden change, ignore */
 	}
 	time->tm_gmtoff = time->tm_isdst ? 7200 : 3600;
