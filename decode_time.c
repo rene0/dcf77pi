@@ -233,6 +233,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		else
 			rval |= DT_CHDSTERR;
 	}
+
 	/* h==23 (UTC), last day of month according to IERS Bulletin C */
 	if (buffer[19] == 1 && ok) {
 		if (time->tm_min > 0 && utchour == 23 &&
@@ -256,7 +257,6 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 				rval |= DT_LEAPONE;
 		}
 	}
-
 	if ((minlen == 60) && !(rval & DT_LEAP))
 		rval |= DT_LONG; /* leap second not processed, so bad minute */
 
