@@ -322,8 +322,9 @@ get_bit(void)
 			}
 			if (p == 0)
 				low++;
-			else { /* p == 1 */
+			if (p == 1)
 				high++;
+			if (p0 != p) {
 				if (p0 == 0) { /* skip initial situation */
 					count = high * 100/i;
 					if (i > minlimit * 2 &&
@@ -342,15 +343,20 @@ get_bit(void)
 						state |= GETBIT_EOM;
 						init = 0;
 						break;
-					} else {
-						if (init) {
-							init = 0;
-							break;
-							/* end of partial second */
-						} else if (count < 95) {
-							high--;
-							low++;
-						} /* other case already handled implicitly */
+					} else if (init) {
+						/* end of partial second */
+						init = 0;
+						break;
+					}
+					if (i > maxlimit / 5) {
+						high--;
+						low++;
+					}
+				}
+				if (p0 == 1) {
+					if (i < maxlimit / 10) {
+						high++;
+						low--;
 					}
 				}
 			}
