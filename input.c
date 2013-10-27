@@ -489,9 +489,9 @@ display_bit(void)
 uint16_t
 next_bit(void)
 {
-	if (state & GETBIT_EOM) {
+	if (state & GETBIT_EOM)
 		bitpos = 0;
-	} else
+	else
 		bitpos++;
 	if (bitpos == sizeof(buffer)) {
 		state |= GETBIT_TOOLONG;
