@@ -79,7 +79,7 @@ main(int argc, char *argv[])
 	if (res) {
 		/* something went wrong */
 		cleanup();
-		return 0;
+		return res;
 	}
 
 	/* no weird values please */

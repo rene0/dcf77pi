@@ -39,9 +39,10 @@ main(int argc, char **argv)
 	long twait;
 	long long diff;
 
-	if (set_mode(0, NULL, NULL)) {
+	res = set_mode(0, NULL, NULL);
+	if (res) {
 		cleanup();
-		return 0;
+		return res;
 	}
 	hw = get_hardware_parameters();
 
