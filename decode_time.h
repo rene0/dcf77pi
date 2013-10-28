@@ -48,6 +48,7 @@ SUCH DAMAGE.
 #define ANN_CHDST	1
 #define ANN_LEAP	2
 
+void init_time(void); /* initialize month values from configuration */
 void add_minute(struct tm *time, int flags);
 int decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
     int increase);

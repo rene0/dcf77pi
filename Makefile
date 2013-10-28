@@ -11,8 +11,8 @@ hdr = input.h decode_time.h decode_alarm.h config.h
 src = dcf77pi.c input.c decode_time.c decode_alarm.c config.c
 obj = dcf77pi.o input.o decode_time.o decode_alarm.o config.o
 
-decode_time.o: decode_time.h
 input.o: input.h config.h
+decode_time.o: decode_time.h config.h
 decode_alarm.o: decode_alarm.h
 config.o: config.h
 dcf77pi.o: $(hdr)

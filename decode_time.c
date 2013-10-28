@@ -24,10 +24,35 @@ SUCH DAMAGE.
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <string.h>
+#include "config.h"
 #include "decode_time.h"
 
 uint8_t announce = 0; /* save DST change and leap second announcements */
 int olderr = 0; /* save error state to determine if DST change might be valid */
+int summermonth;
+int wintermonth;
+int leapsecmonths[12];
+int num_leapsecmonths;
+
+void
+init_time(void)
+{
+	char *lsm, *mon;
+	int i;
+
+	summermonth = strtol(get_config_value("summermonth"), NULL, 10);
+	wintermonth = strtol(get_config_value("wintermonth"), NULL, 10);
+
+	lsm = strdup(get_config_value("leapsecmonths"));
+	/* next loop from http://stackoverflow.com/questions/4235519/ */
+	for (i = 0, num_leapsecmonths = 0; lsm[i]; i++)
+		num_leapsecmonths += (lsm[i] == ',');
+	for (i = 0; (mon = strsep(&lsm, ",")) != NULL; i++)
+		leapsecmonths[i] = strtol(mon, NULL, 10);
+}
 
 uint8_t
 getpar(uint8_t *buffer, int start, int stop)

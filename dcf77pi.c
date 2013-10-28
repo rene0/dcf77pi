@@ -88,6 +88,7 @@ main(int argc, char *argv[])
 		cleanup();
 		return res;
 	}
+	init_time();
 
 	/* no weird values please */
 	bzero(indata, sizeof(indata));
