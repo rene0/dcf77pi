@@ -54,6 +54,17 @@ init_time(void)
 		leapsecmonths[i] = strtol(mon, NULL, 10);
 }
 
+int
+is_leapsecmonth(int month)
+{
+	int i;
+
+	for (i = 0; i < num_leapsecmonths; i++)
+		if (leapsecmonths[i] == month)
+			return 1;
+	return 0;
+}
+
 uint8_t
 getpar(uint8_t *buffer, int start, int stop)
 {
@@ -256,17 +267,17 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	/* h==23, last day of month (UTC) or h==0, first day of next month (UTC)
 	 * according to IERS Bulletin C */
 	if (buffer[19] == 1 && ok) {
-		if (time->tm_mday == 1 &&
+		if (time->tm_mday == 1 && is_leapsecmonth(time->tm_mon - 1) &&
 		    ((time->tm_min > 0 && utchour == 23) ||
 		    (time->tm_min == 0 && utchour == 0)))
-			announce |= ANN_LEAP; /* TODO check month-1 */
+			announce |= ANN_LEAP;
 		else
 			rval |= DT_LEAPERR;
 	}
 
 	/* process possible leap second */
 	if ((announce & ANN_LEAP) && ok && time->tm_min == 0 && utchour == 0 &&
-		time->tm_mday == 1) { /* TODO check month-1 */
+		time->tm_mday == 1 && is_leapsecmonth(time->tm_mon - 1)) {
 		announce &= ~ANN_LEAP;
 		rval |= DT_LEAP;
 		if (minlen == 59)
