@@ -1,0 +1,9 @@
+pin = 17
+activehigh = 1
+freq = 100
+margin = 4
+minlen = 90
+maxlen = 105
+summermonth = 3
+wintermonth = 10
+leapsecmonths = 6,12
