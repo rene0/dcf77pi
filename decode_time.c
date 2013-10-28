@@ -47,11 +47,11 @@ init_time(void)
 	wintermonth = strtol(get_config_value("wintermonth"), NULL, 10);
 
 	lsm = strdup(get_config_value("leapsecmonths"));
-	/* next loop from http://stackoverflow.com/questions/4235519/ */
-	for (i = 0, num_leapsecmonths = 0; lsm[i]; i++)
-		num_leapsecmonths += (lsm[i] == ',');
-	for (i = 0; (mon = strsep(&lsm, ",")) != NULL; i++)
+	num_leapsecmonths = 0;
+	for (i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
 		leapsecmonths[i] = strtol(mon, NULL, 10);
+		num_leapsecmonths++;
+	}
 }
 
 int
