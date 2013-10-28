@@ -140,10 +140,9 @@ add_minute(struct tm *time, int flags)
 	if (++time->tm_min == 60) {
 		if ((flags & DT_CHDST) && get_utchour(*time) == 0 &&
 		    time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7) {
-			/* TODO check month */
-			if (time->tm_isdst)
+			if (time->tm_isdst && time->tm_mon == wintermonth)
 				time->tm_hour--; /* will become non-DST */
-			else
+			else if (!time->tm_isdst && time->tm_mon == summermonth)
 				time->tm_hour++; /* will become DST */
 		}
 		time->tm_min = 0;
@@ -243,10 +242,11 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	/* h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
 	 * last Sunday of month (reference?) */
 	if (buffer[16] == 1 && ok) {
-		if ((time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7) &&
+		if ((time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7 &&
+		    (time->tm_mon == summermonth || time->tm_mon == wintermonth)) &&
 		    ((time->tm_min > 0 && utchour == 0) ||
 		    (time->tm_min == 0 && utchour == 1 + buffer[17] - buffer[18]))) {
-			announce |= ANN_CHDST; /* TODO check month */
+			announce |= ANN_CHDST;
 			if (time->tm_min == 0)
 				utchour = 1; /* time zone just changed */
 		} else
@@ -290,8 +290,8 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		 */
 		tmp = (announce & ANN_CHDST) && ok && time->tm_min == 0 &&
 		    utchour == 1 && time->tm_wday == 7 &&
-		    time->tm_mday > lastday(*time) - 7;
-			/* TODO check month */
+		    time->tm_mday > lastday(*time) - 7 &&
+		    (time->tm_mon == summermonth || time->tm_mon == wintermonth);
 		if ((olderr && ok) || init2 || tmp) {
 			time->tm_isdst = buffer[17]; /* expected change */
 			if (tmp) {
