@@ -141,7 +141,8 @@ add_day(struct tm *time)
 		time->tm_mday = 1;
 		if (++time->tm_mon == 13) {
 			time->tm_mon = 1;
-			time->tm_year++;
+			if (++time->tm_year == 100)
+				time->tm_year = 0;
 		}
 	}
 }
