@@ -32,7 +32,6 @@ install: dcf77pi readpin
 	install dcf77pi readpin $(FULLPREFIX)/bin
 	mkdir -p $(FULLPREFIX)/$(ETCDIR)
 	install etc/dcf77pi/config.txt $(FULLPREFIX)/$(ETCDIR)/config.txt.sample
-	install etc/dcf77pi/hardware.txt $(FULLPREFIX)/$(ETCDIR)/hardware.txt.sample
 
 lint:
 	lint -aabcehrsxgz -D__linux__ -DETCDIR=\"$(ETCDIR)\" $(src) readpin.c
