@@ -36,11 +36,11 @@ SUCH DAMAGE.
 #define GETBIT_RECV	128
 #define GETBIT_RND	256
 
-#include <stdint.h> /* uint8_t */
+#include <stdint.h> /* uintX_t */
 
 struct hardware {
 	unsigned long freq;
-	unsigned int margin, pin, min_len, active_high, max_len;
+	unsigned int pin, active_high, margin, min_len, max_len;
 };
 
 int set_mode(int verbose, char *infilename, char *logfilename);
