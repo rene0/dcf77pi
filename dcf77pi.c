@@ -36,6 +36,7 @@ SUCH DAMAGE.
 #include "input.h"
 #include "decode_time.h"
 #include "decode_alarm.h"
+#include "config.h"
 
 int
 main(int argc, char *argv[])
@@ -75,6 +76,12 @@ main(int argc, char *argv[])
 		}
 	}
 
+	res = read_config_file(ETCDIR"/config.txt");
+	if (res) {
+		/* non-existent file? */
+		cleanup();
+		return res;
+	}
 	res = set_mode(verbose, infilename, logfilename);
 	if (res) {
 		/* something went wrong */

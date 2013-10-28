@@ -27,18 +27,25 @@ SUCH DAMAGE.
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include "config.h"
 #include "input.h"
 
 int
 main(int argc, char **argv)
 {
 	int i, act, pas, minlimit, maxlimit, sec, init;
+	int res;
 	uint8_t p, p0;
 	struct hardware *hw;
 	struct timespec tp0, tp1, slp;
 	long twait;
 	long long diff;
 
+	res = read_config_file(ETCDIR"/config.txt");
+	if (res) {
+		cleanup();
+		return res;
+	}
 	res = set_mode(0, NULL, NULL);
 	if (res) {
 		cleanup();
