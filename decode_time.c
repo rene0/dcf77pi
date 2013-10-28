@@ -59,6 +59,8 @@ is_leapsecmonth(int month)
 {
 	int i;
 
+	if (month < 1)
+		month += 12;
 	for (i = 0; i < num_leapsecmonths; i++)
 		if (leapsecmonths[i] == month)
 			return 1;
