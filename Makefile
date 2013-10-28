@@ -21,8 +21,8 @@ dcf77pi: $(obj)
 	$(CC) -o $@ $(obj)
 
 readpin.o: input.h
-readpin: readpin.o input.o
-	$(CC) -o $@ readpin.o input.o
+readpin: readpin.o input.o config.o
+	$(CC) -o $@ readpin.o input.o config.o
 
 clean:
 	rm dcf77pi $(obj)
