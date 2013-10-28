@@ -28,6 +28,7 @@ SUCH DAMAGE.
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
@@ -44,6 +45,7 @@ SUCH DAMAGE.
 #error Unsupported operating system, please send a patch to the author
 #endif
 #include "input.h"
+#include "config.h"
 
 uint8_t bitpos; /* second */
 uint8_t buffer[60]; /* wrap after 60 positions */
@@ -61,50 +63,6 @@ signal_callback_handler(int signum)
 	printf("Caught signal %d\n", signum);
 	cleanup();
 	exit(signum);
-}
-
-int
-read_hardware_parameters(char *filename, struct hardware *_hw)
-{
-	FILE *hwfile;
-
-	hwfile = fopen(filename, "r");
-	if (hwfile == NULL) {
-		perror("fopen (hwfile)");
-		return errno;
-	}
-	if (fscanf(hwfile, "%li\n", &(_hw->freq)) != 1) {
-		perror("gpio freq");
-		return errno;
-	}
-	if (fscanf(hwfile, "%i\n", &(_hw->margin)) != 1) {
-		perror("gpio margin");
-		return errno;
-	}
-	if (fscanf(hwfile, "%i\n", &(_hw->pin)) != 1) {
-		perror("gpio pin");
-		return errno;
-	}
-	if (fscanf(hwfile, "%i\n", &(_hw->min_len)) != 1) {
-		perror("gpio min_len");
-		return errno;
-	}
-	if (fscanf(hwfile, "%i\n", &(_hw->active_high)) != 1) {
-		perror("gpio active_high");
-		return errno;
-	}
-	if (fscanf(hwfile, "%i\n", &(_hw->max_len)) != 1) {
-		perror("gpio max_len");
-		return errno;
-	}
-	if (fclose(hwfile) == EOF) {
-		perror("fclose (hwfile)");
-		return errno;
-	}
-	printf("hardware: freq=%li margin=%i pin=%i min_len=%i active_high=%i"
-	    " max_len=%i\n", _hw->freq, _hw->margin, _hw->pin, _hw->min_len,
-	    _hw->active_high, _hw->max_len);
-	return 0;
 }
 
 int
@@ -201,14 +159,17 @@ set_mode(int verbose, char *infilename, char *logfilename)
 	state = 0;
 	bzero(buffer, sizeof(buffer));
 
+	/* fill hardware structure */
+	hw.pin = strtol(get_config_value("pin"), NULL, 10);
+	hw.active_high = strtol(get_config_value("activehigh"), NULL, 10);
+	hw.freq = strtol(get_config_value("freq"), NULL, 10);
+	hw.margin = strtol(get_config_value("margin"), NULL, 10);
+	hw.min_len = strtol(get_config_value("minlen"), NULL, 10);
+	hw.max_len = strtol(get_config_value("maxlen"), NULL, 10);
+
 	signal(SIGINT, signal_callback_handler);
 
 	if (islive) {
-		res = read_hardware_parameters(ETCDIR"/hardware.txt", &hw);
-		if (res) {
-			cleanup();
-			return res;
-		}
 		res = init_hardware(hw.pin);
 		if (res < 0) {
 			cleanup();
