@@ -41,7 +41,6 @@ SUCH DAMAGE.
 struct hardware {
 	unsigned long freq;
 	unsigned int margin, pin, min_len, active_high, max_len;
-
 };
 
 int set_mode(int verbose, char *infilename, char *logfilename);

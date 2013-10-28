@@ -43,7 +43,6 @@ main(int argc, char **argv)
 		cleanup();
 		return 0;
 	}
-
 	hw = get_hardware_parameters();
 
 	p0 = 255;

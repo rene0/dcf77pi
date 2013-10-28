@@ -512,13 +512,13 @@ get_bitpos(void)
 	return bitpos;
 }
 
-uint8_t*
+uint8_t *
 get_buffer(void)
 {
 	return buffer;
 }
 
-struct hardware*
+struct hardware *
 get_hardware_parameters(void)
 {
 	return &hw;
