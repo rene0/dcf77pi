@@ -344,8 +344,6 @@ get_bit(void)
 			/* probably tail of EOM marker during startup */
 			state |= GETBIT_READ | GETBIT_EOM;
 			outch = '_';
-			if (isverbose)
-				printf(" M");
 		} else if (count <= 10 + hw.margin) {
 			/* zero bit, ~100 ms active signal */
 			outch = '0';
