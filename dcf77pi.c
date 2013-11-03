@@ -27,6 +27,7 @@ SUCH DAMAGE.
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <strings.h>
 #include <sysexits.h>
@@ -45,7 +46,7 @@ main(int argc, char *argv[])
 	uint16_t bit;
 	struct tm time, oldtime;
 	uint8_t civ1 = 0, civ2 = 0;
-	int dt, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1;
+	int dt, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1, timeout;
 	int tmp, res, opt, verbose = 0;
 	char *infilename, *logfilename;
 
@@ -94,12 +95,14 @@ main(int argc, char *argv[])
 	bzero(indata, sizeof(indata));
 	bzero(&time, sizeof(time));
 
+	timeout = 2000 * strtol(get_config_value("maxlen"), NULL, 10) /
+	    strtol(get_config_value("minlen"), NULL, 10);
 	for (;;) {
 		bit = get_bit();
 		if (bit & GETBIT_EOD)
 			break;
 		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
-			acc_minlen += 2500; /* approximately */
+			acc_minlen += timeout;
 		else
 			acc_minlen += 1000;
 
