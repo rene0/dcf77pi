@@ -279,7 +279,8 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	}
 
 	/* process possible leap second */
-	if ((announce & ANN_LEAP) && ok && time->tm_min == 0 && utchour == 0 &&
+	if ((announce & ANN_LEAP) && (minlen == 59 || minlen == 60) &&
+		time->tm_min == 0 && utchour == 0 &&
 		time->tm_mday == 1 && is_leapsecmonth(time->tm_mon - 1)) {
 		announce &= ~ANN_LEAP;
 		rval |= DT_LEAP;
@@ -287,7 +288,6 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 			rval |= DT_SHORT;
 			/* leap second processed, but missing */
 		else {
-			/* minlen == 60 because !generr */
 			if (buffer[59] == 1)
 				rval |= DT_LEAPONE;
 		}
@@ -302,8 +302,8 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		 * initial state
 		 * actually announced and time is Sunday, lastday, 01:00 UTC
 		 */
-		tmp = (announce & ANN_CHDST) && ok && time->tm_min == 0 &&
-		    utchour == 1 && time->tm_wday == 7 &&
+		tmp = (announce & ANN_CHDST) && (minlen == 59 || minlen == 60) &&
+		    time->tm_min == 0 && utchour == 1 && time->tm_wday == 7 &&
 		    time->tm_mday > lastday(*time) - 7 &&
 		    (time->tm_mon == summermonth || time->tm_mon == wintermonth);
 		if ((olderr && ok) || init2 || tmp) {
