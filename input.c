@@ -260,11 +260,12 @@ get_bit(void)
  * One period is either 1000 ms or 2000 ms long (normal or padding for last)
  * Active part is either 100 ms ('0') or 200 ms ('1') long, with an error
  * margin (e.g. 2%), so:
- *         A <= 120 : '0'          -> 880 <= ~A <= 920  -
- *  120 <  A <  180 : undetermined -> 820 <  ~A <  880  GETBIT_READ
- *  180 <= A        : '1'          -> 780 <= ~A <= 820  GETBIT_ONE
+ *    0 <  A <   20 : undetermined -> GETBIT_READ
+ *   20 <  A <= 120 : '0'          -> -
+ *  120 <  A <  180 : undetermined -> GETBIT_READ
+ *  180 <= A        : '1'          -> GETBIT_ONE
  *
- *  ~A > 1000 : value = GETBIT_EOM
+ *  ~A > 1000 : value |= GETBIT_EOM
  * Short pulses (< min_len % of the sampling frequency) are concatenated.
  *
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
