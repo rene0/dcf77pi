@@ -263,7 +263,8 @@ get_bit(void)
  *    0 <  A <   20 : undetermined -> GETBIT_READ
  *   20 <  A <= 120 : '0'          -> -
  *  120 <  A <  180 : undetermined -> GETBIT_READ
- *  180 <= A        : '1'          -> GETBIT_ONE
+ *  180 <= A <  240 : '1'          -> GETBIT_ONE
+ *  240 <= A        : undetermined -> GETBIT_READ
  *
  *  ~A > 1000 : value |= GETBIT_EOM
  * Short pulses (< min_len % of the sampling frequency) are concatenated.
@@ -349,7 +350,8 @@ get_bit(void)
 			/* zero bit, ~100 ms active signal */
 			outch = '0';
 			buffer[bitpos] = 0;
-		} else if (count >= 20 - hw.margin) {
+		} else if (count >= 20 - hw.margin &&
+		     count <= 20 + 2 * hw.margin) {
 			/* one bit, ~200 ms active signal */
 			state |= GETBIT_ONE;
 			outch = '1';

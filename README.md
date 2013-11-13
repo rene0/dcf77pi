@@ -32,7 +32,7 @@ defining the allowed ranges of initial high pulses of each second:
 
 * EOM tail -> [ .. margin %]
 * 0 bit -> [ margin % .. (10 + margin) %]
-* 1 bit -> [(20 - margin) % .. ]
+* 1 bit -> [(20 - margin) % .. (20 + 2 * margin) %]
 
 The end of the minute is noted by the absence of high pulses. An absence of
 low pulses means that the transmitter is out of range. Any other situation
