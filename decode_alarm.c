@@ -29,7 +29,8 @@ SUCH DAMAGE.
 void
 display_alarm(uint8_t *buf)
 {
-	int ds1, ds2, ps1, ps2, dl1, dl2, pl1, pl2;
+	uint8_t ds1, ds2, ps1, ps2, pl1, pl2;
+	uint16_t dl1, dl2;
 
 	ds1 = buf[0] + 2 * buf[1] + 4 * buf[3];
 	ps1 = buf[2] + 2 * buf[4] + 4 * buf[5];

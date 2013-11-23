@@ -167,7 +167,7 @@ set_mode(int verbose, char *infilename, char *logfilename)
 	hw.min_len = strtol(get_config_value("minlen"), NULL, 10);
 	hw.max_len = strtol(get_config_value("maxlen"), NULL, 10);
 
-	signal(SIGINT, signal_callback_handler);
+	(void)signal(SIGINT, signal_callback_handler);
 
 	if (islive) {
 		res = init_hardware(hw.pin);
@@ -229,7 +229,8 @@ get_pulse(void)
 #elif defined(__linux__)
 	count = read(fd, &tmpch, sizeof(tmpch));
 	tmpch -= '0';
-	lseek(fd, 0, SEEK_SET); /* rewind to prevent EBUSY/no read */
+	if (lseek(fd, 0, SEEK_SET) == (off_t)-1)
+		return GETBIT_IO; /* rewind to prevent EBUSY/no read */
 	if (count != sizeof(tmpch))
 #endif
 		return GETBIT_IO; /* hardware failure? */
@@ -294,19 +295,19 @@ get_bit(void)
 					    i < maxlimit * 2)
 						count *= 2;
 					if (isverbose)
-						printf("[%i %d %i", i, count, bitpos);
-					if (i > minlimit && (init ||
+						printf("[%u %d %u", i, count, bitpos);
+					if (i > minlimit && (init == 1 ||
 					    i < maxlimit)) {
 						/* new second */
 						init = 0;
 						break;
-					} else if (i > minlimit * 2 && (init ||
+					} else if (i > minlimit * 2 && (init == 1 ||
 					    i < maxlimit * 2)) {
 						/* new minute */
 						state |= GETBIT_EOM;
 						init = 0;
 						break;
-					} else if (init) {
+					} else if (init == 1) {
 						/* end of partial second */
 						init = 0;
 						break;
@@ -363,14 +364,14 @@ get_bit(void)
 		}
 report:
 		if (isverbose)
-			printf(" %i]", state);
+			printf(" %u]", state);
 		if (logfile) {
 			fprintf(logfile, "%c", outch);
 			if (state & GETBIT_EOM)
 				fprintf(logfile, "\n");
 		}
 	} else {
-		while (!valid) {
+		while (valid == 0) {
 			inch = getc(datafile);
 			switch (inch) {
 			case EOF:
@@ -444,7 +445,7 @@ display_bit(void)
 	else if (state & GETBIT_READ)
 		printf("_");
 	else
-		printf("%d", buffer[bitpos]);
+		printf("%u", buffer[bitpos]);
 	if (bitpos == 0 || bitpos == 14 || bitpos == 15 || bitpos == 18 ||
 	    bitpos == 19 || bitpos == 20 || bitpos == 27 || bitpos == 28 ||
 	    bitpos == 34 || bitpos == 35 || bitpos == 41 || bitpos == 44 ||

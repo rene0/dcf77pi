@@ -42,12 +42,12 @@ main(int argc, char **argv)
 	long long diff;
 
 	res = read_config_file(ETCDIR"/config.txt");
-	if (res) {
+	if (res != 0) {
 		cleanup();
 		return res;
 	}
 	res = set_mode(0, NULL, NULL);
-	if (res) {
+	if (res != 0) {
 		cleanup();
 		return res;
 	}
@@ -82,20 +82,20 @@ main(int argc, char **argv)
 		if (p0 != p) {
 			if (p0 == 0) {
 				/* theoretically a new second */
-				if (i > minlimit && (init || i < maxlimit)) {
+				if (i > minlimit && (init == 1 || i < maxlimit)) {
 					printf(" (%i %i %i) %i %lli %lli === %i\n", act, pas, i, act*100/i, diff, diff / i / 1000, ++sec);
 					/* new second */
 					i = act = pas = 0;
 					init = 0;
 					diff = 0;
-				} else if (i > minlimit * 2 && (init ||
+				} else if (i > minlimit * 2 && (init == 1 ||
 				    i < maxlimit * 2)) {
 					printf(" (%i %i %i) %i %lli %lli $$$ %i\n", act, pas, i, act*100/i, diff, diff / i / 1000, ++sec);
 					sec = -1; /* new second and new minute */
 					i = act = pas = 0;
 					init = 0;
 					diff = 0;
-				} else if (init) {
+				} else if (init == 1) {
 					/* end of partial second? */
 					printf(" (%i %i %i) %i <<<\n", act, pas, i, act*100/i);
 					i = act = pas = 0;

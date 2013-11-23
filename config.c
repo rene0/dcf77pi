@@ -44,7 +44,7 @@ getpos(char *kw)
 	int i;
 
 	for (i = 0; i < NUM_KEYS; i++)
-		if (!strcmp(key[i], kw))
+		if (strcmp(key[i], kw) == 0)
 			return i;
 	return -1;
 }
@@ -65,7 +65,7 @@ read_config_file(char *filename)
 		return errno;
 	}
 
-	while (!feof(configfile)) {
+	while (feof(configfile) == 0) {
 		if (fscanf(configfile, "%s = %s\n", k, v) != 2) {
 			perror("read_config_file");
 			return errno;

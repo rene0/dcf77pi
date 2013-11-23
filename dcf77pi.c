@@ -46,7 +46,8 @@ main(int argc, char *argv[])
 	uint16_t bit;
 	struct tm time, oldtime;
 	uint8_t civ1 = 0, civ2 = 0;
-	int dt, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1, timeout;
+	int dt, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1;
+	long int timeout;
 	int tmp, res, opt, verbose = 0;
 	char *infilename, *logfilename;
 
@@ -78,13 +79,13 @@ main(int argc, char *argv[])
 	}
 
 	res = read_config_file(ETCDIR"/config.txt");
-	if (res) {
+	if (res != 0) {
 		/* non-existent file? */
 		cleanup();
 		return res;
 	}
 	res = set_mode(verbose, infilename, logfilename);
-	if (res) {
+	if (res != 0) {
 		/* something went wrong */
 		cleanup();
 		return res;
@@ -113,9 +114,9 @@ main(int argc, char *argv[])
 			acc_minlen += 1000;
 		}
 		display_bit();
-		fflush(stdout);
+		(void)fflush(stdout);
 
-		if (!init) {
+		if (init == 0) {
 			switch (time.tm_min % 3) {
 			case 0:
 				/* copy civil warning data */
@@ -137,6 +138,7 @@ main(int argc, char *argv[])
 				if (bitpos > 0 && bitpos < 15)
 					indata[bitpos + 11] = bit & GETBIT_ONE;
 					/* 1..14 -> 12..25 */
+				break;
 			case 2:
 				/* copy civil warning data */
 				if (bitpos > 0 && bitpos < 15)
@@ -171,7 +173,7 @@ main(int argc, char *argv[])
 			}
 
 			tmp = acc_minlen;
-			while (!init && acc_minlen >= 60000) {
+			while (init == 0 && acc_minlen >= 60000) {
 				add_minute(&oldtime, dt);
 				acc_minlen -= 60000;
 			}
@@ -179,14 +181,14 @@ main(int argc, char *argv[])
 			display_time(init2, dt, oldtime, time, tmp >= 60000);
 			printf("\n");
 
-			if (init || !((dt & DT_LONG) || (dt & DT_SHORT)))
+			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
 				acc_minlen = 0; /* really a new minute */
-			if (init || !(dt & DT_SHORT))
+			if (init == 1 || !(dt & DT_SHORT))
 				memcpy((void *)&oldtime, (const void *)&time,
 				    sizeof(struct tm));
-			if (!init && init2)
+			if (init == 0 && init2 == 1)
 				init2 = 0;
-			if (init)
+			if (init == 1)
 				init = 0;
 		}
 	}
