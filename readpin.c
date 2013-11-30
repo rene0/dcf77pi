@@ -89,6 +89,15 @@ main(int argc, char **argv)
 			stv = p;
 		printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
 
+		if (t > hw->realfreq * 5/2) {
+			printf(" {%u %u} %i", tlow, t, sec);
+			t = 0; /* timeout */
+#ifdef TUNETIME
+			printf(" %lli", diff);
+			diff = 0;
+#endif
+			printf("\n");
+		}
 		/* Schmitt trigger, maximize value to introduce hysteresis and avoid infinite memory */
 		if (y < 0.5 && stv == 1) {
 			y = 0.0;
@@ -112,7 +121,6 @@ main(int argc, char **argv)
 				bit = 1;
 			else
 				bit = 2; /* some error */
-			//TODO detect timeouts, other errors, bit value
 			printf(" (%u %u) %u %i %i", tlow, t, bit, res, sec);
 #ifdef TUNETIME
 			printf(" %lli", diff);
