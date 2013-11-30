@@ -1,6 +1,6 @@
 pin = 17
 activehigh = 1
-freq = 100
+freq = 1000
 realfreq = 850
 margin = 4
 minlen = 90
