@@ -130,7 +130,7 @@ main(int argc, char **argv)
 			printf(" <%li> ", twait);
 		else {
 			slp.tv_sec = twait / 1e9;
-			slp.tv_nsec = twait % 1000000000;
+			slp.tv_nsec = twait % 1000000000; /* clang 3.3 does not like 1e9 here */
 			while (nanosleep(&slp, &slp))
 				;
 #ifdef TUNETIME
