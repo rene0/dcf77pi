@@ -42,10 +42,13 @@ main(int argc, char **argv)
 	int t, tlow, thigh, sec, init, res, stv;
 	uint8_t p;
 	struct hardware *hw;
-	struct timespec tp0, tp1, slp;
+#ifdef TUNETIME
+	struct timespec tp0, tp1;
+	long long diff = 0;
+#endif
+	struct timespec slp;
 	long twait;
 	float a, y;
-	long long diff;
 
 	res = read_config_file(ETCDIR"/config.txt");
 	if (res != 0) {
@@ -61,7 +64,6 @@ main(int argc, char **argv)
 
 	sec = -1;
 	init = 1;
-	diff = 0;
 	tlow = thigh = 0;
 	stv = -1;
 
@@ -71,10 +73,12 @@ main(int argc, char **argv)
 	printf("realfreq=%lu filter_a=%f\n", hw->realfreq, a);
 
 	for (t = 0;; t++) {
+#ifdef TUNETIME
 		if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
 			perror("before pulse");
 			break;
 		}
+#endif
 		p = get_pulse();
 		if (p & GETBIT_IO) {
 			printf("IO error!\n");
@@ -101,30 +105,42 @@ main(int argc, char **argv)
 				sec++;
 			//TODO detect timeouts, other errors, bit value
 			printf(" (%u %u) %i", tlow, thigh, sec);
+#ifdef TUNETIME
 			printf(" %lli", diff);
 			diff = 0;
+#endif
 			printf("\n");
 			t = 0;
 			if (thigh > hw->freq * 3/2) {
 				sec = -1;
 			}
 		}
+#ifdef TUNETIME
 		if (clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
 			perror("before sleep");
 			break;
 		}
-		twait = 1e9 / hw->freq - (tp1.tv_sec - tp0.tv_sec) * 1e9 - (tp1.tv_nsec - tp0.tv_nsec);
-		if (twait > 0) { /* 1000 Hz, 80..105 -> -713 us seen ... */
+#endif
+		twait = 1e9 / hw->freq;
+#ifdef TUNETIME
+		twait -= (tp1.tv_sec - tp0.tv_sec) * 1e9 - (tp1.tv_nsec - tp0.tv_nsec);
+#endif
+		if (twait <= 0)
+			/* 1000 Hz -> -713 us seen */
+			printf(" <%li> ", twait);
+		else {
 			slp.tv_sec = twait / 1e9;
 			slp.tv_nsec = twait % 1000000000;
 			while (nanosleep(&slp, &slp))
 				;
+#ifdef TUNETIME
 			if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
 				perror("after sleep");
 				break;
 			}
 			twait = (tp0.tv_sec - tp1.tv_sec) * 1e9 + (tp0.tv_nsec - tp1.tv_nsec) - twait;
 			diff += twait;
+#endif
 		}
 	}
 	cleanup();
