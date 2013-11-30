@@ -23,7 +23,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
+/*
+ * Idea and partial implementation for the exponential low-pass filter and
+ * Schmitt trigger taken from Udo Klein, with permisssion.
+ * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
+ */
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
@@ -33,12 +39,12 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	int i, act, pas, minlimit, maxlimit, sec, init;
-	int res;
-	uint8_t p, p0;
+	int t, tlow, thigh, sec, init, res, stv;
+	uint8_t p;
 	struct hardware *hw;
 	struct timespec tp0, tp1, slp;
 	long twait;
+	float a, y;
 	long long diff;
 
 	res = read_config_file(ETCDIR"/config.txt");
@@ -53,15 +59,18 @@ main(int argc, char **argv)
 	}
 	hw = get_hardware_parameters();
 
-	p0 = 255;
-	minlimit = hw->freq * hw->min_len / 100;
-	maxlimit = hw->freq * hw->max_len / 100;
 	sec = -1;
 	init = 1;
 	diff = 0;
-	printf("limit=[%i..%i]\n", minlimit, maxlimit);
+	tlow = thigh = 0;
+	stv = -1;
 
-	for (i = act = pas = 0;; i++) {
+	/* Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms) */
+	a = 1.0 - exp2(-1.0 / (hw->realfreq / 20.0));
+	y = -1;
+	printf("realfreq=%lu filter_a=%f\n", hw->realfreq, a);
+
+	for (t = 0;; t++) {
 		if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
 			perror("before pulse");
 			break;
@@ -71,56 +80,35 @@ main(int argc, char **argv)
 			printf("IO error!\n");
 			break;
 		}
-		if (p == 0) {
-			pas++;
-			printf("-");
+		y = y < 0 ? (float)p : y + a * (p - y);
+		if (stv == -1)
+			stv = p;
+		printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
+
+		/* Schmitt trigger, maximize value to introduce hysteresis and avoid infinite memory */
+		if (y < 0.5 && stv == 1) {
+			y = 0.0;
+			stv = 0;
+			tlow = t;
 		}
-		if (p == 1) {
-			act++;
-			printf("+");
-		}
-		if (p0 != p) {
-			if (p0 == 0) {
-				/* theoretically a new second */
-				if (i > minlimit && (init == 1 || i < maxlimit)) {
-					printf(" (%i %i %i) %i %lli %lli === %i\n", act, pas, i, act*100/i, diff, diff / i / 1000, ++sec);
-					/* new second */
-					i = act = pas = 0;
-					init = 0;
-					diff = 0;
-				} else if (i > minlimit * 2 && (init == 1 ||
-				    i < maxlimit * 2)) {
-					printf(" (%i %i %i) %i %lli %lli $$$ %i\n", act, pas, i, act*100/i, diff, diff / i / 1000, ++sec);
-					sec = -1; /* new second and new minute */
-					i = act = pas = 0;
-					init = 0;
-					diff = 0;
-				} else if (init == 1) {
-					/* end of partial second? */
-					printf(" (%i %i %i) %i <<<\n", act, pas, i, act*100/i);
-					i = act = pas = 0;
-					init = 0;
-					diff = 0;
-				}
-				if (i > maxlimit/5) {
-					printf("M");
-					act--;
-					pas++;
-				}
-			}
-			if (p0 == 1) {
-				if (i < maxlimit/10) {
-					printf("P");
-					act++;
-					pas--;
-				}
+		if (y > 0.5 && stv == 0) {
+			y = 1.0;
+			stv = 1;
+			thigh = t;
+			if (init == 1)
+				init = 0;
+			else
+				sec++;
+			//TODO detect timeouts, other errors, bit value
+			printf(" (%u %u) %i", tlow, thigh, sec);
+			printf(" %lli", diff);
+			diff = 0;
+			printf("\n");
+			t = 0;
+			if (thigh > hw->freq * 3/2) {
+				sec = -1;
 			}
 		}
-		if (i > maxlimit * 2) {
-			printf(" {%i %i %i} %i >>>\n", act, pas, i, act*100/i); /* timeout */
-			i = act = pas = 0;
-		}
-		p0 = p;
 		if (clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
 			perror("before sleep");
 			break;
