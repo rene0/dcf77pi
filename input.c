@@ -164,9 +164,8 @@ set_mode(int verbose, char *infilename, char *logfilename)
 	hw.active_high = strtol(get_config_value("activehigh"), NULL, 10);
 	hw.freq = strtol(get_config_value("freq"), NULL, 10);
 	hw.realfreq = strtol(get_config_value("realfreq"), NULL, 10);
-	hw.margin = strtol(get_config_value("margin"), NULL, 10);
-	hw.min_len = strtol(get_config_value("minlen"), NULL, 10);
-	hw.max_len = strtol(get_config_value("maxlen"), NULL, 10);
+	hw.maxzero = strtol(get_config_value("maxzero"), NULL, 10);
+	hw.maxone = strtol(get_config_value("maxone"), NULL, 10);
 
 	(void)signal(SIGINT, signal_callback_handler);
 

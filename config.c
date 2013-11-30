@@ -29,7 +29,7 @@ SUCH DAMAGE.
 #include "config.h"
 
 char *key[] = {
-	"pin", "activehigh", "freq", "margin", "minlen", "maxlen",
+	"pin", "activehigh", "freq", "maxzero", "maxone",
 	"realfreq", "summermonth", "wintermonth", "leapsecmonths"
 };
 

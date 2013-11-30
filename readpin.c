@@ -39,8 +39,8 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	int t, tlow, thigh, sec, init, res, stv;
-	uint8_t p;
+	int t, tlow, sec, res;
+	uint8_t p, bit, init, stv;
 	struct hardware *hw;
 #ifdef TUNETIME
 	struct timespec tp0, tp1;
@@ -64,8 +64,8 @@ main(int argc, char **argv)
 
 	sec = -1;
 	init = 1;
-	tlow = thigh = 0;
-	stv = -1;
+	tlow = 0;
+	stv = 2;
 
 	/* Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms) */
 	a = 1.0 - exp2(-1.0 / (hw->realfreq / 20.0));
@@ -85,7 +85,7 @@ main(int argc, char **argv)
 			break;
 		}
 		y = y < 0 ? (float)p : y + a * (p - y);
-		if (stv == -1)
+		if (stv == 2)
 			stv = p;
 		printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
 
@@ -98,22 +98,30 @@ main(int argc, char **argv)
 		if (y > 0.5 && stv == 0) {
 			y = 1.0;
 			stv = 1;
-			thigh = t;
 			if (init == 1)
 				init = 0;
 			else
 				sec++;
+			res = tlow * 100 / t;
+			if (t > hw->realfreq * 3/2)
+				res *= 2;
+			/* in general, pulses are a bit wider than specified */
+			if (res <= hw->maxzero)
+				bit = 0;
+			else if (res <= hw->maxone)
+				bit = 1;
+			else
+				bit = 2; /* some error */
 			//TODO detect timeouts, other errors, bit value
-			printf(" (%u %u) %i", tlow, thigh, sec);
+			printf(" (%u %u) %u %i %i", tlow, t, bit, res, sec);
 #ifdef TUNETIME
 			printf(" %lli", diff);
 			diff = 0;
 #endif
 			printf("\n");
+			if (t > hw->realfreq * 3/2)
+				sec = -1; /* new minute */
 			t = 0;
-			if (thigh > hw->freq * 3/2) {
-				sec = -1;
-			}
 		}
 #ifdef TUNETIME
 		if (clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
