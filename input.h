@@ -39,7 +39,7 @@ SUCH DAMAGE.
 #include <stdint.h> /* uintX_t */
 
 struct hardware {
-	unsigned long freq;
+	unsigned long freq, realfreq;
 	unsigned int pin, active_high, margin, min_len, max_len;
 };
 
