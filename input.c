@@ -249,13 +249,11 @@ get_bit(void)
 	uint8_t p, p0;
 	int minlimit, maxlimit;
 	static int init = 1;
-	uint16_t i;
 
 	/* clear previous flags, except GETBIT_TOOLONG to be able
 	 * to determine if this flag can be cleared again.
 	 */
-	i = state;
-	state = (i & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
+	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
 	if (islive) {
 /*
  * One period is either 1000 ms or 2000 ms long (normal or padding for last)
