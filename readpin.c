@@ -90,7 +90,7 @@ main(int argc, char **argv)
 		printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
 
 		if (t > hw->realfreq * 5/2) {
-			printf(" {%u %u} %i", tlow, t, sec);
+			printf(" {%4u %4u} %3i", tlow, t, sec);
 			t = 0; /* timeout */
 #ifdef TUNETIME
 			printf(" %lli", diff);
@@ -121,7 +121,7 @@ main(int argc, char **argv)
 				bit = 1;
 			else
 				bit = 2; /* some error */
-			printf(" (%u %u) %u %i %i", tlow, t, bit, res, sec);
+			printf(" (%4u %4u) %u %3i %3i", tlow, t, bit, res, sec);
 #ifdef TUNETIME
 			printf(" %lli", diff);
 			diff = 0;

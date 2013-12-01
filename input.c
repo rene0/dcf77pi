@@ -309,7 +309,8 @@ get_bit(void)
 				state |= GETBIT_RND;
 				outch = '#';
 				if (isverbose)
-					printf("\n{%u %u %u}", tlow, t, bitpos);
+					printf("\n{%4u %4u %2u} ", tlow, t,
+					    bitpos);
 				goto report; /* timeout */
 			}
 
@@ -332,8 +333,8 @@ get_bit(void)
 					state |= GETBIT_EOM;
 				}
 				if (isverbose)
-					printf("\n[%u %u %d %u", tlow, t, count,
-					    bitpos);
+					printf("\n[%4u %4u %3d %2u", tlow, t,
+					    count, bitpos);
 
 				break; /* start of new second */
 			}
@@ -359,7 +360,7 @@ get_bit(void)
 		}
 report:
 		if (isverbose)
-			printf(" %u]", state);
+			printf(" %u] ", state);
 		if (logfile) {
 			fprintf(logfile, "%c", outch);
 			if (state & GETBIT_EOM)
