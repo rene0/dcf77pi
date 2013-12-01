@@ -31,6 +31,7 @@ SUCH DAMAGE.
 #include <limits.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 #include <unistd.h>
 #ifdef __FreeBSD__
 #include <sys/param.h>
@@ -249,6 +250,7 @@ get_bit(void)
 	uint8_t p, p0;
 	int minlimit, maxlimit;
 	static int init = 1;
+	struct timespec slp;
 
 	/* clear previous flags, except GETBIT_TOOLONG to be able
 	 * to determine if this flag can be cleared again.
@@ -338,7 +340,10 @@ get_bit(void)
 				goto report;
 			}
 			p0 = p;
-			(void)usleep(1000000.0 / hw.freq);
+			slp.tv_sec = 0;
+			slp.tv_nsec = 1e9 / hw.freq;
+			while (nanosleep(&slp, &slp))
+				;
 		}
 
 		if (count <= hw.maxzero) {
