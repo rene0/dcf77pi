@@ -264,21 +264,16 @@ get_bit(void)
 	 */
 	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
 	if (islive) {
-/*
- * One period is either 1000 ms or 2000 ms long (normal or padding for last)
- * Active part is either 100 ms ('0') or 200 ms ('1') long, with an error
- * margin (e.g. 2%), so:
- *    0 <  A <   20 : undetermined -> GETBIT_READ
- *   20 <  A <= 120 : '0'          -> -
- *  120 <  A <  180 : undetermined -> GETBIT_READ
- *  180 <= A <  240 : '1'          -> GETBIT_ONE
- *  240 <= A        : undetermined -> GETBIT_READ
- *
- *  ~A > 1000 : value |= GETBIT_EOM
- * Short pulses (< min_len % of the sampling frequency) are concatenated.
- *
- *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
- */
+		/*
+		 * One period is either 1000 ms or 2000 ms long (normal or
+		 * padding for last). The active part is either 100 ms ('0')
+		 * or 200 ms ('1') long, the maximum allowed values as
+		 * percentage of the second length are specified with maxzero
+		 * and maxone respectively.
+		 *
+		 *  ~A > 1.5 * realfreq: value |= GETBIT_EOM
+		 *  ~A > 2.5 * realfreq: timeout
+		 */
 
 		/*
 		 * Set up filter, reach 50% after realfreq/20 samples
