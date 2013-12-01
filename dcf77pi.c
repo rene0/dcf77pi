@@ -47,7 +47,6 @@ main(int argc, char *argv[])
 	struct tm time, oldtime;
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1;
-	long int timeout;
 	int tmp, res, opt, verbose = 0;
 	char *infilename, *logfilename;
 
@@ -96,13 +95,12 @@ main(int argc, char *argv[])
 	bzero(indata, sizeof(indata));
 	bzero(&time, sizeof(time));
 
-	timeout = 2500; // * strtol(get_config_value("realfreq"), NULL, 10);
 	for (;;) {
 		bit = get_bit();
 		if (bit & GETBIT_EOD)
 			break;
 		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
-			acc_minlen += timeout;
+			acc_minlen += 2500;
 		else
 			acc_minlen += 1000;
 
