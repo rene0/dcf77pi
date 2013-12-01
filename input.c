@@ -297,12 +297,16 @@ get_bit(void)
 				stv = p;
 
 			if (t > hw.realfreq * 5/2) {
-				/*
-				 * TODO how to notice GETBIT_RECV 'r' and
-				 * GETBIT_XMIT 'x' ?  using tlow and t ?
-				 */
-				state |= GETBIT_RND;
-				outch = '#';
+				if (tlow * 100 / t < 1) {
+					state |= GETBIT_RECV;
+					outch = 'r';
+				} else if (tlow * 100 / t >= 99) {
+					state |= GETBIT_XMIT;
+					outch = 'x';
+				} else {
+					state |= GETBIT_RND;
+					outch = '#';
+				}
 				if (isverbose)
 					printf("\n{%4u %4u %2u} ", tlow, t,
 					    bitpos);
