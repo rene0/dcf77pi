@@ -96,8 +96,7 @@ main(int argc, char *argv[])
 	bzero(indata, sizeof(indata));
 	bzero(&time, sizeof(time));
 
-	timeout = 2000 * strtol(get_config_value("maxlen"), NULL, 10) /
-	    strtol(get_config_value("minlen"), NULL, 10);
+	timeout = 2500; // * strtol(get_config_value("realfreq"), NULL, 10);
 	for (;;) {
 		bit = get_bit();
 		if (bit & GETBIT_EOD)

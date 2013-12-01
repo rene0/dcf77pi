@@ -25,6 +25,7 @@ SUCH DAMAGE.
 
 #include <errno.h>
 #include <fcntl.h>
+#include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -244,13 +245,19 @@ get_pulse(void)
 uint16_t
 get_bit(void)
 {
+	/*
+	 * The bits are decoded from the signal using an exponential low-pass
+	 * filter in conjunction with a Schmitt trigger. The idea and the
+	 * initial implementation for this come from Udo Klein, with permission.
+	 * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
+	 */
+
 	int inch, valid = 0;
 	char outch;
-	int count, high, low;
-	uint8_t p, p0;
-	int minlimit, maxlimit;
-	static int init = 1;
+	int t, tlow, count;
+	uint8_t p, stv;
 	struct timespec slp;
+	float a, y;
 
 	/* clear previous flags, except GETBIT_TOOLONG to be able
 	 * to determine if this flag can be cleared again.
@@ -272,74 +279,64 @@ get_bit(void)
  *
  *  maybe use bins as described at http://blog.blinkenlight.net/experiments/dcf77/phase-detection/
  */
-		high = low = 0;
-		p0 = 255;
-		minlimit = hw.freq * hw.min_len / 100;
-		maxlimit = hw.freq * hw.max_len / 100;
 
-		for (i = 0; ; i++) {
+		/*
+		 * Set up filter, reach 50% after realfreq/20 samples
+		 * (i.e. 50 ms)
+		 */
+		a = 1.0 - exp2(-1.0 / (hw.realfreq / 20.0));
+		y = -1;
+		tlow = 0;
+		stv = 2;
+
+		for (t = 0; ; t++) {
 			p = get_pulse();
 			if (p == GETBIT_IO) {
 				state |= GETBIT_IO;
 				outch = '*';
 				goto report;
 			}
-			if (p == 0)
-				low++;
-			if (p == 1)
-				high++;
-			if (p0 != p) {
-				if (p0 == 0) { /* skip initial situation */
-					count = high * 100/i;
-					if (i > minlimit * 2 &&
-					    i < maxlimit * 2)
-						count *= 2;
-					if (isverbose)
-						printf("[%u %d %u", i, count, bitpos);
-					if (i > minlimit && (init == 1 ||
-					    i < maxlimit)) {
-						/* new second */
-						init = 0;
-						break;
-					} else if (i > minlimit * 2 && (init == 1 ||
-					    i < maxlimit * 2)) {
-						/* new minute */
-						state |= GETBIT_EOM;
-						init = 0;
-						break;
-					} else if (init == 1) {
-						/* end of partial second */
-						init = 0;
-						break;
-					}
-					if (i > maxlimit / 5) {
-						high--;
-						low++;
-					}
-				}
-				if (p0 == 1) {
-					if (i < maxlimit / 10) {
-						high++;
-						low--;
-					}
-				}
-			}
-			if (i > maxlimit * 2) {
+
+			y = y < 0 ? (float)p : y + a * (p - y);
+			if (stv == 2)
+				stv = p;
+
+			if (t > hw.realfreq * 5/2) {
+				/*
+				 * TODO how to notice GETBIT_RECV 'r' and
+				 * GETBIT_XMIT 'x' ?  using tlow and t ?
+				 */
+				state |= GETBIT_RND;
+				outch = '#';
 				if (isverbose)
-					printf("{%i %i}", high, i); /* timeout */
-				if (high < 2) {
-					state |= GETBIT_RECV;
-					outch = 'r';
-				} else if (low < 2) {
-					state |= GETBIT_XMIT;
-					outch = 'x';
-				} else {
-					state |= GETBIT_RND;
-					outch = '#';
-				}
-				goto report;
+					printf("\n{%u %u %u}", tlow, t, bitpos);
+				goto report; /* timeout */
 			}
-			p0 = p;
+
+			/*
+			 * Schmitt trigger, maximize value to introduce
+			 * hysteresis and to avoid infinite memory.
+			 */
+			if (y < 0.5 && stv == 1) {
+				y = 0.0;
+				stv = 0;
+				tlow = t; /* end of high part of second */
+			}
+			if (y > 0.5 && stv == 0) {
+				y = 1.0;
+				stv = 1;
+
+				count = tlow * 100 / t;
+				if (t > hw.realfreq * 3/2) {
+					count *= 2;
+					state |= GETBIT_EOM;
+				}
+				if (isverbose)
+					printf("\n[%u %u %d %u", tlow, t, count,
+					    bitpos);
+
+				break; /* start of new second */
+			}
 			slp.tv_sec = 0;
 			slp.tv_nsec = 1e9 / hw.freq;
 			while (nanosleep(&slp, &slp))
