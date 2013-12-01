@@ -18,25 +18,23 @@ To stop the program, send a SIGINT (Ctrl-C) to it.
 The meaning of the keywords in config.txt is:
 
 * pin = GPIO pin number
-* freq = sample frequency in Hz
-* margin = margin for detection of bit values
-* minlen = minimum length of a second expressed as percentage of the received samples
-* maxlen = maximum length of a second expressed as percentage of the received samples
 * activehigh = pulses are active high (1) or passive high (0)
+* freq = sample frequency in Hz
+* realfreq = real sample frequency in Hz
+* maxzero = maximum percentage of time the signal can be high for a 0 bit
+* maxone = maximum percentage of time the signal can be high for a 1 bit
 * summermonth = month in which daylight saving time starts
 * wintermonth = month in which daylight saving time ends
 * leapsecmonths = months (in UTC) in which a leap second might be inserted
 
-The margin can be used to adjust the valid ranges for '0' and '1' bits by
-defining the allowed ranges of initial high pulses of each second:
-
-* EOM tail -> [ .. margin %]
-* 0 bit -> [ margin % .. (10 + margin) %]
-* 1 bit -> [(20 - margin) % .. (20 + 2 * margin) %]
+realfreq should be the average value output by readpin.c for the 't' variable
+(the value just before the closing bracket).
 
 The end of the minute is noted by the absence of high pulses. An absence of
-low pulses means that the transmitter is out of range. Any other situation
-will result in a logical read error.
+low pulses probably means that the transmitter is out of range. Any other
+situation will result in a logical read error.
 
-To combat bad radio reception, pulses with holes (positive and negative) are
-concatenated by insisting on a minimum pulse length.
+With permission (comment 5916), the method described at
+http://blog.blinkenlight.net/experiments/dcf77/binary-clock is used to
+receive the bits.
+
