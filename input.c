@@ -343,16 +343,11 @@ get_bit(void)
 			(void)usleep(1000000.0 / hw.freq);
 		}
 
-		if (count < hw.margin) {
-			/* probably tail of EOM marker during startup */
-			state |= GETBIT_READ | GETBIT_EOM;
-			outch = '_';
-		} else if (count <= 10 + hw.margin) {
+		if (count <= hw.maxzero) {
 			/* zero bit, ~100 ms active signal */
 			outch = '0';
 			buffer[bitpos] = 0;
-		} else if (count >= 20 - hw.margin &&
-		     count <= 20 + 2 * hw.margin) {
+		} else if (count <= hw.maxone) {
 			/* one bit, ~200 ms active signal */
 			state |= GETBIT_ONE;
 			outch = '1';
