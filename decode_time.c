@@ -322,7 +322,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	if ((minlen == 60) && !(rval & DT_LEAP))
 		rval |= DT_LONG; /* leap second not processed, so bad minute */
 
-	if (buffer[17] != time->tm_isdst) {
+	if ((rval & DT_DSTERR) == 0 && buffer[17] != time->tm_isdst) {
 		/* Time offset change is OK if:
 		 * there was an error but not any more (needed if decoding at
 		 * startup is problematic)
