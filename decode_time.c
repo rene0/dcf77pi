@@ -240,15 +240,16 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	}
 
 	p3 = getpar(buffer, 36, 58);
-	tmp = getbcd(buffer, 36, 39);
+	tmp0 = getbcd(buffer, 36, 39);
 	tmp1 = getbcd(buffer, 40, 41);
 	tmp2 = getbcd(buffer, 42, 44);
 	tmp3 = getbcd(buffer, 45, 48);
 	tmp4 = getbcd(buffer, 50, 53);
 	tmp5 = getbcd(buffer, 54, 57);
-	if (p3 == 1 || tmp > 9 || tmp + 10 * tmp1 == 0 || tmp + 10 * tmp1 > 31 ||
-	    tmp2 == 0 || tmp3 > 9 || tmp3 + 10 * buffer[49] == 0 ||
-	    tmp3 + 10 * buffer[49] > 12 || tmp4 > 9 || tmp5 > 9) {
+	if (p3 == 1 || tmp0 > 9 || tmp0 + 10 * tmp1 == 0 ||
+	    tmp0 + 10 * tmp1 > 31 || tmp2 == 0 || tmp3 > 9 ||
+	    tmp3 + 10 * buffer[49] == 0 || tmp3 + 10 * buffer[49] > 12 ||
+	    tmp4 > 9 || tmp5 > 9) {
 		rval |= DT_DATE;
 		p3 = 1;
 	}
@@ -257,10 +258,19 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 			if (time->tm_min == 0 && time->tm_hour == 0)
 				add_day(time);
 		} else {
-			time->tm_mday = tmp + 10 * tmp1;
-			time->tm_wday = tmp2;
-			time->tm_mon = tmp3 + 10 * buffer[49];
-			time->tm_year = tmp4 + 10 * tmp5;
+		tmp = tmp0 + 10 * tmp1;
+		tmp0 = tmp3 + 10 * buffer[49];
+		tmp1 = tmp4 + 10 * tmp5;
+		time->tm_wday = tmp2;
+		time->tm_mon = tmp0;
+		tmp3 = century_offset(tmp1, tmp0, tmp, tmp2);
+		if (tmp3 == -1) {
+			rval |= DT_DATE;
+			p3 = 1;
+		} else {
+			time->tm_year = BASEYEAR + 100 * tmp3 + tmp1;
+			time->tm_mday = tmp;
+		}
 		}
 	}
 
