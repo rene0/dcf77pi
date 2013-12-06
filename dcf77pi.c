@@ -152,8 +152,10 @@ main(int argc, char *argv[])
 		if (bit & GETBIT_TOOLONG) {
 			printf(" L");
 			minlen = 61;
-			/* leave acc_minlen alone,
-			 * any missing marker already processed */
+			/*
+			 * leave acc_minlen alone,
+			 * any missing marker already processed
+			 */
 		}
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
