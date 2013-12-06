@@ -211,32 +211,27 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		rval |= DT_XMIT;
 
 	p1 = getpar(buffer, 21, 28);
-	tmp = getbcd(buffer, 21, 24);
+	tmp0 = getbcd(buffer, 21, 24);
 	tmp1 = getbcd(buffer, 25, 27);
-	if (p1 == 1 || tmp > 9 || tmp1 > 5) {
+	if (p1 == 1 || tmp0 > 9 || tmp1 > 5) {
 		rval |= DT_MIN;
 		p1 = 1;
 	}
-	if (increase) {
-		if (p1 == 1 || generr > 0)
-			time->tm_min = (time->tm_min + 1) % 60;
-		else
-			time->tm_min = tmp + 10 * tmp1;
+	if ((init == 1 || increase > 0) && p1 == 0 && generr == 0) {
+		tmp = tmp0 + 10 * tmp1;
+		time->tm_min = tmp;
 	}
 
 	p2 = getpar(buffer, 29, 35);
-	tmp = getbcd(buffer, 29, 32);
+	tmp0 = getbcd(buffer, 29, 32);
 	tmp1 = getbcd(buffer, 33, 34);
-	if (p2 == 1 || tmp > 9 || tmp1 > 2 || tmp + 10 * tmp1 > 23) {
+	if (p2 == 1 || tmp0 > 9 || tmp1 > 2 || tmp0 + 10 * tmp1 > 23) {
 		rval |= DT_HOUR;
 		p2 = 1;
 	}
-	if (increase) {
-		if (p2 == 1 || generr > 0) {
-			if (time->tm_min == 0)
-				time->tm_hour = (time->tm_hour + 1) % 24;
-		} else
-			time->tm_hour = tmp + 10 * tmp1;
+	if ((init == 1 || increase > 0) && p2 == 0 && generr == 0) {
+		tmp = tmp0 + 10 * tmp1;
+		time->tm_hour = tmp;
 	}
 
 	p3 = getpar(buffer, 36, 58);
@@ -253,11 +248,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		rval |= DT_DATE;
 		p3 = 1;
 	}
-	if (increase) {
-		if (p3 == 1 || generr > 0) {
-			if (time->tm_min == 0 && time->tm_hour == 0)
-				add_day(time);
-		} else {
+	if ((init == 1 || increase > 0) && p3 == 0 && generr == 0) {
 		tmp = tmp0 + 10 * tmp1;
 		tmp0 = tmp3 + 10 * buffer[49];
 		tmp1 = tmp4 + 10 * tmp5;
