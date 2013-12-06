@@ -60,10 +60,9 @@ SUCH DAMAGE.
 
 void init_time(void); /* initialize month values from configuration */
 void add_minute(struct tm *time, int flags);
-int decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
-    int increase);
-void display_time(int init2, int dt, struct tm oldtime, struct tm time,
-    int increase);
+int decode_time(int init, int init2, int minlen, uint8_t *buffer,
+    struct tm *time, int *acc_minlen, int old_dt);
+void display_time(int dt, struct tm time);
 int get_utchour(struct tm time);
 
 #endif

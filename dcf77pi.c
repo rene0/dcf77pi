@@ -159,10 +159,12 @@ main(int argc, char *argv[])
 		}
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
-			dt = decode_time(init2, minlen, get_buffer(), &time,
-			    acc_minlen >= 60000);
-			printf(" (%d) %d %c\n", acc_minlen, minlen,
-			    dt & DT_LONG ? '>' : dt & DT_SHORT ? '<' : ' ');
+			printf(" (%d) %d\n", acc_minlen, minlen);
+			if (init == 1 || minlen >= 59)
+				memcpy((void *)&oldtime, (const void *)&time,
+				    sizeof(struct tm));
+			dt = decode_time(init, init2, minlen, get_buffer(),
+			    &time, &acc_minlen, dt);
 
 			if (time.tm_min % 3 == 0) {
 				if (civ1 == 1 && civ2 == 1)
@@ -171,20 +173,11 @@ main(int argc, char *argv[])
 					printf("Civil warning error\n");
 			}
 
-			tmp = acc_minlen;
-			while (init == 0 && acc_minlen >= 60000) {
-				add_minute(&oldtime, dt);
-				acc_minlen -= 60000;
-			}
-
-			display_time(init2, dt, oldtime, time, tmp >= 60000);
+			display_time(dt, time);
 			printf("\n");
 
 			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
 				acc_minlen = 0; /* really a new minute */
-			if (init == 1 || !(dt & DT_SHORT))
-				memcpy((void *)&oldtime, (const void *)&time,
-				    sizeof(struct tm));
 			if (init == 0 && init2 == 1)
 				init2 = 0;
 			if (init == 1)

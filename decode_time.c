@@ -180,12 +180,12 @@ add_minute(struct tm *time, int flags)
 }
 
 int
-decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
-    int increase)
+decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
+    int *acc_minlen, int old_dt)
 {
 	unsigned int rval = 0, generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
 	unsigned int tmp, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
-	int utchour;
+	int utchour, increase;
 
 	if (minlen < 59)
 		rval |= DT_SHORT;
@@ -205,6 +205,13 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	if (buffer[15] == 1)
 		rval |= DT_XMIT;
 
+	increase = 0;
+	if (init == 0 && *acc_minlen >= 60000) {
+		add_minute(time, old_dt);
+		*acc_minlen -= 60000;
+		increase++; /* should never reach 2 ? */
+	}
+
 	p1 = getpar(buffer, 21, 28);
 	tmp0 = getbcd(buffer, 21, 24);
 	tmp1 = getbcd(buffer, 25, 27);
@@ -214,6 +221,8 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	}
 	if ((init == 1 || increase > 0) && p1 == 0 && generr == 0) {
 		tmp = tmp0 + 10 * tmp1;
+		if (init2 == 0 && time->tm_min != tmp)
+			rval |= DT_MINJUMP;
 		time->tm_min = tmp;
 	}
 
@@ -226,6 +235,8 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 	}
 	if ((init == 1 || increase > 0) && p2 == 0 && generr == 0) {
 		tmp = tmp0 + 10 * tmp1;
+		if (init2 == 0 && time->tm_hour != tmp)
+			rval |= DT_HOURJUMP;
 		time->tm_hour = tmp;
 	}
 
@@ -247,6 +258,12 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 		tmp = tmp0 + 10 * tmp1;
 		tmp0 = tmp3 + 10 * buffer[49];
 		tmp1 = tmp4 + 10 * tmp5;
+		if (init2 == 0 && time->tm_mday != tmp)
+			rval |= DT_MDAYJUMP;
+		if (init2 == 0 && time->tm_wday != tmp2)
+			rval |= DT_WDAYJUMP;
+		if (init2 == 0 && time->tm_mon != tmp0)
+			rval |= DT_MONTHJUMP;
 		time->tm_wday = tmp2;
 		time->tm_mon = tmp0;
 		tmp3 = century_offset(tmp1, tmp0, tmp, tmp2);
@@ -254,6 +271,9 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 			rval |= DT_DATE;
 			p3 = 1;
 		} else {
+			if (init2 == 0 && time->tm_year !=
+			    BASEYEAR + 100 * tmp3 + tmp1)
+				rval |= DT_YEARJUMP;
 			time->tm_year = BASEYEAR + 100 * tmp3 + tmp1;
 		}
 		if (tmp > lastday(*time)) {
@@ -354,35 +374,38 @@ get_utchour(struct tm time)
 }
 
 void
-display_time(int init2, int dt, struct tm oldtime, struct tm time,
-    int increase)
+display_time(int dt, struct tm time)
 {
 	char *wday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
 	printf("%s %02d-%02d-%02d %s %02d:%02d\n",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
 	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min);
+	if (dt & DT_LONG)
+		printf("Minute too long\n");
+	if (dt & DT_SHORT)
+		printf("Minute too short\n");
 	if (dt & DT_DSTERR)
 		printf("Time offset error\n");
 	if (dt & DT_DSTJUMP)
 		printf("Time offset jump (ignored)\n");
 	if (dt & DT_MIN)
 		printf("Minute parity/value error\n");
-	if (init2 == 0 && increase && oldtime.tm_min != time.tm_min)
+	if (dt & DT_MINJUMP)
 		printf("Minute value jump\n");
 	if (dt & DT_HOUR)
 		printf("Hour parity/value error\n");
-	if (init2 == 0 && increase && oldtime.tm_hour != time.tm_hour)
+	if (dt & DT_HOURJUMP)
 		printf("Hour value jump\n");
 	if (dt & DT_DATE)
 		printf("Date parity/value error\n");
-	if (init2 == 0 && increase && oldtime.tm_wday != time.tm_wday)
+	if (dt & DT_WDAYJUMP)
 		printf("Day-of-week value jump\n");
-	if (init2 == 0 && increase && oldtime.tm_mday != time.tm_mday)
+	if (dt & DT_MDAYJUMP)
 		printf("Day-of-month value jump\n");
-	if (init2 == 0 && increase && oldtime.tm_mon != time.tm_mon)
+	if (dt & DT_MONTHJUMP)
 		printf("Month value jump\n");
-	if (init2 == 0 && increase && oldtime.tm_year != time.tm_year)
+	if (dt & DT_YEARJUMP)
 		printf("Year value jump\n");
 	if (dt & DT_B0)
 		printf("Minute marker error\n");
