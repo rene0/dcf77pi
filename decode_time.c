@@ -94,31 +94,48 @@ getbcd(uint8_t *buffer, int start, int stop)
 
 /* based on: xx00-02-28 is a Monday if and only if xx00 is a leap year */
 int
-isleap(struct tm time)
+century_offset(int year, int month, int day, int weekday)
 {
 	int d, nw, nd;
+	int tmp; /* resulting day of year, 02-28 if xx00 is leap */
 	int dayinleapyear[12] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274,
 	    305, 335};
 
-	if (time.tm_year % 4 > 0)
-		return 0;
-	else if (time.tm_year % 4 == 0 && time.tm_year > 0)
-		return 1;
-	else {	/* year == 0 */
-		/* weekday 1 is a Monday, assume this is a leap year */
-		/* if leap, we should reach Monday 02-28 */
+	/* substract year days from weekday, including normal leap years */
+	weekday = (weekday - year - year / 4 - ((year % 4) > 0)) % 7;
+	if (weekday < 1)
+		weekday += 7;
 
-		d = dayinleapyear[time.tm_mon - 1] + time.tm_mday;
-		if (d < 60) { /* at or before 02-28 (day 59) */
-			nw = (59 - d) / 7;
-			nd = time.tm_wday == 1 ? 0 : 8 - time.tm_wday;
-			return d + (nw * 7) + nd == 59;
-		} else { /* after 02-28 (day 59) */
-			nw = (d - 59) / 7;
-			nd = time.tm_wday == 1 ? 0 : time.tm_wday - 1;
-			return d - (nw * 7) - nd == 59;
-		}
+	/* weekday 1 is a Monday, assume this year is a leap year */
+	/* if leap, we should reach Monday xx00-02-28 */
+	d = dayinleapyear[month - 1] + day;
+	if (d < 60) { /* at or before 02-28 (day 59) */
+		nw = (59 - d) / 7;
+		nd = weekday == 1 ? 0 : 8 - weekday;
+		tmp = d + (nw * 7) + nd;
+	} else { /* after 02-28 (day 59) */
+		d -= ((year % 4) > 0); /* no 02-29 for obvious non-leap years */
+		nw = (d - 59) / 7;
+		nd = weekday - 1;
+		tmp = d - (nw * 7) - nd;
 	}
+	/* if day-in-year is 59, this year (xx00) is leap */
+	if (tmp == 59)
+		return 0;
+	if (tmp == 53 || tmp == 54 || tmp == 60 || tmp == 61)
+		return 1;
+	if (tmp == 55 || tmp == 56 || tmp == 62 || tmp == 63)
+		return 2;
+	if (tmp == 57 || tmp == 58 || tmp == 64 || tmp == 65)
+		return 3;
+	return -1; /* ERROR */
+}
+
+int
+isleap(struct tm time)
+{
+	return (time.tm_year % 4 == 0 && time.tm_year % 100 != 0) ||
+	    time.tm_year % 400 == 0;
 }
 
 int

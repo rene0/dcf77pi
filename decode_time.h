@@ -29,6 +29,9 @@ SUCH DAMAGE.
 #include <stdint.h>
 #include <time.h>
 
+/* update before 2400-01-01 */
+#define BASEYEAR	2000
+
 #define DT_DSTERR	1
 #define DT_MIN		2
 #define DT_HOUR		4
