@@ -411,7 +411,7 @@ display_time(int init2, int dt, struct tm oldtime, struct tm time,
 	if (dt & DT_LEAP) {
 		printf("Leap second processed");
 		if (dt & DT_LEAPONE)
-			printf(", value is one instead of zero");
+			printf(", value is 1 instead of 0");
 		printf("\n");
 	}
 	if (dt & DT_CHDSTERR)
