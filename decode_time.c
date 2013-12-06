@@ -255,9 +255,12 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
 			p3 = 1;
 		} else {
 			time->tm_year = BASEYEAR + 100 * tmp3 + tmp1;
+		}
+		if (tmp > lastday(*time)) {
+			rval |= DT_DATE;
+			p3 = 1;
+		} else
 			time->tm_mday = tmp;
-		}
-		}
 	}
 
 	ok = !generr && !p1 && !p2 && !p3; /* shorthand */
