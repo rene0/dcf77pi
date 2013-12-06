@@ -150,21 +150,6 @@ lastday(struct tm time)
 }
 
 void
-add_day(struct tm *time)
-{
-	if (++time->tm_wday == 8)
-		time->tm_wday = 1;
-	if (++time->tm_mday > lastday(*time)) {
-		time->tm_mday = 1;
-		if (++time->tm_mon == 13) {
-			time->tm_mon = 1;
-			if (++time->tm_year == 100)
-				time->tm_year = 0;
-		}
-	}
-}
-
-void
 add_minute(struct tm *time, int flags)
 {
 	/* time->tm_isdst indicates the old situation */
@@ -179,7 +164,17 @@ add_minute(struct tm *time, int flags)
 		time->tm_min = 0;
 		if (++time->tm_hour == 24) {
 			time->tm_hour = 0;
-			add_day(time);
+			if (++time->tm_wday == 8)
+				time->tm_wday = 1;
+			if (++time->tm_mday > lastday(*time)) {
+				time->tm_mday = 1;
+				if (++time->tm_mon == 13) {
+					time->tm_mon = 1;
+					if (++time->tm_year == BASEYEAR + 400)
+						time->tm_year = BASEYEAR;
+						/* bump! */
+				}
+			}
 		}
 	}
 }
