@@ -189,7 +189,7 @@ decode_time(int init2, int minlen, uint8_t *buffer, struct tm *time,
     int increase)
 {
 	unsigned int rval = 0, generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
-	unsigned int tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
+	unsigned int tmp, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
 	int utchour;
 
 	if (minlen < 59)
