@@ -31,6 +31,7 @@ SUCH DAMAGE.
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
+#include <sysexits.h>
 #include <unistd.h>
 #include <time.h>
 #include "config.h"
@@ -39,16 +40,25 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	int t, tlow, sec, res;
+	int t, tlow, sec, res, opt, tunetime = 0;
 	uint8_t p, bit, init, stv;
 	struct hardware *hw;
-#ifdef TUNETIME
 	struct timespec tp0, tp1;
 	long long diff = 0;
-#endif
 	struct timespec slp;
 	long twait;
 	float a, y;
+
+	while ((opt = getopt(argc, argv, "t")) != -1) {
+		switch (opt) {
+		case 't' :
+			tunetime = 1;
+			break;
+		default:
+			printf("usage: %s [-t]\n", argv[0]);
+			return EX_USAGE;
+		}
+	}
 
 	res = read_config_file(ETCDIR"/config.txt");
 	if (res != 0) {
@@ -73,12 +83,10 @@ main(int argc, char **argv)
 	printf("realfreq=%lu filter_a=%f\n", hw->realfreq, a);
 
 	for (t = 0;; t++) {
-#ifdef TUNETIME
-		if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
+		if (tunetime == 1 && clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
 			perror("before pulse");
 			break;
 		}
-#endif
 		p = get_pulse();
 		if (p & GETBIT_IO) {
 			printf("IO error!\n");
@@ -92,10 +100,10 @@ main(int argc, char **argv)
 		if (t > hw->realfreq * 5/2) {
 			printf(" {%4u %4u} %3i", tlow, t, sec);
 			t = 0; /* timeout */
-#ifdef TUNETIME
-			printf(" %lli", diff);
-			diff = 0;
-#endif
+			if (tunetime == 1) {
+				printf(" %lli", diff);
+				diff = 0;
+			}
 			printf("\n");
 		}
 		/* Schmitt trigger, maximize value to introduce hysteresis and avoid infinite memory */
@@ -122,25 +130,22 @@ main(int argc, char **argv)
 			else
 				bit = 2; /* some error */
 			printf(" (%4u %4u) %u %3i %3i", tlow, t, bit, res, sec);
-#ifdef TUNETIME
-			printf(" %lli", diff);
-			diff = 0;
-#endif
+			if (tunetime == 1) {
+				printf(" %lli", diff);
+				diff = 0;
+			}
 			printf("\n");
 			if (t > hw->realfreq * 3/2)
 				sec = -1; /* new minute */
 			t = 0;
 		}
-#ifdef TUNETIME
-		if (clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
+		if (tunetime == 1 && clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
 			perror("before sleep");
 			break;
 		}
-#endif
 		twait = 1e9 / hw->freq;
-#ifdef TUNETIME
-		twait -= (tp1.tv_sec - tp0.tv_sec) * 1e9 - (tp1.tv_nsec - tp0.tv_nsec);
-#endif
+		if (tunetime == 1)
+			twait -= (tp1.tv_sec - tp0.tv_sec) * 1e9 - (tp1.tv_nsec - tp0.tv_nsec);
 		if (twait <= 0)
 			/* 1000 Hz -> -713 us seen */
 			printf(" <%li> ", twait);
@@ -149,14 +154,12 @@ main(int argc, char **argv)
 			slp.tv_nsec = twait % 1000000000; /* clang 3.3 does not like 1e9 here */
 			while (nanosleep(&slp, &slp))
 				;
-#ifdef TUNETIME
-			if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
+			if (tunetime == 1 && clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
 				perror("after sleep");
 				break;
 			}
 			twait = (tp0.tv_sec - tp1.tv_sec) * 1e9 + (tp0.tv_nsec - tp1.tv_nsec) - twait;
 			diff += twait;
-#endif
 		}
 	}
 	cleanup();
