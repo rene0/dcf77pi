@@ -106,7 +106,10 @@ main(int argc, char **argv)
 			}
 			printf("\n");
 		}
-		/* Schmitt trigger, maximize value to introduce hysteresis and avoid infinite memory */
+		/*
+		 * Schmitt trigger, minimize/maximize value of y to introduce
+		 * hysteresis and avoid infinite memory
+		 * */
 		if (y < 0.5 && stv == 1) {
 			y = 0.0;
 			stv = 0;
