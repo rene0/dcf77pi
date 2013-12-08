@@ -7,13 +7,17 @@ but might work on other devices using GPIO pins too.
 For the Raspberry Pi, connect a stand-alone DCF77 receiver to the GPIO pin
 (default is 17) and the GND/3.3V pins (not 5V, this will break the Pi).
 
-Allowed parameters are:
+Allowed parameters for dcf77pi are:
 
 * -f filename: read from filename instead of the GPIO pin.
 * -l filename: log to filename when reading from the GPIO pin.
 * -v         : verbose information when reading from the GPIO pin.
 
-To stop the program, send a SIGINT (Ctrl-C) to it.
+Allowed parameters for readpin are:
+
+* -t : subtract the pulse acquisition period from the time to sleep
+
+To stop one of the programs, send a SIGINT (Ctrl-C) to it.
 
 The meaning of the keywords in config.txt is:
 
@@ -27,7 +31,7 @@ The meaning of the keywords in config.txt is:
 * wintermonth = month in which daylight saving time ends
 * leapsecmonths = months (in UTC) in which a leap second might be inserted
 
-realfreq should be the average value output by readpin.c for the 't' variable
+realfreq should be the average value output by readpin for the 't' variable
 (the value just before the closing bracket).
 
 The end of the minute is noted by the absence of high pulses. An absence of
