@@ -320,16 +320,20 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 	    time->tm_mday == 1 && is_leapsecmonth(time->tm_mon - 1)) {
 		announce &= ~ANN_LEAP;
 		rval |= DT_LEAP;
-		if (minlen == 59)
+		if (minlen == 59) {
 			rval |= DT_SHORT;
+			ok = 0;
 			/* leap second processed, but missing */
-		else {
+		} else {
 			if (buffer[59] == 1)
 				rval |= DT_LEAPONE;
 		}
 	}
-	if ((minlen == 60) && !(rval & DT_LEAP))
-		rval |= DT_LONG; /* leap second not processed, so bad minute */
+	if ((minlen == 60) && !(rval & DT_LEAP)) {
+		rval |= DT_LONG;
+		ok = 0;
+		/* leap second not processed, so bad minute */
+	}
 
 	if ((rval & DT_DSTERR) == 0 && buffer[17] != time->tm_isdst) {
 		/* Time offset change is OK if:
