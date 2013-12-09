@@ -339,14 +339,14 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		/* Time offset change is OK if:
 		 * there was an error but not any more (needed if decoding at
 		 * startup is problematic)
-		 * initial state
+		 * initial state (otherwise DST would never be valid)
 		 * actually announced and time is Sunday, lastday, 01:00 UTC
 		 */
 		tmp = (announce & ANN_CHDST) && (minlen == 59 || minlen == 60) &&
 		    time->tm_min == 0 && utchour == 1 && time->tm_wday == 7 &&
 		    time->tm_mday > lastday(*time) - 7 &&
 		    (time->tm_mon == summermonth || time->tm_mon == wintermonth);
-		if ((olderr && ok) || init2  == 1 || tmp) {
+		if ((olderr && ok) || init == 1 || tmp) {
 			time->tm_isdst = buffer[17]; /* expected change */
 			if (tmp) {
 				announce &= ~ANN_CHDST;
