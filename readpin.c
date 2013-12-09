@@ -41,13 +41,13 @@ int
 main(int argc, char **argv)
 {
 	int t, tlow, sec, res, opt, tunetime = 0;
-	uint8_t p, bit, init, stv;
+	uint8_t p, bit, init, stv, newminute;
 	struct hardware *hw;
 	struct timespec tp0, tp1;
 	long long diff = 0;
 	struct timespec slp;
 	long twait;
-	float a, y;
+	float a, y, w, realfreq;
 
 	while ((opt = getopt(argc, argv, "t")) != -1) {
 		switch (opt) {
@@ -60,6 +60,7 @@ main(int argc, char **argv)
 		}
 	}
 
+	w = 0.05;
 	res = read_config_file(ETCDIR"/config.txt");
 	if (res != 0) {
 		cleanup();
@@ -77,10 +78,12 @@ main(int argc, char **argv)
 	tlow = 0;
 	stv = 2;
 
+	realfreq = hw->freq; /* initial value */
+
 	/* Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms) */
-	a = 1.0 - exp2(-1.0 / (hw->realfreq / 20.0));
+	a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 	y = -1;
-	printf("realfreq=%lu filter_a=%f\n", hw->realfreq, a);
+	printf("realfreq=%f filter_a=%f\n", realfreq, a);
 
 	for (t = 0;; t++) {
 		if (tunetime == 1 && clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
@@ -97,7 +100,7 @@ main(int argc, char **argv)
 			stv = p;
 		printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
 
-		if (t > hw->realfreq * 5/2) {
+		if (t > realfreq * 5/2) {
 			printf(" {%4u %4u} %3i", tlow, t, sec);
 			t = 0; /* timeout */
 			if (tunetime == 1) {
@@ -118,12 +121,20 @@ main(int argc, char **argv)
 		if (y > 0.5 && stv == 0) {
 			y = 1.0;
 			stv = 1;
+			newminute = t > realfreq * 3/2;
 			if (init == 1)
 				init = 0;
-			else
+			else {
 				sec++;
+				if (newminute)
+					realfreq = realfreq + w * ((t/2) - realfreq);
+				else
+					realfreq = realfreq + w * (t - realfreq);
+				/* adjust filter */
+				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
+			}
 			res = tlow * 100 / t;
-			if (t > hw->realfreq * 3/2)
+			if (newminute)
 				res *= 2;
 			/* in general, pulses are a bit wider than specified */
 			if (res <= hw->maxzero)
@@ -132,13 +143,13 @@ main(int argc, char **argv)
 				bit = 1;
 			else
 				bit = 2; /* some error */
-			printf(" (%4u %4u) %u %3i %3i", tlow, t, bit, res, sec);
+			printf(" (%4u %4u) %u %3i %3i %f %f", tlow, t, bit, res, sec, realfreq, a);
 			if (tunetime == 1) {
 				printf(" %lli", diff);
 				diff = 0;
 			}
 			printf("\n");
-			if (t > hw->realfreq * 3/2)
+			if (newminute)
 				sec = -1; /* new minute */
 			t = 0;
 		}
