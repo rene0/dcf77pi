@@ -32,31 +32,31 @@ SUCH DAMAGE.
 /* update before 2400-01-01 */
 #define BASEYEAR	2000
 
-#define DT_DSTERR	1 << 0
-#define DT_MIN		1 << 1
-#define DT_HOUR		1 << 2
-#define DT_DATE		1 << 3
-#define DT_B0		1 << 4
-#define DT_B20		1 << 5
-#define DT_SHORT	1 << 6
-#define DT_LONG		1 << 7
-#define DT_DSTJUMP	1 << 8
-#define DT_CHDSTERR	1 << 9
-#define DT_LEAPERR	1 << 10
-#define DT_MINJUMP	1 << 11
-#define DT_HOURJUMP	1 << 12
-#define DT_MDAYJUMP	1 << 13
-#define DT_WDAYJUMP	1 << 14
-#define DT_MONTHJUMP	1 << 15
-#define DT_YEARJUMP	1 << 16
-#define DT_LEAPONE	1 << 17
+#define DT_DSTERR	(1 << 0)
+#define DT_MIN		(1 << 1)
+#define DT_HOUR		(1 << 2)
+#define DT_DATE		(1 << 3)
+#define DT_B0		(1 << 4)
+#define DT_B20		(1 << 5)
+#define DT_SHORT	(1 << 6)
+#define DT_LONG		(1 << 7)
+#define DT_DSTJUMP	(1 << 8)
+#define DT_CHDSTERR	(1 << 9)
+#define DT_LEAPERR	(1 << 10)
+#define DT_MINJUMP	(1 << 11)
+#define DT_HOURJUMP	(1 << 12)
+#define DT_MDAYJUMP	(1 << 13)
+#define DT_WDAYJUMP	(1 << 14)
+#define DT_MONTHJUMP	(1 << 15)
+#define DT_YEARJUMP	(1 << 16)
+#define DT_LEAPONE	(1 << 17)
 /* leap second should always be zero if present */
-#define DT_XMIT		1 << 18
-#define DT_CHDST	1 << 19
-#define DT_LEAP		1 << 20
+#define DT_XMIT		(1 << 18)
+#define DT_CHDST	(1 << 19)
+#define DT_LEAP		(1 << 20)
 
-#define ANN_CHDST	1 << 0
-#define ANN_LEAP	1 << 1
+#define ANN_CHDST	(1 << 0)
+#define ANN_LEAP	(1 << 1)
 
 void init_time(void); /* initialize month values from configuration */
 void add_minute(struct tm *time, int flags);

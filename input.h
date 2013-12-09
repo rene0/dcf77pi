@@ -26,15 +26,15 @@ SUCH DAMAGE.
 #ifndef DCF77PI_INPUT_H
 #define DCF77PI_INPUT_H
 
-#define GETBIT_ONE	1 << 0
-#define GETBIT_EOM	1 << 1
-#define GETBIT_EOD	1 << 2
-#define GETBIT_READ	1 << 3
-#define GETBIT_TOOLONG	1 << 4
-#define GETBIT_IO	1 << 5
-#define GETBIT_XMIT	1 << 6
-#define GETBIT_RECV	1 << 7
-#define GETBIT_RND	1 << 8
+#define GETBIT_ONE	(1 << 0)
+#define GETBIT_EOM	(1 << 1)
+#define GETBIT_EOD	(1 << 2)
+#define GETBIT_READ	(1 << 3)
+#define GETBIT_TOOLONG	(1 << 4)
+#define GETBIT_IO	(1 << 5)
+#define GETBIT_XMIT	(1 << 6)
+#define GETBIT_RECV	(1 << 7)
+#define GETBIT_RND	(1 << 8)
 
 #include <stdint.h> /* uintX_t */
 
