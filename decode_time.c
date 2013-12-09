@@ -316,8 +316,8 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 
 	/* process possible leap second */
 	if ((announce & ANN_LEAP) && (minlen == 59 || minlen == 60) &&
-		time->tm_min == 0 && utchour == 0 &&
-		time->tm_mday == 1 && is_leapsecmonth(time->tm_mon - 1)) {
+	    time->tm_min == 0 && utchour == 0 &&
+	    time->tm_mday == 1 && is_leapsecmonth(time->tm_mon - 1)) {
 		announce &= ~ANN_LEAP;
 		rval |= DT_LEAP;
 		if (minlen == 59)
