@@ -209,7 +209,10 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 	if (init == 0 && *acc_minlen >= 60000) {
 		add_minute(time, old_dt);
 		*acc_minlen -= 60000;
-		increase++; /* should never reach 2 ? */
+		increase++;
+		if (increase > 1)
+			printf("! increase=%i !", increase);
+			/* should not happen */
 	}
 
 	p1 = getpar(buffer, 21, 28);
