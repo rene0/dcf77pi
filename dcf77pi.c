@@ -32,6 +32,7 @@ SUCH DAMAGE.
 #include <strings.h>
 #include <sysexits.h>
 #include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include "input.h"
@@ -44,14 +45,17 @@ main(int argc, char *argv[])
 {
 	uint8_t indata[40], civbuf[40];
 	uint16_t bit;
-	struct tm time, oldtime;
+	struct tm time, oldtime, isotime;
+	time_t epochtime;
+	struct timeval tv;
+	struct timezone tz;
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1;
-	int res, opt, verbose = 0;
+	int res, opt, verbose = 0, settime = 0;
 	char *infilename, *logfilename;
 
 	infilename = logfilename = NULL;
-	while ((opt = getopt(argc, argv, "f:l:v")) != -1) {
+	while ((opt = getopt(argc, argv, "f:l:vS")) != -1) {
 		switch (opt) {
 		case 'f' :
 			infilename = strdup(optarg);
@@ -70,8 +74,11 @@ main(int argc, char *argv[])
 		case 'v' :
 			verbose = 1;
 			break;
+		case 'S' :
+			settime = 1;
+			break;
 		default:
-			printf("usage: %s [-f infile] [-l logfile] [-v]\n",
+			printf("usage: %s [-f infile] [-l logfile] [-v] [-S]\n",
 			    argv[0]);
 			return EX_USAGE;
 		}
@@ -176,6 +183,31 @@ main(int argc, char *argv[])
 			display_time(dt, time);
 			printf("\n");
 
+			if (settime == 1 && init == 0 && init2 == 0 &&
+			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
+			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0)) {
+				memcpy((void *)&isotime, (const void *)&time,
+				    sizeof(struct tm));
+				isotime.tm_year -= 1900;
+				isotime.tm_mon--;
+				isotime.tm_wday %= 7;
+				isotime.tm_sec = 0;
+				epochtime = mktime(&isotime);
+				if (epochtime == -1)
+					printf("mktime() failed!\n");
+				else {
+					tv.tv_sec = epochtime;
+					tv.tv_usec = 50000;
+					/* adjust for bit reception algorithm */
+					printf("Setting time (%lld , %lld)\n",
+					    (long long int)tv.tv_sec,
+					    (long long int)tv.tv_usec);
+					tz.tz_minuteswest = -60;
+					tz.tz_dsttime = isotime.tm_isdst;
+					if (settimeofday(&tv, &tz) == -1)
+						perror("settimeofday");
+				}
+			}
 			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
 				acc_minlen = 0; /* really a new minute */
 			if (init == 0 && init2 == 1)
