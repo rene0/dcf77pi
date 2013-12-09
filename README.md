@@ -12,6 +12,7 @@ Allowed parameters for dcf77pi are:
 * -f filename: read from filename instead of the GPIO pin.
 * -l filename: log to filename when reading from the GPIO pin.
 * -v         : verbose information when reading from the GPIO pin.
+* -S         : set the system time each minute that reception is succesful.
 
 Allowed parameters for readpin are:
 
