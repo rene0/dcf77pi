@@ -67,6 +67,7 @@ read_config_file(char *filename)
 	while (feof(configfile) == 0) {
 		if (fscanf(configfile, "%s = %s\n", k, v) != 2) {
 			perror("read_config_file");
+			fclose(configfile);
 			return errno;
 		}
 		i = getpos(k);
@@ -81,8 +82,10 @@ read_config_file(char *filename)
 	for (i = 0; i < NUM_KEYS; i++)
 		if (value[i] == NULL) {
 			printf("read_config_file: missing value for key '%s'\n", key[i]);
+			fclose(configfile);
 			return 1;
 		}
+	fclose(configfile);
 	return 0;
 }
 
