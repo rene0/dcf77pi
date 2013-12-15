@@ -101,7 +101,9 @@ main(int argc, char **argv)
 		printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
 
 		if (t > realfreq * 5/2) {
-			printf(" {%4u %4u} %3i", tlow, t, sec);
+			realfreq = realfreq + w * ((t/2.5) - realfreq);
+			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
+			printf(" {%4u %4u} %3i %f %f", tlow, t, sec, realfreq, a);
 			t = 0; /* timeout */
 			if (tunetime == 1) {
 				printf(" %lli", diff);
