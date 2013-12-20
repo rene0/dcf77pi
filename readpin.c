@@ -100,6 +100,15 @@ main(int argc, char **argv)
 			stv = p;
 		printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
 
+		if (realfreq < hw->freq < 2) {
+			printf("<");
+			realfreq = hw->freq;
+		}
+		if (realfreq > hw->freq * 3/2) {
+			printf(">");
+			realfreq = hw->freq;
+		}
+
 		if (t > realfreq * 5/2) {
 			realfreq = realfreq + w * ((t/2.5) - realfreq);
 			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
