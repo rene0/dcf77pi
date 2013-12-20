@@ -254,10 +254,12 @@ get_bit(void)
 
 	int inch, valid = 0;
 	char outch;
-	int t, tlow, count;
+	int t, tlow, count, newminute;
 	uint8_t p, stv;
 	struct timespec slp;
-	float a, y;
+	float a, y, w;
+	static int init = 1;
+	static float realfreq;
 
 	/* clear previous flags, except GETBIT_TOOLONG to be able
 	 * to determine if this flag can be cleared again.
@@ -279,10 +281,13 @@ get_bit(void)
 		 * Set up filter, reach 50% after realfreq/20 samples
 		 * (i.e. 50 ms)
 		 */
-		a = 1.0 - exp2(-1.0 / (hw.realfreq / 20.0));
+		if (init == 1)
+			realfreq = hw.freq;
+		a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 		y = -1;
 		tlow = 0;
 		stv = 2;
+		w = 0.05;
 
 		for (t = 0; ; t++) {
 			p = get_pulse();
@@ -296,7 +301,31 @@ get_bit(void)
 			if (stv == 2)
 				stv = p;
 
-			if (t > hw.realfreq * 5/2) {
+			/* Prevent algorithm collapse during thunderstorms or scheduler abuse */
+			if (realfreq < hw.freq / 2) {
+				if (isverbose)
+					printf("\n*** realfreq too low (%f < %lu), resetting ***\n",
+					    realfreq, hw.freq / 2);
+				else
+					printf("<");
+				if (logfile)
+					fprintf(logfile, "<");
+				realfreq = hw.freq;
+			}
+			if (realfreq > hw.freq * 3/2) {
+				if (isverbose)
+					printf("\n*** realfreq too high (%f > %lu), resetting ***\n",
+					    realfreq, hw.freq * 3/2);
+				else
+					printf(">");
+				if (logfile)
+					fprintf(logfile, ">");
+				realfreq = hw.freq;
+			}
+
+			if (t > realfreq * 5/2) {
+				realfreq = realfreq + w * ((t / 2.5) - realfreq);
+				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 				if (tlow * 100 / t < 1) {
 					state |= GETBIT_RECV;
 					outch = 'r';
@@ -308,8 +337,8 @@ get_bit(void)
 					outch = '#';
 				}
 				if (isverbose)
-					printf("\n{%4u %4u %2u} ", tlow, t,
-					    bitpos);
+					printf("\n{%4u %4u %2u} %f %f", tlow, t,
+					    bitpos, realfreq, a);
 				goto report; /* timeout */
 			}
 
@@ -327,13 +356,23 @@ get_bit(void)
 				stv = 1;
 
 				count = tlow * 100 / t;
-				if (t > hw.realfreq * 3/2) {
+				newminute = t > realfreq * 3/2;
+				if (init == 1)
+					init = 0;
+				else {
+					if (newminute) {
+						realfreq = realfreq + w * ((t/2) - realfreq);
+					} else
+						realfreq = realfreq + w * (t - realfreq);
+					a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
+				}
+				if (newminute) {
 					count *= 2;
 					state |= GETBIT_EOM;
 				}
 				if (isverbose)
-					printf("\n[%4u %4u %3d %2u", tlow, t,
-					    count, bitpos);
+					printf("\n[%4u %4u %3d %2u %f %f",
+					    tlow, t, count, bitpos, realfreq, a);
 
 				break; /* start of new second */
 			}
