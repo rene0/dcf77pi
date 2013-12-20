@@ -100,7 +100,7 @@ main(int argc, char **argv)
 			stv = p;
 		printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
 
-		if (realfreq < hw->freq < 2) {
+		if (realfreq < hw->freq / 2) {
 			printf("<");
 			realfreq = hw->freq;
 		}
