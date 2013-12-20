@@ -30,7 +30,7 @@ SUCH DAMAGE.
 
 char *key[] = {
 	"pin", "activehigh", "freq", "maxzero", "maxone",
-	"realfreq", "summermonth", "wintermonth", "leapsecmonths"
+	"summermonth", "wintermonth", "leapsecmonths"
 };
 
 #define NUM_KEYS (sizeof(key) / sizeof(key[0]))

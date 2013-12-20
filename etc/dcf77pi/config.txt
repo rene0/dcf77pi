@@ -1,7 +1,6 @@
 pin = 17
 activehigh = 1
 freq = 1000
-realfreq = 850
 maxzero = 16
 maxone = 30
 summermonth = 3

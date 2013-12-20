@@ -25,15 +25,11 @@ The meaning of the keywords in config.txt is:
 * pin = GPIO pin number
 * activehigh = pulses are active high (1) or passive high (0)
 * freq = sample frequency in Hz
-* realfreq = real sample frequency in Hz
 * maxzero = maximum percentage of time the signal can be high for a 0 bit
 * maxone = maximum percentage of time the signal can be high for a 1 bit
 * summermonth = month in which daylight saving time starts
 * wintermonth = month in which daylight saving time ends
 * leapsecmonths = months (in UTC) in which a leap second might be inserted
-
-realfreq should be the average value output by readpin for the 't' variable
-(the value just before the closing bracket).
 
 The end of the minute is noted by the absence of high pulses. An absence of
 low pulses probably means that the transmitter is out of range. Any other
