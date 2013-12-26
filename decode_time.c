@@ -355,8 +355,10 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 				announce &= ~ANN_CHDST;
 				rval |= DT_CHDST;
 			}
-		} else
+		} else {
 			rval |= DT_DSTJUMP; /* sudden change, ignore */
+			ok = 0;
+		}
 	}
 	time->tm_gmtoff = time->tm_isdst ? 7200 : 3600;
 
