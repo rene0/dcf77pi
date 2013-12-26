@@ -345,7 +345,7 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		 * initial state (otherwise DST would never be valid)
 		 * actually announced and time is Sunday, lastday, 01:00 UTC
 		 */
-		tmp = (announce & ANN_CHDST) && (minlen == 59 || minlen == 60) &&
+		tmp = (announce & ANN_CHDST) && minlen == 59 &&
 		    time->tm_min == 0 && utchour == 1 && time->tm_wday == 7 &&
 		    time->tm_mday > lastday(*time) - 7 &&
 		    (time->tm_mon == summermonth || time->tm_mon == wintermonth);
