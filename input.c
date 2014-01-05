@@ -42,6 +42,8 @@ SUCH DAMAGE.
 #  else
 #    define NOLIVE 1
 #  endif
+#elif defined(__NetBSD_Version__)
+#  define NOLIVE 1
 #elif defined(__linux__)
 #  include <sys/types.h>
 #else
