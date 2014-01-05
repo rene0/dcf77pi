@@ -34,18 +34,20 @@ SUCH DAMAGE.
 #include <strings.h>
 #include <time.h>
 #include <unistd.h>
-#ifdef __FreeBSD__
 #include <sys/param.h>
-#if __FreeBSD_version >= 900022
-#include <sys/gpio.h>
-#else
-#define NOLIVE 1
-#endif
+
+#ifdef __FreeBSD__
+#  if __FreeBSD_version >= 900022
+#    include <sys/gpio.h>
+#  else
+#    define NOLIVE 1
+#  endif
 #elif defined(__linux__)
-#include <sys/types.h>
+#  include <sys/types.h>
 #else
-#error Unsupported operating system, please send a patch to the author
+#  error Unsupported operating system, please send a patch to the author
 #endif
+
 #include "input.h"
 #include "config.h"
 
