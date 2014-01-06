@@ -44,7 +44,11 @@ init_time(void)
 	int i, m;
 
 	summermonth = strtol(get_config_value("summermonth"), NULL, 10);
+	if (summermonth < 1 || summermonth > 12)
+		summermonth = 0;
 	wintermonth = strtol(get_config_value("wintermonth"), NULL, 10);
+	if (wintermonth < 1 || wintermonth > 12)
+		wintermonth = 0;
 
 	lsm = strdup(get_config_value("leapsecmonths"));
 	num_leapsecmonths = 0;
