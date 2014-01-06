@@ -31,6 +31,9 @@ The meaning of the keywords in config.txt is:
 * wintermonth = month in which daylight saving time ends
 * leapsecmonths = months (in UTC) in which a leap second might be inserted
 
+Note that a sentinel value of 0 can be used for summermonth, wintermonth, or
+leapsecmonths to disallow daylight time changes or leap seconds.
+
 The end of the minute is noted by the absence of high pulses. An absence of
 low pulses probably means that the transmitter is out of range. Any other
 situation will result in a logical read error.
