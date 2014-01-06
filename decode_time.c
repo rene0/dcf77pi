@@ -41,7 +41,7 @@ void
 init_time(void)
 {
 	char *lsm, *mon;
-	int i;
+	int i, m;
 
 	summermonth = strtol(get_config_value("summermonth"), NULL, 10);
 	wintermonth = strtol(get_config_value("wintermonth"), NULL, 10);
@@ -49,8 +49,11 @@ init_time(void)
 	lsm = strdup(get_config_value("leapsecmonths"));
 	num_leapsecmonths = 0;
 	for (i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
-		leapsecmonths[i] = strtol(mon, NULL, 10);
-		num_leapsecmonths++;
+		m = strtol(mon, NULL, 10);
+		if (m >= 1 && m <= 12) {
+			leapsecmonths[i] = strtol(mon, NULL, 10);
+			num_leapsecmonths++;
+		}
 	}
 }
 
