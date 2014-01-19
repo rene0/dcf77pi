@@ -73,11 +73,8 @@ main(int argc, char *argv[])
 				return errno;
 			}
 			break;
-		case 'S' :
-			settime = 1;
-			break;
 		default:
-			printf("usage: %s [-f infile] [-l logfile] [-S]\n",
+			printf("usage: %s [-f infile] [-l logfile]\n",
 			    argv[0]);
 			return EX_USAGE;
 		}
