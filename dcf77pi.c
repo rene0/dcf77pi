@@ -51,11 +51,11 @@ main(int argc, char *argv[])
 	struct timezone tz;
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt = 0, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1;
-	int res, opt, verbose = 0, settime = 0;
+	int res, opt, settime = 0;
 	char *infilename, *logfilename;
 
 	infilename = logfilename = NULL;
-	while ((opt = getopt(argc, argv, "f:l:vS")) != -1) {
+	while ((opt = getopt(argc, argv, "f:l:S")) != -1) {
 		switch (opt) {
 		case 'f' :
 			infilename = strdup(optarg);
@@ -71,14 +71,11 @@ main(int argc, char *argv[])
 				return errno;
 			}
 			break;
-		case 'v' :
-			verbose = 1;
-			break;
 		case 'S' :
 			settime = 1;
 			break;
 		default:
-			printf("usage: %s [-f infile] [-l logfile] [-v] [-S]\n",
+			printf("usage: %s [-f infile] [-l logfile] [-S]\n",
 			    argv[0]);
 			return EX_USAGE;
 		}
@@ -90,7 +87,7 @@ main(int argc, char *argv[])
 		cleanup();
 		return res;
 	}
-	res = set_mode(verbose, infilename, logfilename);
+	res = set_mode(infilename, logfilename);
 	if (res != 0) {
 		/* something went wrong */
 		cleanup();

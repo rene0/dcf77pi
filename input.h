@@ -43,7 +43,7 @@ struct hardware {
 	unsigned int pin, active_high, maxzero, maxone;
 };
 
-int set_mode(int verbose, char *infilename, char *logfilename);
+int set_mode(char *infilename, char *logfilename);
 struct hardware *get_hardware_parameters(void);
 void cleanup(void);
 uint8_t get_pulse(void);

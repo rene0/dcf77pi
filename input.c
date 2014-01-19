@@ -57,7 +57,6 @@ uint8_t bitpos; /* second */
 uint8_t buffer[60]; /* wrap after 60 positions */
 uint16_t state; /* any errors, or high bit */
 int islive; /* live input or pre-recorded data */
-int isverbose; /* verbose live information */
 FILE *datafile = NULL; /* input file (recorded data) */
 FILE *logfile = NULL; /* auto-appended in live mode */
 int fd = 0; /* gpio file */
@@ -148,11 +147,10 @@ init_hardware(int pin_nr)
 }
 
 int
-set_mode(int verbose, char *infilename, char *logfilename)
+set_mode(char *infilename, char *logfilename)
 {
 	int res;
 
-	isverbose = verbose;
 	islive = (infilename == NULL);
 #ifdef NOLIVE
 	if (islive) {
@@ -306,21 +304,13 @@ get_bit(void)
 
 			/* Prevent algorithm collapse during thunderstorms or scheduler abuse */
 			if (realfreq < hw.freq / 2) {
-				if (isverbose)
-					printf("\n*** realfreq too low (%f < %lu), resetting ***\n",
-					    realfreq, hw.freq / 2);
-				else
-					printf("<");
+				printf("<");
 				if (logfile)
 					fprintf(logfile, "<");
 				realfreq = hw.freq;
 			}
 			if (realfreq > hw.freq * 3/2) {
-				if (isverbose)
-					printf("\n*** realfreq too high (%f > %lu), resetting ***\n",
-					    realfreq, hw.freq * 3/2);
-				else
-					printf(">");
+				printf(">");
 				if (logfile)
 					fprintf(logfile, ">");
 				realfreq = hw.freq;
@@ -339,9 +329,6 @@ get_bit(void)
 					state |= GETBIT_RND;
 					outch = '#';
 				}
-				if (isverbose)
-					printf("\n{%4u %4u %2u} %f %f", tlow, t,
-					    bitpos, realfreq, a);
 				goto report; /* timeout */
 			}
 
@@ -373,10 +360,6 @@ get_bit(void)
 					count *= 2;
 					state |= GETBIT_EOM;
 				}
-				if (isverbose)
-					printf("\n[%4u %4u %3d %2u %f %f",
-					    tlow, t, count, bitpos, realfreq, a);
-
 				break; /* start of new second */
 			}
 			slp.tv_sec = 0;
@@ -400,8 +383,6 @@ get_bit(void)
 			outch = '_';
 		}
 report:
-		if (isverbose)
-			printf(" %u] ", state);
 		if (logfile) {
 			fprintf(logfile, "%c", outch);
 			if (state & GETBIT_EOM)

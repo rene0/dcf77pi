@@ -66,7 +66,7 @@ main(int argc, char **argv)
 		cleanup();
 		return res;
 	}
-	res = set_mode(0, NULL, NULL);
+	res = set_mode(NULL, NULL);
 	if (res != 0) {
 		cleanup();
 		return res;
