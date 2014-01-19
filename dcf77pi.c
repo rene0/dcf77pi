@@ -125,6 +125,9 @@ main(int argc, char *argv[])
 			break;
 		if (infilename == NULL && getch() == 'Q')
 			break;
+		if (infilename == NULL && getch() == 'S')
+			settime = 1 - settime;
+
 		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
 			acc_minlen += 2500;
 		else
