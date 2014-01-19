@@ -29,7 +29,7 @@ SUCH DAMAGE.
 #include <stdint.h>
 #include <time.h>
 
-/* update before 2400-01-01 */
+/* update every 400 years, now at 2400-01-01 */
 #define BASEYEAR	2000
 
 #define DT_DSTERR	(1 << 0)
