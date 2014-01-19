@@ -121,7 +121,9 @@ main(int argc, char *argv[])
 
 	for (;;) {
 		bit = get_bit();
-		if (bit & GETBIT_EOD)
+		if (infilename != NULL && (bit & GETBIT_EOD))
+			break;
+		if (infilename == NULL && getch() == 'Q')
 			break;
 		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
 			acc_minlen += 2500;
