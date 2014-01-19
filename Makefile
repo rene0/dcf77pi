@@ -18,7 +18,7 @@ config.o: config.h
 dcf77pi.o: $(hdr)
 
 dcf77pi: $(obj)
-	$(CC) -o $@ $(obj) -lm
+	$(CC) -o $@ $(obj) -lm -lncurses
 
 readpin.o: input.h
 readpin: readpin.o input.o config.o

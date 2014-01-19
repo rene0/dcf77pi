@@ -35,6 +35,8 @@ SUCH DAMAGE.
 #include <sys/time.h>
 #include <unistd.h>
 
+#include <ncurses.h>
+
 #include "input.h"
 #include "decode_time.h"
 #include "decode_alarm.h"
@@ -98,6 +100,27 @@ main(int argc, char *argv[])
 	/* no weird values please */
 	bzero(indata, sizeof(indata));
 	bzero(&time, sizeof(time));
+
+	if (infilename == NULL) {
+		initscr();
+		if (has_colors() == FALSE) {
+			cleanup();
+			printf("No required color support.\n");
+			return 0;
+		}
+		start_color();
+		init_pair(1, COLOR_RED, COLOR_BLACK);
+		init_pair(2, COLOR_GREEN, COLOR_BLACK);
+		init_pair(3, COLOR_YELLOW, COLOR_BLACK); /* turn on A_BOLD */
+		init_pair(4, COLOR_BLUE, COLOR_BLACK);
+		init_pair(7, COLOR_WHITE, COLOR_BLACK);
+		noecho();
+		nonl();
+		cbreak();
+		nodelay(stdscr, TRUE);
+		curs_set(0);
+		refresh(); /* prevent clearing windows upon getch() / refresh() */
+	}
 
 	for (;;) {
 		bit = get_bit();
@@ -215,5 +238,8 @@ main(int argc, char *argv[])
 	}
 
 	cleanup();
+	if (infilename == NULL) {
+		endwin();
+	}
 	return 0;
 }
