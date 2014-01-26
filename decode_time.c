@@ -213,13 +213,10 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		rval |= DT_XMIT;
 
 	increase = 0;
-	if (init == 0 && *acc_minlen >= 60000) {
+	while (init == 0 && *acc_minlen >= 60000) {
 		add_minute(time, old_dt);
 		*acc_minlen -= 60000;
 		increase++;
-		if (increase > 1)
-			printf("! increase=%i !", increase);
-			/* should not happen */
 	}
 
 	p1 = getpar(buffer, 21, 28);
