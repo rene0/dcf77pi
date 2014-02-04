@@ -44,6 +44,26 @@ SUCH DAMAGE.
 
 WINDOW *main_win0, *main_win1;
 
+void
+curses_cleanup(char *reason)
+{
+	cleanup();
+	if (main_win0 != NULL)
+		delwin(main_win0);
+	if (main_win1 != NULL)
+		delwin(main_win1);
+	if (input_win0 != NULL)
+		delwin(input_win0);
+	if (input_win1 != NULL)
+		delwin(input_win1);
+	if (alarm_win != NULL)
+		delwin(alarm_win);
+	if (decode_win != NULL)
+		delwin(decode_win);
+	endwin();
+	printf("%s", reason);
+}
+
 int
 main(int argc, char *argv[])
 {
