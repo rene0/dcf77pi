@@ -264,7 +264,12 @@ main(int argc, char *argv[])
 		}
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
-			printf(" (%d) %d\n", acc_minlen, minlen);
+			if (infilename != NULL)
+				printf(" (%d) %d\n", acc_minlen, minlen);
+			else {
+				mvwprintw(decode_win, 0, 28, "(%d)", acc_minlen);
+				wrefresh(decode_win);
+			}
 			if (init == 1 || minlen >= 59)
 				memcpy((void *)&oldtime, (const void *)&time,
 				    sizeof(struct tm));
