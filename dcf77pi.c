@@ -210,7 +210,6 @@ main(int argc, char *argv[])
 			acc_minlen += 1000;
 		}
 		display_bit();
-		(void)fflush(stdout);
 
 		if (init == 0) {
 			switch (time.tm_min % 3) {
@@ -273,7 +272,6 @@ main(int argc, char *argv[])
 			}
 
 			display_time(dt, time);
-			printf("\n");
 
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
