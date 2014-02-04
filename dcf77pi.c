@@ -278,9 +278,11 @@ main(int argc, char *argv[])
 
 			if (time.tm_min % 3 == 0) {
 				if (civ1 == 1 && civ2 == 1)
-					display_alarm(civbuf);
+					display_alarm(civbuf, infilename != NULL);
 				if (civ1 != civ2)
-					printf("Civil warning error\n");
+					display_alarm_error(infilename != NULL);
+				if (civ1 == 0 && civ2 == 0)
+					clear_alarm(infilename != NULL);
 			}
 
 			display_time(dt, time);
