@@ -127,8 +127,7 @@ main(int argc, char *argv[])
 		input_win0 = input_win1 = NULL;
 		initscr();
 		if (has_colors() == FALSE) {
-			cleanup();
-			printf("No required color support.\n");
+			curses_cleanup("No required color support.\n");
 			return 0;
 		}
 		start_color();
@@ -143,6 +142,38 @@ main(int argc, char *argv[])
 		nodelay(stdscr, TRUE);
 		curs_set(0);
 		refresh(); /* prevent clearing windows upon getch() / refresh() */
+
+		/* allocate windows */
+		main_win0 = newwin(1, 80, 4, 0);
+		if (main_win0 == NULL) {
+			curses_cleanup("Creating main_win0 failed.\n");
+			return 0;
+		}
+		main_win1 = newwin(1, 80, 24, 0);
+		if (main_win1 == NULL) {
+			curses_cleanup("Creating main_win1 failed.\n");
+			return 0;
+		}
+		alarm_win = newwin(1, 80, 5, 0);
+		if (alarm_win == NULL) {
+			curses_cleanup("Creating alarm_win failed.\n");
+			return 0;
+		}
+		input_win0 = newwin(1, 80, 0, 0);
+		if (input_win0 == NULL) {
+			curses_cleanup("Creating input_win0 failed.\n");
+			return 0;
+		}
+		input_win1 = newwin(4, 80, 7, 0);
+		if (input_win1 == NULL) {
+			curses_cleanup("Creating input_win1 failed.\n");
+			return 0;
+		}
+		decode_win = newwin(2, 80, 1, 0);
+		if (decode_win == NULL) {
+			curses_cleanup("Creating decode_win failed.\n");
+			return 0;
+		}
 	}
 
 	for (;;) {
