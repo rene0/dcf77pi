@@ -174,6 +174,19 @@ main(int argc, char *argv[])
 			curses_cleanup("Creating decode_win failed.\n");
 			return 0;
 		}
+		/* draw initial screen */
+		mvwprintw(main_win0, 0, 0, "Civil buffer:");
+		wrefresh(main_win0);
+		mvwprintw(main_win1, 0, 0, "[S] -> toggle time sync   [Q] -> quit");
+		mvwchgat(main_win1, 0, 1, 1, A_NORMAL, 4, NULL);
+		mvwchgat(main_win1, 0, 27, 1, A_NORMAL, 4, NULL);
+		wrefresh(main_win1);
+		mvwprintw(alarm_win, 0, 0, "German civil warning:");
+		wrefresh(alarm_win);
+		mvwprintw(input_win0, 0, 0, "old");
+		wrefresh(input_win0);
+		mvwprintw(input_win1, 0, 0, "act total       realfreq Hz increment bit");
+		wrefresh(input_win1);
 	}
 
 	for (;;) {
