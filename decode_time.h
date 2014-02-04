@@ -28,6 +28,7 @@ SUCH DAMAGE.
 
 #include <stdint.h>
 #include <time.h>
+#include <ncurses.h>
 
 /* update every 400 years, now at 2400-01-01 */
 #define BASEYEAR	2000
@@ -65,4 +66,5 @@ int decode_time(int init, int init2, int minlen, uint8_t *buffer,
 void display_time(int dt, struct tm time);
 int get_utchour(struct tm time);
 
+WINDOW *decode_win;
 #endif

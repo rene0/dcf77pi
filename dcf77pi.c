@@ -42,6 +42,8 @@ SUCH DAMAGE.
 #include "decode_alarm.h"
 #include "config.h"
 
+WINDOW *main_win0, *main_win1;
+
 int
 main(int argc, char *argv[])
 {
@@ -99,6 +101,10 @@ main(int argc, char *argv[])
 	bzero(&time, sizeof(time));
 
 	if (infilename == NULL) {
+		main_win0 = main_win1 = NULL;
+		alarm_win = NULL;
+		decode_win = NULL;
+		input_win0 = input_win1 = NULL;
 		initscr();
 		if (has_colors() == FALSE) {
 			cleanup();

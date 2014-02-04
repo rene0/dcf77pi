@@ -37,6 +37,7 @@ SUCH DAMAGE.
 #define GETBIT_RND	(1 << 8)
 
 #include <stdint.h> /* uintX_t */
+#include <ncurses.h>
 
 struct hardware {
 	unsigned long freq;
@@ -52,5 +53,7 @@ void display_bit(void);
 uint16_t next_bit(void); /* prepare for next bit */
 uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
+
+WINDOW *input_win0, *input_win1;
 
 #endif

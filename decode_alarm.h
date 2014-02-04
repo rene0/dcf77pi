@@ -27,6 +27,7 @@ SUCH DAMAGE.
 #define DCF77PI_DECODE_ALARM_H
 
 #include <stdint.h>
+#include <ncurses.h>
 
 /*
  * From German wikipedia mostly, long regions and parities are unspecified
@@ -34,4 +35,5 @@ SUCH DAMAGE.
  */
 void display_alarm(uint8_t *buf);
 
+WINDOW *alarm_win;
 #endif
