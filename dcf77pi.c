@@ -248,7 +248,14 @@ main(int argc, char *argv[])
 
 		bit = next_bit();
 		if (bit & GETBIT_TOOLONG) {
-			printf(" L");
+			if (infilename != NULL)
+				printf(" L");
+			else {
+				wattron(input_win1, COLOR_PAIR(1));
+				mvwprintw(input_win1, 0, 40, "no minute");//XXX approx, and invent something for multiple states
+				wattroff(input_win1, COLOR_PAIR(1));
+				wrefresh(input_win1);
+			}
 			minlen = 61;
 			/*
 			 * leave acc_minlen alone,
