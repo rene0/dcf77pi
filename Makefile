@@ -22,7 +22,7 @@ dcf77pi: $(obj)
 
 readpin.o: input.h
 readpin: readpin.o input.o config.o
-	$(CC) -o $@ readpin.o input.o config.o -lrt -lm
+	$(CC) -o $@ readpin.o input.o config.o -lrt -lm -lncurses
 
 clean:
 	rm dcf77pi $(obj)
