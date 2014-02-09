@@ -254,7 +254,8 @@ get_bit(void)
 	static int init = 1;
 	static float realfreq;
 
-	/* clear previous flags, except GETBIT_TOOLONG to be able
+	/*
+	 * Clear previous flags, except GETBIT_TOOLONG to be able
 	 * to determine if this flag can be cleared again.
 	 */
 	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
