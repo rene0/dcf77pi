@@ -360,7 +360,7 @@ get_bit(void)
 				}
 				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%) %f %f", tlow, t, count, realfreq, a);
 				if (freq_reset)
-					mvwchgat(input_win, 3, 16, 11/**/, A_BOLD, COLOR_PAIR(1), NULL);
+					mvwchgat(input_win, 3, 16, 11/**/, A_BOLD, COLOR_PAIR(3), NULL);
 				wattron(input_win, COLOR_PAIR(2));
 				if (newminute) {
 					count *= 2;
