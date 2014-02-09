@@ -174,8 +174,8 @@ main(int argc, char *argv[])
 		mvwprintw(input_win, 2, 0, "act total       realfreq Hz increment bit");
 		wrefresh(input_win);
 		mvwprintw(main_win, 0, 0, "[S] -> toggle time sync   [Q] -> quit");
-		mvwchgat(main_win, 0, 1, 1, A_NORMAL, 4, NULL); /* [S] */
-		mvwchgat(main_win, 0, 27, 1, A_NORMAL, 4, NULL); /* [Q] */
+		mvwchgat(main_win, 0, 1, 1, A_BOLD, 4, NULL); /* [S] */
+		mvwchgat(main_win, 0, 27, 1, A_BOLD, 4, NULL); /* [Q] */
 		wrefresh(main_win);
 	}
 
