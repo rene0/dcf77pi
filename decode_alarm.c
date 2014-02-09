@@ -63,7 +63,7 @@ display_alarm(uint8_t *buf, int fromfile)
 	else {
 		wattron(alarm_win, COLOR_PAIR(3) | A_BOLD);
 		mvwprintw(alarm_win, 1, 22,
-		    "0x%1x 0x%1x 0x%1x 0x%1x 0x%3x 0x%1x 0x%3x\n 0x%1x",
+		    "0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x\n 0x%1x",
 		    ds1, ps1, ds2, ps2, dl1, pl1, dl2, pl2);
 		wattroff(alarm_win, COLOR_PAIR(3) | A_BOLD);
 		wclrtoeol(alarm_win);
