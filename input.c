@@ -36,6 +36,8 @@ SUCH DAMAGE.
 #include <unistd.h>
 #include <sys/param.h>
 
+#include <ncurses.h>
+
 #ifdef __FreeBSD__
 #  if __FreeBSD_version >= 900022
 #    include <sys/gpio.h>
@@ -441,9 +443,20 @@ report:
 	return state;
 }
 
+int
+is_space_bit(int bit)
+{
+	return (bit == 1 || bit == 15 || bit == 16 || bit == 19 ||
+	    bit == 20 || bit == 21 || bit == 28 || bit == 29 ||
+	    bit == 35 || bit == 36 || bit == 42 || bit == 45 ||
+	    bit == 50 || bit == 58 || bit == 59 || bit == 60);
+}
+
 void
 display_bit(void)
 {
+	if (is_space_bit(bitpos))
+		printf(" ");
 	if (state & GETBIT_RECV)
 		printf("r");
 	else if (state & GETBIT_XMIT)
@@ -454,11 +467,33 @@ display_bit(void)
 		printf("_");
 	else
 		printf("%u", buffer[bitpos]);
-	if (bitpos == 0 || bitpos == 14 || bitpos == 15 || bitpos == 18 ||
-	    bitpos == 19 || bitpos == 20 || bitpos == 27 || bitpos == 28 ||
-	    bitpos == 34 || bitpos == 35 || bitpos == 41 || bitpos == 44 ||
-	    bitpos == 49 || bitpos == 57 || bitpos == 58 || bitpos == 59)
-		printf(" ");
+}
+
+void
+display_bit_gui(void)
+{
+	int xpos, i;
+
+	wattron(input_win1, COLOR_PAIR(1));
+	if (state & GETBIT_RECV)
+		mvwprintw(input_win1, 3, 50, "receive");
+	else if (state & GETBIT_XMIT)
+		mvwprintw(input_win1, 3, 50, "transmit");
+	else if (state & GETBIT_RND)
+		mvwprintw(input_win1, 3, 50, "random");
+	else
+		mvwprintw(input_win1, 3, 50, "        ");
+	wattroff(input_win1, COLOR_PAIR(1));
+
+	for (xpos = bitpos + 4, i = 0; i < bitpos; i++)
+		if (is_space_bit(i))
+			xpos++;
+
+	if (state & GETBIT_READ)
+		mvwprintw(input_win1, 0, xpos, "_");
+	else
+		mvwprintw(input_win1, 0, xpos, "%u", buffer[bitpos]);
+	wrefresh(input_win1);
 }
 
 uint16_t

@@ -212,7 +212,10 @@ main(int argc, char *argv[])
 			minlen = bitpos + 1;
 			acc_minlen += 1000;
 		}
-		display_bit();
+		if (infilename != NULL)
+			display_bit();
+		else
+			display_bit_gui();
 
 		if (init == 0) {
 			switch (time.tm_min % 3) {
