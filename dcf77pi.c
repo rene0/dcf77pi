@@ -48,14 +48,14 @@ void
 curses_cleanup(char *reason)
 {
 	cleanup();
-	if (main_win != NULL)
-		delwin(main_win);
-	if (input_win != NULL)
-		delwin(input_win);
-	if (alarm_win != NULL)
-		delwin(alarm_win);
 	if (decode_win != NULL)
 		delwin(decode_win);
+	if (alarm_win != NULL)
+		delwin(alarm_win);
+	if (input_win != NULL)
+		delwin(input_win);
+	if (main_win != NULL)
+		delwin(main_win);
 	endwin();
 	printf("%s", reason);
 }
@@ -117,10 +117,10 @@ main(int argc, char *argv[])
 	bzero(&time, sizeof(time));
 
 	if (infilename == NULL) {
-		main_win = NULL;
-		alarm_win = NULL;
 		decode_win = NULL;
+		alarm_win = NULL;
 		input_win = NULL;
+		main_win = NULL;
 		initscr();
 		if (has_colors() == FALSE) {
 			curses_cleanup("No required color support.\n");
@@ -140,9 +140,9 @@ main(int argc, char *argv[])
 		refresh(); /* prevent clearing windows upon getch() / refresh() */
 
 		/* allocate windows */
-		main_win = newwin(1, 80, 24, 0);
-		if (main_win == NULL) {
-			curses_cleanup("Creating main_win failed.\n");
+		decode_win = newwin(3, 80, 0, 0);
+		if (decode_win == NULL) {
+			curses_cleanup("Creating decode_win failed.\n");
 			return 0;
 		}
 		alarm_win = newwin(2, 80, 4, 0);
@@ -155,25 +155,25 @@ main(int argc, char *argv[])
 			curses_cleanup("Creating input_win failed.\n");
 			return 0;
 		}
-		decode_win = newwin(3, 80, 0, 0);
-		if (decode_win == NULL) {
-			curses_cleanup("Creating decode_win failed.\n");
+		main_win = newwin(1, 80, 24, 0);
+		if (main_win == NULL) {
+			curses_cleanup("Creating main_win failed.\n");
 			return 0;
 		}
 		/* draw initial screen */
-		mvwprintw(main_win, 0, 0, "[S] -> toggle time sync   [Q] -> quit");
-		mvwchgat(main_win, 0, 1, 1, A_NORMAL, 4, NULL); /* [S] */
-		mvwchgat(main_win, 0, 27, 1, A_NORMAL, 4, NULL); /* [Q] */
-		wrefresh(main_win);
-		mvwprintw(alarm_win, 0, 0, "Civil buffer:");
-		mvwprintw(alarm_win, 1, 0, "German civil warning:");
-		wrefresh(alarm_win);
 		mvwprintw(decode_win, 0, 0, "old");
 		mvwprintw(decode_win, 2, 0, "txcall dst leap");
 		mvwchgat(decode_win, 2, 0, 15, A_INVIS, 7, NULL);
 		wrefresh(decode_win);
+		mvwprintw(alarm_win, 0, 0, "Civil buffer:");
+		mvwprintw(alarm_win, 1, 0, "German civil warning:");
+		wrefresh(alarm_win);
 		mvwprintw(input_win, 0, 0, "act total       realfreq Hz increment bit");
 		wrefresh(input_win);
+		mvwprintw(main_win, 0, 0, "[S] -> toggle time sync   [Q] -> quit");
+		mvwchgat(main_win, 0, 1, 1, A_NORMAL, 4, NULL); /* [S] */
+		mvwchgat(main_win, 0, 27, 1, A_NORMAL, 4, NULL); /* [Q] */
+		wrefresh(main_win);
 	}
 
 	for (;;) {
