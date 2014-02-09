@@ -27,6 +27,16 @@ SUCH DAMAGE.
 #include "decode_alarm.h"
 
 void
+show_civbuf(uint8_t *buf)
+{
+	int i;
+
+	for (i = 0; i < 40; i++)
+		mvwprintw(alarm_win, 0, i + 14, "%u", buf[i]);
+	wrefresh(alarm_win);
+}
+
+void
 display_alarm(uint8_t *buf, int fromfile)
 {
 	uint8_t ds1, ds2, ps1, ps2, pl1, pl2;

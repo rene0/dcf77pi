@@ -266,6 +266,8 @@ main(int argc, char *argv[])
 			    &time, &acc_minlen, dt);
 
 			if (time.tm_min % 3 == 0) {
+				if (infilename == NULL)
+					show_civbuf(civbuf);
 				if (civ1 == 1 && civ2 == 1)
 					display_alarm(civbuf, infilename != NULL);
 				if (civ1 != civ2)
