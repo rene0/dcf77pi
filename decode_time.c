@@ -448,12 +448,17 @@ display_time(int dt, struct tm time)
 }
 
 void
-display_time_gui(int dt, struct tm time)
+display_time_gui(int dt, struct tm time, uint8_t *buffer, int acc_minlen)
 {
-	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d",
-	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
-	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min);
-	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
+	int i, xpos;
+
+	/* display bits of previous minute */
+	for (xpos = 4, i = 0; i < 60; i++, xpos++) {
+		if (is_space_bit(i))
+			xpos++;
+		mvwprintw(decode_win, 0, xpos, "%u", buffer[i]);
+	}
+	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
 	/* color bits depending on the results */
 	if (dt & DT_B0)
 		mvwchgat(decode_win, 0, 4, 1, A_NORMAL, 1, NULL);
@@ -478,6 +483,12 @@ display_time_gui(int dt, struct tm time)
 	if (dt & DT_LEAPONE)
 		mvwchgat(decode_win, 0, 77, 1, A_NORMAL, 3, NULL);
 
+	/* display date and time */
+	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d (%d)",
+	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
+	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min,
+	    acc_minlen);
+	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 	/* color date/time string depending on the results */
 	if (dt & DT_DSTERR)
 		mvwchgat(decode_win, 1, 0, 6, A_NORMAL, 1, NULL);
@@ -522,20 +533,5 @@ display_time_gui(int dt, struct tm time)
 	else
 		mvwchgat(decode_win, 2, 16, 5, A_INVIS, 7, NULL);
 
-	wrefresh(decode_win);
-}
-
-void
-cycle_minute(uint8_t *buffer, int acc_minlen)
-{
-	int i, xpos;
-
-	for (xpos = 4, i = 0; i < 60; i++, xpos++) {
-		if (is_space_bit(i))
-			xpos++;
-		mvwprintw(decode_win, 0, xpos, "%u", buffer[i]);
-	}
-	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, COLOR_PAIR(7), NULL);
-	mvwprintw(decode_win, 1, 28, "(%d)", acc_minlen);
 	wrefresh(decode_win);
 }

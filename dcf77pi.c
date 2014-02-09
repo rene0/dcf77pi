@@ -248,8 +248,6 @@ main(int argc, char *argv[])
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			if (infilename != NULL)
 				printf(" (%d) %d\n", acc_minlen, minlen);
-			else
-				cycle_minute(get_buffer(), acc_minlen);
 			if (init == 1 || minlen >= 59)
 				memcpy((void *)&oldtime, (const void *)&time,
 				    sizeof(struct tm));
@@ -270,7 +268,7 @@ main(int argc, char *argv[])
 			if (infilename != NULL)
 				display_time(dt, time);
 			else
-				display_time_gui(dt, time);
+				display_time_gui(dt, time, get_buffer(), acc_minlen);
 
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
