@@ -504,7 +504,7 @@ display_bit_gui(void)
 		mvwprintw(input_win, 3, 48, "        ");
 	wattroff(input_win, COLOR_PAIR(1));
 
-	for (xpos = bitpos + 4, i = 0; i < bitpos; i++)
+	for (xpos = bitpos + 4, i = 0; i <= bitpos; i++)
 		if (is_space_bit(i))
 			xpos++;
 

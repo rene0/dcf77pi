@@ -466,23 +466,23 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int acc_minlen)
 	else
 		mvwchgat(decode_win, 0, 4, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_B20)
-		mvwchgat(decode_win, 0, 28, 1, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 0, 29, 1, A_NORMAL, 1, NULL);
 	else
-		mvwchgat(decode_win, 0, 28, 1, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 0, 29, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_MIN)
-		mvwchgat(decode_win, 0, 38, 1, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 0, 39, 1, A_NORMAL, 1, NULL);
 	else
-		mvwchgat(decode_win, 0, 38, 1, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 0, 39, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_HOUR)
-		mvwchgat(decode_win, 0, 47, 1, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 0, 48, 1, A_NORMAL, 1, NULL);
 	else
-		mvwchgat(decode_win, 0, 47, 1, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 0, 48, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_DATE)
-		mvwchgat(decode_win, 0, 75, 1, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 0, 76, 1, A_NORMAL, 1, NULL);
 	else
-		mvwchgat(decode_win, 0, 75, 1, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 0, 76, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_LEAPONE)
-		mvwchgat(decode_win, 0, 77, 1, A_NORMAL, 3, NULL);
+		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
 
 	/* display date and time */
 	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d (%d)",
