@@ -244,6 +244,7 @@ main(int argc, char *argv[])
 			}
 		}
 
+		bit = next_bit(infilename != NULL);
 		if (bit & GETBIT_TOOLONG) {
 			minlen = 61;
 			/*
