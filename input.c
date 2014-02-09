@@ -323,15 +323,12 @@ get_bit(void)
 				if (tlow * 100 / t < 1) {
 					state |= GETBIT_RECV;
 					outch = 'r';
-					mvwprintw(input_win, 3, 50, "receive");
 				} else if (tlow * 100 / t >= 99) {
 					state |= GETBIT_XMIT;
 					outch = 'x';
-					mvwprintw(input_win, 3, 50, "transmit");
 				} else {
 					state |= GETBIT_RND;
 					outch = '#';
-					mvwprintw(input_win, 3, 50, "random");
 				}
 				wattroff(input_win, COLOR_PAIR(1));
 				goto report; /* timeout */
