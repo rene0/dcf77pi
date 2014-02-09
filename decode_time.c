@@ -458,6 +458,7 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int acc_minlen)
 			xpos++;
 		mvwprintw(decode_win, 0, xpos, "%u", buffer[i]);
 	}
+	wclrtoeol(decode_win);
 	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
 	/* color bits depending on the results */
 	if (dt & DT_B0)
@@ -488,6 +489,7 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int acc_minlen)
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
 	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min,
 	    acc_minlen);
+	wclrtoeol(decode_win);
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 	/* color date/time string depending on the results */
 	if (dt & DT_DSTERR)
@@ -509,21 +511,21 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int acc_minlen)
 
 	/* flip lights depending on the results */
 	if ((dt & DT_XMIT) == 0)
-		mvwchgat(decode_win, 2, 0, 6, A_INVIS, 7, NULL);
+		mvwchgat(decode_win, 2, 0, 6, A_NORMAL, 8, NULL);
 	if ((announce && ANN_CHDST) == 0)
-		mvwchgat(decode_win, 2, 7, 3, A_INVIS, 7, NULL);
+		mvwchgat(decode_win, 2, 7, 3, A_NORMAL, 8, NULL);
 	if (dt & DT_CHDST)
 		mvwchgat(decode_win, 2, 7, 3, A_NORMAL, 2, NULL);
 	else if (dt & DT_CHDSTERR)
 		mvwchgat(decode_win, 2, 7, 3, A_BOLD, 3, NULL);
 	if ((announce & ANN_LEAP) == 0)
-		mvwchgat(decode_win, 2, 11, 3, A_INVIS, 7, NULL);
+		mvwchgat(decode_win, 2, 11, 3, A_NORMAL, 8, NULL);
 	if (dt & DT_LEAP)
 		mvwchgat(decode_win, 2, 11, 3, A_NORMAL, 2, NULL);
 	else if (dt & DT_LEAPERR)
 		mvwchgat(decode_win, 2, 11, 3, A_BOLD, 3, NULL);
 	if (dt & DT_LONG) {
-		mvwprintw(decode_win, 2, 16, "long");
+		mvwprintw(decode_win, 2, 16, "long ");
 		mvwchgat(decode_win, 2, 16, 4, A_NORMAL, 1, NULL);
 	}
 	else if (dt & DT_SHORT) {
@@ -531,7 +533,7 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int acc_minlen)
 		mvwchgat(decode_win, 2, 16, 5, A_NORMAL, 1, NULL);
 	}
 	else
-		mvwchgat(decode_win, 2, 16, 5, A_INVIS, 7, NULL);
+		mvwchgat(decode_win, 2, 16, 5, A_NORMAL, 8, NULL);
 
 	wrefresh(decode_win);
 }

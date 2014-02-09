@@ -132,6 +132,7 @@ main(int argc, char *argv[])
 		init_pair(3, COLOR_YELLOW, COLOR_BLACK); /* turn on A_BOLD */
 		init_pair(4, COLOR_BLUE, COLOR_BLACK);
 		init_pair(7, COLOR_WHITE, COLOR_BLACK);
+		init_pair(8, COLOR_BLACK, COLOR_BLACK); /* A_INVIS does not work? */
 		noecho();
 		nonl();
 		cbreak();
