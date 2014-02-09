@@ -42,16 +42,14 @@ SUCH DAMAGE.
 #include "decode_alarm.h"
 #include "config.h"
 
-WINDOW *main_win0, *main_win1;
+WINDOW *main_win;
 
 void
 curses_cleanup(char *reason)
 {
 	cleanup();
-	if (main_win0 != NULL)
-		delwin(main_win0);
-	if (main_win1 != NULL)
-		delwin(main_win1);
+	if (main_win != NULL)
+		delwin(main_win);
 	if (input_win0 != NULL)
 		delwin(input_win0);
 	if (input_win1 != NULL)
@@ -121,7 +119,7 @@ main(int argc, char *argv[])
 	bzero(&time, sizeof(time));
 
 	if (infilename == NULL) {
-		main_win0 = main_win1 = NULL;
+		main_win = NULL;
 		alarm_win = NULL;
 		decode_win = NULL;
 		input_win0 = input_win1 = NULL;
@@ -144,17 +142,12 @@ main(int argc, char *argv[])
 		refresh(); /* prevent clearing windows upon getch() / refresh() */
 
 		/* allocate windows */
-		main_win0 = newwin(1, 80, 4, 0);
-		if (main_win0 == NULL) {
-			curses_cleanup("Creating main_win0 failed.\n");
+		main_win = newwin(1, 80, 24, 0);
+		if (main_win == NULL) {
+			curses_cleanup("Creating main_win failed.\n");
 			return 0;
 		}
-		main_win1 = newwin(1, 80, 24, 0);
-		if (main_win1 == NULL) {
-			curses_cleanup("Creating main_win1 failed.\n");
-			return 0;
-		}
-		alarm_win = newwin(1, 80, 5, 0);
+		alarm_win = newwin(2, 80, 4, 0);
 		if (alarm_win == NULL) {
 			curses_cleanup("Creating alarm_win failed.\n");
 			return 0;
@@ -175,13 +168,12 @@ main(int argc, char *argv[])
 			return 0;
 		}
 		/* draw initial screen */
-		mvwprintw(main_win0, 0, 0, "Civil buffer:");
-		wrefresh(main_win0);
-		mvwprintw(main_win1, 0, 0, "[S] -> toggle time sync   [Q] -> quit");
-		mvwchgat(main_win1, 0, 1, 1, A_NORMAL, 4, NULL); /* [S] */
-		mvwchgat(main_win1, 0, 27, 1, A_NORMAL, 4, NULL); /* [Q] */
-		wrefresh(main_win1);
-		mvwprintw(alarm_win, 0, 0, "German civil warning:");
+		mvwprintw(main_win, 0, 0, "[S] -> toggle time sync   [Q] -> quit");
+		mvwchgat(main_win, 0, 1, 1, A_NORMAL, 4, NULL); /* [S] */
+		mvwchgat(main_win, 0, 27, 1, A_NORMAL, 4, NULL); /* [Q] */
+		wrefresh(main_win);
+		mvwprintw(alarm_win, 0, 0, "Civil buffer:");
+		mvwprintw(alarm_win, 1, 0, "German civil warning:");
 		wrefresh(alarm_win);
 		mvwprintw(input_win0, 0, 0, "old");
 		wrefresh(input_win0);
@@ -278,8 +270,8 @@ main(int argc, char *argv[])
 					display_alarm(civbuf, infilename != NULL);
 				if (civ1 != civ2)
 					display_alarm_error(infilename != NULL);
-				if (civ1 == 0 && civ2 == 0)
-					clear_alarm(infilename != NULL);
+				if (civ1 == 0 && civ2 == 0 && infilename == NULL)
+					clear_alarm();
 			}
 
 			if (infilename != NULL)

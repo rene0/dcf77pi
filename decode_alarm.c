@@ -51,7 +51,7 @@ display_alarm(uint8_t *buf, int fromfile)
 		    ds1, ps1, ds2, ps2, dl1, pl1, dl2, pl2);
 	else {
 		wattron(alarm_win, COLOR_PAIR(3) | A_BOLD);
-		mvwprintw(alarm_win, 0, 22,
+		mvwprintw(alarm_win, 1, 22,
 		    "0x%1x 0x%1x 0x%1x 0x%1x 0x%3x 0x%1x 0x%3x\n 0x%1x",
 		    ds1, ps1, ds2, ps2, dl1, pl1, dl2, pl2);
 		wattroff(alarm_win, COLOR_PAIR(3) | A_BOLD);
@@ -66,19 +66,17 @@ display_alarm_error(int fromfile)
 		printf("Civil warning error\n");
 	else {
 		wattron(alarm_win, COLOR_PAIR(1));
-		mvwprintw(alarm_win, 0, 22, "error");
+		mvwprintw(alarm_win, 1, 22, "error");
 		wattroff(alarm_win, COLOR_PAIR(1));
 		wrefresh(alarm_win);
 	}
 }
 
 void
-clear_alarm(int fromfile)
+clear_alarm(void)
 {
-	if (fromfile == 0) {
-		wattron(alarm_win, COLOR_PAIR(2));
-		mvwprintw(alarm_win, 0, 22, "none");
-		wattroff(alarm_win, COLOR_PAIR(2));
-		wrefresh(alarm_win);
-	}
+	wattron(alarm_win, COLOR_PAIR(2));
+	mvwprintw(alarm_win, 1, 22, "none");
+	wattroff(alarm_win, COLOR_PAIR(2));
+	wrefresh(alarm_win);
 }

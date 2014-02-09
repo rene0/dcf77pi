@@ -35,7 +35,7 @@ SUCH DAMAGE.
  */
 void display_alarm(uint8_t *buf, int fromfile);
 void display_alarm_error(int fromfile);
-void clear_alarm(int fromfile);
+void clear_alarm(void);
 
 WINDOW *alarm_win;
 #endif
