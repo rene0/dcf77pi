@@ -447,80 +447,79 @@ display_time(int dt, struct tm time)
 }
 
 void
-display_time_gui(int dt, struct tm time, WINDOW *input_win0)
+display_time_gui(int dt, struct tm time)
 {
-	mvwprintw(decode_win, 0, 0, "%s %04d-%02d-%02d %s %02d:%02d",
+	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
 	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min);
-	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
+	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 	/* color bits depending on the results */
 	if (dt & DT_B0)
-		mvwchgat(input_win0, 0, 4, 1, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 0, 4, 1, A_NORMAL, 1, NULL);
 	else
-		mvwchgat(input_win0, 0, 4, 1, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 0, 4, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_B20)
-		mvwchgat(input_win0, 0, 28, 1, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 0, 28, 1, A_NORMAL, 1, NULL);
 	else
-		mvwchgat(input_win0, 0, 28, 1, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 0, 28, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_MIN)
-		mvwchgat(input_win0, 0, 38, 1, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 0, 38, 1, A_NORMAL, 1, NULL);
 	else
-		mvwchgat(input_win0, 0, 38, 1, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 0, 38, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_HOUR)
-		mvwchgat(input_win0, 0, 47, 1, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 0, 47, 1, A_NORMAL, 1, NULL);
 	else
-		mvwchgat(input_win0, 0, 47, 1, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 0, 47, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_DATE)
-		mvwchgat(input_win0, 0, 75, 1, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 0, 75, 1, A_NORMAL, 1, NULL);
 	else
-		mvwchgat(input_win0, 0, 75, 1, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 0, 75, 1, A_NORMAL, 2, NULL);
 	if (dt & DT_LEAPONE)
-		mvwchgat(input_win0, 0, 77, 1, A_NORMAL, 3, NULL);
+		mvwchgat(decode_win, 0, 77, 1, A_NORMAL, 3, NULL);
 
 	/* color date/time string depending on the results */
 	if (dt & DT_DSTERR)
-		mvwchgat(decode_win, 0, 0, 6, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 1, 0, 6, A_NORMAL, 1, NULL);
 	else if (dt & DT_DSTJUMP)
-		mvwchgat(decode_win, 0, 0, 6, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
 	if (dt & DT_YEARJUMP)
-		mvwchgat(decode_win, 0, 7, 4, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 7, 4, A_BOLD, 3, NULL);
 	if (dt & DT_MONTHJUMP)
-		mvwchgat(decode_win, 0, 12, 2, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 12, 2, A_BOLD, 3, NULL);
 	if (dt & DT_MDAYJUMP)
-		mvwchgat(decode_win, 0, 15, 2, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 15, 2, A_BOLD, 3, NULL);
 	if (dt & DT_WDAYJUMP)
-		mvwchgat(decode_win, 0, 18, 3, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 18, 3, A_BOLD, 3, NULL);
 	if (dt & DT_HOURJUMP)
-		mvwchgat(decode_win, 0, 22, 2, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 22, 2, A_BOLD, 3, NULL);
 	if (dt & DT_MINJUMP)
-		mvwchgat(decode_win, 0, 25, 2, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 25, 2, A_BOLD, 3, NULL);
 
 	/* flip lights depending on the results */
 	if ((dt & DT_XMIT) == 0)
-		mvwchgat(decode_win, 1, 0, 6, A_INVIS, 7, NULL);
+		mvwchgat(decode_win, 2, 0, 6, A_INVIS, 7, NULL);
 	if ((announce && ANN_CHDST) == 0)
-		mvwchgat(decode_win, 1, 7, 3, A_INVIS, 7, NULL);
+		mvwchgat(decode_win, 2, 7, 3, A_INVIS, 7, NULL);
 	if (dt & DT_CHDST)
-		mvwchgat(decode_win, 1, 7, 3, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 2, 7, 3, A_NORMAL, 2, NULL);
 	else if (dt & DT_CHDSTERR)
-		mvwchgat(decode_win, 1, 7, 3, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 2, 7, 3, A_BOLD, 3, NULL);
 	if ((announce & ANN_LEAP) == 0)
-		mvwchgat(decode_win, 1, 11, 3, A_INVIS, 7, NULL);
+		mvwchgat(decode_win, 2, 11, 3, A_INVIS, 7, NULL);
 	if (dt & DT_LEAP)
-		mvwchgat(decode_win, 1, 11, 3, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 2, 11, 3, A_NORMAL, 2, NULL);
 	else if (dt & DT_LEAPERR)
-		mvwchgat(decode_win, 1, 11, 3, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 2, 11, 3, A_BOLD, 3, NULL);
 	if (dt & DT_LONG) {
-		mvwprintw(decode_win, 1, 16, "long");
-		mvwchgat(decode_win, 1, 16, 4, A_NORMAL, 1, NULL);
+		mvwprintw(decode_win, 2, 16, "long");
+		mvwchgat(decode_win, 2, 16, 4, A_NORMAL, 1, NULL);
 	}
 	else if (dt & DT_SHORT) {
-		mvwprintw(decode_win, 1, 16, "short");
-		mvwchgat(decode_win, 1, 16, 5, A_NORMAL, 1, NULL);
+		mvwprintw(decode_win, 2, 16, "short");
+		mvwchgat(decode_win, 2, 16, 5, A_NORMAL, 1, NULL);
 	}
 	else
-		mvwchgat(decode_win, 1, 16, 5, A_INVIS, 7, NULL);
+		mvwchgat(decode_win, 2, 16, 5, A_INVIS, 7, NULL);
 
 	wrefresh(decode_win);
-	wrefresh(input_win0);
 }

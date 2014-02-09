@@ -288,9 +288,9 @@ get_bit(void)
 			if (p == GETBIT_IO) {
 				state |= GETBIT_IO;
 				outch = '*';
-				wattron(input_win1, COLOR_PAIR(1));
-				mvwprintw(input_win1, 3, 50, "IO");
-				wattroff(input_win1, COLOR_PAIR(1));
+				wattron(input_win, COLOR_PAIR(1));
+				mvwprintw(input_win, 3, 50, "IO");
+				wattroff(input_win, COLOR_PAIR(1));
 				goto report;
 			}
 
@@ -319,21 +319,21 @@ get_bit(void)
 			if (t > realfreq * 5/2) {
 				realfreq = realfreq + w * ((t / 2.5) - realfreq);
 				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-				wattron(input_win1, COLOR_PAIR(1));
+				wattron(input_win, COLOR_PAIR(1));
 				if (tlow * 100 / t < 1) {
 					state |= GETBIT_RECV;
 					outch = 'r';
-					mvwprintw(input_win1, 3, 50, "receive");
+					mvwprintw(input_win, 3, 50, "receive");
 				} else if (tlow * 100 / t >= 99) {
 					state |= GETBIT_XMIT;
 					outch = 'x';
-					mvwprintw(input_win1, 3, 50, "transmit");
+					mvwprintw(input_win, 3, 50, "transmit");
 				} else {
 					state |= GETBIT_RND;
 					outch = '#';
-					mvwprintw(input_win1, 3, 50, "random");
+					mvwprintw(input_win, 3, 50, "random");
 				}
-				wattroff(input_win1, COLOR_PAIR(1));
+				wattroff(input_win, COLOR_PAIR(1));
 				goto report; /* timeout */
 			}
 
@@ -361,17 +361,17 @@ get_bit(void)
 						realfreq = realfreq + w * (t - realfreq);
 					a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 				}
-				mvwprintw(input_win1, 3, 0, "%3u  %4u (%2u%%) %f %f", tlow, t, count, realfreq, a);
+				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%) %f %f", tlow, t, count, realfreq, a);
 				if (freq_reset)
-					mvwchgat(input_win1, 3, 16, 11/**/, A_BOLD, COLOR_PAIR(1), NULL);
-				wattron(input_win1, COLOR_PAIR(2));
+					mvwchgat(input_win, 3, 16, 11/**/, A_BOLD, COLOR_PAIR(1), NULL);
+				wattron(input_win, COLOR_PAIR(2));
 				if (newminute) {
 					count *= 2;
 					state |= GETBIT_EOM;
-					mvwprintw(input_win1, 3, 40, "minute");
+					mvwprintw(input_win, 3, 40, "minute");
 				} else
-					mvwprintw(input_win1, 3, 40, "OK");
-				wattroff(input_win1, COLOR_PAIR(2));
+					mvwprintw(input_win, 3, 40, "OK");
+				wattroff(input_win, COLOR_PAIR(2));
 				break; /* start of new second */
 			}
 			slp.tv_sec = 0;
@@ -400,8 +400,7 @@ report:
 			if (state & GETBIT_EOM)
 				fprintf(logfile, "\n");
 		}
-		wrefresh(input_win0);
-		wrefresh(input_win1);
+		wrefresh(input_win);
 	} else {
 		while (valid == 0) {
 			inch = getc(datafile);
@@ -496,26 +495,26 @@ display_bit_gui(void)
 {
 	int xpos, i;
 
-	wattron(input_win1, COLOR_PAIR(1));
+	wattron(input_win, COLOR_PAIR(1));
 	if (state & GETBIT_RECV)
-		mvwprintw(input_win1, 3, 50, "receive");
+		mvwprintw(input_win, 3, 50, "receive");
 	else if (state & GETBIT_XMIT)
-		mvwprintw(input_win1, 3, 50, "transmit");
+		mvwprintw(input_win, 3, 50, "transmit");
 	else if (state & GETBIT_RND)
-		mvwprintw(input_win1, 3, 50, "random");
+		mvwprintw(input_win, 3, 50, "random");
 	else
-		mvwprintw(input_win1, 3, 50, "        ");
-	wattroff(input_win1, COLOR_PAIR(1));
+		mvwprintw(input_win, 3, 50, "        ");
+	wattroff(input_win, COLOR_PAIR(1));
 
 	for (xpos = bitpos + 4, i = 0; i < bitpos; i++)
 		if (is_space_bit(i))
 			xpos++;
 
 	if (state & GETBIT_READ)
-		mvwprintw(input_win1, 0, xpos, "_");
+		mvwprintw(input_win, 0, xpos, "_");
 	else
-		mvwprintw(input_win1, 0, xpos, "%u", buffer[bitpos]);
-	wrefresh(input_win1);
+		mvwprintw(input_win, 0, xpos, "%u", buffer[bitpos]);
+	wrefresh(input_win);
 }
 
 uint16_t
@@ -524,16 +523,8 @@ next_bit(int fromfile)
 	if (state & GETBIT_EOM) {
 		bitpos = 0;
 		if (fromfile == 0) {
-			int i, xpos;
-			for (xpos = 4, i = 0; i < sizeof(buffer); i++, xpos++) {
-				if (is_space_bit(i))
-					xpos++;
-				mvwprintw(input_win0, 0, xpos, "%u", buffer[bitpos]);
-			}
-			mvwchgat(input_win0, 0, 0, 80, A_NORMAL, COLOR_PAIR(7), NULL);
-			mvwchgat(input_win1, 0, 0, 80, A_INVIS, COLOR_PAIR(7), NULL);
-			wrefresh(input_win0);
-			wrefresh(input_win1);
+			mvwchgat(input_win, 0, 0, 80, A_INVIS, COLOR_PAIR(7), NULL);
+			wrefresh(input_win);
 		}
 	} else
 		bitpos++;
@@ -543,16 +534,16 @@ next_bit(int fromfile)
 		if (fromfile)
 			printf(" L");
 		else {
-			wattron(input_win1, COLOR_PAIR(1));
-			mvwprintw(input_win1, 3, 40, "no minute");
-			wattroff(input_win1, COLOR_PAIR(1));
-			wrefresh(input_win1);
+			wattron(input_win, COLOR_PAIR(1));
+			mvwprintw(input_win, 3, 40, "no minute");
+			wattroff(input_win, COLOR_PAIR(1));
+			wrefresh(input_win);
 		}
 		return state;
 	}
 	state &= ~GETBIT_TOOLONG; /* fits again */
 	if (fromfile == 0)
-		wrefresh(input_win1);
+		wrefresh(input_win);
 	return state;
 }
 

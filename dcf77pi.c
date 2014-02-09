@@ -50,10 +50,8 @@ curses_cleanup(char *reason)
 	cleanup();
 	if (main_win != NULL)
 		delwin(main_win);
-	if (input_win0 != NULL)
-		delwin(input_win0);
-	if (input_win1 != NULL)
-		delwin(input_win1);
+	if (input_win != NULL)
+		delwin(input_win);
 	if (alarm_win != NULL)
 		delwin(alarm_win);
 	if (decode_win != NULL)
@@ -122,7 +120,7 @@ main(int argc, char *argv[])
 		main_win = NULL;
 		alarm_win = NULL;
 		decode_win = NULL;
-		input_win0 = input_win1 = NULL;
+		input_win = NULL;
 		initscr();
 		if (has_colors() == FALSE) {
 			curses_cleanup("No required color support.\n");
@@ -152,17 +150,12 @@ main(int argc, char *argv[])
 			curses_cleanup("Creating alarm_win failed.\n");
 			return 0;
 		}
-		input_win0 = newwin(1, 80, 0, 0);
-		if (input_win0 == NULL) {
-			curses_cleanup("Creating input_win0 failed.\n");
+		input_win = newwin(4, 80, 7, 0);
+		if (input_win == NULL) {
+			curses_cleanup("Creating input_win failed.\n");
 			return 0;
 		}
-		input_win1 = newwin(4, 80, 7, 0);
-		if (input_win1 == NULL) {
-			curses_cleanup("Creating input_win1 failed.\n");
-			return 0;
-		}
-		decode_win = newwin(2, 80, 1, 0);
+		decode_win = newwin(3, 80, 0, 0);
 		if (decode_win == NULL) {
 			curses_cleanup("Creating decode_win failed.\n");
 			return 0;
@@ -175,13 +168,12 @@ main(int argc, char *argv[])
 		mvwprintw(alarm_win, 0, 0, "Civil buffer:");
 		mvwprintw(alarm_win, 1, 0, "German civil warning:");
 		wrefresh(alarm_win);
-		mvwprintw(input_win0, 0, 0, "old");
-		wrefresh(input_win0);
-		mvwprintw(input_win1, 0, 0, "act total       realfreq Hz increment bit");
-		wrefresh(input_win1);
-		mvwprintw(decode_win, 1, 0, "txcall dst leap");
-		mvwchgat(decode_win, 1, 0, 15, A_INVIS, 7, NULL);
+		mvwprintw(decode_win, 0, 0, "old");
+		mvwprintw(decode_win, 2, 0, "txcall dst leap");
+		mvwchgat(decode_win, 2, 0, 15, A_INVIS, 7, NULL);
 		wrefresh(decode_win);
+		mvwprintw(input_win, 0, 0, "act total       realfreq Hz increment bit");
+		wrefresh(input_win);
 	}
 
 	for (;;) {
@@ -256,7 +248,15 @@ main(int argc, char *argv[])
 			if (infilename != NULL)
 				printf(" (%d) %d\n", acc_minlen, minlen);
 			else {
-				mvwprintw(decode_win, 0, 28, "(%d)", acc_minlen);
+				int i, xpos;
+				uint8_t *buffer = get_buffer();
+				for (xpos = 4, i = 0; i < sizeof(buffer); i++, xpos++) {
+					if (is_space_bit(i))
+						xpos++;
+					mvwprintw(decode_win, 0, xpos, "%u", buffer[bitpos]);
+				}
+				mvwchgat(decode_win, 0, 0, 80, A_NORMAL, COLOR_PAIR(7), NULL);
+				mvwprintw(decode_win, 1, 28, "(%d)", acc_minlen);
 				wrefresh(decode_win);
 			}
 			if (init == 1 || minlen >= 59)
@@ -279,7 +279,7 @@ main(int argc, char *argv[])
 			if (infilename != NULL)
 				display_time(dt, time);
 			else
-				display_time_gui(dt, time, input_win0);
+				display_time_gui(dt, time);
 
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&

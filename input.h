@@ -54,7 +54,8 @@ void display_bit_gui(void);
 uint16_t next_bit(int fromfile); /* prepare for next bit */
 uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
+int is_space_bit(int bit);
 
-WINDOW *input_win0, *input_win1;
+WINDOW *input_win;
 
 #endif
