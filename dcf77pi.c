@@ -187,6 +187,9 @@ main(int argc, char *argv[])
 		wrefresh(input_win0);
 		mvwprintw(input_win1, 0, 0, "act total       realfreq Hz increment bit");
 		wrefresh(input_win1);
+		mvwprintw(decode_win, 1, 0, "txcall dst leap");
+		mvwchgat(decode_win, 1, 0, 15, A_INVIS, 7, NULL);
+		wrefresh(decode_win);
 	}
 
 	for (;;) {
