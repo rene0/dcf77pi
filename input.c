@@ -62,14 +62,6 @@ FILE *logfile = NULL; /* auto-appended in live mode */
 int fd = 0; /* gpio file */
 struct hardware hw;
 
-void
-signal_callback_handler(int signum)
-{
-	printf("Caught signal %d\n", signum);
-	cleanup();
-	exit(signum);
-}
-
 int
 init_hardware(int pin_nr)
 {
@@ -169,8 +161,6 @@ set_mode(char *infilename, char *logfilename)
 	hw.freq = strtol(get_config_value("freq"), NULL, 10);
 	hw.maxzero = strtol(get_config_value("maxzero"), NULL, 10);
 	hw.maxone = strtol(get_config_value("maxone"), NULL, 10);
-
-	(void)signal(SIGINT, signal_callback_handler);
 
 	if (islive) {
 		res = init_hardware(hw.pin);
