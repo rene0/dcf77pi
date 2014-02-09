@@ -115,6 +115,7 @@ main(int argc, char *argv[])
 	/* no weird values please */
 	bzero(indata, sizeof(indata));
 	bzero(&time, sizeof(time));
+	bzero(&civbuf, sizeof(civbuf));
 
 	if (infilename == NULL) {
 		decode_win = NULL;
