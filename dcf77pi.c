@@ -70,7 +70,7 @@ main(int argc, char *argv[])
 	struct timeval tv;
 	struct timezone tz;
 	uint8_t civ1 = 0, civ2 = 0;
-	int dt = 0, bitpos, minlen = 0, acc_minlen = 0, init = 1, init2 = 1;
+	int dt = 0, bitpos, minlen = 0, acc_minlen = 0, old_acc_minlen, init = 1, init2 = 1;
 	int res, opt, settime = 0;
 	char *infilename, *logfilename;
 
@@ -247,6 +247,7 @@ main(int argc, char *argv[])
 			 */
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
+			old_acc_minlen = acc_minlen;
 			if (infilename != NULL)
 				printf(" (%d) %d\n", acc_minlen, minlen);
 			if (init == 1 || minlen >= 59)
@@ -269,7 +270,7 @@ main(int argc, char *argv[])
 			if (infilename != NULL)
 				display_time(dt, time);
 			else
-				display_time_gui(dt, time, get_buffer(), acc_minlen);
+				display_time_gui(dt, time, get_buffer(), minlen, old_acc_minlen);
 
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
