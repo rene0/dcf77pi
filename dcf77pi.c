@@ -178,8 +178,8 @@ main(int argc, char *argv[])
 		mvwprintw(main_win0, 0, 0, "Civil buffer:");
 		wrefresh(main_win0);
 		mvwprintw(main_win1, 0, 0, "[S] -> toggle time sync   [Q] -> quit");
-		mvwchgat(main_win1, 0, 1, 1, A_NORMAL, 4, NULL);
-		mvwchgat(main_win1, 0, 27, 1, A_NORMAL, 4, NULL);
+		mvwchgat(main_win1, 0, 1, 1, A_NORMAL, 4, NULL); /* [S] */
+		mvwchgat(main_win1, 0, 27, 1, A_NORMAL, 4, NULL); /* [Q] */
 		wrefresh(main_win1);
 		mvwprintw(alarm_win, 0, 0, "German civil warning:");
 		wrefresh(alarm_win);
