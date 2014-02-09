@@ -168,7 +168,8 @@ main(int argc, char *argv[])
 		mvwprintw(alarm_win, 0, 0, "Civil buffer:");
 		mvwprintw(alarm_win, 1, 0, "German civil warning:");
 		wrefresh(alarm_win);
-		mvwprintw(input_win, 0, 0, "act total       realfreq Hz increment bit");
+		mvwprintw(input_win, 0, 0, "new");
+		mvwprintw(input_win, 2, 0, "act total       realfreq Hz increment bit");
 		wrefresh(input_win);
 		mvwprintw(main_win, 0, 0, "[S] -> toggle time sync   [Q] -> quit");
 		mvwchgat(main_win, 0, 1, 1, A_NORMAL, 4, NULL); /* [S] */
