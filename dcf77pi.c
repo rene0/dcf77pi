@@ -247,18 +247,8 @@ main(int argc, char *argv[])
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			if (infilename != NULL)
 				printf(" (%d) %d\n", acc_minlen, minlen);
-			else {
-				int i, xpos;
-				uint8_t *buffer = get_buffer();
-				for (xpos = 4, i = 0; i < sizeof(buffer); i++, xpos++) {
-					if (is_space_bit(i))
-						xpos++;
-					mvwprintw(decode_win, 0, xpos, "%u", buffer[bitpos]);
-				}
-				mvwchgat(decode_win, 0, 0, 80, A_NORMAL, COLOR_PAIR(7), NULL);
-				mvwprintw(decode_win, 1, 28, "(%d)", acc_minlen);
-				wrefresh(decode_win);
-			}
+			else
+				cycle_minute(get_buffer(), acc_minlen);
 			if (init == 1 || minlen >= 59)
 				memcpy((void *)&oldtime, (const void *)&time,
 				    sizeof(struct tm));

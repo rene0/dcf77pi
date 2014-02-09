@@ -29,6 +29,7 @@ SUCH DAMAGE.
 #include <string.h>
 #include "config.h"
 #include "decode_time.h"
+#include "input.h"
 
 uint8_t announce = 0; /* save DST change and leap second announcements */
 int olderr = 0; /* save error state to determine if DST change might be valid */
@@ -521,5 +522,20 @@ display_time_gui(int dt, struct tm time)
 	else
 		mvwchgat(decode_win, 2, 16, 5, A_INVIS, 7, NULL);
 
+	wrefresh(decode_win);
+}
+
+void
+cycle_minute(uint8_t *buffer, int acc_minlen)
+{
+	int i, xpos;
+
+	for (xpos = 4, i = 0; i < 60; i++, xpos++) {
+		if (is_space_bit(i))
+			xpos++;
+		mvwprintw(decode_win, 0, xpos, "%u", buffer[i]);
+	}
+	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, COLOR_PAIR(7), NULL);
+	mvwprintw(decode_win, 1, 28, "(%d)", acc_minlen);
 	wrefresh(decode_win);
 }
