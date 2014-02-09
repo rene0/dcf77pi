@@ -507,10 +507,9 @@ display_bit_gui(void)
 		if (is_space_bit(i))
 			xpos++;
 
+	mvwprintw(input_win, 0, xpos, "%u", buffer[bitpos]);
 	if (state & GETBIT_READ)
-		mvwprintw(input_win, 0, xpos, "_");
-	else
-		mvwprintw(input_win, 0, xpos, "%u", buffer[bitpos]);
+		mvwchgat(input_win, 0, xpos, 1, A_BOLD, COLOR_PAIR(3), NULL);
 	wrefresh(input_win);
 }
 
