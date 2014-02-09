@@ -360,7 +360,7 @@ get_bit(void)
 				}
 				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%) %f %f", tlow, t, count, realfreq, a);
 				if (freq_reset)
-					mvwchgat(input_win, 3, 16, 11/**/, A_BOLD, COLOR_PAIR(3), NULL);
+					mvwchgat(input_win, 3, 16, 11/**/, A_BOLD, 3, NULL);
 				wattron(input_win, COLOR_PAIR(2));
 				if (newminute) {
 					count *= 2;
@@ -509,7 +509,7 @@ display_bit_gui(void)
 
 	mvwprintw(input_win, 0, xpos, "%u", buffer[bitpos]);
 	if (state & GETBIT_READ)
-		mvwchgat(input_win, 0, xpos, 1, A_BOLD, COLOR_PAIR(3), NULL);
+		mvwchgat(input_win, 0, xpos, 1, A_BOLD, 3, NULL);
 	wrefresh(input_win);
 }
 
@@ -519,7 +519,7 @@ next_bit(int fromfile)
 	if (state & GETBIT_EOM) {
 		bitpos = 0;
 		if (fromfile == 0) {
-			mvwchgat(input_win, 0, 0, 80, A_INVIS, COLOR_PAIR(7), NULL);
+			mvwchgat(input_win, 0, 0, 80, A_INVIS, 7, NULL);
 			wrefresh(input_win);
 		}
 	} else
