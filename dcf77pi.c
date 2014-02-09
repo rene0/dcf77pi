@@ -165,7 +165,7 @@ main(int argc, char *argv[])
 		/* draw initial screen */
 		mvwprintw(decode_win, 0, 0, "old");
 		mvwprintw(decode_win, 2, 0, "txcall dst leap");
-		mvwchgat(decode_win, 2, 0, 15, A_INVIS, 7, NULL);
+		mvwchgat(decode_win, 2, 0, 15, A_NORMAL, 8, NULL);
 		wrefresh(decode_win);
 		mvwprintw(alarm_win, 0, 0, "Civil buffer:");
 		mvwprintw(alarm_win, 1, 0, "German civil warning:");
