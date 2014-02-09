@@ -285,7 +285,10 @@ main(int argc, char *argv[])
 					clear_alarm(infilename != NULL);
 			}
 
-			display_time(dt, time);
+			if (infilename != NULL)
+				display_time(dt, time);
+			else
+				display_time_gui(dt, time, input_win0);
 
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
