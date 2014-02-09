@@ -497,18 +497,40 @@ display_bit_gui(void)
 }
 
 uint16_t
-next_bit(void)
+next_bit(int fromfile)
 {
-	if (state & GETBIT_EOM)
+	if (state & GETBIT_EOM) {
 		bitpos = 0;
-	else
+		if (fromfile == 0) {
+			int i, xpos;
+			for (xpos = 4, i = 0; i < sizeof(buffer); i++, xpos++) {
+				if (is_space_bit(i))
+					xpos++;
+				mvwprintw(input_win0, 0, xpos, "%u", buffer[bitpos]);
+			}
+			mvwchgat(input_win0, 0, 0, 80, A_NORMAL, COLOR_PAIR(7), NULL);
+			mvwchgat(input_win1, 0, 0, 80, A_INVIS, COLOR_PAIR(7), NULL);
+			wrefresh(input_win0);
+			wrefresh(input_win1);
+		}
+	} else
 		bitpos++;
 	if (bitpos == sizeof(buffer)) {
 		state |= GETBIT_TOOLONG;
 		bitpos = 0;
+		if (fromfile)
+			printf(" L");
+		else {
+			wattron(input_win1, COLOR_PAIR(1));
+			mvwprintw(input_win1, 3, 40, "no minute");
+			wattroff(input_win1, COLOR_PAIR(1));
+			wrefresh(input_win1);
+		}
 		return state;
 	}
 	state &= ~GETBIT_TOOLONG; /* fits again */
+	if (fromfile == 0)
+		wrefresh(input_win1);
 	return state;
 }
 
