@@ -356,16 +356,10 @@ get_bit(void)
 				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%) %f  %f", tlow, t, count, realfreq, a);
 				if (freq_reset)
 					mvwchgat(input_win, 3, 16, 11/**/, A_BOLD, 3, NULL);
-				wattron(input_win, COLOR_PAIR(2));
 				if (newminute) {
 					count *= 2;
 					state |= GETBIT_EOM;
-					mvwprintw(input_win, 3, 38, "minute   ");
-				} else if (state < GETBIT_READ)
-					mvwprintw(input_win, 3, 38, "OK       ");
-				else
-					mvwprintw(input_win, 3, 38, "         ");
-				wattroff(input_win, COLOR_PAIR(2));
+				}
 				break; /* start of new second */
 			}
 			slp.tv_sec = 0;
@@ -488,6 +482,15 @@ void
 display_bit_gui(void)
 {
 	int xpos, i;
+
+	wattron(input_win, COLOR_PAIR(2));
+	if (state & GETBIT_EOM)
+		mvwprintw(input_win, 3, 38, "minute   ");
+	else if (state < GETBIT_READ)
+		mvwprintw(input_win, 3, 38, "OK       ");
+	else
+		mvwprintw(input_win, 3, 38, "         ");
+	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
 	if (state & GETBIT_RECV)
