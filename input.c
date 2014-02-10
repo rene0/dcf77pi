@@ -316,7 +316,6 @@ get_bit(void)
 			if (t > realfreq * 5/2) {
 				realfreq = realfreq + w * ((t / 2.5) - realfreq);
 				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-				wattron(input_win, COLOR_PAIR(1));
 				if (tlow * 100 / t < 1) {
 					state |= GETBIT_RECV;
 					outch = 'r';
@@ -327,7 +326,6 @@ get_bit(void)
 					state |= GETBIT_RND;
 					outch = '#';
 				}
-				wattroff(input_win, COLOR_PAIR(1));
 				goto report; /* timeout */
 			}
 
