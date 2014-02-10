@@ -288,10 +288,6 @@ get_bit(void)
 			if (p == GETBIT_IO) {
 				state |= GETBIT_IO;
 				outch = '*';
-				wattron(input_win, COLOR_PAIR(1));
-				mvwprintw(input_win, 3, 48, "IO");
-				wattroff(input_win, COLOR_PAIR(1));
-				wclrtoeol(input_win);
 				goto report;
 			}
 
@@ -500,6 +496,8 @@ display_bit_gui(void)
 		mvwprintw(input_win, 3, 48, "transmit");
 	else if (state & GETBIT_RND)
 		mvwprintw(input_win, 3, 48, "random  ");
+	else if (state & GETBIT_IO)
+		mvwprintw(input_win, 3, 48, "IO      ");
 	else
 		mvwprintw(input_win, 3, 48, "        ");
 	wattroff(input_win, COLOR_PAIR(1));
