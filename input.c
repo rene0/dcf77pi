@@ -361,8 +361,10 @@ get_bit(void)
 					count *= 2;
 					state |= GETBIT_EOM;
 					mvwprintw(input_win, 3, 38, "minute   ");
-				} else
+				} else if (state < GETBIT_READ)
 					mvwprintw(input_win, 3, 38, "OK       ");
+				else
+					mvwprintw(input_win, 3, 38, "         ");
 				wattroff(input_win, COLOR_PAIR(2));
 				break; /* start of new second */
 			}
