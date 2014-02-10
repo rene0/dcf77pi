@@ -353,9 +353,9 @@ get_bit(void)
 						realfreq = realfreq + w * (t - realfreq);
 					a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 				}
-				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%) %f  %f", tlow, t, count, realfreq, a);
+				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%) %11.6f  %8.6f", tlow, t, count, realfreq, a);
 				if (freq_reset)
-					mvwchgat(input_win, 3, 16, 11/**/, A_BOLD, 3, NULL);
+					mvwchgat(input_win, 3, 16, 11, A_BOLD, 3, NULL);
 				if (newminute) {
 					count *= 2;
 					state |= GETBIT_EOM;
