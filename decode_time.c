@@ -467,6 +467,10 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen, int acc_mi
 		mvwchgat(decode_win, 0, 4, 1, A_NORMAL, 1, NULL);
 	else
 		mvwchgat(decode_win, 0, 4, 1, A_NORMAL, 2, NULL);
+	if (dt & DT_DSTERR)
+		mvwchgat(decode_win, 0, 24, 2, A_NORMAL, 1, NULL);
+	else
+		mvwchgat(decode_win, 0, 24, 2, A_NORMAL, 2, NULL);
 	if (dt & DT_B20)
 		mvwchgat(decode_win, 0, 29, 1, A_NORMAL, 1, NULL);
 	else
@@ -494,9 +498,7 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen, int acc_mi
 	wclrtoeol(decode_win);
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 	/* color date/time string depending on the results */
-	if (dt & DT_DSTERR)
-		mvwchgat(decode_win, 1, 0, 6, A_NORMAL, 1, NULL);
-	else if (dt & DT_DSTJUMP)
+	if (dt & DT_DSTJUMP)
 		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
 	if (dt & DT_YEARJUMP)
 		mvwchgat(decode_win, 1, 7, 4, A_BOLD, 3, NULL);
