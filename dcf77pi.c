@@ -43,6 +43,7 @@ SUCH DAMAGE.
 #include "config.h"
 
 WINDOW *main_win;
+int bitpos, old_bitpos = -1;
 
 void
 curses_cleanup(char *reason)
@@ -69,6 +70,21 @@ draw_keys(void)
 	wrefresh(main_win);
 }
 
+void
+statusbar(char *fmt, ...)
+{
+	va_list ap;
+
+	wmove(main_win, 0, 0);
+	va_start(ap, fmt);
+	vwprintw(main_win, fmt, ap);
+	va_end(ap);
+	wclrtoeol(main_win);
+	wrefresh(main_win);
+
+	old_bitpos = bitpos; /* start timer */
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -79,7 +95,7 @@ main(int argc, char *argv[])
 	struct timeval tv;
 	struct timezone tz;
 	uint8_t civ1 = 0, civ2 = 0;
-	int dt = 0, bitpos, minlen = 0, acc_minlen = 0, old_acc_minlen, init = 1, init2 = 1;
+	int dt = 0, minlen = 0, acc_minlen = 0, old_acc_minlen, init = 1, init2 = 1;
 	int res, opt, settime = 0;
 	char *infilename, *logfilename;
 	int inkey;
@@ -204,6 +220,17 @@ main(int argc, char *argv[])
 			acc_minlen += 1000;
 
 		bitpos = get_bitpos();
+		if (old_bitpos != -1 &&
+		    (bitpos % 60 == (old_bitpos + 2) % 60 ||
+		    (old_bitpos == 57 && bitpos == 0))) {
+			/*
+			 * Time for status text passed, cannot use *sleep()
+			 * in statusbar() because that pauses reception
+			 */
+			old_bitpos = -1;
+			draw_keys();
+		}
+
 		if (bit & GETBIT_EOM) {
 			/* handle the missing minute marker */
 			minlen = bitpos + 1;
