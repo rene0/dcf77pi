@@ -211,6 +211,7 @@ main(int argc, char *argv[])
 				break;
 			if (inkey == 'S') {
 				settime = 1 - settime;
+				statusbar("Time synchronization %s", settime ? "on" : "off");
 			}
 		}
 
@@ -321,18 +322,19 @@ main(int argc, char *argv[])
 				isotime.tm_sec = 0;
 				epochtime = mktime(&isotime);
 				if (epochtime == -1)
-					printf("mktime() failed!\n");
+					statusbar("mktime() failed!");
 				else {
 					tv.tv_sec = epochtime;
 					tv.tv_usec = 50000;
 					/* adjust for bit reception algorithm */
-					printf("Setting time (%lld , %lld)\n",
+					statusbar("Setting time (%lld , %lld)",
 					    (long long int)tv.tv_sec,
 					    (long long int)tv.tv_usec);
 					tz.tz_minuteswest = -60;
 					tz.tz_dsttime = isotime.tm_isdst;
 					if (settimeofday(&tv, &tz) == -1)
-						perror("settimeofday");
+						statusbar("settimeofday: %s",
+						    strerror(errno));
 				}
 			}
 			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
