@@ -82,6 +82,7 @@ main(int argc, char *argv[])
 	int dt = 0, bitpos, minlen = 0, acc_minlen = 0, old_acc_minlen, init = 1, init2 = 1;
 	int res, opt, settime = 0;
 	char *infilename, *logfilename;
+	int inkey;
 
 	infilename = logfilename = NULL;
 	while ((opt = getopt(argc, argv, "f:l:S")) != -1) {
@@ -189,10 +190,13 @@ main(int argc, char *argv[])
 		bit = get_bit();
 		if (infilename != NULL && (bit & GETBIT_EOD))
 			break;
-		if (infilename == NULL && getch() == 'Q')
-			break;
-		if (infilename == NULL && getch() == 'S')
-			settime = 1 - settime;
+		if (infilename == NULL && (inkey = getch()) != ERR) {
+			if (inkey == 'Q')
+				break;
+			if (inkey == 'S') {
+				settime = 1 - settime;
+			}
+		}
 
 		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
 			acc_minlen += 2500;
