@@ -454,6 +454,8 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen, int acc_mi
 
 	/* display bits of previous minute */
 	for (xpos = 4, i = 0; i < minlen; i++, xpos++) {
+		if (i > 59)
+			break;
 		if (is_space_bit(i))
 			xpos++;
 		mvwprintw(decode_win, 0, xpos, "%u", buffer[i]);
