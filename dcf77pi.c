@@ -296,7 +296,7 @@ main(int argc, char *argv[])
 			dt = decode_time(init, init2, minlen, get_buffer(),
 			    &time, &acc_minlen, dt);
 
-			if (time.tm_min % 3 == 0) {
+			if (time.tm_min % 3 == 0 && init == 0) {
 				decode_alarm(civbuf, &civwarn);
 				if (infilename == NULL)
 					show_civbuf(civbuf);
