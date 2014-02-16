@@ -512,29 +512,29 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen, int acc_mi
 
 	/* flip lights depending on the results */
 	if ((dt & DT_XMIT) == 0)
-		mvwchgat(decode_win, 2, 0, 6, A_NORMAL, 8, NULL);
+		mvwchgat(decode_win, 1, 39, 6, A_NORMAL, 8, NULL);
 	if ((announce && ANN_CHDST) == 0)
-		mvwchgat(decode_win, 2, 7, 3, A_NORMAL, 8, NULL);
+		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 8, NULL);
 	if (dt & DT_CHDST)
-		mvwchgat(decode_win, 2, 7, 3, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 2, NULL);
 	else if (dt & DT_CHDSTERR)
-		mvwchgat(decode_win, 2, 7, 3, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 46, 3, A_BOLD, 3, NULL);
 	if ((announce & ANN_LEAP) == 0)
-		mvwchgat(decode_win, 2, 11, 3, A_NORMAL, 8, NULL);
+		mvwchgat(decode_win, 1, 50, 3, A_NORMAL, 8, NULL);
 	if (dt & DT_LEAP)
-		mvwchgat(decode_win, 2, 11, 3, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 1, 50, 3, A_NORMAL, 2, NULL);
 	else if (dt & DT_LEAPERR)
-		mvwchgat(decode_win, 2, 11, 3, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 50, 3, A_BOLD, 3, NULL);
 	if (dt & DT_LONG) {
-		mvwprintw(decode_win, 2, 16, "long ");
-		mvwchgat(decode_win, 2, 16, 4, A_NORMAL, 1, NULL);
+		mvwprintw(decode_win, 1, 56, "long ");
+		mvwchgat(decode_win, 1, 56, 4, A_NORMAL, 1, NULL);
 	}
 	else if (dt & DT_SHORT) {
-		mvwprintw(decode_win, 2, 16, "short");
-		mvwchgat(decode_win, 2, 16, 5, A_NORMAL, 1, NULL);
+		mvwprintw(decode_win, 1, 56, "short");
+		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 1, NULL);
 	}
 	else
-		mvwchgat(decode_win, 2, 16, 5, A_NORMAL, 8, NULL);
+		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 8, NULL);
 
 	wrefresh(decode_win);
 }
