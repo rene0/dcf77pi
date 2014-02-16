@@ -1,4 +1,4 @@
-.PHONY: all clean install
+.PHONY: all clean install install-strip uninstall lint
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
