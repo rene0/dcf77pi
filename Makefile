@@ -37,6 +37,9 @@ install: dcf77pi readpin
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='install -s' install
 
+uninstall:
+	rm -rf $(DESTDIR)$(PREFIX)/bin
+	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
 
 lint:
 	lint -aabcehrsxgz -D__linux__ -DETCDIR=\"$(ETCDIR)\" $(src) readpin.c
