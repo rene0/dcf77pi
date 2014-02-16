@@ -168,17 +168,17 @@ main(int argc, char *argv[])
 		refresh(); /* prevent clearing windows upon getch() / refresh() */
 
 		/* allocate windows */
-		decode_win = newwin(3, 80, 0, 0);
+		decode_win = newwin(2, 80, 0, 0);
 		if (decode_win == NULL) {
 			curses_cleanup("Creating decode_win failed.\n");
 			return 0;
 		}
-		alarm_win = newwin(2, 80, 4, 0);
+		alarm_win = newwin(2, 80, 3, 0);
 		if (alarm_win == NULL) {
 			curses_cleanup("Creating alarm_win failed.\n");
 			return 0;
 		}
-		input_win = newwin(4, 80, 7, 0);
+		input_win = newwin(4, 80, 6, 0);
 		if (input_win == NULL) {
 			curses_cleanup("Creating input_win failed.\n");
 			return 0;
