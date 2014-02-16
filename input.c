@@ -353,9 +353,9 @@ get_bit(void)
 						realfreq = realfreq + w * (t - realfreq);
 					a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 				}
-				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%) %11.6f  %8.6f", tlow, t, count, realfreq, a);
+				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%)  %11.6f   %8.6f", tlow, t, count, realfreq, a);
 				if (freq_reset)
-					mvwchgat(input_win, 3, 16, 11, A_BOLD, 3, NULL);
+					mvwchgat(input_win, 3, 17, 11, A_BOLD, 3, NULL);
 				if (newminute) {
 					count *= 2;
 					state |= GETBIT_EOM;
@@ -483,26 +483,28 @@ display_bit_gui(void)
 {
 	int xpos, i;
 
+	mvwprintw(input_win, 3, 41, "%2u", bitpos);
+
 	wattron(input_win, COLOR_PAIR(2));
 	if (state & GETBIT_EOM)
-		mvwprintw(input_win, 3, 38, "minute   ");
+		mvwprintw(input_win, 3, 44, "minute   ");
 	else if (state < GETBIT_READ)
-		mvwprintw(input_win, 3, 38, "OK       ");
+		mvwprintw(input_win, 3, 44, "OK       ");
 	else
-		mvwprintw(input_win, 3, 38, "         ");
+		mvwprintw(input_win, 3, 44, "         ");
 	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
 	if (state & GETBIT_RECV)
-		mvwprintw(input_win, 3, 48, "receive ");
+		mvwprintw(input_win, 3, 54, "receive ");
 	else if (state & GETBIT_XMIT)
-		mvwprintw(input_win, 3, 48, "transmit");
+		mvwprintw(input_win, 3, 54, "transmit");
 	else if (state & GETBIT_RND)
-		mvwprintw(input_win, 3, 48, "random  ");
+		mvwprintw(input_win, 3, 54, "random  ");
 	else if (state & GETBIT_IO)
-		mvwprintw(input_win, 3, 48, "IO      ");
+		mvwprintw(input_win, 3, 54, "IO      ");
 	else
-		mvwprintw(input_win, 3, 48, "        ");
+		mvwprintw(input_win, 3, 54, "        ");
 	wattroff(input_win, COLOR_PAIR(1));
 
 	for (xpos = bitpos + 4, i = 0; i <= bitpos; i++)
