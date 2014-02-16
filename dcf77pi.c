@@ -101,7 +101,7 @@ main(int argc, char *argv[])
 	int inkey;
 
 	infilename = logfilename = NULL;
-	while ((opt = getopt(argc, argv, "f:l:S")) != -1) {
+	while ((opt = getopt(argc, argv, "f:l:")) != -1) {
 		switch (opt) {
 		case 'f' :
 			infilename = strdup(optarg);
