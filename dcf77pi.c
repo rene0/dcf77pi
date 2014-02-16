@@ -292,7 +292,7 @@ main(int argc, char *argv[])
 				printf(" (%d) %d\n", acc_minlen, minlen);
 			if (init == 1 || minlen >= 59)
 				memcpy((void *)&oldtime, (const void *)&time,
-				    sizeof(struct tm));
+				    sizeof(time));
 			dt = decode_time(init, init2, minlen, get_buffer(),
 			    &time, &acc_minlen, dt);
 
@@ -317,7 +317,7 @@ main(int argc, char *argv[])
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
 			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0)) {
 				memcpy((void *)&isotime, (const void *)&time,
-				    sizeof(struct tm));
+				    sizeof(time));
 				isotime.tm_year -= 1900;
 				isotime.tm_mon--;
 				isotime.tm_wday %= 7;
