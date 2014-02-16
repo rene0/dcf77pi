@@ -1,7 +1,6 @@
 .PHONY: all clean install
 
 PREFIX?=.
-FULLPREFIX?=$(PREFIX)
 ETCDIR?=etc/dcf77pi
 CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
 INSTALL_PROGRAM?=install
@@ -30,9 +29,10 @@ clean:
 	rm readpin readpin.o
 
 install: dcf77pi readpin
-	mkdir -p $(FULLPREFIX)/$(ETCDIR)
-	install etc/dcf77pi/config.txt $(FULLPREFIX)/$(ETCDIR)/config.txt.sample
-	$(INSTALL_PROGRAM) dcf77pi readpin $(FULLPREFIX)/bin
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL_PROGRAM) dcf77pi readpin $(DESTDIR)$(PREFIX)/bin
+	mkdir -p $(DESTDIR)$(PREFIX)/$(ETCDIR)
+	install etc/dcf77pi/config.txt $(DESTDIR)$(PREFIX)/$(ETCDIR)/config.txt.sample
 
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='install -s' install
