@@ -64,9 +64,9 @@ curses_cleanup(char *reason)
 void
 draw_keys(void)
 {
-	mvwprintw(main_win, 0, 0, "[S] -> toggle time sync   [Q] -> quit");
-	mvwchgat(main_win, 0, 1, 1, A_BOLD, 4, NULL); /* [S] */
-	mvwchgat(main_win, 0, 27, 1, A_BOLD, 4, NULL); /* [Q] */
+	mvwprintw(main_win, 0, 0, "[Q] -> quit [S] -> toggle time sync");
+	mvwchgat(main_win, 0, 1, 1, A_BOLD, 4, NULL); /* [Q] */
+	mvwchgat(main_win, 0, 13, 1, A_BOLD, 4, NULL); /* [S] */
 	wrefresh(main_win);
 }
 
