@@ -94,6 +94,7 @@ main(int argc, char *argv[])
 	time_t epochtime;
 	struct timeval tv;
 	struct timezone tz;
+	struct alm civwarn;
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt = 0, minlen = 0, acc_minlen = 0, old_acc_minlen, init = 1, init2 = 1;
 	int res, opt, settime = 0;
@@ -296,10 +297,11 @@ main(int argc, char *argv[])
 			    &time, &acc_minlen, dt);
 
 			if (time.tm_min % 3 == 0) {
+				decode_alarm(civbuf, &civwarn);
 				if (infilename == NULL)
 					show_civbuf(civbuf);
 				if (civ1 == 1 && civ2 == 1)
-					display_alarm(civbuf, infilename != NULL);
+					display_alarm(civwarn, infilename != NULL);
 				if (civ1 != civ2)
 					display_alarm_error(infilename != NULL);
 				if (civ1 == 0 && civ2 == 0 && infilename == NULL)

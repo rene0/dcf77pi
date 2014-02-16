@@ -27,6 +27,24 @@ SUCH DAMAGE.
 #include "decode_alarm.h"
 
 void
+decode_alarm(uint8_t *buf, struct alm *alarm)
+{
+	alarm->ds1 = buf[0] + 2 * buf[1] + 4 * buf[3];
+	alarm->ps1 = buf[2] + 2 * buf[4] + 4 * buf[5];
+	alarm->dl1 = buf[12] + 2 * buf[13] + 4 * buf[14] + 8 * buf[15] +
+	    16 * buf[16] + 32 * buf[17] + 64 * buf[19] + 128 * buf[20] +
+	    256 * buf[21] + 512 * buf[23];
+	alarm->pl1 = buf[18] + 2 * buf[22] + 4 * buf[24] + 8 * buf[25];
+
+	alarm->ds2 = buf[6] + 2 * buf[7] + 4 * buf[9];
+	alarm->ps2 = buf[8] + 2 * buf[10] + 4 * buf[11];
+	alarm->dl2 = buf[26] + 2 * buf[27] + 4 * buf[28] + 8 * buf[29] +
+	    16 * buf[30] + 32 * buf[31] + 64 * buf[33] + 128 * buf[34] +
+	    256 * buf[35] + 512 * buf[37];
+	alarm->pl2 = buf[32] + 2 * buf[36] + 4 * buf[38] + 8 * buf[39];
+}
+
+void
 show_civbuf(uint8_t *buf)
 {
 	int i;
@@ -38,33 +56,18 @@ show_civbuf(uint8_t *buf)
 }
 
 void
-display_alarm(uint8_t *buf, int fromfile)
+display_alarm(struct alm alarm, int fromfile)
 {
-	uint8_t ds1, ds2, ps1, ps2, pl1, pl2;
-	uint16_t dl1, dl2;
-
-	ds1 = buf[0] + 2 * buf[1] + 4 * buf[3];
-	ps1 = buf[2] + 2 * buf[4] + 4 * buf[5];
-	dl1 = buf[12] + 2 * buf[13] + 4 * buf[14] + 8 * buf[15] +
-	    16 * buf[16] + 32 * buf[17] + 64 * buf[19] + 128 * buf[20] +
-	    256 * buf[21] + 512 * buf[23];
-	pl1 = buf[18] + 2 * buf[22] + 4 * buf[24] + 8 * buf[25];
-
-	ds2 = buf[6] + 2 * buf[7] + 4 * buf[9];
-	ps2 = buf[8] + 2 * buf[10] + 4 * buf[11];
-	dl2 = buf[26] + 2 * buf[27] + 4 * buf[28] + 8 * buf[29] +
-	    16 * buf[30] + 32 * buf[31] + 64 * buf[33] + 128 * buf[34] +
-	    256 * buf[35] + 512 * buf[37];
-	pl2 = buf[32] + 2 * buf[36] + 4 * buf[38] + 8 * buf[39];
-
 	if (fromfile)
 		printf("0x%1x 0x%1x 0x%1x 0x%1x 0x%3x 0x%1x 0x%3x\n 0x%1x",
-		    ds1, ps1, ds2, ps2, dl1, pl1, dl2, pl2);
+		    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
+		    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
 	else {
 		wattron(alarm_win, COLOR_PAIR(3) | A_BOLD);
 		mvwprintw(alarm_win, 1, 22,
 		    "0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x\n 0x%1x",
-		    ds1, ps1, ds2, ps2, dl1, pl1, dl2, pl2);
+		    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
+		    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
 		wattroff(alarm_win, COLOR_PAIR(3) | A_BOLD);
 		wclrtoeol(alarm_win);
 		wrefresh(alarm_win);
