@@ -536,7 +536,7 @@ next_bit(int fromfile)
 			printf(" L");
 		else {
 			wattron(input_win, COLOR_PAIR(1));
-			mvwprintw(input_win, 3, 38, "no minute");
+			mvwprintw(input_win, 3, 44, "no minute");
 			wattroff(input_win, COLOR_PAIR(1));
 			wrefresh(input_win);
 		}
