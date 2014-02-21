@@ -58,7 +58,8 @@ curses_cleanup(char *reason)
 	if (main_win != NULL)
 		delwin(main_win);
 	endwin();
-	printf("%s", reason);
+	if (reason != NULL)
+		printf("%s", reason);
 }
 
 void
@@ -348,9 +349,9 @@ main(int argc, char *argv[])
 		}
 	}
 
-	cleanup();
-	if (infilename == NULL) {
-		endwin();
-	}
+	if (infilename == NULL)
+		curses_cleanup(NULL);
+	else
+		cleanup();
 	return 0;
 }
