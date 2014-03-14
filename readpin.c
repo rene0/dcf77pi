@@ -86,7 +86,8 @@ main(int argc, char **argv)
 	printf("realfreq=%f filter_a=%f\n", realfreq, a);
 
 	for (t = 0;; t++) {
-		if (tunetime == 1 && clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
+		if (tunetime == 1 &&
+		    clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
 			perror("before pulse");
 			break;
 		}
@@ -112,7 +113,8 @@ main(int argc, char **argv)
 		if (t > realfreq * 5/2) {
 			realfreq = realfreq + w * ((t/2.5) - realfreq);
 			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-			printf(" {%4u %4u} %3i %f %f", tlow, t, sec, realfreq, a);
+			printf(" {%4u %4u} %3i %f %f", tlow, t, sec, realfreq,
+			    a);
 			t = 0; /* timeout */
 			if (tunetime == 1) {
 				printf(" %lli", diff);
@@ -138,9 +140,11 @@ main(int argc, char **argv)
 			else {
 				sec++;
 				if (newminute)
-					realfreq = realfreq + w * ((t/2) - realfreq);
+					realfreq = realfreq + w *
+					    ((t/2) - realfreq);
 				else
-					realfreq = realfreq + w * (t - realfreq);
+					realfreq = realfreq + w *
+					    (t - realfreq);
 				/* adjust filter */
 				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 			}
@@ -154,7 +158,8 @@ main(int argc, char **argv)
 				bit = 1;
 			else
 				bit = 2; /* some error */
-			printf(" (%4u %4u) %u %3i %3i %f %f", tlow, t, bit, res, sec, realfreq, a);
+			printf(" (%4u %4u) %u %3i %3i %f %f", tlow, t, bit,
+			    res, sec, realfreq, a);
 			if (tunetime == 1) {
 				printf(" %lli", diff);
 				diff = 0;
@@ -164,26 +169,31 @@ main(int argc, char **argv)
 				sec = -1; /* new minute */
 			t = 0;
 		}
-		if (tunetime == 1 && clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
+		if (tunetime == 1 &&
+		    clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
 			perror("before sleep");
 			break;
 		}
 		twait = 1e9 / hw->freq;
 		if (tunetime == 1)
-			twait -= (tp1.tv_sec - tp0.tv_sec) * 1e9 - (tp1.tv_nsec - tp0.tv_nsec);
+			twait -= (tp1.tv_sec - tp0.tv_sec) * 1e9 -
+		    (tp1.tv_nsec - tp0.tv_nsec);
 		if (twait <= 0)
 			/* 1000 Hz -> -713 us seen */
 			printf(" <%li> ", twait);
 		else {
 			slp.tv_sec = twait / 1e9;
-			slp.tv_nsec = twait % 1000000000; /* clang 3.3 does not like 1e9 here */
+			/* clang 3.3 does not like 1e9 here */
+			slp.tv_nsec = twait % 1000000000;
 			while (nanosleep(&slp, &slp))
 				;
-			if (tunetime == 1 && clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
+			if (tunetime == 1 &&
+			    clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
 				perror("after sleep");
 				break;
 			}
-			twait = (tp0.tv_sec - tp1.tv_sec) * 1e9 + (tp0.tv_nsec - tp1.tv_nsec) - twait;
+			twait = (tp0.tv_sec - tp1.tv_sec) * 1e9 +
+			    (tp0.tv_nsec - tp1.tv_nsec) - twait;
 			diff += twait;
 		}
 	}

@@ -76,12 +76,14 @@ read_config_file(char *filename)
 			continue;
 		}
 		if (value[i] != NULL)
-			printf("read_config_file: overwriting value for key '%s'\n", k);
+			printf("read_config_file: overwriting value for key"
+			    " '%s'\n", k);
 		value[i] = strdup(v);
 	}
 	for (i = 0; i < NUM_KEYS; i++)
 		if (value[i] == NULL) {
-			printf("read_config_file: missing value for key '%s'\n", key[i]);
+			printf("read_config_file: missing value for key '%s'\n",
+			    key[i]);
 			fclose(configfile);
 			return 1;
 		}

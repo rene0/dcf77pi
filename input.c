@@ -295,7 +295,10 @@ get_bit(void)
 			if (stv == 2)
 				stv = p;
 
-			/* Prevent algorithm collapse during thunderstorms or scheduler abuse */
+			/*
+			 * Prevent algorithm collapse during thunderstorms
+			 * or scheduler abuse
+			 */
 			if (realfreq < hw.freq / 2) {
 				if (islive == 0)
 					printf("<");
@@ -348,14 +351,19 @@ get_bit(void)
 					init = 0;
 				else {
 					if (newminute) {
-						realfreq = realfreq + w * ((t/2) - realfreq);
+						realfreq = realfreq + w *
+						    ((t/2) - realfreq);
 					} else
-						realfreq = realfreq + w * (t - realfreq);
+						realfreq = realfreq + w *
+						    (t - realfreq);
 					a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 				}
-				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%)  %11.6f   %8.6f", tlow, t, count, realfreq, a);
+				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%)"
+				   "  %11.6f   %8.6f", tlow, t, count,
+				   realfreq, a);
 				if (freq_reset)
-					mvwchgat(input_win, 3, 17, 11, A_BOLD, 3, NULL);
+					mvwchgat(input_win, 3, 17, 11, A_BOLD,
+					   3, NULL);
 				if (newminute) {
 					count *= 2;
 					state |= GETBIT_EOM;

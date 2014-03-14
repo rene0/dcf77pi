@@ -97,7 +97,8 @@ main(int argc, char *argv[])
 	struct timezone tz;
 	struct alm civwarn;
 	uint8_t civ1 = 0, civ2 = 0;
-	int dt = 0, minlen = 0, acc_minlen = 0, old_acc_minlen, init = 1, init2 = 1;
+	int dt = 0, minlen = 0, acc_minlen = 0, old_acc_minlen;
+	int init = 1, init2 = 1;
 	int res, opt, settime = 0;
 	char *infilename, *logfilename;
 	int inkey;
@@ -161,13 +162,16 @@ main(int argc, char *argv[])
 		init_pair(3, COLOR_YELLOW, COLOR_BLACK); /* turn on A_BOLD */
 		init_pair(4, COLOR_BLUE, COLOR_BLACK);
 		init_pair(7, COLOR_WHITE, COLOR_BLACK);
-		init_pair(8, COLOR_BLACK, COLOR_BLACK); /* A_INVIS does not work? */
+		/* A_INVIS does not work? */
+		init_pair(8, COLOR_BLACK, COLOR_BLACK);
+
 		noecho();
 		nonl();
 		cbreak();
 		nodelay(stdscr, TRUE);
 		curs_set(0);
-		refresh(); /* prevent clearing windows upon getch() / refresh() */
+		/* prevent clearing windows upon getch() / refresh() */
+		refresh();
 
 		/* allocate windows */
 		decode_win = newwin(2, 80, 0, 0);
@@ -199,7 +203,8 @@ main(int argc, char *argv[])
 		mvwprintw(alarm_win, 1, 0, "German civil warning:");
 		wrefresh(alarm_win);
 		mvwprintw(input_win, 0, 0, "new");
-		mvwprintw(input_win, 2, 0, "act total        realfreq Hz  increment  bit");
+		mvwprintw(input_win, 2, 0, "act total        realfreq Hz"
+		    "  increment  bit");
 		wrefresh(input_win);
 		draw_keys();
 	}
@@ -213,7 +218,8 @@ main(int argc, char *argv[])
 				break;
 			if (inkey == 'S') {
 				settime = 1 - settime;
-				statusbar("Time synchronization %s", settime ? "on" : "off");
+				statusbar("Time synchronization %s", settime ?
+				    "on" : "off");
 			}
 		}
 
@@ -302,7 +308,8 @@ main(int argc, char *argv[])
 				if (infilename == NULL)
 					show_civbuf(civbuf);
 				if (civ1 == 1 && civ2 == 1)
-					display_alarm(civwarn, infilename != NULL);
+					display_alarm(civwarn,
+					    infilename != NULL);
 				if (civ1 != civ2)
 					display_alarm_error(infilename != NULL);
 				if (civ1 == 0 && civ2 == 0 && infilename == NULL)
@@ -312,7 +319,8 @@ main(int argc, char *argv[])
 			if (infilename != NULL)
 				display_time(dt, time);
 			else
-				display_time_gui(dt, time, get_buffer(), minlen, old_acc_minlen);
+				display_time_gui(dt, time, get_buffer(),
+				    minlen, old_acc_minlen);
 
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&

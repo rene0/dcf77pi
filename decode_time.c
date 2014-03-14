@@ -167,7 +167,8 @@ add_minute(struct tm *time, int flags)
 		    time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7) {
 			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
 				time->tm_hour--; /* will become non-DST */
-			else if (time->tm_isdst == 0 && time->tm_mon == summermonth)
+			else if (time->tm_isdst == 0 &&
+			    time->tm_mon == summermonth)
 				time->tm_hour++; /* will become DST */
 		}
 		time->tm_min = 0;
@@ -302,9 +303,10 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 	 * last Sunday of month (reference?) */
 	if (buffer[16] == 1 && ok) {
 		if ((time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7 &&
-		    (time->tm_mon == summermonth || time->tm_mon == wintermonth)) &&
-		    ((time->tm_min > 0 && utchour == 0) ||
-		    (time->tm_min == 0 && utchour == 1 + buffer[17] - buffer[18]))) {
+		    (time->tm_mon == summermonth ||
+		    time->tm_mon == wintermonth)) && ((time->tm_min > 0 &&
+		    utchour == 0) || (time->tm_min == 0 &&
+		    utchour == 1 + buffer[17] - buffer[18]))) {
 			announce |= ANN_CHDST;
 			if (time->tm_min == 0)
 				utchour = 1; /* time zone just changed */
@@ -312,8 +314,10 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 			rval |= DT_CHDSTERR;
 	}
 
-	/* h==23, last day of month (UTC) or h==0, first day of next month (UTC)
-	 * according to IERS Bulletin C */
+	/*
+	 * h==23, last day of month (UTC) or h==0, first day of next month (UTC)
+	 * according to IERS Bulletin C
+	 */
 	if (buffer[19] == 1 && ok) {
 		if (time->tm_mday == 1 && is_leapsecmonth(time->tm_mon - 1) &&
 		    ((time->tm_min > 0 && utchour == 23) ||
@@ -445,7 +449,8 @@ display_time(int dt, struct tm time)
 }
 
 void
-display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen, int acc_minlen)
+display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
+    int acc_minlen)
 {
 	int i, xpos;
 
