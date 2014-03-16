@@ -466,7 +466,7 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
 	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
 	/* color bits depending on the results */
 	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, dt & DT_B0 ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt & DSTERR ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt & DT_DSTERR ? 1 : 2, NULL);
 	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, dt & DT_B20 ? 1 : 2, NULL);
 	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, dt & DT_MIN ? 1 : 2, NULL);
 	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, dt & DT_HOUR ? 1 : 2, NULL);
