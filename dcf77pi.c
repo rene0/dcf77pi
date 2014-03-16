@@ -35,12 +35,11 @@ SUCH DAMAGE.
 #include <sys/time.h>
 #include <unistd.h>
 
-#include <ncurses.h>
-
 #include "input.h"
 #include "decode_time.h"
 #include "decode_alarm.h"
 #include "config.h"
+#include "guifuncs.h"
 
 WINDOW *main_win;
 int bitpos, old_bitpos = -1;
@@ -59,30 +58,6 @@ curses_cleanup(char *reason)
 	endwin();
 	if (reason != NULL)
 		printf("%s", reason);
-}
-
-void
-draw_keys(void)
-{
-	mvwprintw(main_win, 0, 0, "[Q] -> quit [S] -> toggle time sync");
-	mvwchgat(main_win, 0, 1, 1, A_BOLD, 4, NULL); /* [Q] */
-	mvwchgat(main_win, 0, 13, 1, A_BOLD, 4, NULL); /* [S] */
-	wrefresh(main_win);
-}
-
-void
-statusbar(char *fmt, ...)
-{
-	va_list ap;
-
-	wmove(main_win, 0, 0);
-	va_start(ap, fmt);
-	vwprintw(main_win, fmt, ap);
-	va_end(ap);
-	wclrtoeol(main_win);
-	wrefresh(main_win);
-
-	old_bitpos = bitpos; /* start timer */
 }
 
 int
@@ -150,27 +125,9 @@ main(int argc, char *argv[])
 		alarm_win = NULL;
 		input_win = NULL;
 		main_win = NULL;
-		initscr();
-		if (has_colors() == FALSE) {
-			curses_cleanup("No required color support.\n");
-			return 0;
-		}
-		start_color();
-		init_pair(1, COLOR_RED, COLOR_BLACK);
-		init_pair(2, COLOR_GREEN, COLOR_BLACK);
-		init_pair(3, COLOR_YELLOW, COLOR_BLACK); /* turn on A_BOLD */
-		init_pair(4, COLOR_BLUE, COLOR_BLACK);
-		init_pair(7, COLOR_WHITE, COLOR_BLACK);
-		/* A_INVIS does not work? */
-		init_pair(8, COLOR_BLACK, COLOR_BLACK);
 
-		noecho();
-		nonl();
-		cbreak();
-		nodelay(stdscr, TRUE);
-		curs_set(0);
-		/* prevent clearing windows upon getch() / refresh() */
-		refresh();
+		if (init_curses())
+			curses_cleanup("No required color support.\n");
 
 		/* allocate windows */
 		decode_win = newwin(2, 80, 0, 0);
@@ -197,7 +154,7 @@ main(int argc, char *argv[])
 		draw_time_window();
 		draw_alarm_window();
 		draw_input_window();
-		draw_keys();
+		draw_keys(main_win);
 	}
 
 	for (;;) {
@@ -209,8 +166,10 @@ main(int argc, char *argv[])
 				break;
 			if (inkey == 'S') {
 				settime = 1 - settime;
-				statusbar("Time synchronization %s", settime ?
-				    "on" : "off");
+				statusbar(main_win, "Time synchronization %s",
+				    settime ?  "on" : "off");
+				old_bitpos = bitpos; /* start timer */
+			}
 			}
 		}
 
@@ -220,16 +179,7 @@ main(int argc, char *argv[])
 			acc_minlen += 1000;
 
 		bitpos = get_bitpos();
-		if (old_bitpos != -1 &&
-		    (bitpos % 60 == (old_bitpos + 2) % 60 ||
-		    (old_bitpos == 57 && bitpos == 0))) {
-			/*
-			 * Time for status text passed, cannot use *sleep()
-			 * in statusbar() because that pauses reception
-			 */
-			old_bitpos = -1;
-			draw_keys();
-		}
+		check_timer(main_win, &old_bitpos, bitpos);
 
 		if (bit & GETBIT_EOM) {
 			/* handle the missing minute marker */

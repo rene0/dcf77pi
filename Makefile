@@ -7,9 +7,11 @@ INSTALL_PROGRAM?=install
 
 all: dcf77pi readpin
 
-hdr = input.h decode_time.h decode_alarm.h config.h
-src = dcf77pi.c input.c decode_time.c decode_alarm.c config.c
-obj = dcf77pi.o input.o decode_time.o decode_alarm.o config.o
+hdr = input.h decode_time.h decode_alarm.h config.h guifuncs.h
+src = guifuncs.c input.c decode_time.c decode_alarm.c config.c \
+    dcf77pi.c
+obj = guifuncs.o input.o decode_time.o decode_alarm.o config.o \
+    dcf77pi.o
 input.o: input.h config.h
 decode_time.o: decode_time.h config.h
 decode_alarm.o: decode_alarm.h
