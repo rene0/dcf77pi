@@ -32,13 +32,13 @@ SUCH DAMAGE.
 #include <strings.h>
 #include <sysexits.h>
 #include <time.h>
-#include <sys/time.h>
 #include <unistd.h>
 
 #include "input.h"
 #include "decode_time.h"
 #include "decode_alarm.h"
 #include "config.h"
+#include "setclock.h"
 #include "guifuncs.h"
 
 WINDOW *main_win;
@@ -65,10 +65,7 @@ main(int argc, char *argv[])
 {
 	uint8_t indata[40], civbuf[40];
 	uint16_t bit;
-	struct tm time, oldtime, isotime;
-	time_t epochtime;
-	struct timeval tv;
-	struct timezone tz;
+	struct tm time, oldtime;
 	struct alm civwarn;
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt = 0, minlen = 0, acc_minlen = 0, old_acc_minlen;
@@ -76,6 +73,7 @@ main(int argc, char *argv[])
 	int res, opt, settime = 0;
 	char *infilename, *logfilename;
 	int inkey;
+	char *clockres;
 
 	infilename = logfilename = NULL;
 	while ((opt = getopt(argc, argv, "f:l:")) != -1) {
@@ -276,28 +274,10 @@ main(int argc, char *argv[])
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
 			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0)) {
-				memcpy((void *)&isotime, (const void *)&time,
-				    sizeof(time));
-				isotime.tm_year -= 1900;
-				isotime.tm_mon--;
-				isotime.tm_wday %= 7;
-				isotime.tm_sec = 0;
-				epochtime = mktime(&isotime);
-				if (epochtime == -1)
-					statusbar("mktime() failed!");
-				else {
-					tv.tv_sec = epochtime;
-					tv.tv_usec = 50000;
-					/* adjust for bit reception algorithm */
-					statusbar("Setting time (%lld , %lld)",
-					    (long long int)tv.tv_sec,
-					    (long long int)tv.tv_usec);
-					tz.tz_minuteswest = -60;
-					tz.tz_dsttime = isotime.tm_isdst;
-					if (settimeofday(&tv, &tz) == -1)
-						statusbar("settimeofday: %s",
-						    strerror(errno));
-				}
+				clockres = setclock(&time);
+				statusbar(main_win, clockres);
+				free(clockres);
+				old_bitpos = bitpos; /* start timer */
 			}
 			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
 				acc_minlen = 0; /* really a new minute */
