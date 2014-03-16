@@ -316,7 +316,7 @@ main(int argc, char *argv[])
 			}
 
 			if (infilename != NULL)
-				display_time(dt, time);
+				display_time_file(dt, time);
 			else
 				display_time_gui(dt, time, get_buffer(),
 				    minlen, old_acc_minlen);

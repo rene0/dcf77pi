@@ -393,7 +393,7 @@ get_utchour(struct tm time)
 }
 
 void
-display_time(int dt, struct tm time)
+display_time_file(int dt, struct tm time)
 {
 	printf("%s %04d-%02d-%02d %s %02d:%02d\n\n",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
