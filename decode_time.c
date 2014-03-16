@@ -351,7 +351,7 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 	if ((rval & DT_DSTERR) == 0 && buffer[17] != time->tm_isdst) {
 		/* Time offset change is OK if:
 		 * there was an error but not any more (needed if decoding at
-		 * startup is problematic)
+		 *   startup is problematic)
 		 * initial state (otherwise DST would never be valid)
 		 * actually announced and time is Sunday, lastday, 01:00 UTC
 		 */
