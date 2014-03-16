@@ -74,8 +74,7 @@ draw_keys(WINDOW *win)
 void
 check_timer(WINDOW *win, int *old_bitpos, int bitpos)
 {
-	if (*old_bitpos != -1 &&
-	    (bitpos % 60 == (*old_bitpos + 2) % 60 ||
+	if (*old_bitpos != -1 && (bitpos % 60 == (*old_bitpos + 2) % 60 ||
 	    (*old_bitpos == 57 && bitpos == 0))) {
 		/*
 		 * Time for status text passed, cannot use *sleep()
