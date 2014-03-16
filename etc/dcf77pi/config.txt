@@ -5,4 +5,4 @@ maxzero = 16
 maxone = 30
 summermonth = 3
 wintermonth = 10
-leapsecmonths = 6,12
+leapsecmonths = 3,6,9,12
