@@ -45,7 +45,7 @@ decode_alarm(uint8_t *buf, struct alm *alarm)
 }
 
 void
-show_civbuf(uint8_t *buf)
+show_civbuf_gui(uint8_t *buf)
 {
 	int i;
 
@@ -56,40 +56,44 @@ show_civbuf(uint8_t *buf)
 }
 
 void
-display_alarm(struct alm alarm, int fromfile)
+display_alarm_file(struct alm alarm)
 {
-	if (fromfile)
-		printf("0x%1x 0x%1x 0x%1x 0x%1x 0x%3x 0x%1x 0x%3x\n 0x%1x",
-		    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
-		    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
-	else {
-		wattron(alarm_win, COLOR_PAIR(3) | A_BOLD);
-		mvwprintw(alarm_win, 1, 22,
-		    "0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x\n 0x%1x",
-		    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
-		    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
-		wattroff(alarm_win, COLOR_PAIR(3) | A_BOLD);
-		wclrtoeol(alarm_win);
-		wrefresh(alarm_win);
-	}
+	printf("0x%1x 0x%1x 0x%1x 0x%1x 0x%3x 0x%1x 0x%3x\n 0x%1x",
+	    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
+	    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
 }
 
 void
-display_alarm_error(int fromfile)
+display_alarm_gui(struct alm alarm)
 {
-	if (fromfile)
-		printf("Civil warning error\n");
-	else {
-		wattron(alarm_win, COLOR_PAIR(1));
-		mvwprintw(alarm_win, 1, 22, "error");
-		wattroff(alarm_win, COLOR_PAIR(1));
-		wclrtoeol(alarm_win);
-		wrefresh(alarm_win);
-	}
+	wattron(alarm_win, COLOR_PAIR(3) | A_BOLD);
+	mvwprintw(alarm_win, 1, 22,
+	    "0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x\n 0x%1x",
+	    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
+	    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
+	wattroff(alarm_win, COLOR_PAIR(3) | A_BOLD);
+	wclrtoeol(alarm_win);
+	wrefresh(alarm_win);
 }
 
 void
-clear_alarm(void)
+display_alarm_error_file(void)
+{
+	printf("Civil warning error\n");
+}
+
+void
+display_alarm_error_gui(void)
+{
+	wattron(alarm_win, COLOR_PAIR(1));
+	mvwprintw(alarm_win, 1, 22, "error");
+	wattroff(alarm_win, COLOR_PAIR(1));
+	wclrtoeol(alarm_win);
+	wrefresh(alarm_win);
+}
+
+void
+clear_alarm_gui(void)
 {
 	wattron(alarm_win, COLOR_PAIR(2));
 	mvwprintw(alarm_win, 1, 22, "none");

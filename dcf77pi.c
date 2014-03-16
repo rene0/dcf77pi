@@ -298,14 +298,21 @@ main(int argc, char *argv[])
 			if (time.tm_min % 3 == 0 && init == 0) {
 				decode_alarm(civbuf, &civwarn);
 				if (infilename == NULL)
-					show_civbuf(civbuf);
-				if (civ1 == 1 && civ2 == 1)
-					display_alarm(civwarn,
-					    infilename != NULL);
-				if (civ1 != civ2)
-					display_alarm_error(infilename != NULL);
+					show_civbuf_gui(civbuf);
+				if (civ1 == 1 && civ2 == 1) {
+					if (infilename == NULL)
+						display_alarm_gui(civwarn);
+					else
+						display_alarm_file(civwarn);
+				}
+				if (civ1 != civ2) {
+					if (infilename == NULL)
+						display_alarm_error_gui();
+					else
+						display_alarm_error_file();
+				}
 				if (civ1 == 0 && civ2 == 0 && infilename == NULL)
-					clear_alarm();
+					clear_alarm_gui();
 			}
 
 			if (infilename != NULL)
