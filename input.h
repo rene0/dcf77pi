@@ -49,9 +49,11 @@ struct hardware *get_hardware_parameters(void);
 void cleanup(void);
 uint8_t get_pulse(void);
 uint16_t get_bit(void); /* stores result in internal buffer */
-void display_bit(void);
+void display_bit_file(void);
 void display_bit_gui(void);
-uint16_t next_bit(int fromfile); /* prepare for next bit */
+/* prepare for next bit */
+uint16_t next_bit_file(void);
+uint16_t next_bit_gui(void);
 uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
 int is_space_bit(int bit);

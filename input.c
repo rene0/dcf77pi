@@ -470,7 +470,7 @@ is_space_bit(int bit)
 }
 
 void
-display_bit(void)
+display_bit_file(void)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
@@ -526,33 +526,43 @@ display_bit_gui(void)
 }
 
 uint16_t
-next_bit(int fromfile)
+next_bit_file(void)
+{
+	if (state & GETBIT_EOM)
+		bitpos = 0;
+	else
+		bitpos++;
+	if (bitpos == sizeof(buffer)) {
+		state |= GETBIT_TOOLONG;
+		bitpos = 0;
+		printf(" L");
+		return state;
+	}
+	state &= ~GETBIT_TOOLONG; /* fits again */
+	return state;
+}
+
+uint16_t
+next_bit_gui(void)
 {
 	if (state & GETBIT_EOM) {
 		bitpos = 0;
-		if (fromfile == 0) {
-			mvwdelch(input_win, 0, 4);
-			wclrtoeol(input_win);
-			wrefresh(input_win);
-		}
+		mvwdelch(input_win, 0, 4);
+		wclrtoeol(input_win);
+		wrefresh(input_win);
 	} else
 		bitpos++;
 	if (bitpos == sizeof(buffer)) {
 		state |= GETBIT_TOOLONG;
 		bitpos = 0;
-		if (fromfile)
-			printf(" L");
-		else {
-			wattron(input_win, COLOR_PAIR(1));
-			mvwprintw(input_win, 3, 44, "no minute");
-			wattroff(input_win, COLOR_PAIR(1));
-			wrefresh(input_win);
-		}
+		wattron(input_win, COLOR_PAIR(1));
+		mvwprintw(input_win, 3, 44, "no minute");
+		wattroff(input_win, COLOR_PAIR(1));
+		wrefresh(input_win);
 		return state;
 	}
 	state &= ~GETBIT_TOOLONG; /* fits again */
-	if (fromfile == 0)
-		wrefresh(input_win);
+	wrefresh(input_win);
 	return state;
 }
 
