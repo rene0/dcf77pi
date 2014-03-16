@@ -48,7 +48,6 @@ int bitpos, old_bitpos = -1;
 void
 curses_cleanup(char *reason)
 {
-	cleanup();
 	if (decode_win != NULL)
 		delwin(decode_win);
 	if (alarm_win != NULL)
@@ -359,9 +358,8 @@ main(int argc, char *argv[])
 		}
 	}
 
+	cleanup();
 	if (infilename == NULL)
 		curses_cleanup(NULL);
-	else
-		cleanup();
 	return 0;
 }
