@@ -72,7 +72,8 @@ read_config_file(char *filename)
 		}
 		i = getpos(k);
 		if (i == -1) {
-			printf("read_config_file: skipping invalid key '%s'\n", k);
+			printf("read_config_file: skipping invalid key '%s'\n",
+			    k);
 			continue;
 		}
 		if (value[i] != NULL)
