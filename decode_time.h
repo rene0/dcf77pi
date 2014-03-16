@@ -67,6 +67,7 @@ void display_time(int dt, struct tm time);
 void display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
     int acc_minlen);
 int get_utchour(struct tm time);
+void draw_time_window(void);
 
 WINDOW *decode_win;
 #endif

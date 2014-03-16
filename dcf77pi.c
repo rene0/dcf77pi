@@ -195,17 +195,9 @@ main(int argc, char *argv[])
 			return 0;
 		}
 		/* draw initial screen */
-		mvwprintw(decode_win, 0, 0, "old");
-		mvwprintw(decode_win, 1, 39, "txcall dst leap");
-		mvwchgat(decode_win, 1, 39, 15, A_NORMAL, 8, NULL);
-		wrefresh(decode_win);
-		mvwprintw(alarm_win, 0, 0, "Civil buffer:");
-		mvwprintw(alarm_win, 1, 0, "German civil warning:");
-		wrefresh(alarm_win);
-		mvwprintw(input_win, 0, 0, "new");
-		mvwprintw(input_win, 2, 0, "act total        realfreq Hz"
-		    "  increment  bit");
-		wrefresh(input_win);
+		draw_time_window();
+		draw_alarm_window();
+		draw_input_window();
 		draw_keys();
 	}
 

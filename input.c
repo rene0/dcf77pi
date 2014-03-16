@@ -573,3 +573,12 @@ get_hardware_parameters(void)
 {
 	return &hw;
 }
+
+void
+draw_input_window(void)
+{
+	mvwprintw(input_win, 0, 0, "new");
+	mvwprintw(input_win, 2, 0, "act total        realfreq Hz"
+	    "  increment  bit");
+	wrefresh(input_win);
+}

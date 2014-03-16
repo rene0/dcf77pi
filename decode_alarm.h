@@ -43,6 +43,7 @@ void show_civbuf(uint8_t *buf);
 void display_alarm(struct alm alarm, int fromfile);
 void display_alarm_error(int fromfile);
 void clear_alarm(void);
+void draw_alarm_window(void);
 
 WINDOW *alarm_win;
 #endif

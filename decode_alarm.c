@@ -97,3 +97,11 @@ clear_alarm(void)
 	wclrtoeol(alarm_win);
 	wrefresh(alarm_win);
 }
+
+void
+draw_alarm_window(void)
+{
+	mvwprintw(alarm_win, 0, 0, "Civil buffer:");
+	mvwprintw(alarm_win, 1, 0, "German civil warning:");
+	wrefresh(alarm_win);
+}

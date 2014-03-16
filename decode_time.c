@@ -543,3 +543,12 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
 
 	wrefresh(decode_win);
 }
+
+void
+draw_time_window(void)
+{
+	mvwprintw(decode_win, 0, 0, "old");
+	mvwprintw(decode_win, 1, 39, "txcall dst leap");
+	mvwchgat(decode_win, 1, 39, 15, A_NORMAL, 8, NULL);
+	wrefresh(decode_win);
+}
