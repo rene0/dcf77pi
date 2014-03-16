@@ -23,20 +23,21 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
+#include "input.h"
+
+#include "config.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
-#include <signal.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
-#include <string.h>
 #include <strings.h>
 #include <time.h>
 #include <unistd.h>
+#include <ncurses.h>
+
 #include <sys/param.h>
 
-#include <ncurses.h>
 
 #ifdef __FreeBSD__
 #  if __FreeBSD_version >= 900022
@@ -51,9 +52,6 @@ SUCH DAMAGE.
 #else
 #  error Unsupported operating system, please send a patch to the author
 #endif
-
-#include "input.h"
-#include "config.h"
 
 uint8_t bitpos; /* second */
 uint8_t buffer[60]; /* wrap after 60 positions */

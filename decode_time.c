@@ -23,13 +23,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <string.h>
-#include "config.h"
 #include "decode_time.h"
+
+#include "config.h"
 #include "input.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 uint8_t announce = 0; /* save DST change and leap second announcements */
 int olderr = 0; /* save error state to determine if DST change might be valid */

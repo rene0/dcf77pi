@@ -23,8 +23,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include <stdio.h>
 #include "decode_alarm.h"
+
+#include <stdio.h>
 
 void
 decode_alarm(uint8_t *buf, struct alm *alarm)

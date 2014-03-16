@@ -28,14 +28,15 @@ SUCH DAMAGE.
  * Schmitt trigger taken from Udo Klein, with permisssion.
  * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
  */
-#include <errno.h>
+
+#include "config.h"
+
+#include "input.h"
+
 #include <math.h>
-#include <stdio.h>
 #include <sysexits.h>
 #include <unistd.h>
 #include <time.h>
-#include "config.h"
-#include "input.h"
 
 int
 main(int argc, char **argv)

@@ -23,23 +23,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include <stdio.h>
-#include <errno.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <string.h>
-#include <strings.h>
-#include <sysexits.h>
-#include <time.h>
-#include <unistd.h>
-
 #include "input.h"
 #include "decode_time.h"
 #include "decode_alarm.h"
 #include "config.h"
 #include "setclock.h"
 #include "guifuncs.h"
+
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sysexits.h>
+#include <unistd.h>
 
 WINDOW *main_win;
 int bitpos, old_bitpos = -1;
