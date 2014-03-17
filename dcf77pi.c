@@ -164,7 +164,7 @@ main(int argc, char *argv[])
 			case 'S':
 				settime = 1 - settime;
 				statusbar(main_win, "Time synchronization %s",
-				    settime ?  "on" : "off");
+				    settime ? "on" : "off");
 				old_bitpos = bitpos; /* start timer */
 				break;
 			}
