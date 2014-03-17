@@ -67,7 +67,8 @@ read_config_file(char *filename)
 
 	while (feof(configfile) == 0) {
 		if (fscanf(configfile, "%s = %s\n", k, v) != 2) {
-			perror("read_config_file");
+			printf("read_config_file: read %i items instead of 2\n",
+			    i);
 			fclose(configfile);
 			return 1;
 		}
