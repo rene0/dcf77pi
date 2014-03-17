@@ -56,7 +56,6 @@ SUCH DAMAGE.
 uint8_t bitpos; /* second */
 uint8_t buffer[60]; /* wrap after 60 positions */
 uint16_t state; /* any errors, or high bit */
-int islive; /* live input or pre-recorded data */
 FILE *datafile = NULL; /* input file (recorded data) */
 FILE *logfile = NULL; /* auto-appended in live mode */
 int fd = 0; /* gpio file */
@@ -138,52 +137,49 @@ init_hardware(int pin_nr)
 	return fd;
 }
 
-int
-set_mode(char *infilename, char *logfilename)
+void
+set_state_vars(void)
 {
-	int res;
-
-	islive = (infilename == NULL);
-#ifdef NOLIVE
-	if (islive) {
-		printf("No GPIO interface available, disabling live decoding\n");
-		cleanup();
-		return 1;
-	}
-#endif
 	bitpos = 0;
 	state = 0;
 	bzero(buffer, sizeof(buffer));
+}
 
-	/* fill hardware structure */
+int
+set_mode_file(char *infilename)
+{
+	set_state_vars();
+	datafile = fopen(infilename, "r");
+	if (datafile == NULL) {
+		perror("fopen (datafile)");
+		return errno;
+	}
+	return 0;
+}
+
+int
+set_mode_live(void)
+{
+	int res;
+
+	set_state_vars();
+#ifdef NOLIVE
+	printf("No GPIO interface available, disabling live decoding\n");
+	cleanup();
+	return 1;
+#else
+	/* fill hardware structure and initialize hardware */
 	hw.pin = strtol(get_config_value("pin"), NULL, 10);
+	res = init_hardware(hw.pin);
+	if (res < 0) {
+		cleanup();
+		return res;
+	}
 	hw.active_high = strtol(get_config_value("activehigh"), NULL, 10);
 	hw.freq = strtol(get_config_value("freq"), NULL, 10);
 	hw.maxzero = strtol(get_config_value("maxzero"), NULL, 10);
 	hw.maxone = strtol(get_config_value("maxone"), NULL, 10);
-
-	if (islive) {
-		res = init_hardware(hw.pin);
-		if (res < 0) {
-			cleanup();
-			return res;
-		}
-		if (logfilename != NULL) {
-			logfile = fopen(logfilename, "a");
-			if (logfile == NULL) {
-				perror("fopen (logfile)");
-				cleanup();
-				return errno;
-			}
-			fprintf(logfile, "\n--new log--\n\n");
-		}
-	} else {
-		datafile = fopen(infilename, "r");
-		if (datafile == NULL) {
-			perror("fopen (datafile)");
-			return errno;
-		}
-	}
+#endif
 	return 0;
 }
 

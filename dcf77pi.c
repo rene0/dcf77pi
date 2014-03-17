@@ -100,7 +100,10 @@ main(int argc, char *argv[])
 		cleanup();
 		return res;
 	}
-	res = set_mode(infilename, logfilename);
+	if (infilename != NULL)
+		res = set_mode_file(infilename);
+	else
+		res = set_mode_live();
 	if (res != 0) {
 		/* something went wrong */
 		cleanup();
