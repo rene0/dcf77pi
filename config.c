@@ -66,7 +66,17 @@ read_config_file(char *filename)
 	}
 
 	while (feof(configfile) == 0) {
-		if (fscanf(configfile, "%s = %s\n", k, v) != 2) {
+		bzero(k, sizeof(k));
+		bzero(v, sizeof(v));
+		i = fscanf(configfile, "%s = %s\n", k, v);
+		if (i == 1) {
+			if (strlen(k) == 0) {
+				printf("read_config_file: read 1 item with"
+				    " empty key\n");
+				fclose(configfile);
+				return 1;
+			}
+		} else if (i != 2) {
 			printf("read_config_file: read %i items instead of 2\n",
 			    i);
 			fclose(configfile);
