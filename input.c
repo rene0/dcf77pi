@@ -244,7 +244,7 @@ get_bit_live(void)
 	int t, tlow, count = -1, newminute;
 	uint8_t p, stv;
 	struct timespec slp;
-	float a, y, w;
+	float a, y;
 	static int init = 1;
 	static float realfreq;
 
@@ -274,7 +274,6 @@ get_bit_live(void)
 	y = -1;
 	tlow = 0;
 	stv = 2;
-	w = 0.05;
 
 	for (t = 0; ; t++) {
 		p = get_pulse();
@@ -302,7 +301,7 @@ get_bit_live(void)
 		}
 
 		if (t > realfreq * 5/2) {
-			realfreq = realfreq + w * ((t / 2.5) - realfreq);
+			realfreq = realfreq + 0.05 * ((t / 2.5) - realfreq);
 			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 			if (tlow * 100 / t < 1) {
 				state |= GETBIT_RECV;
@@ -336,10 +335,10 @@ get_bit_live(void)
 				init = 0;
 			else {
 				if (newminute) {
-					realfreq = realfreq + w *
+					realfreq = realfreq + 0.05 *
 					    ((t/2) - realfreq);
 				} else
-					realfreq = realfreq + w *
+					realfreq = realfreq + 0.05 *
 					    (t - realfreq);
 				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 			}
