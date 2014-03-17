@@ -60,6 +60,7 @@ uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
 int is_space_bit(int bit);
 void draw_input_window(void);
+int write_new_logfile(char *logfile);
 
 WINDOW *input_win;
 

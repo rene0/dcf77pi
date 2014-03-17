@@ -601,3 +601,13 @@ draw_input_window(void)
 	    "  increment  bit");
 	wrefresh(input_win);
 }
+
+int
+write_new_logfile(char *logfilename)
+{
+	logfile = fopen(logfilename, "a");
+	if (logfile == NULL)
+		return errno;
+	fprintf(logfile, "\n--new log--\n\n");
+	return 0;
+}
