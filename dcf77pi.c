@@ -37,7 +37,7 @@ SUCH DAMAGE.
 #include <unistd.h>
 
 WINDOW *main_win;
-int bitpos, old_bitpos = -1;
+int bitpos;
 
 void
 curses_cleanup(char *reason)
@@ -69,6 +69,7 @@ main(int argc, char *argv[])
 	char *infilename, *logfilename;
 	int inkey;
 	char *clockres;
+	struct thread_info tinfo;
 
 	infilename = logfilename = NULL;
 	while ((opt = getopt(argc, argv, "f:")) != -1) {
@@ -165,9 +166,13 @@ main(int argc, char *argv[])
 				break;
 			case 'S':
 				settime = 1 - settime;
-				statusbar(main_win, "Time synchronization %s",
+				tinfo.win = main_win;
+				asprintf(&tinfo.str, "Time synchronization %s",
 				    settime ? "on" : "off");
-				old_bitpos = bitpos; /* start timer */
+				if (pthread_create(&tinfo.id, NULL, statusbar,
+				    (void *)&tinfo))
+					bit |= GETBIT_EOD; /* error */
+				free(tinfo.str);
 				break;
 			}
 		}
@@ -180,7 +185,6 @@ main(int argc, char *argv[])
 			acc_minlen += 1000;
 
 		bitpos = get_bitpos();
-		check_timer(main_win, &old_bitpos, bitpos);
 
 		if (bit & GETBIT_EOM) {
 			/* handle the missing minute marker */
@@ -278,9 +282,7 @@ main(int argc, char *argv[])
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
 			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0)) {
 				clockres = setclock(&time);
-				statusbar(main_win, clockres);
 				free(clockres);
-				old_bitpos = bitpos; /* start timer */
 			}
 			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
 				acc_minlen = 0; /* really a new minute */

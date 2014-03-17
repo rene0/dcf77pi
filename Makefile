@@ -19,7 +19,7 @@ config.o: config.h
 setclock.o: setclock.h
 dcf77pi.o: $(hdr)
 dcf77pi: $(obj)
-	$(CC) -o $@ $(obj) -lm -lncurses
+	$(CC) -o $@ $(obj) -lm -lncurses -pthread
 
 readpin.o: input.h
 readpin: readpin.o input.o config.o

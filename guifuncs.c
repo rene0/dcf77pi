@@ -49,17 +49,21 @@ init_curses(void)
 	return 0;
 }
 
-void
-statusbar(WINDOW *win, char *fmt, ...)
+void *
+statusbar(void *arg)
 {
-	va_list ap;
+	struct thread_info *tinfo = arg;
+	struct timespec slp;
 
-	wmove(win, 0, 0);
-	va_start(ap, fmt);
-	vwprintw(win, fmt, ap);
-	va_end(ap);
-	wclrtoeol(win);
-	wrefresh(win);
+	mvwprintw(tinfo->win, 0, 0, tinfo->str);
+	wclrtoeol(tinfo->win);
+	wrefresh(tinfo->win);
+	slp.tv_sec = 2;
+	slp.tv_nsec = 0;
+	while (nanosleep(&slp, &slp))
+		;
+	draw_keys(tinfo->win);
+	pthread_exit(NULL);
 }
 
 void
