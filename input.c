@@ -352,6 +352,8 @@ get_bit_live(void)
 			   "  %11.6f   %8.6f", tlow, t, count, realfreq, a);
 			if (freq_reset)
 				mvwchgat(input_win, 3, 17, 11, A_BOLD, 3, NULL);
+			else
+				mvwchgat(input_win, 3, 17, 11, A_NORMAL, 7, NULL);
 
 			if (newminute) {
 				count *= 2;
