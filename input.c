@@ -239,7 +239,7 @@ get_bit_live(void)
 	 * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
 	 */
 
-	int freq_reset = 0;
+	int freq_reset;
 	char outch;
 	int t, tlow, count = -1, newminute;
 	uint8_t p, stv;
@@ -292,15 +292,11 @@ get_bit_live(void)
 		 * Prevent algorithm collapse during thunderstorms
 		 * or scheduler abuse
 		 */
-		if (realfreq < hw.freq / 2) {
+		freq_reset = 0;
+		if (realfreq < hw.freq / 2 || realfreq > hw.freq * 3/2) {
 			if (logfile)
-				fprintf(logfile, "<");
-			realfreq = hw.freq;
-			freq_reset = 1;
-		}
-		if (realfreq > hw.freq * 3/2) {
-			if (logfile)
-				fprintf(logfile, ">");
+				fprintf(logfile, realfreq < hw.freq / 2 ?
+				    "<" : ">");
 			realfreq = hw.freq;
 			freq_reset = 1;
 		}
