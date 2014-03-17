@@ -6,3 +6,4 @@ maxone = 30
 summermonth = 3
 wintermonth = 10
 leapsecmonths = 3,6,9,12
+logfile =
