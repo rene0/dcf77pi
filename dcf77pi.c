@@ -71,24 +71,15 @@ main(int argc, char *argv[])
 	char *clockres;
 
 	infilename = logfilename = NULL;
-	while ((opt = getopt(argc, argv, "f:l:")) != -1) {
-		switch (opt) {
-		case 'f' :
+	while ((opt = getopt(argc, argv, "f:")) != -1) {
+		if (opt == 'f') {
 			infilename = strdup(optarg);
 			if (infilename == NULL) {
 				perror("infilename");
 				return errno;
 			}
-			break;
-		case 'l' :
-			logfilename = strdup(optarg);
-			if (logfilename == NULL) {
-				perror("logfilename");
-				return errno;
-			}
-			break;
-		default:
-			printf("usage: %s [-f infile] [-l logfile]\n",
+		} else {
+			printf("usage: %s [-f infile]\n",
 			    argv[0]);
 			return EX_USAGE;
 		}
@@ -99,6 +90,14 @@ main(int argc, char *argv[])
 		/* non-existent file? */
 		cleanup();
 		return res;
+	}
+	logfilename = get_config_value("logfile");
+	if (logfilename != NULL && strlen(logfilename) != 0) {
+		res = write_new_logfile(logfilename);
+		if (res != 0) {
+			perror("fopen (logfile)");
+			return res;
+		}
 	}
 	if (infilename != NULL)
 		res = set_mode_file(infilename);

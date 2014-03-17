@@ -31,7 +31,7 @@ int read_config_file(char *filename);
 /*
  * Valid values are:
  * "pin", "activehigh", "freq", "maxzero", "maxone",
- * "summermonth", "wintermonth", "leapsecmonths"
+ * "summermonth", "wintermonth", "leapsecmonths", "logfile"
  */
 char *get_config_value(char *keyword);
 
