@@ -334,10 +334,10 @@ get_bit_live(void)
 			if (init == 1)
 				init = 0;
 			else {
-				if (newminute) {
+				if (newminute)
 					realfreq = realfreq + 0.05 *
 					    ((t/2) - realfreq);
-				} else
+				else
 					realfreq = realfreq + 0.05 *
 					    (t - realfreq);
 				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
