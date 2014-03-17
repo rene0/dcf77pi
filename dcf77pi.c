@@ -155,19 +155,22 @@ main(int argc, char *argv[])
 			bit = get_bit_file();
 		else
 			bit = get_bit_live();
-		if (infilename != NULL && (bit & GETBIT_EOD))
-			break;
+
 		if (infilename == NULL && (inkey = getch()) != ERR) {
-			if (inkey == 'Q')
+			switch (inkey) {
+			case 'Q':
+				bit |= GETBIT_EOD; /* quit main loop */
 				break;
-			if (inkey == 'S') {
+			case 'S':
 				settime = 1 - settime;
 				statusbar(main_win, "Time synchronization %s",
 				    settime ?  "on" : "off");
 				old_bitpos = bitpos; /* start timer */
-			}
+				break;
 			}
 		}
+		if (bit & GETBIT_EOD)
+			break;
 
 		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
 			acc_minlen += 2500;
