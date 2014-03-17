@@ -69,7 +69,7 @@ read_config_file(char *filename)
 		if (fscanf(configfile, "%s = %s\n", k, v) != 2) {
 			perror("read_config_file");
 			fclose(configfile);
-			return errno;
+			return 1;
 		}
 		i = getpos(k);
 		if (i == -1) {
