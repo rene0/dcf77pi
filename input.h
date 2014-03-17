@@ -48,7 +48,9 @@ int set_mode(char *infilename, char *logfilename);
 struct hardware *get_hardware_parameters(void);
 void cleanup(void);
 uint8_t get_pulse(void);
-uint16_t get_bit(void); /* stores result in internal buffer */
+/* get_bit_*() stores result in internal buffer */
+uint16_t get_bit_file(void);
+uint16_t get_bit_live(void);
 void display_bit_file(void);
 void display_bit_gui(void);
 /* prepare for next bit */

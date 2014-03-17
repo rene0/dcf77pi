@@ -234,7 +234,7 @@ get_pulse(void)
 }
 
 uint16_t
-get_bit(void)
+get_bit_live(void)
 {
 	/*
 	 * The bits are decoded from the signal using an exponential low-pass
@@ -243,9 +243,9 @@ get_bit(void)
 	 * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
 	 */
 
-	int inch, valid = 0, freq_reset = 0;
+	int freq_reset = 0;
 	char outch;
-	int t, tlow, count, newminute;
+	int t, tlow, count = -1, newminute;
 	uint8_t p, stv;
 	struct timespec slp;
 	float a, y, w;
@@ -257,124 +257,122 @@ get_bit(void)
 	 * to determine if this flag can be cleared again.
 	 */
 	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
-	if (islive) {
-		/*
-		 * One period is either 1000 ms or 2000 ms long (normal or
-		 * padding for last). The active part is either 100 ms ('0')
-		 * or 200 ms ('1') long, the maximum allowed values as
-		 * percentage of the second length are specified with maxzero
-		 * and maxone respectively.
-		 *
-		 *  ~A > 1.5 * realfreq: value |= GETBIT_EOM
-		 *  ~A > 2.5 * realfreq: timeout
-		 */
 
-		/*
-		 * Set up filter, reach 50% after realfreq/20 samples
-		 * (i.e. 50 ms)
-		 */
-		if (init == 1)
-			realfreq = hw.freq;
-		a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-		y = -1;
-		tlow = 0;
-		stv = 2;
-		w = 0.05;
+	/*
+	 * One period is either 1000 ms or 2000 ms long (normal or
+	 * padding for last). The active part is either 100 ms ('0')
+	 * or 200 ms ('1') long, the maximum allowed values as
+	 * percentage of the second length are specified with maxzero
+	 * and maxone respectively.
+	 *
+	 *  ~A > 1.5 * realfreq: value |= GETBIT_EOM
+	 *  ~A > 2.5 * realfreq: timeout
+	 */
 
-		for (t = 0; ; t++) {
-			p = get_pulse();
-			if (p == GETBIT_IO) {
-				state |= GETBIT_IO;
-				outch = '*';
-				goto report;
-			}
+	/*
+	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
+	 */
+	if (init == 1)
+		realfreq = hw.freq;
+	a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
+	y = -1;
+	tlow = 0;
+	stv = 2;
+	w = 0.05;
 
-			y = y < 0 ? (float)p : y + a * (p - y);
-			if (stv == 2)
-				stv = p;
-
-			/*
-			 * Prevent algorithm collapse during thunderstorms
-			 * or scheduler abuse
-			 */
-			if (realfreq < hw.freq / 2) {
-				if (islive == 0)
-					printf("<");
-				if (logfile)
-					fprintf(logfile, "<");
-				realfreq = hw.freq;
-				freq_reset = 1;
-			}
-			if (realfreq > hw.freq * 3/2) {
-				if (islive == 0)
-					printf(">");
-				if (logfile)
-					fprintf(logfile, ">");
-				realfreq = hw.freq;
-				freq_reset = 1;
-			}
-
-			if (t > realfreq * 5/2) {
-				realfreq = realfreq + w * ((t / 2.5) - realfreq);
-				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-				if (tlow * 100 / t < 1) {
-					state |= GETBIT_RECV;
-					outch = 'r';
-				} else if (tlow * 100 / t >= 99) {
-					state |= GETBIT_XMIT;
-					outch = 'x';
-				} else {
-					state |= GETBIT_RND;
-					outch = '#';
-				}
-				goto report; /* timeout */
-			}
-
-			/*
-			 * Schmitt trigger, maximize value to introduce
-			 * hysteresis and to avoid infinite memory.
-			 */
-			if (y < 0.5 && stv == 1) {
-				y = 0.0;
-				stv = 0;
-				tlow = t; /* end of high part of second */
-			}
-			if (y > 0.5 && stv == 0) {
-				y = 1.0;
-				stv = 1;
-
-				count = tlow * 100 / t;
-				newminute = t > realfreq * 3/2;
-				if (init == 1)
-					init = 0;
-				else {
-					if (newminute) {
-						realfreq = realfreq + w *
-						    ((t/2) - realfreq);
-					} else
-						realfreq = realfreq + w *
-						    (t - realfreq);
-					a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-				}
-				mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%)"
-				   "  %11.6f   %8.6f", tlow, t, count,
-				   realfreq, a);
-				if (freq_reset)
-					mvwchgat(input_win, 3, 17, 11, A_BOLD,
-					   3, NULL);
-				if (newminute) {
-					count *= 2;
-					state |= GETBIT_EOM;
-				}
-				break; /* start of new second */
-			}
-			slp.tv_sec = 0;
-			slp.tv_nsec = 1e9 / hw.freq;
-			while (nanosleep(&slp, &slp))
-				;
+	for (t = 0; ; t++) {
+		p = get_pulse();
+		if (p == GETBIT_IO) {
+			state |= GETBIT_IO;
+			outch = '*';
+			goto report;
 		}
 
-		if (count <= hw.maxzero) {
+		y = y < 0 ? (float)p : y + a * (p - y);
+		if (stv == 2)
+			stv = p;
+
+		/*
+		 * Prevent algorithm collapse during thunderstorms
+		 * or scheduler abuse
+		 */
+		if (realfreq < hw.freq / 2) {
+			if (logfile)
+				fprintf(logfile, "<");
+			realfreq = hw.freq;
+			freq_reset = 1;
+		}
+		if (realfreq > hw.freq * 3/2) {
+			if (logfile)
+				fprintf(logfile, ">");
+			realfreq = hw.freq;
+			freq_reset = 1;
+		}
+
+		if (t > realfreq * 5/2) {
+			realfreq = realfreq + w * ((t / 2.5) - realfreq);
+			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
+			if (tlow * 100 / t < 1) {
+				state |= GETBIT_RECV;
+				outch = 'r';
+			} else if (tlow * 100 / t >= 99) {
+				state |= GETBIT_XMIT;
+				outch = 'x';
+			} else {
+				state |= GETBIT_RND;
+				outch = '#';
+			}
+			goto report; /* timeout */
+		}
+
+		/*
+		 * Schmitt trigger, maximize value to introduce
+		 * hysteresis and to avoid infinite memory.
+		 */
+		if (y < 0.5 && stv == 1) {
+			y = 0.0;
+			stv = 0;
+			tlow = t; /* end of high part of second */
+		}
+		if (y > 0.5 && stv == 0) {
+			y = 1.0;
+			stv = 1;
+
+			count = tlow * 100 / t;
+			newminute = t > realfreq * 3/2;
+			if (init == 1)
+				init = 0;
+			else {
+				if (newminute) {
+					realfreq = realfreq + w *
+					    ((t/2) - realfreq);
+				} else
+					realfreq = realfreq + w *
+					    (t - realfreq);
+				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
+			}
+
+			mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%)"
+			   "  %11.6f   %8.6f", tlow, t, count, realfreq, a);
+			if (freq_reset)
+				mvwchgat(input_win, 3, 17, 11, A_BOLD, 3, NULL);
+
+			if (newminute) {
+				count *= 2;
+				state |= GETBIT_EOM;
+			}
+			break; /* start of new second */
+		}
+		slp.tv_sec = 0;
+		slp.tv_nsec = 1e9 / hw.freq;
+		while (nanosleep(&slp, &slp))
+			;
+
+		if (count == -1) {
+			/* something went wrong ... */
+			state |= GETBIT_READ;
+			outch = '_';
+		} else if (count <= hw.maxzero) {
 			/* zero bit, ~100 ms active signal */
 			outch = '0';
 			buffer[bitpos] = 0;
@@ -395,65 +393,78 @@ report:
 				fprintf(logfile, "\n");
 		}
 		wrefresh(input_win);
-	} else {
-		while (valid == 0) {
-			inch = getc(datafile);
-			switch (inch) {
-			case EOF:
-				state |= GETBIT_EOD;
-				return state;
-			case '0':
-			case '1':
-				buffer[bitpos] = (uint8_t)(inch - '0');
-				if (inch == '1')
-					state |= GETBIT_ONE;
-				valid = 1;
-				break;
-			case '\r' :
-			case '\n' :
-				state |= GETBIT_EOM; /* otherwise empty bit */
-				valid = 1;
-				break;
-			case 'x' :
-				state |= GETBIT_XMIT;
-				valid = 1;
-				break;
-			case 'r':
-				state |= GETBIT_RECV;
-				valid = 1;
-				break;
-			case '#' :
-				state |= GETBIT_RND;
-				valid = 1;
-				break;
-			case '*' :
-				state |= GETBIT_IO;
-				valid = 1;
-				break;
-			case '_' :
-				/* retain old value in buffer[bitpos] */
-				state |= GETBIT_READ;
-				valid = 1;
-				break;
-			default:
-				break;
-			}
-		}
+	}
+	return state;
+}
+
+uint16_t
+get_bit_file(void)
+{
+	int inch, valid = 0;
+
+	/*
+	 * Clear previous flags, except GETBIT_TOOLONG to be able
+	 * to determine if this flag can be cleared again.
+	 */
+	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
+
+	while (valid == 0) {
 		inch = getc(datafile);
-		if (inch == '\n')
+		switch (inch) {
+		case EOF:
+			state |= GETBIT_EOD;
+			return state;
+		case '0':
+		case '1':
+			buffer[bitpos] = (uint8_t)(inch - '0');
+			if (inch == '1')
+				state |= GETBIT_ONE;
+			valid = 1;
+			break;
+		case '\r':
+		case '\n':
+			state |= GETBIT_EOM; /* otherwise empty bit */
+			valid = 1;
+			break;
+		case 'x':
+			state |= GETBIT_XMIT;
+			valid = 1;
+			break;
+		case 'r':
+			state |= GETBIT_RECV;
+			valid = 1;
+			break;
+		case '#':
+			state |= GETBIT_RND;
+			valid = 1;
+			break;
+		case '*':
+			state |= GETBIT_IO;
+			valid = 1;
+			break;
+		case '_':
+			/* retain old value in buffer[bitpos] */
+			state |= GETBIT_READ;
+			valid = 1;
+			break;
+		default:
+			break;
+		}
+	}
+	inch = getc(datafile);
+	if (inch == '\n')
+		state |= GETBIT_EOM;
+	else {
+		if (inch == '\r') {
 			state |= GETBIT_EOM;
-		else {
-			if (inch == '\r') {
-				state |= GETBIT_EOM;
-				inch = getc(datafile);
-				if (inch != '\n' &&
-				    ungetc(inch, datafile) == EOF)
-					state |= GETBIT_EOD;
-					/* push back, not an EOM marker */
-			} else if (ungetc(inch, datafile) == EOF)
+			inch = getc(datafile);
+			if (inch != '\n' &&
+			    ungetc(inch, datafile) == EOF)
 				state |= GETBIT_EOD;
 				/* push back, not an EOM marker */
-		}
+		} else if (ungetc(inch, datafile) == EOF)
+			state |= GETBIT_EOD;
+			/* push back, not an EOM marker */
 	}
 	return state;
 }

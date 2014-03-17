@@ -151,7 +151,10 @@ main(int argc, char *argv[])
 	}
 
 	for (;;) {
-		bit = get_bit();
+		if (infilename != NULL)
+			bit = get_bit_file();
+		else
+			bit = get_bit_live();
 		if (infilename != NULL && (bit & GETBIT_EOD))
 			break;
 		if (infilename == NULL && (inkey = getch()) != ERR) {
