@@ -360,33 +360,33 @@ get_bit_live(void)
 		slp.tv_nsec = 1e9 / hw.freq;
 		while (nanosleep(&slp, &slp))
 			;
-
-		if (count == -1) {
-			/* something went wrong ... */
-			state |= GETBIT_READ;
-			outch = '_';
-		} else if (count <= hw.maxzero) {
-			/* zero bit, ~100 ms active signal */
-			outch = '0';
-			buffer[bitpos] = 0;
-		} else if (count <= hw.maxone) {
-			/* one bit, ~200 ms active signal */
-			state |= GETBIT_ONE;
-			outch = '1';
-			buffer[bitpos] = 1;
-		} else {
-			/* bad radio signal, retain old value */
-			state |= GETBIT_READ;
-			outch = '_';
-		}
-report:
-		if (logfile) {
-			fprintf(logfile, "%c", outch);
-			if (state & GETBIT_EOM)
-				fprintf(logfile, "\n");
-		}
-		wrefresh(input_win);
 	}
+
+	if (count == -1) {
+		/* something went wrong ... */
+		state |= GETBIT_READ;
+		outch = '_';
+	} else if (count <= hw.maxzero) {
+		/* zero bit, ~100 ms active signal */
+		outch = '0';
+		buffer[bitpos] = 0;
+	} else if (count <= hw.maxone) {
+		/* one bit, ~200 ms active signal */
+		state |= GETBIT_ONE;
+		outch = '1';
+		buffer[bitpos] = 1;
+	} else {
+		/* bad radio signal, retain old value */
+		state |= GETBIT_READ;
+		outch = '_';
+	}
+report:
+	if (logfile) {
+		fprintf(logfile, "%c", outch);
+		if (state & GETBIT_EOM)
+			fprintf(logfile, "\n");
+	}
+	wrefresh(input_win);
 	return state;
 }
 
