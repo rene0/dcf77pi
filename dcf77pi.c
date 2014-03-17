@@ -68,7 +68,6 @@ main(int argc, char *argv[])
 	int res, opt, settime = 0;
 	char *infilename, *logfilename;
 	int inkey;
-	char *clockres;
 	struct thread_info tinfo;
 
 	infilename = logfilename = NULL;
@@ -281,8 +280,8 @@ main(int argc, char *argv[])
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
 			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0)) {
-				clockres = setclock(&time);
-				free(clockres);
+				if (setclock(main_win, time))
+					bit |= GETBIT_EOD; /* error */
 			}
 			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
 				acc_minlen = 0; /* really a new minute */

@@ -26,6 +26,9 @@ SUCH DAMAGE.
 #ifndef DCF77PI_SETCLOCK_H
 #define DCF77PI_SETCLOCK_H
 
-char *setclock(void *time);
+#include <ncurses.h>
+#include <time.h>
+
+int setclock(WINDOW *win, struct tm time);
 
 #endif
