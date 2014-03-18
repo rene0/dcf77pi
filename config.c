@@ -74,13 +74,13 @@ read_config_file(char *filename)
 				printf("read_config_file: read 1 item with"
 				    " empty key\n");
 				fclose(configfile);
-				return 1;
+				return -1;
 			}
 		} else if (i != 2) {
 			printf("read_config_file: read %i items instead of 2\n",
 			    i);
 			fclose(configfile);
-			return 1;
+			return -1;
 		}
 		i = getpos(k);
 		if (i == -1) {
@@ -98,7 +98,7 @@ read_config_file(char *filename)
 			printf("read_config_file: missing value for key '%s'\n",
 			    key[i]);
 			fclose(configfile);
-			return 1;
+			return -1;
 		}
 	fclose(configfile);
 	return 0;

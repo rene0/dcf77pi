@@ -166,7 +166,7 @@ set_mode_live(void)
 #ifdef NOLIVE
 	printf("No GPIO interface available, disabling live decoding\n");
 	cleanup();
-	return 1;
+	return -1;
 #else
 	/* fill hardware structure and initialize hardware */
 	hw.pin = strtol(get_config_value("pin"), NULL, 10);
