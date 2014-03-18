@@ -42,7 +42,7 @@ char *wday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 void
 init_time(void)
 {
-	char *lsm, *mon;
+	char *freeptr, *lsm, *mon;
 	int i, m;
 
 	summermonth = strtol(get_config_value("summermonth"), NULL, 10);
@@ -52,7 +52,7 @@ init_time(void)
 	if (wintermonth < 1 || wintermonth > 12)
 		wintermonth = 0;
 
-	lsm = strdup(get_config_value("leapsecmonths"));
+	freeptr = lsm = strdup(get_config_value("leapsecmonths"));
 	num_leapsecmonths = 0;
 	for (i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
 		m = strtol(mon, NULL, 10);
@@ -61,6 +61,7 @@ init_time(void)
 			num_leapsecmonths++;
 		}
 	}
+	free(freeptr);
 }
 
 int
