@@ -29,6 +29,7 @@ SUCH DAMAGE.
 #include <ncurses.h>
 #include <time.h>
 
+/* Does *not* work with no timezone or UTC */
 int setclock(WINDOW *win, struct tm time);
 
 #endif

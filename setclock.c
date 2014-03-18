@@ -43,7 +43,7 @@ setclock(WINDOW *win, struct tm time)
 	struct timezone tz;
 	struct thread_info tinfo;
 
-	tzset();
+	tzset(); /* does not help for TZ=UTC */
 
 	memcpy((void *)&isotime, (const void *)&time, sizeof(time));
 	isotime.tm_year -= 1900;
