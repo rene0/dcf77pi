@@ -606,7 +606,8 @@ switch_logfile(WINDOW *win, char **logfilename)
 	if (*logfilename == NULL)
 		*logfilename = strdup('\0');
 	old_logfilename = strdup(*logfilename);
-	strncpy(*logfilename, get_keybuf(), sizeof(char) * MAXBUF);
+	free(*logfilename);
+	*logfilename = strdup(get_keybuf());
 
 	if (strcmp(old_logfilename, *logfilename)) {
 		if (strlen(old_logfilename) > 0) {
