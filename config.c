@@ -54,7 +54,7 @@ read_config_file(char *filename)
 {
 	int i;
 	FILE *configfile;
-	char k[20], v[60];
+	char k[20], v[255];
 
 	for (i = 0; i < NUM_KEYS; i++)
 		value[i] = NULL;
