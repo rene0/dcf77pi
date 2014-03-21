@@ -69,6 +69,13 @@ strip(char *s)
 	return t;
 }
 
+#define END_CONFIG(ret) \
+do { \
+	fclose(configfile); \
+	free(freeptr); \
+	return (ret); \
+} while (0)
+
 int
 read_config_file(char *filename)
 {
@@ -99,17 +106,13 @@ read_config_file(char *filename)
 			if (feof(configfile))
 				break;
 			printf("read_config_file: error reading file\n");
-			fclose(configfile);
-			free(freeptr);
-			return -1;
+			END_CONFIG(-1);
 		}
 		if ((k = strsep(&line, "=")) != NULL)
 			v = line;
 		else {
 			printf("read_config_file: no key/value pair found\n");
-			fclose(configfile);
-			free(freeptr);
-			return -1;
+			END_CONFIG(-1);
 		}
 		i = strlen(k);
 		k = strip(k);
@@ -117,9 +120,7 @@ read_config_file(char *filename)
 		if (i > MAX_KEYLEN + 1 || strlen(k) == 0 ||
 		    strlen(k) > MAX_KEYLEN) {
 			printf("read_config_file: item with bad key length\n");
-			fclose(configfile);
-			free(freeptr);
-			return -1;
+			END_CONFIG(-1);
 		}
 		i = getpos(k);
 		if (i == -1) {
@@ -129,9 +130,7 @@ read_config_file(char *filename)
 		}
 		if (strlen(v) > MAX_VALLEN) {
 			printf("read_config_file: item with too long value\n");
-			fclose(configfile);
-			free(freeptr);
-			return -1;
+			END_CONFIG(-1);
 		}
 		if (value[i] != NULL)
 			printf("read_config_file: overwriting value for key"
@@ -142,13 +141,9 @@ read_config_file(char *filename)
 		if (value[i] == NULL) {
 			printf("read_config_file: missing value for key '%s'\n",
 			    key[i]);
-			fclose(configfile);
-			free(freeptr);
-			return -1;
+			END_CONFIG(-1);
 		}
-	fclose(configfile);
-	free(freeptr);
-	return 0;
+	END_CONFIG(0);
 }
 
 char *
