@@ -27,6 +27,7 @@ SUCH DAMAGE.
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 char *key[] = {
@@ -35,6 +36,10 @@ char *key[] = {
 };
 
 #define NUM_KEYS (sizeof(key) / sizeof(key[0]))
+
+#define MAX_KEYLEN 20
+#define MAX_VALLEN 255
+#define MAX_LEN (MAX_KEYLEN + 3 + MAX_VALLEN + 2) /* "k = v\n\0" */
 
 char *value[NUM_KEYS];
 
@@ -49,37 +54,71 @@ getpos(char *kw)
 	return -1;
 }
 
+char *
+strip(char *s)
+{
+	int i;
+	char *t;
+
+	for (t = s; t[0] == ' ' || t[0] == '\n' || t[0] == '\r' ||
+	    t[0] == '\t'; t++)
+		;
+	for (i = strlen(t) - 1; t[i] == ' ' || t[i] == '\n' || t[i] == '\r' ||
+	    t[i] == '\t'; i--)
+		t[i] = '\0';
+	return t;
+}
+
 int
 read_config_file(char *filename)
 {
 	int i;
 	FILE *configfile;
-	char k[20], v[255];
+	char *k, *v;
+	char *line, *freeptr;
 
+	k = v = NULL;
+	line = malloc(MAX_LEN);
+	if (line == NULL) {
+		perror("malloc(configfile)");
+		return errno;
+	}
+	freeptr = line;
 	for (i = 0; i < NUM_KEYS; i++)
 		value[i] = NULL;
 
 	configfile = fopen(filename, "r");
 	if (configfile == NULL) {
 		perror("fopen (configfile)");
+		free(freeptr);
 		return errno;
 	}
 
 	while (feof(configfile) == 0) {
-		bzero(k, sizeof(k));
-		bzero(v, sizeof(v));
-		i = fscanf(configfile, "%s = %s\n", k, v);
-		if (i == 1) {
-			if (strlen(k) == 0) {
-				printf("read_config_file: read 1 item with"
-				    " empty key\n");
-				fclose(configfile);
-				return -1;
-			}
-		} else if (i != 2) {
-			printf("read_config_file: read %i items instead of 2\n",
-			    i);
+		if (fgets(line, MAX_LEN, configfile) == NULL) {
+			if (feof(configfile))
+				break;
+			printf("read_config_file: error reading file\n");
 			fclose(configfile);
+			free(freeptr);
+			return -1;
+		}
+		if ((k = strsep(&line, "=")) != NULL)
+			v = line;
+		else {
+			printf("read_config_file: no key/value pair found\n");
+			fclose(configfile);
+			free(freeptr);
+			return -1;
+		}
+		i = strlen(k);
+		k = strip(k);
+		v = strip(v);
+		if (i > MAX_KEYLEN + 1 || strlen(k) == 0 ||
+		    strlen(k) > MAX_KEYLEN) {
+			printf("read_config_file: item with bad key length\n");
+			fclose(configfile);
+			free(freeptr);
 			return -1;
 		}
 		i = getpos(k);
@@ -87,6 +126,12 @@ read_config_file(char *filename)
 			printf("read_config_file: skipping invalid key '%s'\n",
 			    k);
 			continue;
+		}
+		if (strlen(v) > MAX_VALLEN) {
+			printf("read_config_file: item with too long value\n");
+			fclose(configfile);
+			free(freeptr);
+			return -1;
 		}
 		if (value[i] != NULL)
 			printf("read_config_file: overwriting value for key"
@@ -98,9 +143,11 @@ read_config_file(char *filename)
 			printf("read_config_file: missing value for key '%s'\n",
 			    key[i]);
 			fclose(configfile);
+			free(freeptr);
 			return -1;
 		}
 	fclose(configfile);
+	free(freeptr);
 	return 0;
 }
 
