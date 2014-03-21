@@ -28,10 +28,16 @@ SUCH DAMAGE.
 
 #include <ncurses.h>
 
+#define MAXBUF 255
 
 int init_curses(void);
 void draw_keys(WINDOW *win);
 void statusbar(WINDOW *win, int bitpos, char *fmt, ...);
 void check_timer(WINDOW *win, int bitpos);
+void input_line(WINDOW *win, char *msg);
+void process_key(WINDOW *win, int inkey);
+char *get_keybuf();
+int get_inputmode();
+void set_inputmode(int mode);
 
 #endif

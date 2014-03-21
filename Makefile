@@ -12,7 +12,7 @@ src = guifuncs.c input.c decode_time.c decode_alarm.c config.c setclock.c \
     dcf77pi.c
 obj = guifuncs.o input.o decode_time.o decode_alarm.o config.o setclock.o \
     dcf77pi.o
-input.o: input.h config.h
+input.o: input.h config.h guifuncs.h
 decode_time.o: decode_time.h config.h
 decode_alarm.o: decode_alarm.h
 config.o: config.h
@@ -22,8 +22,8 @@ dcf77pi: $(obj)
 	$(CC) -o $@ $(obj) -lm -lncurses
 
 readpin.o: input.h
-readpin: readpin.o input.o config.o
-	$(CC) -o $@ readpin.o input.o config.o -lrt -lm -lncurses
+readpin: readpin.o input.o config.o guifuncs.o
+	$(CC) -o $@ readpin.o input.o config.o guifuncs.o -lrt -lm -lncurses
 
 clean:
 	rm dcf77pi $(obj)

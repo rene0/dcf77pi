@@ -26,11 +26,13 @@ SUCH DAMAGE.
 #include "input.h"
 
 #include "config.h"
+#include "guifuncs.h"
 
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 #include <strings.h>
 #include <time.h>
 #include <unistd.h>
@@ -593,6 +595,36 @@ draw_input_window(void)
 	mvwprintw(input_win, 2, 0, "act total        realfreq Hz"
 	    "  increment  bit");
 	wrefresh(input_win);
+}
+
+int
+switch_logfile(WINDOW *win, char **logfilename)
+{
+	int res;
+	char *old_logfilename;
+
+	if (*logfilename == NULL)
+		*logfilename = strdup('\0');
+	old_logfilename = strdup(*logfilename);
+	strncpy(*logfilename, get_keybuf(), sizeof(char) * MAXBUF);
+
+	if (strcmp(old_logfilename, *logfilename)) {
+		if (strlen(old_logfilename) > 0) {
+			if (fclose(logfile) == EOF) {
+				statusbar(win, bitpos,
+				    "Error closing old log file");
+				return errno;
+			}
+		}
+		if (strlen(*logfilename) > 0) {
+			if ((res = write_new_logfile(*logfilename)) != 0) {
+				statusbar(win, bitpos, strerror(res));
+				return res;
+			}
+		}
+	}
+	free(old_logfilename);
+	return 0;
 }
 
 int

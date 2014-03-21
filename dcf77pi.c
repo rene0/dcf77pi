@@ -67,6 +67,7 @@ main(int argc, char *argv[])
 	int init = 1, init2 = 1;
 	int res, opt, settime = 0;
 	char *infilename, *logfilename;
+	int change_logfile = 0;
 	int inkey;
 
 	infilename = logfilename = NULL;
@@ -162,6 +163,12 @@ main(int argc, char *argv[])
 				case 'Q':
 					bit |= GETBIT_EOD; /* quit main loop */
 					break;
+				case 'L':
+					inkey = ERR; /* prevent key repeat */
+					input_line(main_win,
+					    "Log file (empty for none):");
+					change_logfile = 1;
+					break;
 				case 'S':
 					settime = 1 - settime;
 					statusbar(main_win, bitpos,
@@ -169,6 +176,8 @@ main(int argc, char *argv[])
 					    settime ? "on" : "off");
 					break;
 				}
+			if (get_inputmode() == 1 && inkey != ERR)
+				process_key(main_win, inkey);
 		}
 		if (bit & GETBIT_EOD)
 			break;
@@ -180,6 +189,14 @@ main(int argc, char *argv[])
 
 		bitpos = get_bitpos();
 		check_timer(main_win, bitpos);
+		if (get_inputmode() == -1) {
+			if (change_logfile) {
+				if (switch_logfile(main_win, &logfilename))
+					bit = GETBIT_EOD; /* error */
+				change_logfile = 0;
+			}
+			set_inputmode(0);
+		}
 
 		if (bit & GETBIT_EOM) {
 			/* handle the missing minute marker */

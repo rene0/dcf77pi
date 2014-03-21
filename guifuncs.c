@@ -25,7 +25,14 @@ SUCH DAMAGE.
 
 #include "guifuncs.h"
 
+#include <stdint.h>
+#include <string.h>
+
 int old_bitpos = -1;        /* timer for statusbar inactive */
+static int input_mode = 0;  /* normal input (statusbar keys) or string input */
+static char keybuf[MAXBUF]; /* accumulator for string input */
+uint8_t input_count, input_xpos;
+
 int
 init_curses(void)
 {
@@ -85,4 +92,61 @@ check_timer(WINDOW *win, int bitpos)
 		old_bitpos = -1;
 		draw_keys(win);
 	}
+}
+
+void
+input_line(WINDOW *win, char *msg)
+{
+	mvwprintw(win, 0, 0, "%s", msg);
+	wclrtoeol(win);
+	wrefresh(win);
+	input_mode = 1;
+	input_count = 0;
+	input_xpos = strlen(msg);
+}
+
+void
+end_input(WINDOW *win)
+{
+	keybuf[input_count] = '\0'; /* terminate to prevent overflow */
+	draw_keys(win);
+	input_mode = -1;
+}
+
+void
+process_key(WINDOW *win, int inkey)
+{
+	if ((inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127) &&
+	     input_count > 0) {
+		input_count--;
+		wmove(win, 0, --input_xpos);
+		wclrtoeol(win);
+		wrefresh(win);
+	} else if (inkey == KEY_ENTER || inkey == '\r' || inkey == 13)
+		end_input(win);
+	else if (input_count == MAXBUF-1)
+		end_input(win);
+	else {
+		keybuf[input_count++] = inkey;
+		mvwprintw(win, 0, ++input_xpos, "%c", inkey);
+		wrefresh(win);
+	}
+}
+
+int
+get_inputmode(void)
+{
+	return input_mode;
+}
+
+void
+set_inputmode(int mode)
+{
+	input_mode = mode;
+}
+
+char *
+get_keybuf(void)
+{
+	return keybuf;
 }
