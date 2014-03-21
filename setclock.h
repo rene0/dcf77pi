@@ -30,6 +30,6 @@ SUCH DAMAGE.
 #include <time.h>
 
 /* Does *not* work with no timezone or UTC */
-int setclock(WINDOW *win, struct tm time);
+int setclock(WINDOW *win, int bitpos, struct tm time);
 
 #endif

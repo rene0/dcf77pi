@@ -25,6 +25,7 @@ SUCH DAMAGE.
 
 #include "guifuncs.h"
 
+int old_bitpos = -1;        /* timer for statusbar inactive */
 int
 init_curses(void)
 {
@@ -49,21 +50,18 @@ init_curses(void)
 	return 0;
 }
 
-void *
-statusbar(void *arg)
+void
+statusbar(WINDOW *win, int bitpos, char *fmt, ...)
 {
-	struct thread_info *tinfo = arg;
-	struct timespec slp;
+	va_list ap;
 
-	mvwprintw(tinfo->win, 0, 0, tinfo->str);
-	wclrtoeol(tinfo->win);
-	wrefresh(tinfo->win);
-	slp.tv_sec = 2;
-	slp.tv_nsec = 0;
-	while (nanosleep(&slp, &slp))
-		;
-	draw_keys(tinfo->win);
-	pthread_exit(NULL);
+	old_bitpos = bitpos;
+
+	va_start(ap, fmt);
+	vw_printw(win, fmt, ap);
+	va_end(ap);
+	wclrtoeol(win);
+	wrefresh(win);
 }
 
 void
@@ -76,15 +74,15 @@ draw_keys(WINDOW *win)
 }
 
 void
-check_timer(WINDOW *win, int *old_bitpos, int bitpos)
+check_timer(WINDOW *win, int bitpos)
 {
-	if (*old_bitpos != -1 && (bitpos % 60 == (*old_bitpos + 2) % 60 ||
-	    (*old_bitpos == 57 && bitpos == 0))) {
+	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 2) % 60 ||
+	    (old_bitpos == 57 && bitpos == 0))) {
 		/*
 		 * Time for status text passed, cannot use *sleep()
 		 * in statusbar() because that pauses reception
 		 */
-		*old_bitpos = -1;
+		old_bitpos = -1;
 		draw_keys(win);
 	}
 }

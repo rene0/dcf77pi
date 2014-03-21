@@ -27,17 +27,11 @@ SUCH DAMAGE.
 #define DCF77PI_GUIFUNCS_H
 
 #include <ncurses.h>
-#include <pthread.h>
 
-struct thread_info {
-	pthread_t id;
-	WINDOW *win;
-	char *str;
-	char *res;
-};
 
 int init_curses(void);
 void draw_keys(WINDOW *win);
-void *statusbar(void *arg);
+void statusbar(WINDOW *win, int bitpos, char *fmt, ...);
+void check_timer(WINDOW *win, int bitpos);
 
 #endif

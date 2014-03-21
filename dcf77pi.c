@@ -68,7 +68,6 @@ main(int argc, char *argv[])
 	int res, opt, settime = 0;
 	char *infilename, *logfilename;
 	int inkey;
-	struct thread_info tinfo;
 
 	infilename = logfilename = NULL;
 	while ((opt = getopt(argc, argv, "f:")) != -1) {
@@ -155,25 +154,21 @@ main(int argc, char *argv[])
 	for (;;) {
 		if (infilename != NULL)
 			bit = get_bit_file();
-		else
+		else {
 			bit = get_bit_live();
-
-		if (infilename == NULL && (inkey = getch()) != ERR) {
-			switch (inkey) {
-			case 'Q':
-				bit |= GETBIT_EOD; /* quit main loop */
-				break;
-			case 'S':
-				settime = 1 - settime;
-				tinfo.win = main_win;
-				asprintf(&tinfo.str, "Time synchronization %s",
-				    settime ? "on" : "off");
-				if (pthread_create(&tinfo.id, NULL, statusbar,
-				    (void *)&tinfo))
-					bit |= GETBIT_EOD; /* error */
-				free(tinfo.str);
-				break;
-			}
+			inkey = getch();
+			if (get_inputmode() == 0 && inkey != ERR)
+				switch (inkey) {
+				case 'Q':
+					bit |= GETBIT_EOD; /* quit main loop */
+					break;
+				case 'S':
+					settime = 1 - settime;
+					statusbar(main_win, bitpos,
+					    "Time synchronization %s",
+					    settime ? "on" : "off");
+					break;
+				}
 		}
 		if (bit & GETBIT_EOD)
 			break;
@@ -184,6 +179,7 @@ main(int argc, char *argv[])
 			acc_minlen += 1000;
 
 		bitpos = get_bitpos();
+		check_timer(main_win, bitpos);
 
 		if (bit & GETBIT_EOM) {
 			/* handle the missing minute marker */
@@ -280,7 +276,7 @@ main(int argc, char *argv[])
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
 			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0)) {
-				if (setclock(main_win, time))
+				if (setclock(main_win, bitpos, time))
 					bit |= GETBIT_EOD; /* error */
 			}
 			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
