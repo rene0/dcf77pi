@@ -91,7 +91,7 @@ main(int argc, char *argv[])
 		cleanup();
 		return res;
 	}
-	logfilename = get_config_value("logfile");
+	logfilename = get_config_value("outlogfile");
 	if (logfilename != NULL && strlen(logfilename) != 0) {
 		res = write_new_logfile(logfilename);
 		if (res != 0) {
