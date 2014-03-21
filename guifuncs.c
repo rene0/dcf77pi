@@ -74,9 +74,11 @@ statusbar(WINDOW *win, int bitpos, char *fmt, ...)
 void
 draw_keys(WINDOW *win)
 {
-	mvwprintw(win, 0, 0, "[Q] -> quit [S] -> toggle time sync");
+	mvwprintw(win, 0, 0, "[Q] -> quit [L] -> change log file"
+	    " [S] -> toggle time sync");
 	mvwchgat(win, 0, 1, 1, A_BOLD, 4, NULL); /* [Q] */
-	mvwchgat(win, 0, 13, 1, A_BOLD, 4, NULL); /* [S] */
+	mvwchgat(win, 0, 13, 1, A_BOLD, 4, NULL); /* [L] */
+	mvwchgat(win, 0, 36, 1, A_BOLD, 4, NULL); /* [S] */
 	wrefresh(win);
 }
 
