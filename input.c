@@ -293,7 +293,7 @@ get_bit_live(void)
 		 */
 		freq_reset = 0;
 		if (realfreq < hw.freq / 2 || realfreq > hw.freq * 3/2) {
-			if (logfile)
+			if (logfile != NULL)
 				fprintf(logfile, realfreq < hw.freq / 2 ?
 				    "<" : ">");
 			realfreq = hw.freq;
@@ -381,7 +381,7 @@ get_bit_live(void)
 		outch = '_';
 	}
 report:
-	if (logfile) {
+	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
 		if (state & GETBIT_EOM)
 			fprintf(logfile, "\n");
