@@ -29,8 +29,8 @@ SUCH DAMAGE.
 #include <string.h>
 
 int old_bitpos = -1;        /* timer for statusbar inactive */
-static int input_mode = 0;  /* normal input (statusbar keys) or string input */
-static char keybuf[MAXBUF]; /* accumulator for string input */
+int input_mode = 0;  /* normal input (statusbar keys) or string input */
+char keybuf[MAXBUF]; /* accumulator for string input */
 uint8_t input_count, input_xpos;
 
 int
