@@ -308,5 +308,7 @@ main(int argc, char *argv[])
 	cleanup();
 	if (infilename == NULL)
 		curses_cleanup(NULL);
+	if (logfilename != NULL)
+		free(logfilename);
 	return 0;
 }
