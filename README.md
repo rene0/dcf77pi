@@ -9,14 +9,15 @@ For the Raspberry Pi, connect a stand-alone DCF77 receiver to the GPIO pin
 
 Allowed parameters for dcf77pi are:
 
-* -f filename: read from filename instead of the GPIO pin.
-* -l filename: log to filename when reading from the GPIO pin.
+* -f filename: read from filename instead of the GPIO pin. If used, output is
+  generated in report mode. Otherwise, interactive mode is used, with useable
+  keys shown at the bottom of the screen.
 
 Allowed parameters for readpin are:
 
 * -t : subtract the pulse acquisition period from the time to sleep
 
-To stop one of the programs, send a SIGINT (Ctrl-C) to it.
+To stop readpin or dcf77pi in report mode, send a SIGINT (Ctrl-C) to it.
 
 The meaning of the keywords in config.txt is:
 
@@ -28,6 +29,8 @@ The meaning of the keywords in config.txt is:
 * summermonth = month in which daylight saving time starts
 * wintermonth = month in which daylight saving time ends
 * leapsecmonths = months (in UTC) in which a leap second might be inserted
+* outlogfile = name of the output logfile which can be read back with the -f
+  parameter (default empty).
 
 Note that a sentinel value of 0 can be used for summermonth, wintermonth, or
 leapsecmonths to disallow daylight time changes or leap seconds.
@@ -39,4 +42,3 @@ situation will result in a logical read error.
 With permission (comment 5916), the method described at
 http://blog.blinkenlight.net/experiments/dcf77/binary-clock is used to
 receive the bits.
-
