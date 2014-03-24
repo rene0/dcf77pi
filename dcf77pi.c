@@ -176,7 +176,7 @@ main(int argc, char *argv[])
 					    settime ? "on" : "off");
 					break;
 				}
-			if (get_inputmode() == 1 && inkey != ERR)
+			while (get_inputmode() == 1 && inkey != ERR)
 				process_key(main_win, inkey);
 		}
 		if (bit & GETBIT_EOD)
