@@ -54,9 +54,11 @@ uint16_t get_bit_file(void);
 uint16_t get_bit_live(void);
 void display_bit_file(void);
 void display_bit_gui(void);
-/* prepare for next bit */
-uint16_t next_bit_file(void);
-uint16_t next_bit_gui(void);
+/*
+ * Prepare for next bit.
+ * Indeed one function here to prevent significant duplication.
+ */
+uint16_t next_bit(int fromfile);
 uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
 int is_space_bit(int bit);

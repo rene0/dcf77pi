@@ -530,43 +530,32 @@ display_bit_gui(void)
 }
 
 uint16_t
-next_bit_file(void)
-{
-	if (state & GETBIT_EOM)
-		bitpos = 0;
-	else
-		bitpos++;
-	if (bitpos == sizeof(buffer)) {
-		state |= GETBIT_TOOLONG;
-		bitpos = 0;
-		printf(" L");
-		return state;
-	}
-	state &= ~GETBIT_TOOLONG; /* fits again */
-	return state;
-}
-
-uint16_t
-next_bit_gui(void)
+next_bit(int fromfile)
 {
 	if (state & GETBIT_EOM) {
 		bitpos = 0;
-		mvwdelch(input_win, 0, 4);
-		wclrtoeol(input_win);
-		wrefresh(input_win);
+		if (fromfile == 0) {
+			mvwdelch(input_win, 0, 4);
+			wclrtoeol(input_win);
+		}
 	} else
 		bitpos++;
 	if (bitpos == sizeof(buffer)) {
 		state |= GETBIT_TOOLONG;
 		bitpos = 0;
-		wattron(input_win, COLOR_PAIR(1));
-		mvwprintw(input_win, 3, 44, "no minute");
-		wattroff(input_win, COLOR_PAIR(1));
-		wrefresh(input_win);
+		if (fromfile == 1)
+			printf(" L");
+		else {
+			wattron(input_win, COLOR_PAIR(1));
+			mvwprintw(input_win, 3, 44, "no minute");
+			wattroff(input_win, COLOR_PAIR(1));
+			wrefresh(input_win);
+		}
 		return state;
 	}
 	state &= ~GETBIT_TOOLONG; /* fits again */
-	wrefresh(input_win);
+	if (fromfile == 0)
+		wrefresh(input_win);
 	return state;
 }
 
