@@ -593,7 +593,7 @@ switch_logfile(WINDOW *win, char **logfilename)
 	char *old_logfilename;
 
 	if (*logfilename == NULL)
-		*logfilename = strdup('\0');
+		*logfilename = strdup("");
 	old_logfilename = strdup(*logfilename);
 	free(*logfilename);
 	*logfilename = strdup(get_keybuf());
