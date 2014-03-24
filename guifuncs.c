@@ -125,9 +125,8 @@ process_key(WINDOW *win, int inkey)
 		wmove(win, 0, --input_xpos);
 		wclrtoeol(win);
 		wrefresh(win);
-	} else if (inkey == KEY_ENTER || inkey == '\r' || inkey == 13)
-		end_input(win);
-	else if (input_count == MAXBUF-1)
+	} else if ((inkey == KEY_ENTER || inkey == '\r' || inkey == '\n') ||
+	    input_count == MAXBUF-1)
 		end_input(win);
 	else {
 		keybuf[input_count++] = inkey;
