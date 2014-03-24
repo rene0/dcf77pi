@@ -51,6 +51,7 @@ init_curses(void)
 	nonl();
 	cbreak();
 	nodelay(stdscr, TRUE);
+	keypad(stdscr, TRUE);
 	curs_set(0);
 	refresh(); /* prevent clearing windows upon getch() / refresh() */
 
