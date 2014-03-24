@@ -120,7 +120,7 @@ void
 process_key(WINDOW *win, int inkey)
 {
 	if ((inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127) &&
-	     input_count > 0) {
+	    input_count > 0) {
 		input_count--;
 		wmove(win, 0, --input_xpos);
 		wclrtoeol(win);
