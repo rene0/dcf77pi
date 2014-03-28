@@ -509,15 +509,15 @@ display_bit_gui(void)
 	if (state & GETBIT_READ)
 		mvwprintw(input_win, 3, 44, "read   ");
 	if (state & GETBIT_RECV)
-		mvwprintw(input_win, 3, 54, "receive ");
+		mvwprintw(input_win, 3, 52, "receive ");
 	else if (state & GETBIT_XMIT)
-		mvwprintw(input_win, 3, 54, "transmit");
+		mvwprintw(input_win, 3, 52, "transmit");
 	else if (state & GETBIT_RND)
-		mvwprintw(input_win, 3, 54, "random  ");
+		mvwprintw(input_win, 3, 52, "random  ");
 	else if (state & GETBIT_IO)
-		mvwprintw(input_win, 3, 54, "IO      ");
+		mvwprintw(input_win, 3, 52, "IO      ");
 	else
-		mvwprintw(input_win, 3, 54, "        ");
+		mvwprintw(input_win, 3, 52, "        ");
 	wattroff(input_win, COLOR_PAIR(1));
 
 	for (xpos = bitpos + 4, i = 0; i <= bitpos; i++)
