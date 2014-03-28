@@ -389,6 +389,16 @@ report:
 	return state;
 }
 
+#define TRYCHAR \
+	oldinch = inch; \
+	inch = getc(datafile); \
+	if (feof(datafile)) \
+		return state; \
+	if ((inch != '\r' && inch != '\n') || inch == oldinch) { \
+		if (ungetc(inch, datafile) == EOF) /* EOF remains, IO error */\
+			state |= GETBIT_EOD; \
+	}
+
 uint16_t
 get_bit_file(void)
 {
@@ -445,13 +455,11 @@ get_bit_file(void)
 		}
 	}
 	/* Only allow \r , \n , \r\n , and \n\r as single EOM markers */
-	oldinch = inch;
-	inch = getc(datafile);
-	if ((inch != '\r' && inch != '\n') || inch == oldinch) {
-		if (ungetc(inch, datafile) == EOF) /* EOF remains */
-			state |= GETBIT_EOD;
-	} else
+	TRYCHAR else {
 		state |= GETBIT_EOM;
+		/* Check for B\r\n or B\n\r */
+		TRYCHAR
+	}
 	return state;
 }
 
