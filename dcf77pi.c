@@ -188,14 +188,17 @@ main(int argc, char *argv[])
 			acc_minlen += 1000;
 
 		bitpos = get_bitpos();
-		check_timer(main_win, bitpos);
-		if (get_inputmode() == -1) {
-			if (change_logfile) {
-				if (switch_logfile(main_win, &logfilename))
-					bit = GETBIT_EOD; /* error */
-				change_logfile = 0;
+		if (infilename == NULL) {
+			check_timer(main_win, bitpos);
+			if (get_inputmode() == -1) {
+				if (change_logfile) {
+					if (switch_logfile(main_win,
+					    &logfilename))
+						bit = GETBIT_EOD; /* error */
+					change_logfile = 0;
+				}
+				set_inputmode(0);
 			}
-			set_inputmode(0);
 		}
 
 		if (bit & GETBIT_EOM) {
