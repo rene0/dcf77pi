@@ -498,11 +498,11 @@ display_bit_gui(void)
 
 	wattron(input_win, COLOR_PAIR(2));
 	if (state & GETBIT_EOM)
-		mvwprintw(input_win, 3, 44, "minute   ");
-	else if (state < GETBIT_READ)
-		mvwprintw(input_win, 3, 44, "OK       ");
+		mvwprintw(input_win, 3, 44, "minute ");
+	else if (state == 0 || state == GETBIT_ONE)
+		mvwprintw(input_win, 3, 44, "OK     ");
 	else
-		mvwprintw(input_win, 3, 44, "         ");
+		mvwprintw(input_win, 3, 44, "       ");
 	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
