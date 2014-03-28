@@ -383,11 +383,8 @@ get_bit_live(void)
 		outch = '_';
 	}
 report:
-	if (logfile != NULL) {
-		fprintf(logfile, "%c", outch);
-		if (state & GETBIT_EOM)
-			fprintf(logfile, "\n");
-	}
+	if (logfile != NULL)
+		fprintf(logfile, "%c%s", outch, state & GETBIT_EOM ? "\n" : "");
 	wrefresh(input_win);
 	return state;
 }
