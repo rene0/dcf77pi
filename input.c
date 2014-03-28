@@ -506,6 +506,8 @@ display_bit_gui(void)
 	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
+	if (state & GETBIT_READ)
+		mvwprintw(input_win, 3, 44, "read   ");
 	if (state & GETBIT_RECV)
 		mvwprintw(input_win, 3, 54, "receive ");
 	else if (state & GETBIT_XMIT)
