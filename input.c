@@ -598,6 +598,10 @@ switch_logfile(WINDOW *win, char **logfilename)
 	old_logfilename = strdup(*logfilename);
 	free(*logfilename);
 	*logfilename = strdup(get_keybuf());
+	if (!strcmp(*logfilename, ".")) {
+		free(*logfilename);
+		*logfilename = strdup(old_logfilename);
+	}
 
 	if (strcmp(old_logfilename, *logfilename)) {
 		if (strlen(old_logfilename) > 0) {
