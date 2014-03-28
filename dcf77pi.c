@@ -140,7 +140,7 @@ main(int argc, char *argv[])
 			curses_cleanup("Creating input_win failed.\n");
 			return 0;
 		}
-		main_win = newwin(1, 80, 24, 0);
+		main_win = newwin(2, 80, 23, 0);
 		if (main_win == NULL) {
 			curses_cleanup("Creating main_win failed.\n");
 			return 0;

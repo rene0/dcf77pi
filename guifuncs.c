@@ -65,6 +65,7 @@ statusbar(WINDOW *win, int bitpos, char *fmt, ...)
 
 	old_bitpos = bitpos;
 
+	wmove(win, 1, 0);
 	va_start(ap, fmt);
 	vw_printw(win, fmt, ap);
 	va_end(ap);
@@ -75,11 +76,11 @@ statusbar(WINDOW *win, int bitpos, char *fmt, ...)
 void
 draw_keys(WINDOW *win)
 {
-	mvwprintw(win, 0, 0, "[Q] -> quit [L] -> change log file"
+	mvwprintw(win, 1, 0, "[Q] -> quit [L] -> change log file"
 	    " [S] -> toggle time sync");
-	mvwchgat(win, 0, 1, 1, A_BOLD, 4, NULL); /* [Q] */
-	mvwchgat(win, 0, 13, 1, A_BOLD, 4, NULL); /* [L] */
-	mvwchgat(win, 0, 36, 1, A_BOLD, 4, NULL); /* [S] */
+	mvwchgat(win, 1, 1, 1, A_BOLD, 4, NULL); /* [Q] */
+	mvwchgat(win, 1, 13, 1, A_BOLD, 4, NULL); /* [L] */
+	mvwchgat(win, 1, 36, 1, A_BOLD, 4, NULL); /* [S] */
 	wrefresh(win);
 }
 
@@ -100,7 +101,7 @@ check_timer(WINDOW *win, int bitpos)
 void
 input_line(WINDOW *win, char *msg)
 {
-	mvwprintw(win, 0, 0, "%s", msg);
+	mvwprintw(win, 1, 0, "%s", msg);
 	wclrtoeol(win);
 	wrefresh(win);
 	input_mode = 1;
@@ -122,7 +123,7 @@ process_key(WINDOW *win, int inkey)
 	if ((inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127) &&
 	    input_count > 0) {
 		input_count--;
-		wmove(win, 0, --input_xpos);
+		wmove(win, 1, --input_xpos);
 		wclrtoeol(win);
 		wrefresh(win);
 	} else if ((inkey == KEY_ENTER || inkey == '\r' || inkey == '\n') ||
@@ -130,7 +131,7 @@ process_key(WINDOW *win, int inkey)
 		end_input(win);
 	else {
 		keybuf[input_count++] = inkey;
-		mvwprintw(win, 0, ++input_xpos, "%c", inkey);
+		mvwprintw(win, 1, ++input_xpos, "%c", inkey);
 		wrefresh(win);
 	}
 }
