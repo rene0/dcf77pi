@@ -395,7 +395,7 @@ report:
 uint16_t
 get_bit_file(void)
 {
-	int inch, valid = 0;
+	int oldinch, inch, valid = 0;
 
 	/*
 	 * Clear previous flags, except GETBIT_TOOLONG to be able
@@ -446,20 +446,15 @@ get_bit_file(void)
 			break;
 		}
 	}
-	inch = getc(datafile);
-	if (inch == '\n')
-		state |= GETBIT_EOM;
-	else {
-		if (inch == '\r') {
-			state |= GETBIT_EOM;
-			inch = getc(datafile);
-			if (inch != '\n' &&
-			    ungetc(inch, datafile) == EOF)
+	/* Only allow \r , \n , \r\n , and \n\r as single EOM markers */
+	if (state & GETBIT_EOM) {
+		oldinch = inch; /* \r or \n */
+		/* See if there is another newline character */
+		inch = getc(datafile);
+		if ((inch != '\r' && inch != '\n') || inch == oldinch) {
+			if (ungetc(inch, datafile) == EOF) /* EOF remains */
 				state |= GETBIT_EOD;
-				/* push back, not an EOM marker */
-		} else if (ungetc(inch, datafile) == EOF)
-			state |= GETBIT_EOD;
-			/* push back, not an EOM marker */
+		}
 	}
 	return state;
 }
