@@ -165,6 +165,10 @@ main(int argc, char *argv[])
 					break;
 				case 'L':
 					inkey = ERR; /* prevent key repeat */
+					mvwprintw(main_win, 0, 0,
+					    "Current log (.): %s",
+					    logfilename ? logfilename :
+					    "(none)");
 					input_line(main_win,
 					    "Log file (empty for none):");
 					change_logfile = 1;
@@ -192,6 +196,9 @@ main(int argc, char *argv[])
 			check_timer(main_win, bitpos);
 			if (get_inputmode() == -1) {
 				if (change_logfile) {
+					wmove(main_win, 0, 0);
+					wclrtoeol(main_win);
+					wrefresh(main_win);
 					if (switch_logfile(main_win,
 					    &logfilename))
 						bit = GETBIT_EOD; /* error */
