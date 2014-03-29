@@ -480,7 +480,6 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
 	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min,
 	    acc_minlen);
-	wclrtoeol(decode_win);
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 	/* color date/time string depending on the results */
 	if (dt & DT_DSTJUMP)
@@ -508,14 +507,14 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
 	else if (dt & DT_CHDSTERR)
 		mvwchgat(decode_win, 1, 46, 3, A_BOLD, 3, NULL);
 	if ((announce & ANN_LEAP) == 0)
-		mvwchgat(decode_win, 1, 50, 3, A_NORMAL, 8, NULL);
+		mvwchgat(decode_win, 1, 50, 4, A_NORMAL, 8, NULL);
 	if (dt & DT_LEAP)
-		mvwchgat(decode_win, 1, 50, 3, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 1, 50, 4, A_NORMAL, 2, NULL);
 	else if (dt & DT_LEAPERR)
-		mvwchgat(decode_win, 1, 50, 3, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 50, 4, A_BOLD, 3, NULL);
 	if (dt & DT_LONG) {
 		mvwprintw(decode_win, 1, 56, "long ");
-		mvwchgat(decode_win, 1, 56, 4, A_NORMAL, 1, NULL);
+		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 1, NULL);
 	}
 	else if (dt & DT_SHORT) {
 		mvwprintw(decode_win, 1, 56, "short");
