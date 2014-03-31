@@ -166,9 +166,9 @@ main(int argc, char *argv[])
 				case 'L':
 					inkey = ERR; /* prevent key repeat */
 					mvwprintw(main_win, 0, 0,
-					    "Current log (.): %s",
-					    logfilename ? logfilename :
-					    "(none)");
+					    "Current log (.): %s", (logfilename
+					        && strlen(logfilename) > 0) ?
+						logfilename : "(none)");
 					input_line(main_win,
 					    "Log file (empty for none):");
 					change_logfile = 1;
