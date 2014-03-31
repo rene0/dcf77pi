@@ -32,6 +32,7 @@ int old_bitpos = -1; /* timer for statusbar inactive */
 int input_mode = 0;  /* normal input (statusbar keys) or string input */
 char keybuf[MAXBUF]; /* accumulator for string input */
 uint8_t input_count, input_xpos;
+int msglen;
 
 int
 init_curses(void)
@@ -108,6 +109,7 @@ input_line(WINDOW *win, char *msg)
 	input_mode = 1;
 	input_count = 0;
 	input_xpos = strlen(msg);
+	msglen = strlen(msg);
 }
 
 void
@@ -121,18 +123,38 @@ end_input(WINDOW *win)
 void
 process_key(WINDOW *win, int inkey)
 {
-	if ((inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127) &&
-	    input_count > 0) {
-		input_count--;
-		wmove(win, 1, --input_xpos);
-		wclrtoeol(win);
-		wrefresh(win);
+	char dispbuf[80];
+
+	if (inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127) {
+		if (input_count > 0) {
+			input_count--;
+			input_xpos--;
+			if (input_xpos > 78) {
+				/* Shift display line one character to right */
+				(void)strncpy(dispbuf, keybuf +
+				    (input_xpos - 79), 79 - msglen);
+				dispbuf[80 - msglen] = '\0';
+				mvwprintw(win, 1, msglen + 1, "%s", dispbuf);
+			} else {
+				wmove(win, 1, input_xpos + 1);
+				wclrtoeol(win);
+			}
+			wrefresh(win);
+		}
 	} else if ((inkey == KEY_ENTER || inkey == '\r' || inkey == '\n') ||
 	    input_count == MAXBUF-1)
 		end_input(win);
 	else {
 		keybuf[input_count++] = inkey;
-		mvwprintw(win, 1, ++input_xpos, "%c", inkey);
+		input_xpos++;
+		if (input_xpos > 79) {
+			/* Shift displayed line one character to the left */
+			(void)strncpy(dispbuf, keybuf +
+			    (input_xpos - 79), 79 - msglen);
+			dispbuf[80 - msglen] = '\0';
+			mvwprintw(win, 1, msglen + 1, "%s", dispbuf);
+		} else
+			mvwprintw(win, 1, input_xpos, "%c", inkey);
 		wrefresh(win);
 	}
 }
