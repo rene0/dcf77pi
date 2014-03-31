@@ -180,8 +180,10 @@ main(int argc, char *argv[])
 					    settime ? "on" : "off");
 					break;
 				}
-			while (get_inputmode() == 1 && inkey != ERR)
+			while (get_inputmode() == 1 && inkey != ERR) {
 				process_key(main_win, inkey);
+				inkey = getch();
+			}
 		}
 		if (bit & GETBIT_EOD)
 			break;
