@@ -78,6 +78,7 @@ draw_keys(WINDOW *win)
 {
 	mvwprintw(win, 1, 0, "[Q] -> quit [L] -> change log file"
 	    " [S] -> toggle time sync");
+	wclrtoeol(win);
 	mvwchgat(win, 1, 1, 1, A_BOLD, 4, NULL); /* [Q] */
 	mvwchgat(win, 1, 13, 1, A_BOLD, 4, NULL); /* [L] */
 	mvwchgat(win, 1, 36, 1, A_BOLD, 4, NULL); /* [S] */
