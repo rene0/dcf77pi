@@ -397,7 +397,7 @@ get_utchour(struct tm time)
 void
 display_time_file(int dt, struct tm time)
 {
-	printf("%s %04d-%02d-%02d %s %02d:%02d\n\n",
+	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
 	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min);
 	if (dt & DT_LONG)
@@ -448,6 +448,7 @@ display_time_file(int dt, struct tm time)
 		printf("Spurious time offset change announcement\n");
 	if (dt & DT_LEAPERR)
 		printf("Spurious leap second announcement\n");
+	printf("\n");
 }
 
 void
