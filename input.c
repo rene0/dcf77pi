@@ -345,12 +345,12 @@ get_bit_live(void)
 				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 			}
 
-			mvwprintw(input_win, 3, 0, "%3u  %4u (%2u%%)"
+			mvwprintw(input_win, 3, 0, "%4u  %4u (%2u%%)"
 			   "  %11.6f   %8.6f", tlow, t, count, realfreq, a);
 			if (freq_reset)
-				mvwchgat(input_win, 3, 17, 11, A_BOLD, 3, NULL);
+				mvwchgat(input_win, 3, 18, 11, A_BOLD, 3, NULL);
 			else
-				mvwchgat(input_win, 3, 17, 11, A_NORMAL, 7, NULL);
+				mvwchgat(input_win, 3, 18, 11, A_NORMAL, 7, NULL);
 
 			if (newminute) {
 				count *= 2;
@@ -494,30 +494,30 @@ display_bit_gui(void)
 {
 	int xpos, i;
 
-	mvwprintw(input_win, 3, 41, "%2u", bitpos);
+	mvwprintw(input_win, 3, 42, "%2u", bitpos);
 
 	wattron(input_win, COLOR_PAIR(2));
 	if (state & GETBIT_EOM)
-		mvwprintw(input_win, 3, 44, "minute   ");
+		mvwprintw(input_win, 3, 45, "minute   ");
 	else if (state == 0 || state == GETBIT_ONE)
-		mvwprintw(input_win, 3, 44, "OK       ");
+		mvwprintw(input_win, 3, 45, "OK       ");
 	else
-		mvwprintw(input_win, 3, 44, "         ");
+		mvwprintw(input_win, 3, 45, "         ");
 	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
 	if (state & GETBIT_READ)
-		mvwprintw(input_win, 3, 44, "read     ");
+		mvwprintw(input_win, 3, 45, "read     ");
 	if (state & GETBIT_RECV)
-		mvwprintw(input_win, 3, 54, "receive ");
+		mvwprintw(input_win, 3, 55, "receive ");
 	else if (state & GETBIT_XMIT)
-		mvwprintw(input_win, 3, 54, "transmit");
+		mvwprintw(input_win, 3, 55, "transmit");
 	else if (state & GETBIT_RND)
-		mvwprintw(input_win, 3, 54, "random  ");
+		mvwprintw(input_win, 3, 55, "random  ");
 	else if (state & GETBIT_IO)
-		mvwprintw(input_win, 3, 54, "IO      ");
+		mvwprintw(input_win, 3, 55, "IO      ");
 	else
-		mvwprintw(input_win, 3, 54, "        ");
+		mvwprintw(input_win, 3, 55, "        ");
 	wattroff(input_win, COLOR_PAIR(1));
 
 	for (xpos = bitpos + 4, i = 0; i <= bitpos; i++)
@@ -548,7 +548,7 @@ next_bit(int fromfile)
 			printf(" L");
 		else {
 			wattron(input_win, COLOR_PAIR(1));
-			mvwprintw(input_win, 3, 44, "no minute");
+			mvwprintw(input_win, 3, 45, "no minute");
 			wattroff(input_win, COLOR_PAIR(1));
 			wrefresh(input_win);
 		}
@@ -582,7 +582,7 @@ void
 draw_input_window(void)
 {
 	mvwprintw(input_win, 0, 0, "new");
-	mvwprintw(input_win, 2, 0, "act total        realfreq Hz"
+	mvwprintw(input_win, 2, 0, "act  total        realfreq Hz"
 	    "  increment  bit");
 	wrefresh(input_win);
 }
