@@ -164,7 +164,7 @@ add_minute(struct tm *time, int flags)
 {
 	/* time->tm_isdst indicates the old situation */
 	if (++time->tm_min == 60) {
-		if ((announce & ANN_CHDST) && time->tm_min == 59 &&
+		if ((announce & ANN_CHDST) && time->tm_min == 60 &&
 		    get_utchour(*time) == 0 && time->tm_wday == 7 &&
 		    time->tm_mday > lastday(*time) - 7) {
 			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
