@@ -11,7 +11,8 @@ Allowed parameters for dcf77pi are:
 
 * -f filename: read from filename instead of the GPIO pin. If used, output is
   generated in report mode. Otherwise, interactive mode is used, with useable
-  keys shown at the bottom of the screen.
+  keys shown at the bottom of the screen. The backspace key can be used to
+  correct the last typed character of the input text.
 
 Allowed parameters for readpin are:
 
