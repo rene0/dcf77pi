@@ -350,7 +350,7 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		/* leap second not processed, so bad minute */
 	}
 
-	if ((rval & DT_DSTERR) == 0 && buffer[17] != time->tm_isdst) {
+	if (buffer[17] != time->tm_isdst) {
 		/* Time offset change is OK if:
 		 * there was an error but not any more (needed if decoding at
 		 *   startup is problematic)
@@ -361,7 +361,8 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		    time->tm_min == 0 && utchour == 1 && time->tm_wday == 7 &&
 		    time->tm_mday > lastday(*time) - 7 &&
 		    (time->tm_mon == summermonth || time->tm_mon == wintermonth);
-		if ((olderr && ok) || init == 1 || tmp) {
+		if (tmp ||
+		    (((rval & DT_DSTERR) == 0) && ((olderr && ok) || init == 1))) {
 			time->tm_isdst = buffer[17]; /* expected change */
 			if (tmp) {
 				announce &= ~ANN_CHDST;
