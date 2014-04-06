@@ -373,6 +373,8 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 			ok = 0;
 		}
 	}
+	if ((announce & ANN_CHDST) && time->tm_min == 0)
+		announce &= ~ANN_CHDST; /* reset DST announcement at hh:00 */
 	time->tm_gmtoff = time->tm_isdst ? 7200 : 3600;
 
 	if (olderr && ok)
