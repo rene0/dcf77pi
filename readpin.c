@@ -48,7 +48,7 @@ main(int argc, char **argv)
 	long long diff = 0;
 	struct timespec slp;
 	long twait;
-	float a, y, w, realfreq;
+	float a, y, realfreq;
 
 	while ((opt = getopt(argc, argv, "t")) != -1) {
 		switch (opt) {
@@ -61,7 +61,6 @@ main(int argc, char **argv)
 		}
 	}
 
-	w = 0.05;
 	res = read_config_file(ETCDIR"/config.txt");
 	if (res != 0) {
 		cleanup();
@@ -112,7 +111,7 @@ main(int argc, char **argv)
 		}
 
 		if (t > realfreq * 5/2) {
-			realfreq = realfreq + w * ((t/2.5) - realfreq);
+			realfreq = realfreq + 0.05 * ((t/2.5) - realfreq);
 			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 			printf(" {%4u %4u} %3i %f %f", tlow, t, sec, realfreq,
 			    a);
@@ -141,10 +140,10 @@ main(int argc, char **argv)
 			else {
 				sec++;
 				if (newminute)
-					realfreq = realfreq + w *
+					realfreq = realfreq + 0.05 *
 					    ((t/2) - realfreq);
 				else
-					realfreq = realfreq + w *
+					realfreq = realfreq + 0.05 *
 					    (t - realfreq);
 				/* adjust filter */
 				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
