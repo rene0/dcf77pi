@@ -41,8 +41,8 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	int t, tlow, sec, res, opt, tunetime = 0;
-	int verbose = 1;
+	int t, tf, tlow, sec;
+	int res, opt, tunetime = 0, verbose = 1;
 	uint8_t p, bit, init, stv, newminute;
 	struct hardware *hw;
 	struct timespec tp0, tp1;
@@ -50,6 +50,7 @@ main(int argc, char **argv)
 	struct timespec slp;
 	long twait;
 	float a, y, realfreq;
+	float frac, bit0, bit20, maxone;
 
 	while ((opt = getopt(argc, argv, "qt")) != -1) {
 		switch (opt) {
@@ -82,7 +83,11 @@ main(int argc, char **argv)
 	tlow = 0;
 	stv = 2;
 
-	realfreq = hw->freq; /* initial value */
+	realfreq = hw->freq;
+	tf = hw->freq * 2;
+	bit0 = 0.1 * realfreq;
+	bit20 = 0.2 * realfreq;
+	maxone = 0.32;
 
 	/* Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms) */
 	a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
@@ -153,13 +158,13 @@ main(int argc, char **argv)
 				/* adjust filter */
 				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 			}
-			res = tlow * 100 / t;
+			frac = (float)tlow / (float)t;
 			if (newminute)
-				res *= 2;
+				frac *= 2.0;
 			/* in general, pulses are a bit wider than specified */
-			if (res <= hw->maxzero)
+			if (frac <= maxone / 2.0)
 				bit = 0;
-			else if (res <= hw->maxone)
+			else if (frac <= maxone)
 				bit = 1;
 			else
 				bit = 2; /* some error */
@@ -169,9 +174,19 @@ main(int argc, char **argv)
 				printf(" | %lli", diff);
 				diff = 0;
 			}
+			if (sec == 0) {
+				if (bit == 0)
+					bit0 = bit0 + 0.5 * (tlow - bit0);
+			} else if (sec == 20) {
+				if (bit == 1)
+					bit20 = bit20 + 0.5 * (tlow - bit20);
+			}
+			if (newminute) {
+				sec = -1;
+				maxone = (bit0 + bit20) / realfreq;
+				tf = tf + 0.5 * (t - tf);
+			}
 			printf("\n");
-			if (newminute)
-				sec = -1; /* new minute */
 			t = 0;
 		}
 		if (tunetime == 1 &&
