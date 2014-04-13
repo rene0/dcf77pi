@@ -122,7 +122,7 @@ main(int argc, char **argv)
 			    a);
 			t = 0; /* timeout */
 			if (tunetime == 1) {
-				printf(" %lli", diff);
+				printf(" | %lli", diff);
 				diff = 0;
 			}
 			printf("\n");
@@ -166,7 +166,7 @@ main(int argc, char **argv)
 			printf(" (%4u %4u) %u %3i %3i %f %f", tlow, t, bit,
 			    res, sec, realfreq, a);
 			if (tunetime == 1) {
-				printf(" %lli", diff);
+				printf(" | %lli", diff);
 				diff = 0;
 			}
 			printf("\n");
