@@ -42,6 +42,7 @@ int
 main(int argc, char **argv)
 {
 	int t, tlow, sec, res, opt, tunetime = 0;
+	int verbose = 1;
 	uint8_t p, bit, init, stv, newminute;
 	struct hardware *hw;
 	struct timespec tp0, tp1;
@@ -50,13 +51,16 @@ main(int argc, char **argv)
 	long twait;
 	float a, y, realfreq;
 
-	while ((opt = getopt(argc, argv, "t")) != -1) {
+	while ((opt = getopt(argc, argv, "qt")) != -1) {
 		switch (opt) {
+		case 'q' :
+			verbose = 0;
+			break;
 		case 't' :
 			tunetime = 1;
 			break;
 		default:
-			printf("usage: %s [-t]\n", argv[0]);
+			printf("usage: %s [-qt]\n", argv[0]);
 			return EX_USAGE;
 		}
 	}
@@ -99,7 +103,8 @@ main(int argc, char **argv)
 		y = y < 0 ? (float)p : y + a * (p - y);
 		if (stv == 2)
 			stv = p;
-		printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
+		if (verbose == 1)
+			printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
 
 		if (realfreq < hw->freq / 2) {
 			printf("<");
