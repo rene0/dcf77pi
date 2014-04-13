@@ -42,6 +42,7 @@ int
 main(int argc, char **argv)
 {
 	int t, tf, tlow, sec;
+	int min;
 	int res, opt, tunetime = 0, verbose = 1;
 	uint8_t p, bit, init, stv, newminute;
 	struct hardware *hw;
@@ -79,10 +80,10 @@ main(int argc, char **argv)
 	hw = get_hardware_parameters();
 
 	sec = -1;
+	min = -1;
 	init = 1;
 	tlow = 0;
 	stv = 2;
-
 	realfreq = hw->freq;
 	tf = hw->freq * 2;
 	bit0 = 0.1 * realfreq;
@@ -123,8 +124,8 @@ main(int argc, char **argv)
 		if (t > realfreq * 5/2) {
 			realfreq = realfreq + 0.05 * ((t/2.5) - realfreq);
 			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-			printf(" {%4u %4u} %3i %f %f", tlow, t, sec, realfreq,
-			    a);
+			printf(" ! %3i %4u/%4u %f %f %f", sec, tlow, t,
+			    realfreq, realfreq / tf, a);
 			t = 0; /* timeout */
 			if (tunetime == 1) {
 				printf(" | %lli", diff);
@@ -168,8 +169,8 @@ main(int argc, char **argv)
 				bit = 1;
 			else
 				bit = 2; /* some error */
-			printf(" (%4u %4u) %u %3i %3i %f %f", tlow, t, bit,
-			    res, sec, realfreq, a);
+			printf(" %3i %4u/%4u %f %u %f %f %f", sec, tlow, t,
+			    frac, bit, realfreq, realfreq / tf, a);
 			if (tunetime == 1) {
 				printf(" | %lli", diff);
 				diff = 0;
@@ -177,14 +178,21 @@ main(int argc, char **argv)
 			if (sec == 0) {
 				if (bit == 0)
 					bit0 = bit0 + 0.5 * (tlow - bit0);
+				else
+					printf(" bit 0 = 1 ");
 			} else if (sec == 20) {
 				if (bit == 1)
 					bit20 = bit20 + 0.5 * (tlow - bit20);
+				else
+					printf(" bit 20 = 0 ");
 			}
 			if (newminute) {
 				sec = -1;
+				min++;
 				maxone = (bit0 + bit20) / realfreq;
 				tf = tf + 0.5 * (t - tf);
+				printf(" | %f %f %f-%f %i", bit0, bit20,
+				    maxone/2.0, maxone, min);
 			}
 			printf("\n");
 			t = 0;
