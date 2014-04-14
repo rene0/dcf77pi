@@ -350,8 +350,6 @@ get_bit_live(void)
 				frac *= 2;
 				state |= GETBIT_EOM;
 			}
-			maxone = (bit0 + bit20) / realfreq;
-
 			break; /* start of new second */
 		}
 		slp.tv_sec = 0;
@@ -360,6 +358,7 @@ get_bit_live(void)
 			;
 	}
 
+	maxone = (bit0 + bit20) / realfreq;
 	if (frac < 0) {
 		/* radio error, results already set */
 	} else if (frac <= maxone / 2.0) {
