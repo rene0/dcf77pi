@@ -31,7 +31,7 @@ SUCH DAMAGE.
 #include <string.h>
 
 char *key[] = {
-	"pin", "activehigh", "freq", "maxzero", "maxone",
+	"pin", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
 

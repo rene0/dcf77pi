@@ -179,8 +179,6 @@ set_mode_live(void)
 	}
 	hw.active_high = strtol(get_config_value("activehigh"), NULL, 10);
 	hw.freq = strtol(get_config_value("freq"), NULL, 10);
-	hw.maxzero = strtol(get_config_value("maxzero"), NULL, 10);
-	hw.maxone = strtol(get_config_value("maxone"), NULL, 10);
 #endif
 	return 0;
 }
