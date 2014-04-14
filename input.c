@@ -244,7 +244,7 @@ get_bit_live(void)
 	int t, tlow, newminute;
 	uint8_t p, stv;
 	struct timespec slp;
-	float a, y, frac, maxone;
+	float a, y, frac = -0.01, maxone = -0.01;
 	static int init = 1;
 	static float realfreq, bit0, bit20;
 
@@ -352,13 +352,6 @@ get_bit_live(void)
 			}
 			maxone = (bit0 + bit20) / realfreq;
 
-			mvwprintw(input_win, 3, 4, "%4u  %4u (%5.1f%%) %8.3f"
-			    " %4u %4u %4.1f%%  %8.6f", tlow, t, frac * 100,
-			    realfreq, (int)bit0, (int)bit20, maxone * 100, a);
-			if (freq_reset)
-				mvwchgat(input_win, 3, 24, 8, A_BOLD, 3, NULL);
-			else
-				mvwchgat(input_win, 3, 24, 8, A_NORMAL, 7, NULL);
 			break; /* start of new second */
 		}
 		slp.tv_sec = 0;
@@ -392,6 +385,13 @@ get_bit_live(void)
 report:
 	if (logfile != NULL)
 		fprintf(logfile, "%c%s", outch, state & GETBIT_EOM ? "\n" : "");
+	mvwprintw(input_win, 3, 4, "%4u  %4u (%5.1f%%) %8.3f"
+	    " %4u %4u %4.1f%%  %8.6f", tlow, t, frac * 100,
+	    realfreq, (int)bit0, (int)bit20, maxone * 100, a);
+	if (freq_reset)
+		mvwchgat(input_win, 3, 24, 8, A_BOLD, 3, NULL);
+	else
+		mvwchgat(input_win, 3, 24, 8, A_NORMAL, 7, NULL);
 	wrefresh(input_win);
 	return state;
 }
