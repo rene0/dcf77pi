@@ -243,12 +243,12 @@ get_bit_live(void)
 
 	int freq_reset;
 	char outch;
-	int t, tlow, count = -1, newminute;
+	int t, tlow, newminute;
 	uint8_t p, stv;
 	struct timespec slp;
-	float a, y;
+	float a, y, frac, maxone;
 	static int init = 1;
-	static float realfreq;
+	static float realfreq, bit0, bit20;
 
 	/*
 	 * Clear previous flags, except GETBIT_TOOLONG to be able
@@ -260,18 +260,21 @@ get_bit_live(void)
 	 * One period is either 1000 ms or 2000 ms long (normal or
 	 * padding for last). The active part is either 100 ms ('0')
 	 * or 200 ms ('1') long, the maximum allowed values as
-	 * percentage of the second length are specified with maxzero
+	 * percentage of the second length are specified with maxone/2
 	 * and maxone respectively.
 	 *
 	 *  ~A > 1.5 * realfreq: value |= GETBIT_EOM
 	 *  ~A > 2.5 * realfreq: timeout
 	 */
 
+	if (init == 1) {
+		realfreq = hw.freq;
+		bit0 = 0.1 * realfreq;
+		bit20 = 0.2 * realfreq;
+	}
 	/*
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
-	if (init == 1)
-		realfreq = hw.freq;
 	a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 	y = -1;
 	tlow = 0;
@@ -331,7 +334,6 @@ get_bit_live(void)
 			y = 1.0;
 			stv = 1;
 
-			count = tlow * 100 / t;
 			newminute = t > realfreq * 3/2;
 			if (init == 1)
 				init = 0;
@@ -345,6 +347,7 @@ get_bit_live(void)
 				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
 			}
 
+			frac = (float)tlow / (float)t;
 			mvwprintw(input_win, 3, 0, "%4u  %4u (%2u%%)"
 			   "  %11.6f   %8.6f", tlow, t, count, realfreq, a);
 			if (freq_reset)
@@ -353,9 +356,10 @@ get_bit_live(void)
 				mvwchgat(input_win, 3, 18, 11, A_NORMAL, 7, NULL);
 
 			if (newminute) {
-				count *= 2;
+				frac *= 2;
 				state |= GETBIT_EOM;
 			}
+			maxone = (bit0 + bit20) / realfreq;
 			break; /* start of new second */
 		}
 		slp.tv_sec = 0;
@@ -364,15 +368,11 @@ get_bit_live(void)
 			;
 	}
 
-	if (count == -1) {
-		/* something went wrong ... */
-		state |= GETBIT_READ;
-		outch = '_';
-	} else if (count <= hw.maxzero) {
+	if (frac <= maxone / 2.0) {
 		/* zero bit, ~100 ms active signal */
 		outch = '0';
 		buffer[bitpos] = 0;
-	} else if (count <= hw.maxone) {
+	} else if (frac <= maxone) {
 		/* one bit, ~200 ms active signal */
 		state |= GETBIT_ONE;
 		outch = '1';
@@ -382,6 +382,10 @@ get_bit_live(void)
 		state |= GETBIT_READ;
 		outch = '_';
 	}
+		if (bitpos == 0 && buffer[0] == 0)
+			bit0 = bit0 + 0.5 * (tlow - bit0);
+		if (bitpos == 20 && buffer[20] == 1)
+			bit20 = bit20 + 0.5 * (tlow - bit20);
 report:
 	if (logfile != NULL)
 		fprintf(logfile, "%c%s", outch, state & GETBIT_EOM ? "\n" : "");
