@@ -336,7 +336,7 @@ get_bit_live(void)
 
 			newminute = t > realfreq * 3/2;
 			if (init == 1)
-				init = 0;
+				init = 2;
 			else {
 				if (newminute)
 					realfreq = realfreq + 0.05 *
@@ -382,10 +382,14 @@ get_bit_live(void)
 		state |= GETBIT_READ;
 		outch = '_';
 	}
+	if (init == 2)
+		init = 0;
+	else {
 		if (bitpos == 0 && buffer[0] == 0)
 			bit0 = bit0 + 0.5 * (tlow - bit0);
 		if (bitpos == 20 && buffer[20] == 1)
 			bit20 = bit20 + 0.5 * (tlow - bit20);
+	}
 report:
 	if (logfile != NULL)
 		fprintf(logfile, "%c%s", outch, state & GETBIT_EOM ? "\n" : "");
