@@ -360,7 +360,9 @@ get_bit_live(void)
 			;
 	}
 
-	if (frac <= maxone / 2.0) {
+	if (frac < 0) {
+		/* radio error, results already set */
+	} else if (frac <= maxone / 2.0) {
 		/* zero bit, ~100 ms active signal */
 		outch = '0';
 		buffer[bitpos] = 0;
