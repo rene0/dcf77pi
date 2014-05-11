@@ -59,7 +59,8 @@ show_civbuf_gui(uint8_t *buf)
 void
 display_alarm_file(struct alm alarm)
 {
-	printf("0x%1x 0x%1x 0x%1x 0x%1x 0x%3x 0x%1x 0x%3x 0x%1x",
+	printf("German civil warning:"
+	    " 0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x 0x%1x\n",
 	    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
 	    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
 }
