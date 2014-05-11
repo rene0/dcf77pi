@@ -370,7 +370,8 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 				rval |= DT_CHDST;
 			}
 		} else {
-			rval |= DT_DSTJUMP; /* sudden change, ignore */
+			if ((rval & DT_DSTERR) == 0)
+				rval |= DT_DSTJUMP; /* sudden change, ignore */
 			ok = 0;
 		}
 	}
