@@ -65,25 +65,12 @@ main(int argc, char *argv[])
 	uint8_t civ1 = 0, civ2 = 0;
 	int dt = 0, minlen = 0, acc_minlen = 0, old_acc_minlen;
 	int init = 1, init2 = 1;
-	int res, opt, settime = 0;
-	char *infilename, *logfilename;
+	int res, settime = 0;
+	char *logfilename;
 	int change_logfile = 0;
 	int inkey;
 
-	infilename = logfilename = NULL;
-	while ((opt = getopt(argc, argv, "f:")) != -1) {
-		if (opt == 'f') {
-			infilename = strdup(optarg);
-			if (infilename == NULL) {
-				perror("infilename");
-				return errno;
-			}
-		} else {
-			printf("usage: %s [-f infile]\n",
-			    argv[0]);
-			return EX_USAGE;
-		}
-	}
+	logfilename = NULL;
 
 	res = read_config_file(ETCDIR"/config.txt");
 	if (res != 0) {
@@ -99,10 +86,7 @@ main(int argc, char *argv[])
 			return res;
 		}
 	}
-	if (infilename != NULL)
-		res = set_mode_file(infilename);
-	else
-		res = set_mode_live();
+	res = set_mode_live();
 	if (res != 0) {
 		/* something went wrong */
 		cleanup();
@@ -115,75 +99,69 @@ main(int argc, char *argv[])
 	bzero(&time, sizeof(time));
 	bzero(&civbuf, sizeof(civbuf));
 
-	if (infilename == NULL) {
-		decode_win = NULL;
-		alarm_win = NULL;
-		input_win = NULL;
-		main_win = NULL;
+	decode_win = NULL;
+	alarm_win = NULL;
+	input_win = NULL;
+	main_win = NULL;
 
-		if (init_curses())
-			curses_cleanup("No required color support.\n");
+	if (init_curses())
+		curses_cleanup("No required color support.\n");
 
-		/* allocate windows */
-		decode_win = newwin(2, 80, 0, 0);
-		if (decode_win == NULL) {
-			curses_cleanup("Creating decode_win failed.\n");
-			return 0;
-		}
-		alarm_win = newwin(2, 80, 3, 0);
-		if (alarm_win == NULL) {
-			curses_cleanup("Creating alarm_win failed.\n");
-			return 0;
-		}
-		input_win = newwin(4, 80, 6, 0);
-		if (input_win == NULL) {
-			curses_cleanup("Creating input_win failed.\n");
-			return 0;
-		}
-		main_win = newwin(2, 80, 23, 0);
-		if (main_win == NULL) {
-			curses_cleanup("Creating main_win failed.\n");
-			return 0;
-		}
-		/* draw initial screen */
-		draw_time_window();
-		draw_alarm_window();
-		draw_input_window();
-		draw_keys(main_win);
+	/* allocate windows */
+	decode_win = newwin(2, 80, 0, 0);
+	if (decode_win == NULL) {
+		curses_cleanup("Creating decode_win failed.\n");
+		return 0;
 	}
+	alarm_win = newwin(2, 80, 3, 0);
+	if (alarm_win == NULL) {
+		curses_cleanup("Creating alarm_win failed.\n");
+		return 0;
+	}
+	input_win = newwin(4, 80, 6, 0);
+	if (input_win == NULL) {
+		curses_cleanup("Creating input_win failed.\n");
+		return 0;
+	}
+	main_win = newwin(2, 80, 23, 0);
+	if (main_win == NULL) {
+		curses_cleanup("Creating main_win failed.\n");
+		return 0;
+	}
+	/* draw initial screen */
+	draw_time_window();
+	draw_alarm_window();
+	draw_input_window();
+	draw_keys(main_win);
 
 	for (;;) {
-		if (infilename != NULL)
-			bit = get_bit_file();
-		else {
-			bit = get_bit_live();
-			inkey = getch();
-			if (get_inputmode() == 0 && inkey != ERR)
-				switch (inkey) {
-				case 'Q':
-					bit |= GETBIT_EOD; /* quit main loop */
-					break;
-				case 'L':
-					inkey = ERR; /* prevent key repeat */
-					mvwprintw(main_win, 0, 0,
-					    "Current log (.): %s", (logfilename
-					        && strlen(logfilename) > 0) ?
-						logfilename : "(none)");
-					input_line(main_win,
-					    "Log file (empty for none):");
-					change_logfile = 1;
-					break;
-				case 'S':
-					settime = 1 - settime;
-					statusbar(main_win, bitpos,
-					    "Time synchronization %s",
-					    settime ? "on" : "off");
-					break;
-				}
-			while (get_inputmode() == 1 && inkey != ERR) {
-				process_key(main_win, inkey);
-				inkey = getch();
+		bit = get_bit_live();
+		inkey = getch();
+		if (get_inputmode() == 0 && inkey != ERR)
+			switch (inkey) {
+			case 'Q':
+				bit |= GETBIT_EOD; /* quit main loop */
+				break;
+			case 'L':
+				inkey = ERR; /* prevent key repeat */
+				mvwprintw(main_win, 0, 0,
+				    "Current log (.): %s", (logfilename
+				        && strlen(logfilename) > 0) ?
+					logfilename : "(none)");
+				input_line(main_win,
+				    "Log file (empty for none):");
+				change_logfile = 1;
+				break;
+			case 'S':
+				settime = 1 - settime;
+				statusbar(main_win, bitpos,
+				    "Time synchronization %s",
+				    settime ? "on" : "off");
+				break;
 			}
+		while (get_inputmode() == 1 && inkey != ERR) {
+			process_key(main_win, inkey);
+			inkey = getch();
 		}
 		if (bit & GETBIT_EOD)
 			break;
@@ -194,20 +172,18 @@ main(int argc, char *argv[])
 			acc_minlen += 1000;
 
 		bitpos = get_bitpos();
-		if (infilename == NULL) {
-			check_timer(main_win, bitpos);
-			if (get_inputmode() == -1) {
-				if (change_logfile) {
-					wmove(main_win, 0, 0);
-					wclrtoeol(main_win);
-					wrefresh(main_win);
-					if (switch_logfile(main_win,
-					    &logfilename))
-						bit = GETBIT_EOD; /* error */
-					change_logfile = 0;
-				}
-				set_inputmode(0);
+		check_timer(main_win, bitpos);
+		if (get_inputmode() == -1) {
+			if (change_logfile) {
+				wmove(main_win, 0, 0);
+				wclrtoeol(main_win);
+				wrefresh(main_win);
+				if (switch_logfile(main_win,
+				    &logfilename))
+					bit = GETBIT_EOD; /* error */
+				change_logfile = 0;
 			}
+			set_inputmode(0);
 		}
 
 		if (bit & GETBIT_EOM) {
@@ -215,10 +191,7 @@ main(int argc, char *argv[])
 			minlen = bitpos + 1;
 			acc_minlen += 1000;
 		}
-		if (infilename != NULL)
-			display_bit_file();
-		else
-			display_bit_gui();
+		display_bit_gui();
 
 		if (init == 0) {
 			switch (time.tm_min % 3) {
@@ -255,7 +228,7 @@ main(int argc, char *argv[])
 			}
 		}
 
-		bit = next_bit(infilename != NULL);
+		bit = next_bit(0); /* 0 as in "false" */
 		if (bit & GETBIT_TOOLONG)
 			minlen = 61;
 			/*
@@ -265,8 +238,6 @@ main(int argc, char *argv[])
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			old_acc_minlen = acc_minlen;
-			if (infilename != NULL)
-				printf(" (%d) %d\n", acc_minlen, minlen);
 			if (init == 1 || minlen >= 59)
 				memcpy((void *)&oldtime, (const void *)&time,
 				    sizeof(time));
@@ -275,29 +246,17 @@ main(int argc, char *argv[])
 
 			if (time.tm_min % 3 == 0 && init == 0) {
 				decode_alarm(civbuf, &civwarn);
-				if (infilename == NULL)
-					show_civbuf_gui(civbuf);
-				if (civ1 == 1 && civ2 == 1) {
-					if (infilename == NULL)
-						display_alarm_gui(civwarn);
-					else
-						display_alarm_file(civwarn);
-				}
-				if (civ1 != civ2) {
-					if (infilename == NULL)
-						display_alarm_error_gui();
-					else
-						display_alarm_error_file();
-				}
-				if (civ1 == 0 && civ2 == 0 && infilename == NULL)
+				show_civbuf_gui(civbuf);
+				if (civ1 == 1 && civ2 == 1)
+					display_alarm_gui(civwarn);
+				if (civ1 != civ2)
+					display_alarm_error_gui();
+				if (civ1 == 0 && civ2 == 0)
 					clear_alarm_gui();
 			}
 
-			if (infilename != NULL)
-				display_time_file(dt, time);
-			else
-				display_time_gui(dt, time, get_buffer(),
-				    minlen, old_acc_minlen);
+			display_time_gui(dt, time, get_buffer(),
+			    minlen, old_acc_minlen);
 
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
@@ -315,8 +274,7 @@ main(int argc, char *argv[])
 	}
 
 	cleanup();
-	if (infilename == NULL)
-		curses_cleanup(NULL);
+	curses_cleanup(NULL);
 	if (logfilename != NULL)
 		free(logfilename);
 	return 0;
