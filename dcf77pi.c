@@ -37,6 +37,7 @@ SUCH DAMAGE.
 #include <unistd.h>
 
 WINDOW *input_win;
+WINDOW *decode_win;
 WINDOW *main_win;
 int bitpos;
 
@@ -144,6 +145,91 @@ switch_logfile(WINDOW *win, char **logfilename)
 	return 0;
 }
 
+void
+display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
+    int acc_minlen)
+{
+	int i, xpos;
+
+	/* display bits of previous minute */
+	for (xpos = 4, i = 0; i < minlen; i++, xpos++) {
+		if (i > 59)
+			break;
+		if (is_space_bit(i))
+			xpos++;
+		mvwprintw(decode_win, 0, xpos, "%u", buffer[i]);
+	}
+	wclrtoeol(decode_win);
+	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
+	/* color bits depending on the results */
+	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, dt & DT_B0 ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt & DT_DSTERR ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, dt & DT_B20 ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, dt & DT_MIN ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, dt & DT_HOUR ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, dt & DT_DATE ? 1 : 2, NULL);
+	if (dt & DT_LEAPONE)
+		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
+
+	/* display date and time */
+	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d (%6d)",
+	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
+	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min,
+	    acc_minlen >= 1e6 ? 999999 : acc_minlen);
+	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
+	/* color date/time string depending on the results */
+	if (dt & DT_DSTJUMP)
+		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
+	if (dt & DT_YEARJUMP)
+		mvwchgat(decode_win, 1, 7, 4, A_BOLD, 3, NULL);
+	if (dt & DT_MONTHJUMP)
+		mvwchgat(decode_win, 1, 12, 2, A_BOLD, 3, NULL);
+	if (dt & DT_MDAYJUMP)
+		mvwchgat(decode_win, 1, 15, 2, A_BOLD, 3, NULL);
+	if (dt & DT_WDAYJUMP)
+		mvwchgat(decode_win, 1, 18, 3, A_BOLD, 3, NULL);
+	if (dt & DT_HOURJUMP)
+		mvwchgat(decode_win, 1, 22, 2, A_BOLD, 3, NULL);
+	if (dt & DT_MINJUMP)
+		mvwchgat(decode_win, 1, 25, 2, A_BOLD, 3, NULL);
+
+	/* flip lights depending on the results */
+	if ((dt & DT_XMIT) == 0)
+		mvwchgat(decode_win, 1, 39, 6, A_NORMAL, 8, NULL);
+	if ((dt & ANN_CHDST) == 0)
+		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 8, NULL);
+	if (dt & DT_CHDST)
+		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 2, NULL);
+	else if (dt & DT_CHDSTERR)
+		mvwchgat(decode_win, 1, 46, 3, A_BOLD, 3, NULL);
+	if ((dt & ANN_LEAP) == 0)
+		mvwchgat(decode_win, 1, 50, 4, A_NORMAL, 8, NULL);
+	if (dt & DT_LEAP)
+		mvwchgat(decode_win, 1, 50, 4, A_NORMAL, 2, NULL);
+	else if (dt & DT_LEAPERR)
+		mvwchgat(decode_win, 1, 50, 4, A_BOLD, 3, NULL);
+	if (dt & DT_LONG) {
+		mvwprintw(decode_win, 1, 56, "long ");
+		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 1, NULL);
+	}
+	else if (dt & DT_SHORT) {
+		mvwprintw(decode_win, 1, 56, "short");
+		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 1, NULL);
+	}
+	else
+		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 8, NULL);
+
+	wrefresh(decode_win);
+}
+
+void
+draw_time_window(void)
+{
+	mvwprintw(decode_win, 0, 0, "old");
+	mvwprintw(decode_win, 1, 39, "txcall dst leap");
+	mvwchgat(decode_win, 1, 39, 15, A_NORMAL, 8, NULL);
+	wrefresh(decode_win);
+}
 int
 main(int argc, char *argv[])
 {

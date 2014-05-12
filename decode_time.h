@@ -28,7 +28,6 @@ SUCH DAMAGE.
 
 #include <stdint.h>
 #include <time.h>
-#include <ncurses.h>
 
 /* update every 400 years, now at 2400-01-01 */
 #define BASEYEAR	2000
@@ -56,18 +55,14 @@ SUCH DAMAGE.
 #define DT_CHDST	(1 << 19)
 #define DT_LEAP		(1 << 20)
 
-#define ANN_CHDST	(1 << 0)
-#define ANN_LEAP	(1 << 1)
+#define ANN_CHDST	(1 << 30)
+#define ANN_LEAP	(1 << 31)
 
 void init_time(void); /* initialize month values from configuration */
 void add_minute(struct tm *time, int flags);
-int decode_time(int init, int init2, int minlen, uint8_t *buffer,
+uint32_t decode_time(int init, int init2, int minlen, uint8_t *buffer,
     struct tm *time, int *acc_minlen, int old_dt);
-void display_time_file(int dt, struct tm time);
-void display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
-    int acc_minlen);
 int get_utchour(struct tm time);
-void draw_time_window(void);
 
-WINDOW *decode_win;
+char *wday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 #endif

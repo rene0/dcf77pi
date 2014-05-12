@@ -53,6 +53,63 @@ display_bit_file(uint16_t state)
 		printf("%u", get_buffer()[bitpos]);
 }
 
+void
+display_time_file(int dt, struct tm time)
+{
+	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
+	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
+	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min);
+	if (dt & DT_LONG)
+		printf("Minute too long\n");
+	if (dt & DT_SHORT)
+		printf("Minute too short\n");
+	if (dt & DT_DSTERR)
+		printf("Time offset error\n");
+	if (dt & DT_DSTJUMP)
+		printf("Time offset jump (ignored)\n");
+	if (dt & DT_MIN)
+		printf("Minute parity/value error\n");
+	if (dt & DT_MINJUMP)
+		printf("Minute value jump\n");
+	if (dt & DT_HOUR)
+		printf("Hour parity/value error\n");
+	if (dt & DT_HOURJUMP)
+		printf("Hour value jump\n");
+	if (dt & DT_DATE)
+		printf("Date parity/value error\n");
+	if (dt & DT_WDAYJUMP)
+		printf("Day-of-week value jump\n");
+	if (dt & DT_MDAYJUMP)
+		printf("Day-of-month value jump\n");
+	if (dt & DT_MONTHJUMP)
+		printf("Month value jump\n");
+	if (dt & DT_YEARJUMP)
+		printf("Year value jump\n");
+	if (dt & DT_B0)
+		printf("Minute marker error\n");
+	if (dt & DT_B20)
+		printf("Date/time start marker error\n");
+	if (dt & DT_XMIT)
+		printf("Transmitter call bit set\n");
+	if (dt & ANN_CHDST)
+		printf("Time offset change announced\n");
+	if (dt & ANN_LEAP)
+		printf("Leap second announced\n");
+	if (dt & DT_CHDST)
+		printf("Time offset changed\n");
+	if (dt & DT_LEAP) {
+		printf("Leap second processed");
+		if (dt & DT_LEAPONE)
+			printf(", value is 1 instead of 0");
+		printf("\n");
+	}
+	if (dt & DT_CHDSTERR)
+		printf("Spurious time offset change announcement\n");
+	if (dt & DT_LEAPERR)
+		printf("Spurious leap second announcement\n");
+	printf("\n");
+}
+
 int
 main(int argc, char *argv[])
 {

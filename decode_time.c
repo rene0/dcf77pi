@@ -37,7 +37,6 @@ int summermonth;
 int wintermonth;
 int leapsecmonths[12];
 int num_leapsecmonths;
-char *wday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
 void
 init_time(void)
@@ -191,7 +190,7 @@ add_minute(struct tm *time, int flags)
 	}
 }
 
-int
+uint32_t
 decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
     int *acc_minlen, int old_dt)
 {
@@ -383,7 +382,8 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		olderr = 0;
 	if (!ok)
 		olderr = 1;
-	return rval;
+
+	return rval | announce;
 }
 
 int
@@ -397,147 +397,4 @@ get_utchour(struct tm time)
 	if (utchour < 0)
 		utchour += 24;
 	return utchour;
-}
-
-void
-display_time_file(int dt, struct tm time)
-{
-	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
-	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
-	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min);
-	if (dt & DT_LONG)
-		printf("Minute too long\n");
-	if (dt & DT_SHORT)
-		printf("Minute too short\n");
-	if (dt & DT_DSTERR)
-		printf("Time offset error\n");
-	if (dt & DT_DSTJUMP)
-		printf("Time offset jump (ignored)\n");
-	if (dt & DT_MIN)
-		printf("Minute parity/value error\n");
-	if (dt & DT_MINJUMP)
-		printf("Minute value jump\n");
-	if (dt & DT_HOUR)
-		printf("Hour parity/value error\n");
-	if (dt & DT_HOURJUMP)
-		printf("Hour value jump\n");
-	if (dt & DT_DATE)
-		printf("Date parity/value error\n");
-	if (dt & DT_WDAYJUMP)
-		printf("Day-of-week value jump\n");
-	if (dt & DT_MDAYJUMP)
-		printf("Day-of-month value jump\n");
-	if (dt & DT_MONTHJUMP)
-		printf("Month value jump\n");
-	if (dt & DT_YEARJUMP)
-		printf("Year value jump\n");
-	if (dt & DT_B0)
-		printf("Minute marker error\n");
-	if (dt & DT_B20)
-		printf("Date/time start marker error\n");
-	if (dt & DT_XMIT)
-		printf("Transmitter call bit set\n");
-	if (announce & ANN_CHDST)
-		printf("Time offset change announced\n");
-	if (announce & ANN_LEAP)
-		printf("Leap second announced\n");
-	if (dt & DT_CHDST)
-		printf("Time offset changed\n");
-	if (dt & DT_LEAP) {
-		printf("Leap second processed");
-		if (dt & DT_LEAPONE)
-			printf(", value is 1 instead of 0");
-		printf("\n");
-	}
-	if (dt & DT_CHDSTERR)
-		printf("Spurious time offset change announcement\n");
-	if (dt & DT_LEAPERR)
-		printf("Spurious leap second announcement\n");
-	printf("\n");
-}
-
-void
-display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
-    int acc_minlen)
-{
-	int i, xpos;
-
-	/* display bits of previous minute */
-	for (xpos = 4, i = 0; i < minlen; i++, xpos++) {
-		if (i > 59)
-			break;
-		if (is_space_bit(i))
-			xpos++;
-		mvwprintw(decode_win, 0, xpos, "%u", buffer[i]);
-	}
-	wclrtoeol(decode_win);
-	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
-	/* color bits depending on the results */
-	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, dt & DT_B0 ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt & DT_DSTERR ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, dt & DT_B20 ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, dt & DT_MIN ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, dt & DT_HOUR ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, dt & DT_DATE ? 1 : 2, NULL);
-	if (dt & DT_LEAPONE)
-		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
-
-	/* display date and time */
-	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d (%6d)",
-	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
-	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min,
-	    acc_minlen >= 1e6 ? 999999 : acc_minlen);
-	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
-	/* color date/time string depending on the results */
-	if (dt & DT_DSTJUMP)
-		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
-	if (dt & DT_YEARJUMP)
-		mvwchgat(decode_win, 1, 7, 4, A_BOLD, 3, NULL);
-	if (dt & DT_MONTHJUMP)
-		mvwchgat(decode_win, 1, 12, 2, A_BOLD, 3, NULL);
-	if (dt & DT_MDAYJUMP)
-		mvwchgat(decode_win, 1, 15, 2, A_BOLD, 3, NULL);
-	if (dt & DT_WDAYJUMP)
-		mvwchgat(decode_win, 1, 18, 3, A_BOLD, 3, NULL);
-	if (dt & DT_HOURJUMP)
-		mvwchgat(decode_win, 1, 22, 2, A_BOLD, 3, NULL);
-	if (dt & DT_MINJUMP)
-		mvwchgat(decode_win, 1, 25, 2, A_BOLD, 3, NULL);
-
-	/* flip lights depending on the results */
-	if ((dt & DT_XMIT) == 0)
-		mvwchgat(decode_win, 1, 39, 6, A_NORMAL, 8, NULL);
-	if ((announce && ANN_CHDST) == 0)
-		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 8, NULL);
-	if (dt & DT_CHDST)
-		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 2, NULL);
-	else if (dt & DT_CHDSTERR)
-		mvwchgat(decode_win, 1, 46, 3, A_BOLD, 3, NULL);
-	if ((announce & ANN_LEAP) == 0)
-		mvwchgat(decode_win, 1, 50, 4, A_NORMAL, 8, NULL);
-	if (dt & DT_LEAP)
-		mvwchgat(decode_win, 1, 50, 4, A_NORMAL, 2, NULL);
-	else if (dt & DT_LEAPERR)
-		mvwchgat(decode_win, 1, 50, 4, A_BOLD, 3, NULL);
-	if (dt & DT_LONG) {
-		mvwprintw(decode_win, 1, 56, "long ");
-		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 1, NULL);
-	}
-	else if (dt & DT_SHORT) {
-		mvwprintw(decode_win, 1, 56, "short");
-		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 1, NULL);
-	}
-	else
-		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 8, NULL);
-
-	wrefresh(decode_win);
-}
-
-void
-draw_time_window(void)
-{
-	mvwprintw(decode_win, 0, 0, "old");
-	mvwprintw(decode_win, 1, 39, "txcall dst leap");
-	mvwchgat(decode_win, 1, 39, 15, A_NORMAL, 8, NULL);
-	wrefresh(decode_win);
 }
