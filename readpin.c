@@ -33,9 +33,10 @@ SUCH DAMAGE.
 #include "input.h"
 
 #include <math.h>
+#include <stdio.h>
 #include <sysexits.h>
-#include <unistd.h>
 #include <time.h>
+#include <unistd.h>
 
 int
 main(int argc, char **argv)
