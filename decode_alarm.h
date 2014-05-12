@@ -27,7 +27,6 @@ SUCH DAMAGE.
 #define DCF77PI_DECODE_ALARM_H
 
 #include <stdint.h>
-#include <ncurses.h>
 
 /*
  * From German wikipedia mostly, long regions and parities are unspecified
@@ -39,13 +38,5 @@ struct alm {
 };
 
 void decode_alarm(uint8_t *buf, struct alm *alarm);
-void show_civbuf_gui(uint8_t *buf);
-void display_alarm_gui(struct alm alarm);
-void display_alarm_file(struct alm alarm);
-void display_alarm_error_gui(void);
-void display_alarm_error_file(void);
-void clear_alarm_gui(void);
-void draw_alarm_window(void);
 
-WINDOW *alarm_win;
 #endif

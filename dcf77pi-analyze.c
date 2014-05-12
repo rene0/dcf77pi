@@ -30,6 +30,7 @@ SUCH DAMAGE.
 
 #include <errno.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <sysexits.h>
 #include <unistd.h>
@@ -108,6 +109,21 @@ display_time_file(int dt, struct tm time)
 	if (dt & DT_LEAPERR)
 		printf("Spurious leap second announcement\n");
 	printf("\n");
+}
+
+void
+display_alarm_file(struct alm alarm)
+{
+	printf("German civil warning:"
+	    " 0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x 0x%1x\n",
+	    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
+	    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
+}
+
+void
+display_alarm_error_file(void)
+{
+	printf("Civil warning error\n");
 }
 
 int

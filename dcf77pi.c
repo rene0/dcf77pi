@@ -38,6 +38,7 @@ SUCH DAMAGE.
 
 WINDOW *input_win;
 WINDOW *decode_win;
+WINDOW *alarm_win;
 WINDOW *main_win;
 int bitpos;
 
@@ -230,6 +231,59 @@ draw_time_window(void)
 	mvwchgat(decode_win, 1, 39, 15, A_NORMAL, 8, NULL);
 	wrefresh(decode_win);
 }
+
+void
+show_civbuf_gui(uint8_t *buf)
+{
+	int i;
+
+	for (i = 0; i < 40; i++)
+		mvwprintw(alarm_win, 0, i + 14, "%u", buf[i]);
+	wclrtoeol(alarm_win);
+	wrefresh(alarm_win);
+}
+
+void
+display_alarm_gui(struct alm alarm)
+{
+	wattron(alarm_win, COLOR_PAIR(3) | A_BOLD);
+	mvwprintw(alarm_win, 1, 22,
+	    "0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x 0x%1x",
+	    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
+	    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
+	wattroff(alarm_win, COLOR_PAIR(3) | A_BOLD);
+	wclrtoeol(alarm_win);
+	wrefresh(alarm_win);
+}
+
+void
+display_alarm_error_gui(void)
+{
+	wattron(alarm_win, COLOR_PAIR(1));
+	mvwprintw(alarm_win, 1, 22, "error");
+	wattroff(alarm_win, COLOR_PAIR(1));
+	wclrtoeol(alarm_win);
+	wrefresh(alarm_win);
+}
+
+void
+clear_alarm_gui(void)
+{
+	wattron(alarm_win, COLOR_PAIR(2));
+	mvwprintw(alarm_win, 1, 22, "none");
+	wattroff(alarm_win, COLOR_PAIR(2));
+	wclrtoeol(alarm_win);
+	wrefresh(alarm_win);
+}
+
+void
+draw_alarm_window(void)
+{
+	mvwprintw(alarm_win, 0, 0, "Civil buffer:");
+	mvwprintw(alarm_win, 1, 0, "German civil warning:");
+	wrefresh(alarm_win);
+}
+
 int
 main(int argc, char *argv[])
 {

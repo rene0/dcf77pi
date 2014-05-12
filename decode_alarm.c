@@ -25,8 +25,6 @@ SUCH DAMAGE.
 
 #include "decode_alarm.h"
 
-#include <stdio.h>
-
 void
 decode_alarm(uint8_t *buf, struct alm *alarm)
 {
@@ -43,71 +41,4 @@ decode_alarm(uint8_t *buf, struct alm *alarm)
 	    16 * buf[30] + 32 * buf[31] + 64 * buf[33] + 128 * buf[34] +
 	    256 * buf[35] + 512 * buf[37];
 	alarm->pl2 = buf[32] + 2 * buf[36] + 4 * buf[38] + 8 * buf[39];
-}
-
-void
-show_civbuf_gui(uint8_t *buf)
-{
-	int i;
-
-	for (i = 0; i < 40; i++)
-		mvwprintw(alarm_win, 0, i + 14, "%u", buf[i]);
-	wclrtoeol(alarm_win);
-	wrefresh(alarm_win);
-}
-
-void
-display_alarm_file(struct alm alarm)
-{
-	printf("German civil warning:"
-	    " 0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x 0x%1x\n",
-	    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
-	    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
-}
-
-void
-display_alarm_gui(struct alm alarm)
-{
-	wattron(alarm_win, COLOR_PAIR(3) | A_BOLD);
-	mvwprintw(alarm_win, 1, 22,
-	    "0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x 0x%1x",
-	    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
-	    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
-	wattroff(alarm_win, COLOR_PAIR(3) | A_BOLD);
-	wclrtoeol(alarm_win);
-	wrefresh(alarm_win);
-}
-
-void
-display_alarm_error_file(void)
-{
-	printf("Civil warning error\n");
-}
-
-void
-display_alarm_error_gui(void)
-{
-	wattron(alarm_win, COLOR_PAIR(1));
-	mvwprintw(alarm_win, 1, 22, "error");
-	wattroff(alarm_win, COLOR_PAIR(1));
-	wclrtoeol(alarm_win);
-	wrefresh(alarm_win);
-}
-
-void
-clear_alarm_gui(void)
-{
-	wattron(alarm_win, COLOR_PAIR(2));
-	mvwprintw(alarm_win, 1, 22, "none");
-	wattroff(alarm_win, COLOR_PAIR(2));
-	wclrtoeol(alarm_win);
-	wrefresh(alarm_win);
-}
-
-void
-draw_alarm_window(void)
-{
-	mvwprintw(alarm_win, 0, 0, "Civil buffer:");
-	mvwprintw(alarm_win, 1, 0, "German civil warning:");
-	wrefresh(alarm_win);
 }
