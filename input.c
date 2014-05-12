@@ -40,7 +40,6 @@ SUCH DAMAGE.
 
 #include <sys/param.h>
 
-
 #ifdef __FreeBSD__
 #  if __FreeBSD_version >= 900022
 #    include <sys/gpio.h>

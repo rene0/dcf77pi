@@ -30,7 +30,6 @@ SUCH DAMAGE.
  */
 
 #include "config.h"
-
 #include "input.h"
 
 #include <math.h>
