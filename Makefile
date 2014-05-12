@@ -7,6 +7,7 @@ INSTALL_PROGRAM?=install
 
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin
 
+#XXX keep setclock in lib ?
 
 hdrlib = input.h decode_time.h decode_alarm.h config.h
 srclib = input.c decode_time.c decode_alarm.c config.c
@@ -29,17 +30,18 @@ decode_alarm.o: decode_alarm.h
 config.o: config.h
 	$(CC) -fPIC -c $< -o $@
 setclock.o: setclock.h
+	#$(CC) -fPIC -c $< -o $@
 
 libdcf77.so: $(objlib) $(hdrlib)
-	$(CC) -shared -o $@ $(objlib)
+	$(CC) -shared -o $@ $(objlib) -lm
 
 dcf77pi.o: $(hdrgui) $(hdrlib)
 dcf77pi: $(objgui)
-	$(CC) -o $@ $(objgui) -lm -lncurses -ldcf77 -L.
+	$(CC) -o $@ $(objgui) -lncurses -ldcf77 -L.
 
 dcf77pi-analyze.o: $(hdrfile) $(hdrlib)
 dcf77pi-analyze: $(objfile)
-	$(CC) -o $@ $(objfile) guifuncs.o -lm -lncurses -ldcf77 -L.
+	$(CC) -o $@ $(objfile) guifuncs.o -lncurses -ldcf77 -L.
 
 readpin.o: input.h
 readpin: readpin.o
