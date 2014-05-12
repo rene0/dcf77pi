@@ -5,7 +5,8 @@ ETCDIR?=etc/dcf77pi
 CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
 INSTALL_PROGRAM?=install
 
-all: libdcf77 dcf77pi dcf77pi-analyze readpin
+all: libdcf77.so dcf77pi dcf77pi-analyze readpin
+
 
 hdrlib = input.h decode_time.h decode_alarm.h config.h
 srclib = input.c decode_time.c decode_alarm.c config.c
@@ -29,8 +30,8 @@ config.o: config.h
 	$(CC) -fPIC -c $< -o $@
 setclock.o: setclock.h
 
-libdcf77: $(objlib)
-	$(CC) $(objlib) -o $@.so -shared
+libdcf77.so: $(objlib) $(hdrlib)
+	$(CC) -shared -o $@ $(objlib)
 
 dcf77pi.o: $(hdrgui) $(hdrlib)
 dcf77pi: $(objgui)
@@ -50,7 +51,7 @@ clean:
 	rm readpin readpin.o
 	rm libdcf77.so $(objlib)
 
-install: libdcf77 dcf77pi dcf77pi-analyze readpin
+install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	$(INSTALL_LIB) libdcf77.so $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
