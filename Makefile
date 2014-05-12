@@ -41,11 +41,11 @@ dcf77pi: $(objgui)
 
 dcf77pi-analyze.o: $(hdrfile) $(hdrlib)
 dcf77pi-analyze: $(objfile)
-	$(CC) -o $@ $(objfile) guifuncs.o -lncurses -ldcf77 -L.
+	$(CC) -o $@ $(objfile) -ldcf77 -L.
 
 readpin.o: input.h
 readpin: readpin.o
-	$(CC) -o $@ readpin.o guifuncs.o -lrt -lm -lncurses -ldcf77 -L.
+	$(CC) -o $@ readpin.o -lrt -lm -ldcf77 -L.
 
 clean:
 	rm dcf77pi $(objgui)
