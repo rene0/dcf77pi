@@ -36,6 +36,23 @@ SUCH DAMAGE.
 
 int bitpos;
 
+void
+display_bit_file(uint16_t state)
+{
+	if (is_space_bit(bitpos))
+		printf(" ");
+	if (state & GETBIT_RECV)
+		printf("r");
+	else if (state & GETBIT_XMIT)
+		printf("x");
+	else if (state & GETBIT_RND)
+		printf("#");
+	else if (state & GETBIT_READ)
+		printf("_");
+	else
+		printf("%u", get_buffer()[bitpos]);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -91,7 +108,7 @@ main(int argc, char *argv[])
 			minlen = bitpos + 1;
 			acc_minlen += 1000;
 		}
-		display_bit_file();
+		display_bit_file(bit);
 
 		if (init == 0) {
 			switch (time.tm_min % 3) {
@@ -128,13 +145,15 @@ main(int argc, char *argv[])
 			}
 		}
 
-		bit = next_bit(1); /* 1 as in "true" */
-		if (bit & GETBIT_TOOLONG)
+		bit = next_bit();
+		if (bit & GETBIT_TOOLONG) {
 			minlen = 61;
 			/*
 			 * leave acc_minlen alone,
 			 * any missing marker already processed
 			 */
+			printf(" L");
+		}
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			old_acc_minlen = acc_minlen;

@@ -37,11 +37,16 @@ SUCH DAMAGE.
 #define GETBIT_RND	(1 << 8)
 
 #include <stdint.h> /* uintX_t */
-#include <ncurses.h>
 
 struct hardware {
 	unsigned long freq;
 	unsigned int pin, active_high;
+};
+
+struct bitinfo {
+	int tlow, t, freq_reset;
+	float realfreq, bit0, bit20; /* static */
+	float frac, maxone, a;
 };
 
 int set_mode_file(char *infilename);
@@ -51,21 +56,12 @@ void cleanup(void);
 uint8_t get_pulse(void);
 /* get_bit_*() stores result in internal buffer */
 uint16_t get_bit_file(void);
-uint16_t get_bit_live(void);
-void display_bit_file(void);
-void display_bit_gui(void);
-/*
- * Prepare for next bit.
- * Indeed one function here to prevent significant duplication.
- */
-uint16_t next_bit(int fromfile);
+uint16_t get_bit_live(struct bitinfo *bit);
+uint16_t next_bit(void);
 uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
 int is_space_bit(int bit);
-void draw_input_window(void);
 int write_new_logfile(char *logfile);
-int switch_logfile(WINDOW *win, char **logfile);
-
-WINDOW *input_win;
+int close_logfile();
 
 #endif

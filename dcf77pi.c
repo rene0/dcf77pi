@@ -36,6 +36,7 @@ SUCH DAMAGE.
 #include <sysexits.h>
 #include <unistd.h>
 
+WINDOW *input_win;
 WINDOW *main_win;
 int bitpos;
 
@@ -55,10 +56,99 @@ curses_cleanup(char *reason)
 		printf("%s", reason);
 }
 
+void
+display_bit_gui(uint16_t state)
+{
+	int xpos, i;
+
+	mvwprintw(input_win, 3, 1, "%2u", bitpos);
+
+	wattron(input_win, COLOR_PAIR(2));
+	if (state & GETBIT_EOM)
+		mvwprintw(input_win, 3, 59, "minute   ");
+	else if (state == 0 || state == GETBIT_ONE)
+		mvwprintw(input_win, 3, 59, "OK       ");
+	else
+		mvwprintw(input_win, 3, 59, "         ");
+	wattroff(input_win, COLOR_PAIR(2));
+
+	wattron(input_win, COLOR_PAIR(1));
+	if (state & GETBIT_READ)
+		mvwprintw(input_win, 3, 59, "read     ");
+	if (state & GETBIT_RECV)
+		mvwprintw(input_win, 3, 70, "receive ");
+	else if (state & GETBIT_XMIT)
+		mvwprintw(input_win, 3, 70, "transmit");
+	else if (state & GETBIT_RND)
+		mvwprintw(input_win, 3, 70, "random  ");
+	else if (state & GETBIT_IO)
+		mvwprintw(input_win, 3, 70, "IO      ");
+	else {
+		wattron(input_win, COLOR_PAIR(2));
+		mvwprintw(input_win, 3, 70, "OK      ");
+		wattroff(input_win, COLOR_PAIR(2));
+	}
+	wattroff(input_win, COLOR_PAIR(1));
+
+	for (xpos = bitpos + 4, i = 0; i <= bitpos; i++)
+		if (is_space_bit(i))
+			xpos++;
+
+	mvwprintw(input_win, 0, xpos, "%u", get_buffer()[bitpos]);
+	if (state & GETBIT_READ)
+		mvwchgat(input_win, 0, xpos, 1, A_BOLD, 3, NULL);
+	wrefresh(input_win);
+}
+
+void
+draw_input_window(void)
+{
+	mvwprintw(input_win, 0, 0, "new");
+	mvwprintw(input_win, 2, 0, "bit  act total          realfreq   b0"
+	    "  b20  max1 increment state      radio");
+	wrefresh(input_win);
+}
+
+int
+switch_logfile(WINDOW *win, char **logfilename)
+{
+	int res;
+	char *old_logfilename;
+
+	if (*logfilename == NULL)
+		*logfilename = strdup("");
+	old_logfilename = strdup(*logfilename);
+	free(*logfilename);
+	*logfilename = strdup(get_keybuf());
+	if (!strcmp(*logfilename, ".")) {
+		free(*logfilename);
+		*logfilename = strdup(old_logfilename);
+	}
+
+	if (strcmp(old_logfilename, *logfilename)) {
+		if (strlen(old_logfilename) > 0) {
+			if (close_logfile() != 0) {
+				statusbar(win, bitpos,
+				    "Error closing old log file");
+				return errno;
+			}
+		}
+		if (strlen(*logfilename) > 0) {
+			if ((res = write_new_logfile(*logfilename)) != 0) {
+				statusbar(win, bitpos, strerror(res));
+				return res;
+			}
+		}
+	}
+	free(old_logfilename);
+	return 0;
+}
+
 int
 main(int argc, char *argv[])
 {
 	uint8_t indata[40], civbuf[40];
+	struct bitinfo bitinf;
 	uint16_t bit;
 	struct tm time, oldtime;
 	struct alm civwarn;
@@ -98,6 +188,7 @@ main(int argc, char *argv[])
 	bzero(indata, sizeof(indata));
 	bzero(&time, sizeof(time));
 	bzero(&civbuf, sizeof(civbuf));
+	bzero(&bitinf, sizeof(bitinf));
 
 	decode_win = NULL;
 	alarm_win = NULL;
@@ -135,7 +226,15 @@ main(int argc, char *argv[])
 	draw_keys(main_win);
 
 	for (;;) {
-		bit = get_bit_live();
+		bit = get_bit_live(&bitinf);
+		mvwprintw(input_win, 3, 4, "%4u  %4u (%5.1f%%) %8.3f"
+		    " %4u %4u %4.1f%%  %8.6f", bitinf.tlow, bitinf.t, bitinf.frac * 100,
+		    bitinf.realfreq, (int)bitinf.bit0, (int)bitinf.bit20, bitinf.maxone * 100, bitinf.a);
+		if (bitinf.freq_reset)
+			mvwchgat(input_win, 3, 24, 8, A_BOLD, 3, NULL);
+		else
+			mvwchgat(input_win, 3, 24, 8, A_NORMAL, 7, NULL);
+		wrefresh(input_win);
 		inkey = getch();
 		if (get_inputmode() == 0 && inkey != ERR)
 			switch (inkey) {
@@ -191,7 +290,7 @@ main(int argc, char *argv[])
 			minlen = bitpos + 1;
 			acc_minlen += 1000;
 		}
-		display_bit_gui();
+		display_bit_gui(bit);
 
 		if (init == 0) {
 			switch (time.tm_min % 3) {
@@ -228,13 +327,22 @@ main(int argc, char *argv[])
 			}
 		}
 
-		bit = next_bit(0); /* 0 as in "false" */
-		if (bit & GETBIT_TOOLONG)
+		bit = next_bit();
+		if (get_bitpos() == 0) {
+			mvwdelch(input_win, 0, 4);
+			wclrtoeol(input_win);
+		}
+		if (bit & GETBIT_TOOLONG) {
 			minlen = 61;
 			/*
 			 * leave acc_minlen alone,
 			 * any missing marker already processed
 			 */
+			wattron(input_win, COLOR_PAIR(1));
+			mvwprintw(input_win, 3, 59, "no minute");
+			wattroff(input_win, COLOR_PAIR(1));
+		}
+		wrefresh(input_win);
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			old_acc_minlen = acc_minlen;

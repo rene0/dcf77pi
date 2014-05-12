@@ -26,7 +26,6 @@ SUCH DAMAGE.
 #include "input.h"
 
 #include "config.h"
-#include "guifuncs.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -229,7 +228,7 @@ get_pulse(void)
 }
 
 uint16_t
-get_bit_live(void)
+get_bit_live(struct bitinfo *bit)
 {
 	/*
 	 * The bits are decoded from the signal using an exponential low-pass
@@ -238,14 +237,15 @@ get_bit_live(void)
 	 * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
 	 */
 
-	int freq_reset = 0;
 	char outch;
-	int t, tlow, newminute;
+	int newminute;
 	uint8_t p, stv;
 	struct timespec slp;
-	float a, y, frac = -0.01, maxone = -0.01;
+	float y;
 	static int init = 1;
-	static float realfreq, bit0, bit20;
+
+	bit->freq_reset = 0;
+	bit->frac = bit->maxone = -0.01;
 
 	/*
 	 * Clear previous flags, except GETBIT_TOOLONG to be able
@@ -265,19 +265,19 @@ get_bit_live(void)
 	 */
 
 	if (init == 1) {
-		realfreq = hw.freq;
-		bit0 = 0.1 * realfreq;
-		bit20 = 0.2 * realfreq;
+		bit->realfreq = hw.freq;
+		bit->bit0 = 0.1 * bit->realfreq;
+		bit->bit20 = 0.2 * bit->realfreq;
 	}
 	/*
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
-	a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
+	bit->a = 1.0 - exp2(-1.0 / (bit->realfreq / 20.0));
 	y = -1;
-	tlow = 0;
+	bit->tlow = 0;
 	stv = 2;
 
-	for (t = 0; ; t++) {
+	for (bit->t = 0; ; bit->t++) {
 		p = get_pulse();
 		if (p == GETBIT_IO) {
 			state |= GETBIT_IO;
@@ -285,7 +285,7 @@ get_bit_live(void)
 			goto report;
 		}
 
-		y = y < 0 ? (float)p : y + a * (p - y);
+		y = y < 0 ? (float)p : y + bit->a * (p - y);
 		if (stv == 2)
 			stv = p;
 
@@ -293,21 +293,21 @@ get_bit_live(void)
 		 * Prevent algorithm collapse during thunderstorms
 		 * or scheduler abuse
 		 */
-		if (realfreq < hw.freq / 2 || realfreq > hw.freq * 3/2) {
+		if (bit->realfreq < hw.freq / 2 || bit->realfreq > hw.freq * 3/2) {
 			if (logfile != NULL)
-				fprintf(logfile, realfreq < hw.freq / 2 ?
+				fprintf(logfile, bit->realfreq < hw.freq / 2 ?
 				    "<" : ">");
-			realfreq = hw.freq;
-			freq_reset = 1;
+			bit->realfreq = hw.freq;
+			bit->freq_reset = 1;
 		}
 
-		if (t > realfreq * 5/2) {
-			realfreq = realfreq + 0.05 * ((t / 2.5) - realfreq);
-			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-			if (tlow * 100 / t < 1) {
+		if (bit->t > bit->realfreq * 5/2) {
+			bit->realfreq = bit->realfreq + 0.05 * ((bit->t / 2.5) - bit->realfreq);
+			bit->a = 1.0 - exp2(-1.0 / (bit->realfreq / 20.0));
+			if (bit->tlow * 100 / bit->t < 1) {
 				state |= GETBIT_RECV;
 				outch = 'r';
-			} else if (tlow * 100 / t >= 99) {
+			} else if (bit->tlow * 100 / bit->t >= 99) {
 				state |= GETBIT_XMIT;
 				outch = 'x';
 			} else {
@@ -324,28 +324,28 @@ get_bit_live(void)
 		if (y < 0.5 && stv == 1) {
 			y = 0.0;
 			stv = 0;
-			tlow = t; /* end of high part of second */
+			bit->tlow = bit->t; /* end of high part of second */
 		}
 		if (y > 0.5 && stv == 0) {
 			y = 1.0;
 			stv = 1;
 
-			newminute = t > realfreq * 3/2;
+			newminute = bit->t > bit->realfreq * 3/2;
 			if (init == 1)
 				init = 2;
 			else {
 				if (newminute)
-					realfreq = realfreq + 0.05 *
-					    ((t/2) - realfreq);
+					bit->realfreq = bit->realfreq + 0.05 *
+					    ((bit->t/2) - bit->realfreq);
 				else
-					realfreq = realfreq + 0.05 *
-					    (t - realfreq);
-				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
+					bit->realfreq = bit->realfreq + 0.05 *
+					    (bit->t - bit->realfreq);
+				bit->a = 1.0 - exp2(-1.0 / (bit->realfreq / 20.0));
 			}
 
-			frac = (float)tlow / (float)t;
+			bit->frac = (float)bit->tlow / (float)bit->t;
 			if (newminute) {
-				frac *= 2;
+				bit->frac *= 2;
 				state |= GETBIT_EOM;
 			}
 			break; /* start of new second */
@@ -356,14 +356,14 @@ get_bit_live(void)
 			;
 	}
 
-	maxone = (bit0 + bit20) / realfreq;
-	if (frac < 0) {
+	bit->maxone = (bit->bit0 + bit->bit20) / bit->realfreq;
+	if (bit->frac < 0) {
 		/* radio error, results already set */
-	} else if (frac <= maxone / 2.0) {
+	} else if (bit->frac <= bit->maxone / 2.0) {
 		/* zero bit, ~100 ms active signal */
 		outch = '0';
 		buffer[bitpos] = 0;
-	} else if (frac <= maxone) {
+	} else if (bit->frac <= bit->maxone) {
 		/* one bit, ~200 ms active signal */
 		state |= GETBIT_ONE;
 		outch = '1';
@@ -377,21 +377,13 @@ get_bit_live(void)
 		init = 0;
 	else {
 		if (bitpos == 0 && buffer[0] == 0)
-			bit0 = bit0 + 0.5 * (tlow - bit0);
+			bit->bit0 = bit->bit0 + 0.5 * (bit->tlow - bit->bit0);
 		if (bitpos == 20 && buffer[20] == 1)
-			bit20 = bit20 + 0.5 * (tlow - bit20);
+			bit->bit20 = bit->bit20 + 0.5 * (bit->tlow - bit->bit20);
 	}
 report:
 	if (logfile != NULL)
 		fprintf(logfile, "%c%s", outch, state & GETBIT_EOM ? "\n" : "");
-	mvwprintw(input_win, 3, 4, "%4u  %4u (%5.1f%%) %8.3f"
-	    " %4u %4u %4.1f%%  %8.6f", tlow, t, frac * 100,
-	    realfreq, (int)bit0, (int)bit20, maxone * 100, a);
-	if (freq_reset)
-		mvwchgat(input_win, 3, 24, 8, A_BOLD, 3, NULL);
-	else
-		mvwchgat(input_win, 3, 24, 8, A_NORMAL, 7, NULL);
-	wrefresh(input_win);
 	return state;
 }
 
@@ -478,94 +470,16 @@ is_space_bit(int bit)
 	    bit == 50 || bit == 58 || bit == 59 || bit == 60);
 }
 
-void
-display_bit_file(void)
-{
-	if (is_space_bit(bitpos))
-		printf(" ");
-	if (state & GETBIT_RECV)
-		printf("r");
-	else if (state & GETBIT_XMIT)
-		printf("x");
-	else if (state & GETBIT_RND)
-		printf("#");
-	else if (state & GETBIT_READ)
-		printf("_");
-	else
-		printf("%u", buffer[bitpos]);
-}
-
-void
-display_bit_gui(void)
-{
-	int xpos, i;
-
-	mvwprintw(input_win, 3, 1, "%2u", bitpos);
-
-	wattron(input_win, COLOR_PAIR(2));
-	if (state & GETBIT_EOM)
-		mvwprintw(input_win, 3, 59, "minute   ");
-	else if (state == 0 || state == GETBIT_ONE)
-		mvwprintw(input_win, 3, 59, "OK       ");
-	else
-		mvwprintw(input_win, 3, 59, "         ");
-	wattroff(input_win, COLOR_PAIR(2));
-
-	wattron(input_win, COLOR_PAIR(1));
-	if (state & GETBIT_READ)
-		mvwprintw(input_win, 3, 59, "read     ");
-	if (state & GETBIT_RECV)
-		mvwprintw(input_win, 3, 70, "receive ");
-	else if (state & GETBIT_XMIT)
-		mvwprintw(input_win, 3, 70, "transmit");
-	else if (state & GETBIT_RND)
-		mvwprintw(input_win, 3, 70, "random  ");
-	else if (state & GETBIT_IO)
-		mvwprintw(input_win, 3, 70, "IO      ");
-	else {
-		wattron(input_win, COLOR_PAIR(2));
-		mvwprintw(input_win, 3, 70, "OK      ");
-		wattroff(input_win, COLOR_PAIR(2));
-	}
-	wattroff(input_win, COLOR_PAIR(1));
-
-	for (xpos = bitpos + 4, i = 0; i <= bitpos; i++)
-		if (is_space_bit(i))
-			xpos++;
-
-	mvwprintw(input_win, 0, xpos, "%u", buffer[bitpos]);
-	if (state & GETBIT_READ)
-		mvwchgat(input_win, 0, xpos, 1, A_BOLD, 3, NULL);
-	wrefresh(input_win);
-}
-
 uint16_t
-next_bit(int fromfile)
+next_bit(void)
 {
-	if (state & GETBIT_EOM) {
-		bitpos = 0;
-		if (fromfile == 0) {
-			mvwdelch(input_win, 0, 4);
-			wclrtoeol(input_win);
-		}
-	} else
-		bitpos++;
+	bitpos = (state & GETBIT_EOM) ? 0 : bitpos + 1;
 	if (bitpos == sizeof(buffer)) {
 		state |= GETBIT_TOOLONG;
 		bitpos = 0;
-		if (fromfile == 1)
-			printf(" L");
-		else {
-			wattron(input_win, COLOR_PAIR(1));
-			mvwprintw(input_win, 3, 59, "no minute");
-			wattroff(input_win, COLOR_PAIR(1));
-			wrefresh(input_win);
-		}
 		return state;
 	}
 	state &= ~GETBIT_TOOLONG; /* fits again */
-	if (fromfile == 0)
-		wrefresh(input_win);
 	return state;
 }
 
@@ -587,50 +501,6 @@ get_hardware_parameters(void)
 	return &hw;
 }
 
-void
-draw_input_window(void)
-{
-	mvwprintw(input_win, 0, 0, "new");
-	mvwprintw(input_win, 2, 0, "bit  act total          realfreq   b0"
-	    "  b20  max1 increment state      radio");
-	wrefresh(input_win);
-}
-
-int
-switch_logfile(WINDOW *win, char **logfilename)
-{
-	int res;
-	char *old_logfilename;
-
-	if (*logfilename == NULL)
-		*logfilename = strdup("");
-	old_logfilename = strdup(*logfilename);
-	free(*logfilename);
-	*logfilename = strdup(get_keybuf());
-	if (!strcmp(*logfilename, ".")) {
-		free(*logfilename);
-		*logfilename = strdup(old_logfilename);
-	}
-
-	if (strcmp(old_logfilename, *logfilename)) {
-		if (strlen(old_logfilename) > 0) {
-			if (fclose(logfile) == EOF) {
-				statusbar(win, bitpos,
-				    "Error closing old log file");
-				return errno;
-			}
-		}
-		if (strlen(*logfilename) > 0) {
-			if ((res = write_new_logfile(*logfilename)) != 0) {
-				statusbar(win, bitpos, strerror(res));
-				return res;
-			}
-		}
-	}
-	free(old_logfilename);
-	return 0;
-}
-
 int
 write_new_logfile(char *logfilename)
 {
@@ -639,4 +509,12 @@ write_new_logfile(char *logfilename)
 		return errno;
 	fprintf(logfile, "\n--new log--\n\n");
 	return 0;
+}
+
+int
+close_logfile(void)
+{
+	int f;
+	f = fclose(logfile);
+	return (f == EOF) ? errno : 0;
 }
