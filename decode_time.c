@@ -507,7 +507,7 @@ display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
 	/* flip lights depending on the results */
 	if ((dt & DT_XMIT) == 0)
 		mvwchgat(decode_win, 1, 39, 6, A_NORMAL, 8, NULL);
-	if ((announce && ANN_CHDST) == 0)
+	if ((announce & ANN_CHDST) == 0)
 		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 8, NULL);
 	if (dt & DT_CHDST)
 		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 2, NULL);
