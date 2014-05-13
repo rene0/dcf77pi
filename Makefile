@@ -14,7 +14,6 @@ objlib = input.o decode_time.o decode_alarm.o config.o setclock.o
 srcgui = dcf77pi.c
 objgui = dcf77pi.o
 
-hdrfile =
 srcfile = dcf77pi-analyze.c
 objfile = dcf77pi-analyze.o
 
@@ -36,7 +35,7 @@ dcf77pi.o: $(hdrlib)
 dcf77pi: $(objgui)
 	$(CC) -o $@ $(objgui) -lncurses -ldcf77 -L.
 
-dcf77pi-analyze.o: $(hdrfile) $(hdrlib)
+dcf77pi-analyze.o: $(hdrlib)
 dcf77pi-analyze: $(objfile)
 	$(CC) -o $@ $(objfile) -ldcf77 -L.
 
