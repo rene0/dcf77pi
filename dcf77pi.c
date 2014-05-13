@@ -508,10 +508,23 @@ main(int argc, char *argv[])
 
 			if (settime == 1 && init == 0 && init2 == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
-			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0)) {
-				if (setclock(main_win, bitpos, time))
+			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0))
+				switch (setclock(time)) {
+				case -1:
+					statusbar(main_win, bitpos,
+					    "mktime() failed!");
 					bit |= GETBIT_EOD; /* error */
-			}
+					break;
+				case -2:
+					statusbar(main_win, bitpos,
+					    "settimeofday(): %s",
+					    strerror(errno));
+					bit |= GETBIT_EOD; /* error */
+					break;
+				default:
+					statusbar(main_win, bitpos, "Time set");
+					break;
+				}
 			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
 				acc_minlen = 0; /* really a new minute */
 			if (init == 0 && init2 == 1)

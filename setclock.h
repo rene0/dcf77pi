@@ -26,10 +26,9 @@ SUCH DAMAGE.
 #ifndef DCF77PI_SETCLOCK_H
 #define DCF77PI_SETCLOCK_H
 
-#include <ncurses.h>
 #include <time.h>
 
 /* Does *not* work with no timezone or UTC */
-int setclock(WINDOW *win, int bitpos, struct tm time);
+int setclock(struct tm time);
 
 #endif

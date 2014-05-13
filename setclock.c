@@ -25,8 +25,6 @@ SUCH DAMAGE.
 
 #include "setclock.h"
 
-#include "guifuncs.h"
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +32,7 @@ SUCH DAMAGE.
 #include <sys/time.h>
 
 int
-setclock(WINDOW *win, int bitpos, struct tm time)
+setclock(struct tm time)
 {
 	time_t epochtime;
 	struct tm isotime;
@@ -49,19 +47,11 @@ setclock(WINDOW *win, int bitpos, struct tm time)
 	isotime.tm_wday %= 7;
 	isotime.tm_sec = 0;
 	epochtime = mktime(&isotime);
-	if (epochtime == -1) {
-		statusbar(win, bitpos, "mktime() failed!");
+	if (epochtime == -1)
 		return -1;
-	}
 	tv.tv_sec = epochtime;
 	tv.tv_usec = 50000; /* adjust for bit reception algorithm */
-	statusbar(win, bitpos, "Setting time (%lld , %lld)",
-	    (long long int)tv.tv_sec, (long long int)tv.tv_usec);
 	tz.tz_minuteswest = -60;
 	tz.tz_dsttime = isotime.tm_isdst;
-	if (settimeofday(&tv, &tz) == -1) {
-		statusbar(win, bitpos, "settimeofday: %s", strerror(errno));
-		return -1;
-	}
-	return 0;
+	return (settimeofday(&tv, &tz) == -1) ? -2 : 0;
 }
