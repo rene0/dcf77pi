@@ -11,15 +11,14 @@ hdrlib = input.h decode_time.h decode_alarm.h config.h setclock.h
 srclib = input.c decode_time.c decode_alarm.c config.c setclock.c
 objlib = input.o decode_time.o decode_alarm.o config.o setclock.o
 
-hdrgui = guifuncs.h
-srcgui = guifuncs.c dcf77pi.c
-objgui = guifuncs.o dcf77pi.o
+srcgui = dcf77pi.c
+objgui = dcf77pi.o
 
 hdrfile =
 srcfile = dcf77pi-analyze.c
 objfile = dcf77pi-analyze.o
 
-input.o: input.h config.h guifuncs.h
+input.o: input.h config.h
 	$(CC) -fPIC -c $< -o $@
 decode_time.o: decode_time.h config.h
 	$(CC) -fPIC -c $< -o $@
@@ -33,7 +32,7 @@ setclock.o: setclock.h
 libdcf77.so: $(objlib) $(hdrlib)
 	$(CC) -shared -o $@ $(objlib) -lm
 
-dcf77pi.o: $(hdrgui) $(hdrlib)
+dcf77pi.o: $(hdrlib)
 dcf77pi: $(objgui)
 	$(CC) -o $@ $(objgui) -lncurses -ldcf77 -L.
 
