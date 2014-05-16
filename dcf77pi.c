@@ -473,7 +473,6 @@ main(int argc, char *argv[])
 	}
 	init_time();
 
-	/* no weird values please */
 	init_alarm();
 	bzero(&time, sizeof(time));
 	bzero(&bitinf, sizeof(bitinf));

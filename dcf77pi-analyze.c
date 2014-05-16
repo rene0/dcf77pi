@@ -157,7 +157,6 @@ main(int argc, char *argv[])
 	}
 	init_time();
 
-	/* no weird values please */
 	bzero(&time, sizeof(time));
 	init_alarm();
 
