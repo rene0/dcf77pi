@@ -650,7 +650,7 @@ main(int argc, char *argv[])
 				acc_minlen = 0; /* really a new minute */
 			if (init == 2)
 				init &= ~2;
-			if (init == 1)
+			if ((init & 1) == 1)
 				init &= ~1;
 		}
 	}
