@@ -236,7 +236,7 @@ main(int argc, char *argv[])
 				memcpy((void *)&oldtime, (const void *)&time,
 				    sizeof(time));
 			dt = decode_time(init, init2, minlen, get_buffer(),
-			    &time, &acc_minlen, dt);
+			    &time, &acc_minlen);
 
 			if (time.tm_min % 3 == 0 && init == 0) {
 				decode_alarm(civbuf, &civwarn);

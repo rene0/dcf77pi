@@ -167,7 +167,7 @@ lastday(struct tm time)
 }
 
 void
-add_minute(struct tm *time, int flags)
+add_minute(struct tm *time)
 {
 	/* time->tm_isdst indicates the old situation */
 	if (++time->tm_min == 60) {
@@ -200,7 +200,7 @@ add_minute(struct tm *time, int flags)
 
 uint32_t
 decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
-    int *acc_minlen, int old_dt)
+    int *acc_minlen)
 {
 	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
 	unsigned int tmp, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
@@ -227,7 +227,7 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 
 	increase = 0;
 	while (init == 0 && *acc_minlen >= 60000) {
-		add_minute(time, old_dt);
+		add_minute(time);
 		*acc_minlen -= 60000;
 		increase++;
 	}
