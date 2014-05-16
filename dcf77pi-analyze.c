@@ -130,10 +130,11 @@ main(int argc, char *argv[])
 	uint16_t bit;
 	struct tm time, oldtime;
 	struct alm civwarn;
+	uint8_t *civbuf;
 	int minlen = 0, acc_minlen = 0, old_acc_minlen;
 	uint32_t dt = 0;
 	int init = 3;
-	int bitpos, res;
+	int bitpos, res, i;
 	char *logfilename;
 
 	if (argc == 2)
@@ -201,6 +202,11 @@ main(int argc, char *argv[])
 			    &time, &acc_minlen);
 
 			if (time.tm_min % 3 == 0 && init == 0) {
+				civbuf = get_civil_buffer();
+				printf("German civil buffer: ");
+				for (i = 0; i < CIVBUFLEN; i++)
+					printf("%u", civbuf[i]);
+				printf("\n");
 				decode_alarm(&civwarn);
 				switch (get_civil_status()) {
 				case 3:
