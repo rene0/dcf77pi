@@ -443,7 +443,7 @@ main(int argc, char *argv[])
 	struct alm civwarn;
 	int minlen = 0, acc_minlen = 0, old_acc_minlen;
 	uint32_t dt = 0;
-	int init = 1, init2 = 1;
+	int init = 3;
 	int res, settime = 0;
 	char *logfilename;
 	int change_logfile = 0;
@@ -601,10 +601,10 @@ main(int argc, char *argv[])
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			old_acc_minlen = acc_minlen;
-			if (init == 1 || minlen >= 59)
+			if ((init & 1) == 1 || minlen >= 59)
 				memcpy((void *)&oldtime, (const void *)&time,
 				    sizeof(time));
-			dt = decode_time(init, init2, minlen, get_buffer(),
+			dt = decode_time(init, minlen, get_buffer(),
 			    &time, &acc_minlen);
 
 			if (time.tm_min % 3 == 0 && init == 0) {
@@ -627,7 +627,7 @@ main(int argc, char *argv[])
 			display_time_gui(dt, time, get_buffer(),
 			    minlen, old_acc_minlen);
 
-			if (settime == 1 && init == 0 && init2 == 0 &&
+			if (settime == 1 && init == 0 &&
 			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
 			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0))
 				switch (setclock(time)) {
@@ -646,12 +646,12 @@ main(int argc, char *argv[])
 					statusbar(main_win, bitpos, "Time set");
 					break;
 				}
-			if (init == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
+			if ((init & 1) == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
 				acc_minlen = 0; /* really a new minute */
-			if (init == 0 && init2 == 1)
-				init2 = 0;
+			if (init == 2)
+				init &= ~2;
 			if (init == 1)
-				init = 0;
+				init &= ~1;
 		}
 	}
 

@@ -199,7 +199,7 @@ add_minute(struct tm *time)
 }
 
 uint32_t
-decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
+decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
     int *acc_minlen)
 {
 	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
@@ -226,7 +226,7 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		rval |= DT_XMIT;
 
 	increase = 0;
-	while (init == 0 && *acc_minlen >= 60000) {
+	while ((init & 1) == 0 && *acc_minlen >= 60000) {
 		add_minute(time);
 		*acc_minlen -= 60000;
 		increase++;
@@ -239,9 +239,9 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		rval |= DT_MIN;
 		p1 = 1;
 	}
-	if ((init == 1 || increase > 0) && p1 == 0 && generr == 0) {
+	if (((init & 1) == 1 || increase > 0) && p1 == 0 && generr == 0) {
 		tmp = tmp0 + 10 * tmp1;
-		if (init2 == 0 && time->tm_min != tmp)
+		if ((init & 2) == 0 && time->tm_min != tmp)
 			rval |= DT_MINJUMP;
 		time->tm_min = tmp;
 	}
@@ -253,9 +253,9 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		rval |= DT_HOUR;
 		p2 = 1;
 	}
-	if ((init == 1 || increase > 0) && p2 == 0 && generr == 0) {
+	if (((init & 1) == 1 || increase > 0) && p2 == 0 && generr == 0) {
 		tmp = tmp0 + 10 * tmp1;
-		if (init2 == 0 && time->tm_hour != tmp)
+		if ((init & 2) == 0 && time->tm_hour != tmp)
 			rval |= DT_HOURJUMP;
 		time->tm_hour = tmp;
 	}
@@ -274,15 +274,15 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		rval |= DT_DATE;
 		p3 = 1;
 	}
-	if ((init == 1 || increase > 0) && p3 == 0 && generr == 0) {
+	if (((init & 1) == 1 || increase > 0) && p3 == 0 && generr == 0) {
 		tmp = tmp0 + 10 * tmp1;
 		tmp0 = tmp3 + 10 * buffer[49];
 		tmp1 = tmp4 + 10 * tmp5;
-		if (init2 == 0 && time->tm_mday != tmp)
+		if ((init & 2) == 0 && time->tm_mday != tmp)
 			rval |= DT_MDAYJUMP;
-		if (init2 == 0 && time->tm_wday != tmp2)
+		if ((init & 2) == 0 && time->tm_wday != tmp2)
 			rval |= DT_WDAYJUMP;
-		if (init2 == 0 && time->tm_mon != tmp0)
+		if ((init & 2) == 0 && time->tm_mon != tmp0)
 			rval |= DT_MONTHJUMP;
 		time->tm_wday = tmp2;
 		time->tm_mon = tmp0;
@@ -291,7 +291,7 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 			rval |= DT_DATE;
 			p3 = 1;
 		} else {
-			if (init2 == 0 && time->tm_year !=
+			if ((init & 2) == 0 && time->tm_year !=
 			    BASEYEAR + 100 * tmp3 + tmp1)
 				rval |= DT_YEARJUMP;
 			time->tm_year = BASEYEAR + 100 * tmp3 + tmp1;
@@ -371,7 +371,7 @@ decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
 		    time->tm_mday > lastday(*time) - 7 &&
 		    (time->tm_mon == summermonth || time->tm_mon == wintermonth);
 		if (tmp ||
-		    (((rval & DT_DSTERR) == 0) && ((olderr && ok) || init == 1))) {
+		    (((rval & DT_DSTERR) == 0) && ((olderr && ok) || (init & 1) == 1))) {
 			time->tm_isdst = buffer[17]; /* expected change */
 			if (tmp) {
 				announce &= ~ANN_CHDST;
