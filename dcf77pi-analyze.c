@@ -55,7 +55,7 @@ display_bit_file(uint16_t state)
 }
 
 void
-display_time_file(int dt, struct tm time)
+display_time_file(uint32_t dt, struct tm time)
 {
 	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
@@ -133,8 +133,9 @@ main(int argc, char *argv[])
 	uint16_t bit;
 	struct tm time, oldtime;
 	struct alm civwarn;
+	int minlen = 0, acc_minlen = 0, old_acc_minlen;
+	uint32_t dt = 0;
 	uint8_t civ1 = 0, civ2 = 0;
-	int dt = 0, minlen = 0, acc_minlen = 0, old_acc_minlen;
 	int init = 1, init2 = 1;
 	int res;
 	char *logfilename;

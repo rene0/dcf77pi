@@ -297,7 +297,7 @@ switch_logfile(WINDOW *win, char **logfilename)
 }
 
 void
-display_time_gui(int dt, struct tm time, uint8_t *buffer, int minlen,
+display_time_gui(uint32_t dt, struct tm time, uint8_t *buffer, int minlen,
     int acc_minlen)
 {
 	int i, xpos;
@@ -442,8 +442,9 @@ main(int argc, char *argv[])
 	uint16_t bit;
 	struct tm time, oldtime;
 	struct alm civwarn;
+	int minlen = 0, acc_minlen = 0, old_acc_minlen;
+	uint32_t dt = 0;
 	uint8_t civ1 = 0, civ2 = 0;
-	int dt = 0, minlen = 0, acc_minlen = 0, old_acc_minlen;
 	int init = 1, init2 = 1;
 	int res, settime = 0;
 	char *logfilename;

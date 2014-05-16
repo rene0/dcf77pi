@@ -31,7 +31,7 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-uint8_t announce = 0; /* save DST change and leap second announcements */
+uint32_t announce = 0; /* save DST change and leap second announcements */
 int olderr = 0; /* save error state to determine if DST change might be valid */
 int summermonth;
 int wintermonth;
@@ -194,8 +194,9 @@ uint32_t
 decode_time(int init, int init2, int minlen, uint8_t *buffer, struct tm *time,
     int *acc_minlen, int old_dt)
 {
-	unsigned int rval = 0, generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
+	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
 	unsigned int tmp, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
+	uint32_t rval = 0;
 	int utchour, increase;
 
 	if (minlen < 59)
