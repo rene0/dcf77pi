@@ -38,6 +38,14 @@ int wintermonth;
 int leapsecmonths[12];
 int num_leapsecmonths;
 
+char *weekday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+
+char *
+get_weekday(int wday)
+{
+	return weekday[wday & 7];
+}
+
 void
 init_time(void)
 {

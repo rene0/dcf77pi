@@ -59,7 +59,7 @@ display_time_file(uint32_t dt, struct tm time)
 {
 	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
-	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min);
+	    time.tm_mday, get_weekday(time.tm_wday), time.tm_hour, time.tm_min);
 	if (dt & DT_LONG)
 		printf("Minute too long\n");
 	if (dt & DT_SHORT)

@@ -63,6 +63,6 @@ void add_minute(struct tm *time, int flags);
 uint32_t decode_time(int init, int init2, int minlen, uint8_t *buffer,
     struct tm *time, int *acc_minlen, int old_dt);
 int get_utchour(struct tm time);
+char *get_weekday(int wday);
 
-char *wday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 #endif

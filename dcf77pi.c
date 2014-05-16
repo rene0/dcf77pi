@@ -325,7 +325,7 @@ display_time_gui(uint32_t dt, struct tm time, uint8_t *buffer, int minlen,
 	/* display date and time */
 	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d (%6d)",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
-	    time.tm_mday, wday[time.tm_wday], time.tm_hour, time.tm_min,
+	    time.tm_mday, get_weekday(time.tm_wday), time.tm_hour, time.tm_min,
 	    acc_minlen >= 1e6 ? 999999 : acc_minlen);
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 	/* color date/time string depending on the results */
