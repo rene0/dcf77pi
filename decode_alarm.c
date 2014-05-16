@@ -27,8 +27,17 @@ SUCH DAMAGE.
 
 #include "input.h"
 
+#include <strings.h>
+
 uint8_t civbuf[CIVBUFLEN];
 uint8_t civstat;
+
+void
+init_alarm(void)
+{
+	bzero(civbuf, sizeof(civbuf));
+	civstat = 0;
+}
 
 void
 decode_alarm(struct alm *alarm)
@@ -84,6 +93,16 @@ fill_civil_buffer(int minute, int bitpos, uint16_t bit)
 			/* 1..14 -> 26..39 */
 		break;
 	}
-{
+}
 
+uint8_t *
+get_civil_buffer(void)
+{
+	return civbuf;
+}
+
+uint8_t
+get_civil_status(void)
+{
+	return civstat;
 }

@@ -39,7 +39,10 @@ struct alm {
 	uint16_t dl1, dl2;
 };
 
+void init_alarm(void);
 void decode_alarm(struct alm *alarm);
 void fill_civil_buffer(int minute, int bitpos, uint16_t bit);
+uint8_t *get_civil_buffer(void);
+uint8_t get_civil_status(void);
 
 #endif

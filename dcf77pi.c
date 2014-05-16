@@ -437,14 +437,12 @@ draw_alarm_window(void)
 int
 main(int argc, char *argv[])
 {
-	uint8_t indata[40], civbuf[40];
 	struct bitinfo bitinf;
 	uint16_t bit;
 	struct tm time, oldtime;
 	struct alm civwarn;
 	int minlen = 0, acc_minlen = 0, old_acc_minlen;
 	uint32_t dt = 0;
-	uint8_t civ1 = 0, civ2 = 0;
 	int init = 1, init2 = 1;
 	int res, settime = 0;
 	char *logfilename;
@@ -476,9 +474,8 @@ main(int argc, char *argv[])
 	init_time();
 
 	/* no weird values please */
-	bzero(indata, sizeof(indata));
+	init_alarm();
 	bzero(&time, sizeof(time));
-	bzero(&civbuf, sizeof(civbuf));
 	bzero(&bitinf, sizeof(bitinf));
 
 	decode_win = NULL;
@@ -613,13 +610,19 @@ main(int argc, char *argv[])
 
 			if (time.tm_min % 3 == 0 && init == 0) {
 				decode_alarm(&civwarn);
-				show_civbuf_gui(civbuf);
-				if (civ1 == 1 && civ2 == 1)
+				show_civbuf_gui(get_civil_buffer());
+				switch (get_civil_status()) {
+				case 3:
 					display_alarm_gui(civwarn);
-				if (civ1 != civ2)
+					break;
+				case 2:
+				case 1:
 					display_alarm_error_gui();
-				if (civ1 == 0 && civ2 == 0)
+					break;
+				case 0:
 					clear_alarm_gui();
+					break;
+				}
 			}
 
 			display_time_gui(dt, time, get_buffer(),
