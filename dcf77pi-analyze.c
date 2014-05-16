@@ -35,10 +35,8 @@ SUCH DAMAGE.
 #include <sysexits.h>
 #include <unistd.h>
 
-int bitpos;
-
 void
-display_bit_file(uint16_t state)
+display_bit_file(uint16_t state, int bitpos)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
@@ -135,7 +133,7 @@ main(int argc, char *argv[])
 	int minlen = 0, acc_minlen = 0, old_acc_minlen;
 	uint32_t dt = 0;
 	int init = 1, init2 = 1;
-	int res;
+	int bitpos, res;
 	char *logfilename;
 
 	if (argc == 2)
@@ -179,7 +177,7 @@ main(int argc, char *argv[])
 			minlen = bitpos + 1;
 			acc_minlen += 1000;
 		}
-		display_bit_file(bit);
+		display_bit_file(bit, bitpos);
 
 		if (init == 0)
 			fill_civil_buffer(time.tm_min, bitpos, bit);
