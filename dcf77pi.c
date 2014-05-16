@@ -387,7 +387,7 @@ show_civbuf_gui(uint8_t *buf)
 {
 	int i;
 
-	for (i = 0; i < 40; i++)
+	for (i = 0; i < CIVBUFLEN; i++)
 		mvwprintw(alarm_win, 0, i + 14, "%u", buf[i]);
 	wclrtoeol(alarm_win);
 	wrefresh(alarm_win);
@@ -583,40 +583,8 @@ main(int argc, char *argv[])
 		}
 		display_bit_gui(bit);
 
-		if (init == 0) {
-			switch (time.tm_min % 3) {
-			case 0:
-				/* copy civil warning data */
-				if (bitpos > 1 && bitpos < 8)
-					indata[bitpos - 2] = bit & GETBIT_ONE;
-					/* 2..7 -> 0..5 */
-				if (bitpos > 8 && bitpos < 15)
-					indata[bitpos - 3] = bit & GETBIT_ONE;
-					/* 9..14 -> 6..11 */
-
-				/* copy civil warning flags */
-				if (bitpos == 1)
-					civ1 = bit & GETBIT_ONE;
-				if (bitpos == 8)
-					civ2 = bit & GETBIT_ONE;
-				break;
-			case 1:
-				/* copy civil warning data */
-				if (bitpos > 0 && bitpos < 15)
-					indata[bitpos + 11] = bit & GETBIT_ONE;
-					/* 1..14 -> 12..25 */
-				break;
-			case 2:
-				/* copy civil warning data */
-				if (bitpos > 0 && bitpos < 15)
-					indata[bitpos + 25] = bit & GETBIT_ONE;
-					/* 1..14 -> 26..39 */
-				if (bitpos == 15)
-					memcpy(civbuf, indata, sizeof(civbuf));
-					/* take snapshot of civil warning buffer */
-				break;
-			}
-		}
+		if (init == 0)
+			fill_civil_buffer(time.tm_min, bitpos, bit);
 
 		bit = next_bit();
 		if (get_bitpos() == 0) {
@@ -644,7 +612,7 @@ main(int argc, char *argv[])
 			    &time, &acc_minlen);
 
 			if (time.tm_min % 3 == 0 && init == 0) {
-				decode_alarm(civbuf, &civwarn);
+				decode_alarm(&civwarn);
 				show_civbuf_gui(civbuf);
 				if (civ1 == 1 && civ2 == 1)
 					display_alarm_gui(civwarn);

@@ -25,20 +25,65 @@ SUCH DAMAGE.
 
 #include "decode_alarm.h"
 
-void
-decode_alarm(uint8_t *buf, struct alm *alarm)
-{
-	alarm->ds1 = buf[0] + 2 * buf[1] + 4 * buf[3];
-	alarm->ps1 = buf[2] + 2 * buf[4] + 4 * buf[5];
-	alarm->dl1 = buf[12] + 2 * buf[13] + 4 * buf[14] + 8 * buf[15] +
-	    16 * buf[16] + 32 * buf[17] + 64 * buf[19] + 128 * buf[20] +
-	    256 * buf[21] + 512 * buf[23];
-	alarm->pl1 = buf[18] + 2 * buf[22] + 4 * buf[24] + 8 * buf[25];
+#include "input.h"
 
-	alarm->ds2 = buf[6] + 2 * buf[7] + 4 * buf[9];
-	alarm->ps2 = buf[8] + 2 * buf[10] + 4 * buf[11];
-	alarm->dl2 = buf[26] + 2 * buf[27] + 4 * buf[28] + 8 * buf[29] +
-	    16 * buf[30] + 32 * buf[31] + 64 * buf[33] + 128 * buf[34] +
-	    256 * buf[35] + 512 * buf[37];
-	alarm->pl2 = buf[32] + 2 * buf[36] + 4 * buf[38] + 8 * buf[39];
+uint8_t civbuf[CIVBUFLEN];
+uint8_t civstat;
+
+void
+decode_alarm(struct alm *alarm)
+{
+	alarm->ds1 = civbuf[0] + 2 * civbuf[1] + 4 * civbuf[3];
+	alarm->ps1 = civbuf[2] + 2 * civbuf[4] + 4 * civbuf[5];
+	alarm->dl1 = civbuf[12] + 2 * civbuf[13] + 4 * civbuf[14] +
+	    8 * civbuf[15] + 16 * civbuf[16] + 32 * civbuf[17] +
+	    64 * civbuf[19] + 128 * civbuf[20] + 256 * civbuf[21] +
+	    512 * civbuf[23];
+	alarm->pl1 = civbuf[18] + 2 * civbuf[22] + 4 * civbuf[24] +
+	    8 * civbuf[25];
+
+	alarm->ds2 = civbuf[6] + 2 * civbuf[7] + 4 * civbuf[9];
+	alarm->ps2 = civbuf[8] + 2 * civbuf[10] + 4 * civbuf[11];
+	alarm->dl2 = civbuf[26] + 2 * civbuf[27] + 4 * civbuf[28] +
+	    8 * civbuf[29] + 16 * civbuf[30] + 32 * civbuf[31] +
+	    64 * civbuf[33] + 128 * civbuf[34] + 256 * civbuf[35] +
+	    512 * civbuf[37];
+	alarm->pl2 = civbuf[32] + 2 * civbuf[36] + 4 * civbuf[38] +
+	    8 * civbuf[39];
+}
+
+void
+fill_civil_buffer(int minute, int bitpos, uint16_t bit)
+{
+	switch (minute % 3) {
+	case 0:
+		/* copy civil warning data */
+		if (bitpos > 1 && bitpos < 8)
+			civbuf[bitpos - 2] = bit & GETBIT_ONE;
+			/* 2..7 -> 0..5 */
+		if (bitpos > 8 && bitpos < 15)
+			civbuf[bitpos - 3] = bit & GETBIT_ONE;
+			/* 9..14 -> 6..11 */
+
+		/* copy civil warning flags */
+		if (bitpos == 1)
+			civstat = (bit & GETBIT_ONE) << 1;
+		if (bitpos == 8)
+			civstat |= bit & GETBIT_ONE;
+		break;
+	case 1:
+		/* copy civil warning data */
+		if (bitpos > 0 && bitpos < 15)
+			civbuf[bitpos + 11] = bit & GETBIT_ONE;
+			/* 1..14 -> 12..25 */
+		break;
+	case 2:
+		/* copy civil warning data */
+		if (bitpos > 0 && bitpos < 15)
+			civbuf[bitpos + 25] = bit & GETBIT_ONE;
+			/* 1..14 -> 26..39 */
+		break;
+	}
+{
+
 }

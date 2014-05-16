@@ -28,6 +28,8 @@ SUCH DAMAGE.
 
 #include <stdint.h>
 
+#define CIVBUFLEN 40
+
 /*
  * From German wikipedia mostly, long regions and parities are unspecified
  * short regions: 1=north, 2=middle, 4=south
@@ -37,6 +39,7 @@ struct alm {
 	uint16_t dl1, dl2;
 };
 
-void decode_alarm(uint8_t *buf, struct alm *alarm);
+void decode_alarm(struct alm *alarm);
+void fill_civil_buffer(int minute, int bitpos, uint16_t bit);
 
 #endif
