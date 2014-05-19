@@ -43,7 +43,6 @@ WINDOW *input_win;
 WINDOW *decode_win;
 WINDOW *alarm_win;
 WINDOW *main_win;
-int bitpos;
 int old_bitpos = -1; /* timer for statusbar inactive */
 int input_mode = 0;  /* normal input (statusbar keys) or string input */
 char keybuf[MAXBUF]; /* accumulator for string input */
@@ -209,7 +208,7 @@ curses_cleanup(char *reason)
 }
 
 void
-display_bit_gui(uint16_t state)
+display_bit_gui(uint16_t state, int bitpos)
 {
 	int xpos, i;
 
@@ -262,7 +261,7 @@ draw_input_window(void)
 }
 
 int
-switch_logfile(WINDOW *win, char **logfilename)
+switch_logfile(WINDOW *win, char **logfilename, int bitpos)
 {
 	int res;
 	char *old_logfilename;
@@ -439,6 +438,7 @@ main(int argc, char *argv[])
 {
 	struct bitinfo bitinf;
 	uint16_t bit;
+	int bitpos;
 	struct tm time, oldtime;
 	struct alm civwarn;
 	int minlen = 0, acc_minlen = 0, old_acc_minlen;
@@ -565,7 +565,7 @@ main(int argc, char *argv[])
 				wclrtoeol(main_win);
 				wrefresh(main_win);
 				if (switch_logfile(main_win,
-				    &logfilename))
+				    &logfilename, bitpos))
 					bit = GETBIT_EOD; /* error */
 				change_logfile = 0;
 			}
@@ -577,7 +577,7 @@ main(int argc, char *argv[])
 			minlen = bitpos + 1;
 			acc_minlen += 1000;
 		}
-		display_bit_gui(bit);
+		display_bit_gui(bit, bitpos);
 
 		if (init == 0)
 			fill_civil_buffer(time.tm_min, bitpos, bit);
