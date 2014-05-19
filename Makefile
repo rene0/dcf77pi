@@ -18,15 +18,15 @@ srcfile = dcf77pi-analyze.c
 objfile = dcf77pi-analyze.o
 
 input.o: input.h config.h
-	$(CC) -fPIC -c $< -o $@
+	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 decode_time.o: decode_time.h config.h
-	$(CC) -fPIC -c $< -o $@
+	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 decode_alarm.o: decode_alarm.h
-	$(CC) -fPIC -c $< -o $@
+	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 config.o: config.h
-	$(CC) -fPIC -c $< -o $@
+	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 setclock.o: setclock.h
-	$(CC) -fPIC -c $< -o $@
+	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 
 libdcf77.so: $(objlib) $(hdrlib)
 	$(CC) -shared -o $@ $(objlib) -lm
