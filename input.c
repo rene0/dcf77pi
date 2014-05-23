@@ -60,6 +60,7 @@ FILE *datafile = NULL; /* input file (recorded data) */
 FILE *logfile = NULL; /* auto-appended in live mode */
 int fd = 0; /* gpio file */
 struct hardware hw;
+struct bitinfo bit;
 
 int
 init_hardware(int pin_nr)
@@ -228,7 +229,7 @@ get_pulse(void)
 }
 
 uint16_t
-get_bit_live(struct bitinfo *bit)
+get_bit_live(void)
 {
 	/*
 	 * The bits are decoded from the signal using an exponential low-pass
@@ -244,8 +245,8 @@ get_bit_live(struct bitinfo *bit)
 	float y;
 	static int init = 1;
 
-	bit->freq_reset = 0;
-	bit->frac = bit->maxone = -0.01;
+	bit.freq_reset = 0;
+	bit.frac = bit.maxone = -0.01;
 
 	/*
 	 * Clear previous flags, except GETBIT_TOOLONG to be able
@@ -265,19 +266,19 @@ get_bit_live(struct bitinfo *bit)
 	 */
 
 	if (init == 1) {
-		bit->realfreq = hw.freq;
-		bit->bit0 = 0.1 * bit->realfreq;
-		bit->bit20 = 0.2 * bit->realfreq;
+		bit.realfreq = hw.freq;
+		bit.bit0 = 0.1 * bit.realfreq;
+		bit.bit20 = 0.2 * bit.realfreq;
 	}
 	/*
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
-	bit->a = 1.0 - exp2(-1.0 / (bit->realfreq / 20.0));
+	bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
 	y = -1;
-	bit->tlow = 0;
+	bit.tlow = 0;
 	stv = 2;
 
-	for (bit->t = 0; ; bit->t++) {
+	for (bit.t = 0; ; bit.t++) {
 		p = get_pulse();
 		if (p == GETBIT_IO) {
 			state |= GETBIT_IO;
@@ -285,7 +286,7 @@ get_bit_live(struct bitinfo *bit)
 			goto report;
 		}
 
-		y = y < 0 ? (float)p : y + bit->a * (p - y);
+		y = y < 0 ? (float)p : y + bit.a * (p - y);
 		if (stv == 2)
 			stv = p;
 
@@ -293,21 +294,21 @@ get_bit_live(struct bitinfo *bit)
 		 * Prevent algorithm collapse during thunderstorms
 		 * or scheduler abuse
 		 */
-		if (bit->realfreq < hw.freq / 2 || bit->realfreq > hw.freq * 3/2) {
+		if (bit.realfreq < hw.freq / 2 || bit.realfreq > hw.freq * 3/2) {
 			if (logfile != NULL)
-				fprintf(logfile, bit->realfreq < hw.freq / 2 ?
+				fprintf(logfile, bit.realfreq < hw.freq / 2 ?
 				    "<" : ">");
-			bit->realfreq = hw.freq;
-			bit->freq_reset = 1;
+			bit.realfreq = hw.freq;
+			bit.freq_reset = 1;
 		}
 
-		if (bit->t > bit->realfreq * 5/2) {
-			bit->realfreq = bit->realfreq + 0.05 * ((bit->t / 2.5) - bit->realfreq);
-			bit->a = 1.0 - exp2(-1.0 / (bit->realfreq / 20.0));
-			if (bit->tlow * 100 / bit->t < 1) {
+		if (bit.t > bit.realfreq * 5/2) {
+			bit.realfreq = bit.realfreq + 0.05 * ((bit.t / 2.5) - bit.realfreq);
+			bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
+			if (bit.tlow * 100 / bit.t < 1) {
 				state |= GETBIT_RECV;
 				outch = 'r';
-			} else if (bit->tlow * 100 / bit->t >= 99) {
+			} else if (bit.tlow * 100 / bit.t >= 99) {
 				state |= GETBIT_XMIT;
 				outch = 'x';
 			} else {
@@ -324,28 +325,28 @@ get_bit_live(struct bitinfo *bit)
 		if (y < 0.5 && stv == 1) {
 			y = 0.0;
 			stv = 0;
-			bit->tlow = bit->t; /* end of high part of second */
+			bit.tlow = bit.t; /* end of high part of second */
 		}
 		if (y > 0.5 && stv == 0) {
 			y = 1.0;
 			stv = 1;
 
-			newminute = bit->t > bit->realfreq * 3/2;
+			newminute = bit.t > bit.realfreq * 3/2;
 			if (init == 1)
 				init = 2;
 			else {
 				if (newminute)
-					bit->realfreq = bit->realfreq + 0.05 *
-					    ((bit->t/2) - bit->realfreq);
+					bit.realfreq = bit.realfreq + 0.05 *
+					    ((bit.t/2) - bit.realfreq);
 				else
-					bit->realfreq = bit->realfreq + 0.05 *
-					    (bit->t - bit->realfreq);
-				bit->a = 1.0 - exp2(-1.0 / (bit->realfreq / 20.0));
+					bit.realfreq = bit.realfreq + 0.05 *
+					    (bit.t - bit.realfreq);
+				bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
 			}
 
-			bit->frac = (float)bit->tlow / (float)bit->t;
+			bit.frac = (float)bit.tlow / (float)bit.t;
 			if (newminute) {
-				bit->frac *= 2;
+				bit.frac *= 2;
 				state |= GETBIT_EOM;
 			}
 			break; /* start of new second */
@@ -356,14 +357,14 @@ get_bit_live(struct bitinfo *bit)
 			;
 	}
 
-	bit->maxone = (bit->bit0 + bit->bit20) / bit->realfreq;
-	if (bit->frac < 0) {
+	bit.maxone = (bit.bit0 + bit.bit20) / bit.realfreq;
+	if (bit.frac < 0) {
 		/* radio error, results already set */
-	} else if (bit->frac <= bit->maxone / 2.0) {
+	} else if (bit.frac <= bit.maxone / 2.0) {
 		/* zero bit, ~100 ms active signal */
 		outch = '0';
 		buffer[bitpos] = 0;
-	} else if (bit->frac <= bit->maxone) {
+	} else if (bit.frac <= bit.maxone) {
 		/* one bit, ~200 ms active signal */
 		state |= GETBIT_ONE;
 		outch = '1';
@@ -377,9 +378,9 @@ get_bit_live(struct bitinfo *bit)
 		init = 0;
 	else {
 		if (bitpos == 0 && buffer[0] == 0)
-			bit->bit0 = bit->bit0 + 0.5 * (bit->tlow - bit->bit0);
+			bit.bit0 = bit.bit0 + 0.5 * (bit.tlow - bit.bit0);
 		if (bitpos == 20 && buffer[20] == 1)
-			bit->bit20 = bit->bit20 + 0.5 * (bit->tlow - bit->bit20);
+			bit.bit20 = bit.bit20 + 0.5 * (bit.tlow - bit.bit20);
 	}
 report:
 	if (logfile != NULL)
@@ -517,4 +518,10 @@ close_logfile(void)
 	int f;
 	f = fclose(logfile);
 	return (f == EOF) ? errno : 0;
+}
+
+struct bitinfo *
+get_bitinfo(void)
+{
+	return &bit;
 }

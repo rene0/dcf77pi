@@ -56,12 +56,13 @@ void cleanup(void);
 uint8_t get_pulse(void);
 /* get_bit_*() stores result in internal buffer */
 uint16_t get_bit_file(void);
-uint16_t get_bit_live(struct bitinfo *bit);
+uint16_t get_bit_live(void);
 uint16_t next_bit(void);
 uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
 int is_space_bit(int bit);
 int write_new_logfile(char *logfile);
 int close_logfile();
+struct bitinfo *get_bitinfo(void);
 
 #endif
