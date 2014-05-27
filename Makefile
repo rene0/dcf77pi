@@ -7,9 +7,9 @@ INSTALL_PROGRAM?=install
 
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin
 
-hdrlib = input.h decode_time.h decode_alarm.h config.h setclock.h
-srclib = input.c decode_time.c decode_alarm.c config.c setclock.c
-objlib = input.o decode_time.o decode_alarm.o config.o setclock.o
+hdrlib = input.h decode_time.h decode_alarm.h config.h setclock.h dcf77_mainloop.h
+srclib = input.c decode_time.c decode_alarm.c config.c setclock.c dcf77_mainloop.c
+objlib = input.o decode_time.o decode_alarm.o config.o setclock.o dcf77_mainloop.o
 
 srcgui = dcf77pi.c
 objgui = dcf77pi.o
@@ -26,6 +26,8 @@ decode_alarm.o: decode_alarm.h
 config.o: config.h
 	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 setclock.o: setclock.h
+	$(CC) -fPIC $(CFLAGS) -c $< -o $@
+dcf77_mainloop.o: dcf77_mainloop.h
 	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 
 libdcf77.so: $(objlib) $(hdrlib)
