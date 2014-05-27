@@ -29,6 +29,8 @@ SUCH DAMAGE.
 #include "config.h"
 #include "setclock.h"
 
+#include "dcf77_mainloop.h"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -211,6 +213,17 @@ void
 display_bit_gui(uint16_t state, int bitpos)
 {
 	int xpos, i;
+	struct bitinfo *bitinf;
+
+	bitinf = get_bitinfo();
+
+	mvwprintw(input_win, 3, 4, "%4u  %4u (%5.1f%%) %8.3f"
+	    " %4u %4u %4.1f%%  %8.6f", bitinf->tlow, bitinf->t, bitinf->frac * 100,
+	    bitinf->realfreq, (int)bitinf->bit0, (int)bitinf->bit20, bitinf->maxone * 100, bitinf->a);
+	if (bitinf->freq_reset)
+		mvwchgat(input_win, 3, 24, 8, A_BOLD, 3, NULL);
+	else
+		mvwchgat(input_win, 3, 24, 8, A_NORMAL, 7, NULL);
 
 	mvwprintw(input_win, 3, 1, "%2u", bitpos);
 
@@ -296,21 +309,8 @@ switch_logfile(WINDOW *win, char **logfilename, int bitpos)
 }
 
 void
-display_time_gui(uint32_t dt, struct tm time, uint8_t *buffer, int minlen,
-    int acc_minlen)
+display_time_gui(uint32_t dt, struct tm time)
 {
-	int i, xpos;
-
-	/* display bits of previous minute */
-	for (xpos = 4, i = 0; i < minlen; i++, xpos++) {
-		if (i > 59)
-			break;
-		if (is_space_bit(i))
-			xpos++;
-		mvwprintw(decode_win, 0, xpos, "%u", buffer[i]);
-	}
-	wclrtoeol(decode_win);
-	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
 	/* color bits depending on the results */
 	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, dt & DT_B0 ? 1 : 2, NULL);
 	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt & DT_DSTERR ? 1 : 2, NULL);
@@ -322,10 +322,9 @@ display_time_gui(uint32_t dt, struct tm time, uint8_t *buffer, int minlen,
 		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
 
 	/* display date and time */
-	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d (%6d)",
+	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
-	    time.tm_mday, get_weekday(time.tm_wday), time.tm_hour, time.tm_min,
-	    acc_minlen >= 1e6 ? 999999 : acc_minlen);
+	    time.tm_mday, get_weekday(time.tm_wday), time.tm_hour, time.tm_min);
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 	/* color date/time string depending on the results */
 	if (dt & DT_DSTJUMP)
@@ -433,21 +432,120 @@ draw_alarm_window(void)
 	wrefresh(alarm_win);
 }
 
+void
+process_input(uint16_t bit, int bitpos, char *logfilename, int *settime, int *change_logfile)
+{
+	int inkey;
+
+	inkey = getch();
+	if (get_inputmode() == 0 && inkey != ERR)
+		switch (inkey) {
+		case 'Q':
+			bit |= GETBIT_EOD; /* quit main loop */
+			break;
+		case 'L':
+			inkey = ERR; /* prevent key repeat */
+			mvwprintw(main_win, 0, 0, "Current log (.): %s",
+			    (logfilename && strlen(logfilename) > 0) ?
+			    logfilename : "(none)");
+			input_line(main_win, "Log file (empty for none):");
+			*change_logfile = 1;
+			break;
+		case 'S':
+			*settime = 1 - *settime;
+			statusbar(main_win, bitpos, "Time synchronization %s",
+			    *settime ? "on" : "off");
+			break;
+		}
+	while (get_inputmode() == 1 && inkey != ERR) {
+		process_key(main_win, inkey);
+		inkey = getch();
+	}
+}
+
+void
+post_process_input(char **logfilename, int *change_logfile, uint16_t *bit, int bitpos)
+{
+	check_timer(main_win, bitpos);
+	if (get_inputmode() == -1) {
+		if (*change_logfile) {
+			wmove(main_win, 0, 0);
+			wclrtoeol(main_win);
+			wrefresh(main_win);
+			if (switch_logfile(main_win, logfilename, bitpos))
+				*bit |= GETBIT_EOD; /* error */
+			*change_logfile = 0;
+		}
+		set_inputmode(0);
+	}
+}
+
+void
+wipe_input()
+{
+	if (get_bitpos() == 0) {
+		mvwdelch(input_win, 0, 4);
+		wclrtoeol(input_win);
+	}
+	wrefresh(input_win);
+}
+
+void
+print_long_minute(void)
+{
+	wattron(input_win, COLOR_PAIR(1));
+	mvwprintw(input_win, 3, 59, "no minute");
+	wattroff(input_win, COLOR_PAIR(1));
+}
+
+void
+print_minute(int acc_minlen, int minlen)
+{
+	int i, xpos;
+
+	/* display bits of previous minute */
+	for (xpos = 4, i = 0; i < minlen; i++, xpos++) {
+		if (i > 59)
+			break;
+		if (is_space_bit(i))
+			xpos++;
+		mvwprintw(decode_win, 0, xpos, "%u", get_buffer()[i]);
+	}
+	wclrtoeol(decode_win);
+	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
+
+	mvwprintw(decode_win, 1, 28, "(%6d)",
+	    acc_minlen >= 1e6 ? 999999 : acc_minlen);
+	wrefresh(decode_win);
+}
+
+void
+set_time_gui(int init, uint32_t dt, uint16_t bit, int bitpos, struct tm time)
+{
+	if (init == 0 && ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
+	    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0))
+		switch (setclock(time)) {
+		case -1:
+			statusbar(main_win, bitpos, "mktime() failed!");
+			bit |= GETBIT_EOD; /* error */
+			break;
+		case -2:
+			statusbar(main_win, bitpos, "settimeofday(): %s",
+			    strerror(errno));
+			bit |= GETBIT_EOD; /* error */
+			break;
+		default:
+			statusbar(main_win, bitpos, "Time set");
+			break;
+		}
+}
+
 int
 main(int argc, char *argv[])
 {
 	struct bitinfo bitinf;
-	uint16_t bit;
-	int bitpos;
-	struct tm time, oldtime;
-	struct alm civwarn;
-	int minlen = 0, acc_minlen = 0, old_acc_minlen;
-	uint32_t dt = 0;
-	int init = 3;
-	int res, settime = 0;
+	int res;
 	char *logfilename;
-	int change_logfile = 0;
-	int inkey;
 
 	logfilename = NULL;
 
@@ -471,10 +569,7 @@ main(int argc, char *argv[])
 		cleanup();
 		return res;
 	}
-	init_time();
 
-	init_alarm();
-	bzero(&time, sizeof(time));
 	bzero(&bitinf, sizeof(bitinf));
 
 	decode_win = NULL;
@@ -512,152 +607,10 @@ main(int argc, char *argv[])
 	draw_input_window();
 	draw_keys(main_win);
 
-	for (;;) {
-		bit = get_bit_live(&bitinf);
-		mvwprintw(input_win, 3, 4, "%4u  %4u (%5.1f%%) %8.3f"
-		    " %4u %4u %4.1f%%  %8.6f", bitinf.tlow, bitinf.t, bitinf.frac * 100,
-		    bitinf.realfreq, (int)bitinf.bit0, (int)bitinf.bit20, bitinf.maxone * 100, bitinf.a);
-		if (bitinf.freq_reset)
-			mvwchgat(input_win, 3, 24, 8, A_BOLD, 3, NULL);
-		else
-			mvwchgat(input_win, 3, 24, 8, A_NORMAL, 7, NULL);
-		wrefresh(input_win);
-		inkey = getch();
-		if (get_inputmode() == 0 && inkey != ERR)
-			switch (inkey) {
-			case 'Q':
-				bit |= GETBIT_EOD; /* quit main loop */
-				break;
-			case 'L':
-				inkey = ERR; /* prevent key repeat */
-				mvwprintw(main_win, 0, 0,
-				    "Current log (.): %s", (logfilename
-				        && strlen(logfilename) > 0) ?
-					logfilename : "(none)");
-				input_line(main_win,
-				    "Log file (empty for none):");
-				change_logfile = 1;
-				break;
-			case 'S':
-				settime = 1 - settime;
-				statusbar(main_win, bitpos,
-				    "Time synchronization %s",
-				    settime ? "on" : "off");
-				break;
-			}
-		while (get_inputmode() == 1 && inkey != ERR) {
-			process_key(main_win, inkey);
-			inkey = getch();
-		}
-		if (bit & GETBIT_EOD)
-			break;
+	res = dcf77_mainloop(&bitinf, logfilename, get_bit_live, display_bit_gui, print_long_minute, print_minute, wipe_input, display_alarm_gui, display_alarm_error_gui, clear_alarm_gui, display_time_gui, show_civbuf_gui, set_time_gui, process_input, post_process_input);
 
-		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
-			acc_minlen += 2500;
-		else
-			acc_minlen += 1000;
-
-		bitpos = get_bitpos();
-		check_timer(main_win, bitpos);
-		if (get_inputmode() == -1) {
-			if (change_logfile) {
-				wmove(main_win, 0, 0);
-				wclrtoeol(main_win);
-				wrefresh(main_win);
-				if (switch_logfile(main_win,
-				    &logfilename, bitpos))
-					bit = GETBIT_EOD; /* error */
-				change_logfile = 0;
-			}
-			set_inputmode(0);
-		}
-
-		if (bit & GETBIT_EOM) {
-			/* handle the missing minute marker */
-			minlen = bitpos + 1;
-			acc_minlen += 1000;
-		}
-		display_bit_gui(bit, bitpos);
-
-		if (init == 0)
-			fill_civil_buffer(time.tm_min, bitpos, bit);
-
-		bit = next_bit();
-		if (get_bitpos() == 0) {
-			mvwdelch(input_win, 0, 4);
-			wclrtoeol(input_win);
-		}
-		if (bit & GETBIT_TOOLONG) {
-			minlen = 61;
-			/*
-			 * leave acc_minlen alone,
-			 * any missing marker already processed
-			 */
-			wattron(input_win, COLOR_PAIR(1));
-			mvwprintw(input_win, 3, 59, "no minute");
-			wattroff(input_win, COLOR_PAIR(1));
-		}
-		wrefresh(input_win);
-
-		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
-			old_acc_minlen = acc_minlen;
-			if ((init & 1) == 1 || minlen >= 59)
-				memcpy((void *)&oldtime, (const void *)&time,
-				    sizeof(time));
-			dt = decode_time(init, minlen, get_buffer(),
-			    &time, &acc_minlen);
-
-			if (time.tm_min % 3 == 0 && init == 0) {
-				decode_alarm(&civwarn);
-				show_civbuf_gui(get_civil_buffer());
-				switch (get_civil_status()) {
-				case 3:
-					display_alarm_gui(civwarn);
-					break;
-				case 2:
-				case 1:
-					display_alarm_error_gui();
-					break;
-				case 0:
-					clear_alarm_gui();
-					break;
-				}
-			}
-
-			display_time_gui(dt, time, get_buffer(),
-			    minlen, old_acc_minlen);
-
-			if (settime == 1 && init == 0 &&
-			    ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
-			    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0))
-				switch (setclock(time)) {
-				case -1:
-					statusbar(main_win, bitpos,
-					    "mktime() failed!");
-					bit |= GETBIT_EOD; /* error */
-					break;
-				case -2:
-					statusbar(main_win, bitpos,
-					    "settimeofday(): %s",
-					    strerror(errno));
-					bit |= GETBIT_EOD; /* error */
-					break;
-				default:
-					statusbar(main_win, bitpos, "Time set");
-					break;
-				}
-			if ((init & 1) == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
-				acc_minlen = 0; /* really a new minute */
-			if (init == 2)
-				init &= ~2;
-			if ((init & 1) == 1)
-				init &= ~1;
-		}
-	}
-
-	cleanup();
 	curses_cleanup(NULL);
 	if (logfilename != NULL)
 		free(logfilename);
-	return 0;
+	return res;
 }
