@@ -28,6 +28,8 @@ SUCH DAMAGE.
 #include "decode_alarm.h"
 #include "config.h"
 
+#include "dcf77_mainloop.h"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -124,17 +126,39 @@ display_alarm_error_file(void)
 	printf("Civil warning error\n");
 }
 
+void
+display_alarm_ok_file(void)
+{
+	/* Nothing to do in this callback function */
+}
+
+void
+print_long_minute(void)
+{
+	printf(" L");
+}
+
+void
+print_minute(int acc_minlen, int minlen)
+{
+	printf(" (%d) %d\n", acc_minlen, minlen);
+}
+
+void
+print_civil_buffer(uint8_t *civbuf)
+{
+	int i;
+
+	printf("German civil buffer: ");
+	for (i = 0; i < CIVBUFLEN; i++)
+		printf("%u", civbuf[i]);
+	printf("\n");
+}
+
 int
 main(int argc, char *argv[])
 {
-	uint16_t bit;
-	struct tm time, oldtime;
-	struct alm civwarn;
-	uint8_t *civbuf;
-	int minlen = 0, acc_minlen = 0, old_acc_minlen;
-	uint32_t dt = 0;
-	int init = 3;
-	int bitpos, res, i;
+	int res;
 	char *logfilename;
 
 	if (argc == 2)
@@ -156,83 +180,8 @@ main(int argc, char *argv[])
 		cleanup();
 		return res;
 	}
-	init_time();
 
-	bzero(&time, sizeof(time));
-	init_alarm();
-
-	for (;;) {
-		bit = get_bit_file();
-		if (bit & GETBIT_EOD)
-			break;
-
-		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
-			acc_minlen += 2500;
-		else
-			acc_minlen += 1000;
-
-		bitpos = get_bitpos();
-		if (bit & GETBIT_EOM) {
-			/* handle the missing minute marker */
-			minlen = bitpos + 1;
-			acc_minlen += 1000;
-		}
-		display_bit_file(bit, bitpos);
-
-		if (init == 0)
-			fill_civil_buffer(time.tm_min, bitpos, bit);
-
-		bit = next_bit();
-		if (bit & GETBIT_TOOLONG) {
-			minlen = 61;
-			/*
-			 * leave acc_minlen alone,
-			 * any missing marker already processed
-			 */
-			printf(" L");
-		}
-
-		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
-			old_acc_minlen = acc_minlen;
-			printf(" (%d) %d\n", acc_minlen, minlen);
-			if ((init & 1) == 1 || minlen >= 59)
-				memcpy((void *)&oldtime, (const void *)&time,
-				    sizeof(time));
-			dt = decode_time(init, minlen, get_buffer(),
-			    &time, &acc_minlen);
-
-			if (time.tm_min % 3 == 0 && init == 0) {
-				civbuf = get_civil_buffer();
-				printf("German civil buffer: ");
-				for (i = 0; i < CIVBUFLEN; i++)
-					printf("%u", civbuf[i]);
-				printf("\n");
-				decode_alarm(&civwarn);
-				switch (get_civil_status()) {
-				case 3:
-					display_alarm_file(civwarn);
-					break;
-				case 2:
-				case 1:
-					display_alarm_error_file();
-					break;
-				case 0:
-					break;
-				}
-			}
-
-			display_time_file(dt, time);
-
-			if ((init & 1) == 1 || !((dt & DT_LONG) || (dt & DT_SHORT)))
-				acc_minlen = 0; /* really a new minute */
-			if (init == 2)
-				init &= ~2;
-			if ((init & 1) == 1)
-				init &= ~1;
-		}
-	}
-
-	cleanup();
+	res = dcf77_mainloop(NULL, NULL, get_bit_file, display_bit_file, print_long_minute, print_minute, NULL, display_alarm_file, display_alarm_error_file, display_alarm_ok_file, display_time_file, print_civil_buffer, NULL, NULL, NULL);
 	free(logfilename);
-	return 0;
+	return res;
 }
