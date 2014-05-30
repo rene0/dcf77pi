@@ -34,7 +34,7 @@ SUCH DAMAGE.
 #include <strings.h>
 
 int
-dcf77_mainloop(struct bitinfo *bi, char *logfilename, uint16_t (*get_bit)(void), void (*display_bit)(uint16_t, int), void (*print_long_minute)(void), void (*print_minute)(int, int), void (*process_new_minute)(void), void (*display_alarm)(struct alm), void (*display_alarm_error)(void), void (*display_alarm_ok)(void), void (*display_time)(uint32_t, struct tm), void (*print_civil_buffer)(uint8_t *), void (*set_time)(int, uint32_t, uint16_t, int, struct tm), void (*process_input)(uint16_t, int, char *, int *, int *), void (*post_process_input)(char **, int *, uint16_t *, int))
+dcf77_mainloop(struct bitinfo *bi, char *logfilename, uint16_t (*get_bit)(void), void (*display_bit)(uint16_t, int), void (*print_long_minute)(void), void (*print_minute)(int, int), void (*process_new_minute)(void), void (*display_alarm)(struct alm), void (*display_alarm_error)(void), void (*display_alarm_ok)(void), void (*display_time)(uint32_t, struct tm), void (*print_civil_buffer)(uint8_t *), void (*set_time)(int, uint32_t, uint16_t, int, struct tm), void (*process_input)(uint16_t *, int, char *, int *, int *), void (*post_process_input)(char **, int *, uint16_t *, int))
 {
 	uint16_t bit;
 	uint32_t dt = 0;
@@ -54,7 +54,7 @@ dcf77_mainloop(struct bitinfo *bi, char *logfilename, uint16_t (*get_bit)(void),
 	for (;;) {
 		bit = get_bit();
 		if (process_input != NULL)
-			process_input(bit, bitpos, logfilename, &settime, &change_logfile);
+			process_input(&bit, bitpos, logfilename, &settime, &change_logfile);
 		if (bit & GETBIT_EOD)
 			break;
 

@@ -433,7 +433,7 @@ draw_alarm_window(void)
 }
 
 void
-process_input(uint16_t bit, int bitpos, char *logfilename, int *settime, int *change_logfile)
+process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime, int *change_logfile)
 {
 	int inkey;
 
@@ -441,7 +441,7 @@ process_input(uint16_t bit, int bitpos, char *logfilename, int *settime, int *ch
 	if (get_inputmode() == 0 && inkey != ERR)
 		switch (inkey) {
 		case 'Q':
-			bit |= GETBIT_EOD; /* quit main loop */
+			*bit |= GETBIT_EOD; /* quit main loop */
 			break;
 		case 'L':
 			inkey = ERR; /* prevent key repeat */
