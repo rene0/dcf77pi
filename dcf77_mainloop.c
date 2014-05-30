@@ -25,10 +25,7 @@ SUCH DAMAGE.
 
 #include "dcf77_mainloop.h"
 
-#include "config.h"
-#include "decode_alarm.h"
 #include "decode_time.h"
-#include "input.h"
 
 #include <string.h>
 #include <strings.h>

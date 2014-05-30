@@ -23,19 +23,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include "input.h"
 #include "decode_time.h"
-#include "decode_alarm.h"
 #include "config.h"
 
 #include "dcf77_mainloop.h"
 
-#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sysexits.h>
-#include <unistd.h>
 
 void
 display_bit_file(uint16_t state, int bitpos)

@@ -26,7 +26,6 @@ SUCH DAMAGE.
 #include "decode_time.h"
 
 #include "config.h"
-#include "input.h"
 
 #include <stdlib.h>
 #include <string.h>
