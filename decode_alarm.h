@@ -39,10 +39,42 @@ struct alm {
 	uint16_t dl1, dl2;
 };
 
+/**
+ * Initialize internal structures.
+ */
 void init_alarm(void);
+
+/**
+ * Decode the alarm buffer into the various fields of "struct alm"
+ *
+ * @param alarm The structure containing the decoded values.
+ */
 void decode_alarm(struct alm *alarm);
+
+/**
+ * Add the current bit value to the alarm buffer.
+ *
+ * @param minute The current value of the minute.
+ * @param bitpos The current bit position.
+ * @param bit The current bit value.
+ */
 void fill_civil_buffer(int minute, int bitpos, uint16_t bit);
+
+/**
+ * Retrieve the alarm buffer (e.g. for display purposes).
+ *
+ * @return The alarm buffer.
+ */
 uint8_t *get_civil_buffer(void);
+
+/**
+ * Retrieve the value of the alarm status:
+ * 0   = no alarm
+ * 1,2 = inconsitent state
+ * 3   = alarm
+ *
+ * @return The alarm status.
+ */
 uint8_t get_civil_status(void);
 
 #endif

@@ -26,12 +26,21 @@ SUCH DAMAGE.
 #ifndef DCF77PI_CONFIG_H
 #define DCF77PI_CONFIG_H
 
+/**
+ * Read the configuration file and store the values in an internal dictionary.
+ *
+ * @param filename The name of the configuration file.
+ * @return Reading the file is succesful (0), errno or -1 otherwise.
+ */
 int read_config_file(char *filename);
 
-/*
- * Valid values are:
- * "pin", "activehigh", "freq",
- * "summermonth", "wintermonth", "leapsecmonths", "outlogfile"
+/**
+ * Rerieve a configuration value from the internal dictionary.
+ *
+ * @param keyword: the key for the value to retrieve. Valid keys are:
+ * "pin", "activehigh", "freq", "summermonth", "wintermonth",
+ * "leapsecmonths", "outlogfile"
+ * @return The corresponding value, or NULL when the key was not found.
  */
 char *get_config_value(char *keyword);
 

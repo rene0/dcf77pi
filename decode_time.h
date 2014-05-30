@@ -58,11 +58,65 @@ SUCH DAMAGE.
 #define ANN_CHDST	(1 << 30)
 #define ANN_LEAP	(1 << 31)
 
-void init_time(void); /* initialize month values from configuration */
+/**
+ * Initialize the month values from the configuration:
+ * * summermonth, wintermonth: 1..12 or none for out-of-bound values
+ *   These values indicate in which month a change to daylight-saving
+ *   respectively normal time is allowed.
+ * * leapsecmonths: 1..12 (1 or more), or none for out-of-bound values.
+ *   These values indicate in which months a leap second is allowed.
+ */
+void init_time(void);
+
+/**
+ * Add one minute to the current time. Daylight saving time transitions and
+ * leap years are handled. Note that the year will fall back to BASEYEAR when
+ * it reaches BASEYEAR + 400.
+ *
+ * @param time The current time increased with one minute.
+ */
 void add_minute(struct tm *time);
+
+/**
+ * Decodes the current time from the internal bit buffer.
+ *
+ * The current time is first increased using add_minute(), and only if the
+ * parities and other checks match these values are replaced by their
+ * calculated counterparts.
+ *
+ * @param init Indicates that the state of the decoder is initial:
+ *   0 = normal, first two minute marks passed
+ *   1 = first minute mark passed
+ *   2 = (unused)
+ *   3 = just starting
+ * @param minlen The length of this minute in bits (normally 59 or 60 in
+ *   case of a leap second).
+ * @param buffer The bit buffer.
+ * @param time The current time, to be updated.
+ * @param acc_minlen The accumulated length of this minute in milliseconds.
+ *   This parameter is used to accumulate short minutes into one minute,
+ *   meaning that 60,000 is subtracted from it each minute. It should be
+ *   reset to 0 when an error-free minute is received.
+ * @return The state of this minute, the combination of the various DT_* and
+ *   ANN_* values that are applicable.
+ */
 uint32_t decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
     int *acc_minlen);
+
+/**
+ * Calculates the hour in UTC from the given time.
+ *
+ * @param time The time to calculate the hour in UTC from.
+ * @return The hour value in UTC.
+ */
 int get_utchour(struct tm time);
+
+/**
+ * Return a textual representation of the given day-of-week.
+ *
+ * @param wday The day of week (1 = Monday, 7 = Sunday)
+ * @return The textual representation of wday ("Mon" .. "Sun")
+ */
 char *get_weekday(int wday);
 
 #endif

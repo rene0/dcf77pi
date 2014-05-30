@@ -28,7 +28,15 @@ SUCH DAMAGE.
 
 #include <time.h>
 
-/* Does *not* work with no timezone or UTC */
+/**
+ * Set the system clock according to the given time.
+ *
+ * @param time: The time to set the system clock to.
+ * @return The clock was set successfully (0), or the time was invalid (-1),
+ *   or setting the clock somehow failed (-2).
+ *
+ * Note that this does *not* work with no timezone or UTC
+ */
 int setclock(struct tm time);
 
 #endif

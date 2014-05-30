@@ -49,20 +49,123 @@ struct bitinfo {
 	float frac, maxone, a;
 };
 
+/**
+ * Prepare for input from a log file.
+ *
+ * @param infilename The name of the log file to use.
+ * @return Preparation was succesful (0), errno otherwise.
+ */
 int set_mode_file(char *infilename);
+
+/**
+ * Prepare for live input.
+ *
+ * The sample rate is set to hw.freq Hz, reading from pin hw.pin using
+ * hw.active_high logic.
+ *
+ * @return Preparation was succesful (0), -1 or -errno otherwise.
+ */
 int set_mode_live(void);
+
+/**
+ * Return the hardware paramters.
+ *
+ * @return The hardware parameters.
+ */
 struct hardware *get_hardware_parameters(void);
+
+/**
+ * Clean up when: close the device or input logfile, and output log file
+ *   if applicable.
+ */
 void cleanup(void);
+
+/**
+ * Retrieve one pulse from the hardware.
+ *
+ * @return: 0 or 1 depending on the pin value and hw.active_high, or
+ *   GETBIT_IO if obtaining the pulse failed.
+ */
 uint8_t get_pulse(void);
-/* get_bit_*() stores result in internal buffer */
+
+/**
+ * Retrieve one bit from the log file.
+ *
+ * @return The current bit from the log file, a mask of GETBIT_* values.
+ */
 uint16_t get_bit_file(void);
+
+/**
+ * Retrieve one live bit from the hardware.
+ * This function determines several values which can be retrieved using
+ * get_bit_info().
+ *
+ * @return The currently received bit, a mask of GETBIT_* values.
+ */
 uint16_t get_bit_live(void);
+
+/**
+ * Prepare for the next bit: update the bit position or wrap it around.
+ *
+ * @return The current bit state mask, ORed with GETBIT_TOOLONG if the
+ *   bit buffer just became full.
+ */
 uint16_t next_bit(void);
+
+/**
+ * Retrieve the current bit position.
+ *
+ * @return The current bit position (0..60).
+ */
 uint8_t get_bitpos(void);
+
+/**
+ * Retrieve the current bit buffer.
+ *
+ * @return The bit buffer, an array of 0 and 1 values.
+ */
 uint8_t *get_buffer(void);
+
+/**
+ * Determine if there should be a space between the last bit and the current
+ * bit when displaying the bit buffer.
+ *
+ * @param bit The current bit position.
+ */
 int is_space_bit(int bitpos);
+
+/**
+ * Open the log file and append a "new log" marker to it.
+ *
+ * @param logfile The name of the log file to use.
+ * @return The log file was opened succesfully (0), or errno on error.
+ */
 int write_new_logfile(char *logfile);
+
+/**
+ * Close the currently opened log file.
+ *
+ * @return The log file was closed successfully (0), or errno otherwise.
+ */
 int close_logfile();
+
+/**
+ * Retrieve "internal" information about the currently received bit.
+ *  tlow: time in samples when the signal went low again
+ *  t: length of this bit in samples
+ *  freq_reset: realfreq was reset to hw.freq (normally because of reception
+ *     errors)
+ *  realfreq: The average length of a bit in samples
+ *  bit0: The average length of bit 0 (a 0 bit) in samples
+ *  bit20: The average length of bit 20 (a 1 bit) in samples
+ *  frac: tlow / t, or -1 % in case of an error
+ *  maxone: the maximum allowed length of the high part of the pulse for
+ *    a 1 bit, or -1 % in case of an error
+ *  a: The amount to update the wave of the pulse with
+ *    (see blinkenlight link in README.md)
+ *
+ * @return The above bit information.
+ */
 struct bitinfo *get_bitinfo(void);
 
 #endif

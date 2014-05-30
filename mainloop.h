@@ -32,6 +32,12 @@ SUCH DAMAGE.
 #include <stdint.h>
 #include <time.h>
 
+/**
+ * Provide a ready-to-use mainloop function for the main program.
+ * Both dcf77pi and dcf77pi-analyze use it.
+ *
+ * @return Any error that happened (currently just '0').
+ */
 int mainloop(struct bitinfo *bi, char *logfilename,
     uint16_t (*get_bit)(void),
     void (*display_bit)(uint16_t, int),
