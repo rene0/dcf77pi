@@ -56,6 +56,8 @@ install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	$(INSTALL_LIB) libdcf77.so $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL_PROGRAM) dcf77pi dcf77pi-analyze readpin $(DESTDIR)$(PREFIX)/bin
+	mkdir -p $(DESTDIR)$(PREFIX)/include/dcf77pi
+	$(INSTALL) $(hdrlib) $(DESTDIR)$(PREFIX)/include/dcf77pi
 	mkdir -p $(DESTDIR)$(PREFIX)/$(ETCDIR)
 	install etc/dcf77pi/config.txt $(DESTDIR)$(PREFIX)/$(ETCDIR)/config.txt.sample
 
@@ -65,6 +67,7 @@ install-strip:
 uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/lib
 	rm -rf $(DESTDIR)$(PREFIX)/bin
+	rm -rf $(DESTDIR)$(PREFIX)/include/dcf77pi
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
 
 lint:
