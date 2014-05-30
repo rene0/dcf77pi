@@ -293,7 +293,8 @@ get_bit_live(void)
 		 * Prevent algorithm collapse during thunderstorms
 		 * or scheduler abuse
 		 */
-		if (bit.realfreq < hw.freq / 2 || bit.realfreq > hw.freq * 3/2) {
+		if (bit.realfreq < hw.freq / 2 ||
+		    bit.realfreq > hw.freq * 3/2) {
 			if (logfile != NULL)
 				fprintf(logfile, bit.realfreq < hw.freq / 2 ?
 				    "<" : ">");
@@ -302,7 +303,8 @@ get_bit_live(void)
 		}
 
 		if (bit.t > bit.realfreq * 5/2) {
-			bit.realfreq = bit.realfreq + 0.05 * ((bit.t / 2.5) - bit.realfreq);
+			bit.realfreq = bit.realfreq + 0.05 *
+			    ((bit.t / 2.5) - bit.realfreq);
 			bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
 			if (bit.tlow * 100 / bit.t < 1) {
 				state |= GETBIT_RECV;

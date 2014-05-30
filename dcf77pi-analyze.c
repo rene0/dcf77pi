@@ -176,7 +176,10 @@ main(int argc, char *argv[])
 		return res;
 	}
 
-	res = mainloop(NULL, NULL, get_bit_file, display_bit_file, print_long_minute, print_minute, NULL, display_alarm_file, display_alarm_error_file, display_alarm_ok_file, display_time_file, print_civil_buffer, NULL, NULL, NULL);
+	res = mainloop(NULL, NULL, get_bit_file, display_bit_file,
+	    print_long_minute, print_minute, NULL, display_alarm_file,
+	    display_alarm_error_file, display_alarm_ok_file, display_time_file,
+	    print_civil_buffer, NULL, NULL, NULL);
 	free(logfilename);
 	return res;
 }

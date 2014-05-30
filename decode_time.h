@@ -60,8 +60,8 @@ SUCH DAMAGE.
 
 void init_time(void); /* initialize month values from configuration */
 void add_minute(struct tm *time);
-uint32_t decode_time(int init, int minlen, uint8_t *buffer,
-    struct tm *time, int *acc_minlen);
+uint32_t decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
+    int *acc_minlen);
 int get_utchour(struct tm time);
 char *get_weekday(int wday);
 

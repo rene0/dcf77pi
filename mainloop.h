@@ -32,6 +32,19 @@ SUCH DAMAGE.
 #include <stdint.h>
 #include <time.h>
 
-int mainloop(struct bitinfo *bi, char *logfilename, uint16_t (*get_bit)(void), void (*display_bit)(uint16_t, int), void (*print_long_minute)(void), void (*print_minute)(int, int), void (*process_new_minute)(void), void (*display_alarm)(struct alm), void (*display_alarm_error)(), void (*display_alarm_ok)(), void (*display_time)(uint32_t, struct tm), void (*print_civil_buffer)(uint8_t *), void (*set_time)(int, uint32_t, uint16_t, int, struct tm), void (*process_input)(uint16_t *, int, char *, int *, int *), void (*post_process_input)(char **, int *, uint16_t *, int));
+int mainloop(struct bitinfo *bi, char *logfilename,
+    uint16_t (*get_bit)(void),
+    void (*display_bit)(uint16_t, int),
+    void (*print_long_minute)(void),
+    void (*print_minute)(int, int),
+    void (*process_new_minute)(void),
+    void (*display_alarm)(struct alm),
+    void (*display_alarm_error)(),
+    void (*display_alarm_ok)(),
+    void (*display_time)(uint32_t, struct tm),
+    void (*print_civil_buffer)(uint8_t *),
+    void (*set_time)(int, uint32_t, uint16_t, int, struct tm),
+    void (*process_input)(uint16_t *, int, char *, int *, int *),
+    void (*post_process_input)(char **, int *, uint16_t *, int));
 
 #endif

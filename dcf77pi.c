@@ -212,9 +212,10 @@ display_bit_gui(uint16_t state, int bitpos)
 
 	bitinf = get_bitinfo();
 
-	mvwprintw(input_win, 3, 4, "%4u  %4u (%5.1f%%) %8.3f"
-	    " %4u %4u %4.1f%%  %8.6f", bitinf->tlow, bitinf->t, bitinf->frac * 100,
-	    bitinf->realfreq, (int)bitinf->bit0, (int)bitinf->bit20, bitinf->maxone * 100, bitinf->a);
+	mvwprintw(input_win, 3, 4, "%4u  %4u (%5.1f%%) %8.3f %4u %4u %4.1f%%"
+	    "  %8.6f", bitinf->tlow, bitinf->t, bitinf->frac * 100,
+	    bitinf->realfreq, (int)bitinf->bit0, (int)bitinf->bit20,
+	    bitinf->maxone * 100, bitinf->a);
 	if (bitinf->freq_reset)
 		mvwchgat(input_win, 3, 24, 8, A_BOLD, 3, NULL);
 	else
@@ -428,7 +429,8 @@ draw_alarm_window(void)
 }
 
 void
-process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime, int *change_logfile)
+process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime,
+    int *change_logfile)
 {
 	int inkey;
 
@@ -459,7 +461,8 @@ process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime, int *c
 }
 
 void
-post_process_input(char **logfilename, int *change_logfile, uint16_t *bit, int bitpos)
+post_process_input(char **logfilename, int *change_logfile, uint16_t *bit,
+    int bitpos)
 {
 	check_timer(main_win, bitpos);
 	if (get_inputmode() == -1) {
@@ -602,7 +605,10 @@ main(int argc, char *argv[])
 	draw_input_window();
 	draw_keys(main_win);
 
-	res = mainloop(&bitinf, logfilename, get_bit_live, display_bit_gui, print_long_minute, print_minute, wipe_input, display_alarm_gui, display_alarm_error_gui, clear_alarm_gui, display_time_gui, show_civbuf_gui, set_time_gui, process_input, post_process_input);
+	res = mainloop(&bitinf, logfilename, get_bit_live, display_bit_gui,
+	    print_long_minute, print_minute, wipe_input, display_alarm_gui,
+	    display_alarm_error_gui, clear_alarm_gui, display_time_gui,
+	    show_civbuf_gui, set_time_gui, process_input, post_process_input);
 
 	curses_cleanup(NULL);
 	if (logfilename != NULL)
