@@ -27,7 +27,7 @@ SUCH DAMAGE.
 #include "config.h"
 #include "setclock.h"
 
-#include "dcf77_mainloop.h"
+#include "mainloop.h"
 
 #include <errno.h>
 #include <stdlib.h>
@@ -603,7 +603,7 @@ main(int argc, char *argv[])
 	draw_input_window();
 	draw_keys(main_win);
 
-	res = dcf77_mainloop(&bitinf, logfilename, get_bit_live, display_bit_gui, print_long_minute, print_minute, wipe_input, display_alarm_gui, display_alarm_error_gui, clear_alarm_gui, display_time_gui, show_civbuf_gui, set_time_gui, process_input, post_process_input);
+	res = mainloop(&bitinf, logfilename, get_bit_live, display_bit_gui, print_long_minute, print_minute, wipe_input, display_alarm_gui, display_alarm_error_gui, clear_alarm_gui, display_time_gui, show_civbuf_gui, set_time_gui, process_input, post_process_input);
 
 	curses_cleanup(NULL);
 	if (logfilename != NULL)

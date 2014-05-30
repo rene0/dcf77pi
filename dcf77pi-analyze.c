@@ -26,7 +26,7 @@ SUCH DAMAGE.
 #include "decode_time.h"
 #include "config.h"
 
-#include "dcf77_mainloop.h"
+#include "mainloop.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -177,7 +177,7 @@ main(int argc, char *argv[])
 		return res;
 	}
 
-	res = dcf77_mainloop(NULL, NULL, get_bit_file, display_bit_file, print_long_minute, print_minute, NULL, display_alarm_file, display_alarm_error_file, display_alarm_ok_file, display_time_file, print_civil_buffer, NULL, NULL, NULL);
+	res = mainloop(NULL, NULL, get_bit_file, display_bit_file, print_long_minute, print_minute, NULL, display_alarm_file, display_alarm_error_file, display_alarm_ok_file, display_time_file, print_civil_buffer, NULL, NULL, NULL);
 	free(logfilename);
 	return res;
 }
