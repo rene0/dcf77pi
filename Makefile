@@ -71,5 +71,5 @@ uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
 
 lint:
-	lint -aabcehrsxgz -D__linux__ -DETCDIR=\"$(ETCDIR)\" $(srclib) $(srcfile) $(srcgui) readpin.c
-	lint -aabcehrsxgz -D__FreeBSD__ -D__FreeBSD_version=900022 -DETCDIR=\"$(ETCDIR)\" $(srclib) $(srcfile) $(srcgui) readpin.c
+	lint -aabcehrsxgz -D__linux__ -DETCDIR=\"$(ETCDIR)\" $(srclib) $(srcfile) readpin.c $(srcgui) || true
+	lint -aabcehrsxgz -D__FreeBSD__ -D__FreeBSD_version=900022 -DETCDIR=\"$(ETCDIR)\" $(srclib) $(srcfile) readpin.c $(srcgui) || true
