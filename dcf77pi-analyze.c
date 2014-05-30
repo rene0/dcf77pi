@@ -23,9 +23,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include "decode_time.h"
 #include "config.h"
-
+#include "decode_time.h"
 #include "mainloop.h"
 
 #include <stdlib.h>
