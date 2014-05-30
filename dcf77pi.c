@@ -541,7 +541,6 @@ set_time_gui(int init, uint32_t dt, uint16_t bit, int bitpos, struct tm time)
 int
 main(int argc, char *argv[])
 {
-	struct bitinfo bitinf;
 	int res;
 	char *logfilename;
 
@@ -567,8 +566,6 @@ main(int argc, char *argv[])
 		cleanup();
 		return res;
 	}
-
-	bzero(&bitinf, sizeof(bitinf));
 
 	decode_win = NULL;
 	alarm_win = NULL;
@@ -605,7 +602,7 @@ main(int argc, char *argv[])
 	draw_input_window();
 	draw_keys(main_win);
 
-	res = mainloop(&bitinf, logfilename, get_bit_live, display_bit_gui,
+	res = mainloop(logfilename, get_bit_live, display_bit_gui,
 	    print_long_minute, print_minute, wipe_input, display_alarm_gui,
 	    display_alarm_error_gui, clear_alarm_gui, display_time_gui,
 	    show_civbuf_gui, set_time_gui, process_input, post_process_input);

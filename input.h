@@ -147,7 +147,7 @@ int write_new_logfile(char *logfile);
  *
  * @return The log file was closed successfully (0), or errno otherwise.
  */
-int close_logfile();
+int close_logfile(void);
 
 /**
  * Retrieve "internal" information about the currently received bit.

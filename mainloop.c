@@ -31,7 +31,7 @@ SUCH DAMAGE.
 #include <strings.h>
 
 int
-mainloop(struct bitinfo *bi, char *logfilename,
+mainloop(char *logfilename,
     uint16_t (*get_bit)(void),
     void (*display_bit)(uint16_t, int),
     void (*print_long_minute)(void),
@@ -48,8 +48,8 @@ mainloop(struct bitinfo *bi, char *logfilename,
 {
 	uint16_t bit;
 	uint32_t dt = 0;
-	int minlen = 0, acc_minlen = 0, old_acc_minlen;
-	int bitpos;
+	int minlen = 0, acc_minlen = 0;
+	int bitpos = 0;
 	int init = 3;
 	struct tm time, oldtime;
 	struct alm civwarn;
@@ -101,7 +101,6 @@ mainloop(struct bitinfo *bi, char *logfilename,
 			process_new_minute();
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
-			old_acc_minlen = acc_minlen;
 			print_minute(acc_minlen, minlen);
 			if ((init & 1) == 1 || minlen >= 59)
 				memcpy((void *)&oldtime, (const void *)&time,

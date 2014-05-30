@@ -202,9 +202,9 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
     int *acc_minlen)
 {
 	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
-	unsigned int tmp, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
+	unsigned int tmp, tmp0, tmp1, tmp2, tmp4, tmp5;
 	uint32_t rval = 0;
-	int utchour, increase;
+	int tmp3, utchour, increase;
 
 	if (minlen < 59)
 		rval |= DT_SHORT;
