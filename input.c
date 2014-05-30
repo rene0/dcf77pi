@@ -464,12 +464,12 @@ get_bit_file(void)
 }
 
 int
-is_space_bit(int bit)
+is_space_bit(int bitpos)
 {
-	return (bit == 1 || bit == 15 || bit == 16 || bit == 19 ||
-	    bit == 20 || bit == 21 || bit == 28 || bit == 29 ||
-	    bit == 35 || bit == 36 || bit == 42 || bit == 45 ||
-	    bit == 50 || bit == 58 || bit == 59 || bit == 60);
+	return (bitpos == 1 || bitpos == 15 || bitpos == 16 || bitpos == 19 ||
+	    bitpos == 20 || bitpos == 21 || bitpos == 28 || bitpos == 29 ||
+	    bitpos == 35 || bitpos == 36 || bitpos == 42 || bitpos == 45 ||
+	    bitpos == 50 || bitpos == 58 || bitpos == 59 || bitpos == 60);
 }
 
 uint16_t

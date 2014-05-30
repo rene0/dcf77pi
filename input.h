@@ -60,7 +60,7 @@ uint16_t get_bit_live(void);
 uint16_t next_bit(void);
 uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
-int is_space_bit(int bit);
+int is_space_bit(int bitpos);
 int write_new_logfile(char *logfile);
 int close_logfile();
 struct bitinfo *get_bitinfo(void);
