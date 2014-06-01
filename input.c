@@ -353,7 +353,7 @@ get_bit_live(void)
 			break; /* start of new second */
 		}
 		slp.tv_sec = 0;
-		slp.tv_nsec = 1e9 / hw.freq;
+		slp.tv_nsec = 1e9 / hw.freq / hw.freq * bit.realfreq;
 		while (nanosleep(&slp, &slp))
 			;
 	}
