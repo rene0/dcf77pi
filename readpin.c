@@ -202,7 +202,7 @@ main(int argc, char **argv)
 			perror("before sleep");
 			break;
 		}
-		twait = 1e9 / hw->freq;
+		twait = 1e9 / hw->freq / hw->freq * realfreq;
 		if (tunetime == 1)
 			twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1e9 -
 		    (tp1.tv_nsec - tp0.tv_nsec);
