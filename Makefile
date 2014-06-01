@@ -34,15 +34,15 @@ libdcf77.so: $(objlib) $(hdrlib)
 	$(CC) -shared -o $@ $(objlib) -lm
 
 dcf77pi.o: $(hdrlib)
-dcf77pi: $(objgui)
+dcf77pi: $(objgui) libdcf77.so
 	$(CC) -o $@ $(objgui) -lncurses -ldcf77 -L.
 
 dcf77pi-analyze.o: $(hdrlib)
-dcf77pi-analyze: $(objfile)
+dcf77pi-analyze: $(objfile) libdcf77.so
 	$(CC) -o $@ $(objfile) -ldcf77 -L.
 
 readpin.o: input.h
-readpin: readpin.o
+readpin: readpin.o libdcf77.so
 	$(CC) -o $@ readpin.o -lrt -lm -ldcf77 -L.
 
 clean:
@@ -53,7 +53,7 @@ clean:
 
 install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
-	$(INSTALL_LIB) libdcf77.so $(DESTDIR)$(PREFIX)/lib
+	$(INSTALL_PROGRAM) libdcf77.so $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL_PROGRAM) dcf77pi dcf77pi-analyze readpin $(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(PREFIX)/include/dcf77pi
