@@ -188,6 +188,7 @@ get_keybuf(void)
 {
 	return keybuf;
 }
+
 void
 curses_cleanup(char *reason)
 {
