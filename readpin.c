@@ -204,7 +204,7 @@ main(int argc, char **argv)
 		}
 		twait = 1e9 / hw->freq;
 		if (tunetime == 1)
-			twait -= (tp1.tv_sec - tp0.tv_sec) * 1e9 -
+			twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1e9 -
 		    (tp1.tv_nsec - tp0.tv_nsec);
 		if (twait <= 0)
 			/* 1000 Hz -> -713 us seen */
@@ -215,14 +215,15 @@ main(int argc, char **argv)
 			slp.tv_nsec = twait % 1000000000;
 			while (nanosleep(&slp, &slp))
 				;
-			if (tunetime == 1 &&
-			    clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
-				perror("after sleep");
-				break;
+			if (tunetime == 1) {
+				if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
+					perror("after sleep");
+					break;
+				}
+				twait = (tp0.tv_sec - tp1.tv_sec) * 1e9 +
+				    (tp0.tv_nsec - tp1.tv_nsec) - twait;
+				diff += twait;
 			}
-			twait = (tp0.tv_sec - tp1.tv_sec) * 1e9 +
-			    (tp0.tv_nsec - tp1.tv_nsec) - twait;
-			diff += twait;
 		}
 	}
 	cleanup();
