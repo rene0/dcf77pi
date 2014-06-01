@@ -26,23 +26,53 @@ SUCH DAMAGE.
 #ifndef DCF77PI_INPUT_H
 #define DCF77PI_INPUT_H
 
+/* this bit has value 1 */
 #define GETBIT_ONE	(1 << 0)
+/* end-of-minute bit */
 #define GETBIT_EOM	(1 << 1)
+/* end of data, either end-of-file or user quit */
 #define GETBIT_EOD	(1 << 2)
+/* bit value could not be determined */
 #define GETBIT_READ	(1 << 3)
+/* bit buffer would overflow */
 #define GETBIT_TOOLONG	(1 << 4)
+/* I/O error while reading bit from hardware */
 #define GETBIT_IO	(1 << 5)
+/* transmitter error, all positive pulses */
 #define GETBIT_XMIT	(1 << 6)
+/* receiver error, all negative pulses */
 #define GETBIT_RECV	(1 << 7)
+/* random radio error, both positive and negative pulses but no proper signal */
 #define GETBIT_RND	(1 << 8)
 
 #include <stdint.h> /* uintX_t */
 
+/*
+ * Hardware parameters:
+ * freq        = sample frequency in Hz
+ * pin         = pin number to read from
+ * active_high = pin value is high (1) for active signal
+ */
 struct hardware {
 	unsigned long freq;
 	unsigned int pin, active_high;
 };
 
+/*
+ * (Internal) information about the currently received bit:
+ * tlow       = time in samples when the signal went low again
+ * t          = length of this bit in samples
+ * freq_reset = realfreq was reset to hw.freq (normally because of reception
+ *    errors)
+ * realfreq   = the average length of a bit in samples
+ * bit0       = the average length of bit 0 (a 0 bit) in samples
+ * bit20      = the average length of bit 20 (a 1 bit) in samples
+ * frac       = tlow / t, or -1 % in case of an error
+ * maxone     = the maximum allowed length of the high part of the pulse for
+ *   a 1 bit, or -1 % in case of an error
+ * a          = the amount to update the wave of the pulse with
+ *   (see blinkenlight link in README.md)
+ */
 struct bitinfo {
 	int tlow, t, freq_reset;
 	float realfreq, bit0, bit20; /* static */
@@ -151,20 +181,8 @@ int close_logfile(void);
 
 /**
  * Retrieve "internal" information about the currently received bit.
- *  tlow: time in samples when the signal went low again
- *  t: length of this bit in samples
- *  freq_reset: realfreq was reset to hw.freq (normally because of reception
- *     errors)
- *  realfreq: The average length of a bit in samples
- *  bit0: The average length of bit 0 (a 0 bit) in samples
- *  bit20: The average length of bit 20 (a 1 bit) in samples
- *  frac: tlow / t, or -1 % in case of an error
- *  maxone: the maximum allowed length of the high part of the pulse for
- *    a 1 bit, or -1 % in case of an error
- *  a: The amount to update the wave of the pulse with
- *    (see blinkenlight link in README.md)
  *
- * @return The above bit information.
+ * @return The bit information as described for {@link struct bitinfo}.
  */
 struct bitinfo *get_bitinfo(void);
 

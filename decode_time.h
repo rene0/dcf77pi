@@ -32,30 +32,52 @@ SUCH DAMAGE.
 /* update every 400 years, now at 2400-01-01 */
 #define BASEYEAR	2000
 
+/* daylight saving time error, bit 17 = bit 18 */
 #define DT_DSTERR	(1 << 0)
+/* minute value/parity error */
 #define DT_MIN		(1 << 1)
+/* hour value/parity error */
 #define DT_HOUR		(1 << 2)
+/* date value/parity error */
 #define DT_DATE		(1 << 3)
+/* bit 0 is 1 */
 #define DT_B0		(1 << 4)
+/* bit 20 is 0 */
 #define DT_B20		(1 << 5)
+/* too short minute */
 #define DT_SHORT	(1 << 6)
+/* too long minute */
 #define DT_LONG		(1 << 7)
+/* unexpected daylight saving time change */
 #define DT_DSTJUMP	(1 << 8)
+/* unexpected daylight saving time change announcement */
 #define DT_CHDSTERR	(1 << 9)
+/* unexpected leap second announcement */
 #define DT_LEAPERR	(1 << 10)
+/* unexpected minute value change */
 #define DT_MINJUMP	(1 << 11)
+/* unexpected hour value change */
 #define DT_HOURJUMP	(1 << 12)
+/* unexpected day value change */
 #define DT_MDAYJUMP	(1 << 13)
+/* unexpected day-of-week value change */
 #define DT_WDAYJUMP	(1 << 14)
+/* unexpected month value change */
 #define DT_MONTHJUMP	(1 << 15)
+/* unexpected year value change */
 #define DT_YEARJUMP	(1 << 16)
-#define DT_LEAPONE	(1 << 17)
 /* leap second should always be zero if present */
+#define DT_LEAPONE	(1 << 17)
+/* transmitter call bit (15) set */
 #define DT_XMIT		(1 << 18)
+/* daylight saving time just changed */
 #define DT_CHDST	(1 << 19)
+/* leap second just processed */
 #define DT_LEAP		(1 << 20)
 
+/* daylight saving time change announced */
 #define ANN_CHDST	(1 << 30)
+/* leap second announced */
 #define ANN_LEAP	(1 << 31)
 
 /**

@@ -28,11 +28,17 @@ SUCH DAMAGE.
 
 #include <stdint.h>
 
+/* Length of the civil warning buffer in bits */
 #define CIVBUFLEN 40
 
 /*
  * From German wikipedia mostly, long regions and parities are unspecified
  * short regions: 1=north, 2=middle, 4=south
+ * xx1 and xx2 must be equal
+ * ds = short region
+ * dl = long region
+ * ps = parity over ds
+ * pl = parity over dl
  */
 struct alm {
 	uint8_t ds1, ds2, ps1, ps2, pl1, pl2;
