@@ -241,7 +241,7 @@ get_bit_live(void)
 	int newminute;
 	uint8_t p, stv;
 	struct timespec slp;
-	float y;
+	float y, sec2;
 	static int init = 1;
 
 	bit.freq_reset = 0;
@@ -269,6 +269,7 @@ get_bit_live(void)
 		bit.bit0 = 0.1 * bit.realfreq;
 		bit.bit20 = 0.2 * bit.realfreq;
 	}
+	sec2 = 1e9 / hw.freq / hw.freq;
 	/*
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
@@ -353,7 +354,7 @@ get_bit_live(void)
 			break; /* start of new second */
 		}
 		slp.tv_sec = 0;
-		slp.tv_nsec = 1e9 / hw.freq / hw.freq * bit.realfreq;
+		slp.tv_nsec = sec2 * bit.realfreq;
 		while (nanosleep(&slp, &slp))
 			;
 	}
