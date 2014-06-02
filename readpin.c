@@ -51,7 +51,7 @@ main(int argc, char **argv)
 	struct timespec slp;
 	long twait;
 	float a, y, realfreq;
-	float frac, bit0, bit20, maxone;
+	float frac, bit0, bit20, maxone, sec2;
 
 	while ((opt = getopt(argc, argv, "qt")) != -1) {
 		switch (opt) {
@@ -89,6 +89,7 @@ main(int argc, char **argv)
 	bit0 = 0.1 * realfreq;
 	bit20 = 0.2 * realfreq;
 	maxone = 0.32;
+	sec2 = 1e9 / hw->freq / hw->freq;
 
 	/* Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms) */
 	a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
@@ -202,7 +203,7 @@ main(int argc, char **argv)
 			perror("before sleep");
 			break;
 		}
-		twait = 1e9 / hw->freq / hw->freq * realfreq;
+		twait = sec2 * realfreq;
 		if (tunetime == 1)
 			twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1e9 -
 		    (tp1.tv_nsec - tp0.tv_nsec);
