@@ -378,9 +378,9 @@ get_bit_live(void)
 	}
 	if (init == 2)
 		init = 0;
-	else if ((state & (GETBIT_READ | GETBIT_RND | GETBIT_XMIT |
+	else if ((state & (GETBIT_RND | GETBIT_XMIT |
 	    GETBIT_RECV | GETBIT_EOM | GETBIT_TOOLONG)) == 0) {
-		if (bitpos == 0 && buffer[0] == 0)
+		if (bitpos == 0 && buffer[0] == 0 && (state & GETBIT_READ) == 0)
 			bit.bit0 = bit.bit0 + 0.5 * (bit.tlow - bit.bit0);
 		if (bitpos == 20 && buffer[20] == 1)
 			bit.bit20 = bit.bit20 + 0.5 * (bit.tlow - bit.bit20);
