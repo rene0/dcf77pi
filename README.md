@@ -14,11 +14,10 @@ The software currently comes with four binaries:
   correct the last typed character of the input text.
 * dcf77pi-analyze filename: decode from filename instead of the GPIO pin.
   Output is generated in report mode.
-* readpin [-tq] : Program to test reading from the GPIO pin and decode the
+* readpin [-q] : Program to test reading from the GPIO pin and decode the
   resulting bit. Send a SIGINT (Ctrl-C) to stop the program. Allowed parameters
   are:
   * -q do not show the raw input, default is to show it
-  * -t subtract the pulse acquisition period from the time to sleep
 * libdcf77.so: the shared library containing common routines for reading bits
   (either from a log file or the GPIO pin) and to decode the date, time and
   civil warning buffer. Both dcf77pi and dcf77pi-analyze use this library.
