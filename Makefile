@@ -35,15 +35,15 @@ libdcf77.so: $(objlib) $(hdrlib)
 
 dcf77pi.o: $(hdrlib)
 dcf77pi: $(objgui) libdcf77.so
-	$(CC) -o $@ $(objgui) -lncurses -ldcf77 -L.
+	$(CC) -o $@ $(objgui) -lncurses libdcf77.so
 
 dcf77pi-analyze.o: $(hdrlib)
 dcf77pi-analyze: $(objfile) libdcf77.so
-	$(CC) -o $@ $(objfile) -ldcf77 -L.
+	$(CC) -o $@ $(objfile) libdcf77.so
 
 readpin.o: input.h
 readpin: readpin.o libdcf77.so
-	$(CC) -o $@ readpin.o -lrt -lm -ldcf77 -L.
+	$(CC) -o $@ readpin.o -lm libdcf77.so
 
 clean:
 	rm dcf77pi $(objgui)

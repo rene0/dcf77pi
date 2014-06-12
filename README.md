@@ -44,3 +44,8 @@ will result in a logical read error.
 With permission (comment 5916), the method described at
 http://blog.blinkenlight.net/experiments/dcf77/binary-clock is used to receive
 the bits.
+
+Currently supporrted platforms:
+* FreeBSD, Linux: full support
+* Cygwin, MacOS, NetBSD: supported without GPIO communication for live decoding
+* Windows: only via Cygwin

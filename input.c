@@ -46,8 +46,17 @@ SUCH DAMAGE.
 #  endif
 #elif defined(__NetBSD__)
 #  define NOLIVE 1
+#  warning NetBSD, GPIO support not yet implemented
 #elif defined(__linux__)
 #  include <sys/types.h>
+#elif defined(__APPLE__) && (defined(__OSX__) || defined(__MACH__))
+#  warning MacOS, GPIO support available but no port for Rapberry Pi
+#  define NOLIVE 1
+#elif defined(__CYGWIN__)
+#  warning Cygwin, GPIO support not yet implemented
+#  define NOLIVE 1
+#elif defined(_WIN16) || defined(_WIN32) || defined(_WIN64)
+#  error Use Cygwin to use this software on Windows
 #else
 #  error Unsupported operating system, please send a patch to the author
 #endif
