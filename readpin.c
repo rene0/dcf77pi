@@ -34,37 +34,28 @@ SUCH DAMAGE.
 
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include <sysexits.h>
 #include <time.h>
-#include <unistd.h>
 
 int
 main(int argc, char **argv)
 {
 	int t, tf, tlow, sec;
 	int min;
-	int res, opt, tunetime = 0, verbose = 1;
+	int res, verbose = 1;
 	uint8_t p, bit, init, stv, newminute;
 	struct hardware *hw;
-	struct timespec tp0, tp1;
-	long long diff = 0;
 	struct timespec slp;
 	long twait;
 	float a, y, realfreq;
 	float frac, bit0, bit20, maxone, sec2;
 
-	while ((opt = getopt(argc, argv, "qt")) != -1) {
-		switch (opt) {
-		case 'q' :
-			verbose = 0;
-			break;
-		case 't' :
-			tunetime = 1;
-			break;
-		default:
-			printf("usage: %s [-qt]\n", argv[0]);
-			return EX_USAGE;
-		}
+	if ((argc == 2) && !strncmp(argv[1], "-q", strlen(argv[1])))
+		verbose = 0;
+	else if (argc != 1) {
+		printf("usage: %s [-q]\n", argv[0]);
+		return EX_USAGE;
 	}
 
 	res = read_config_file(ETCDIR"/config.txt");
@@ -97,11 +88,6 @@ main(int argc, char **argv)
 	printf("realfreq=%f filter_a=%f\n", realfreq, a);
 
 	for (t = 0;; t++) {
-		if (tunetime == 1 &&
-		    clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
-			perror("before pulse");
-			break;
-		}
 		p = get_pulse();
 		if (p & GETBIT_IO) {
 			printf("IO error!\n");
@@ -128,10 +114,6 @@ main(int argc, char **argv)
 			printf(" ! %3i %4u/%4u %f %f %f", sec, tlow, t,
 			    realfreq, realfreq / tf, a);
 			t = 0; /* timeout */
-			if (tunetime == 1) {
-				printf(" | %lli", diff);
-				diff = 0;
-			}
 			printf("\n");
 		}
 		/*
@@ -172,10 +154,6 @@ main(int argc, char **argv)
 				bit = 2; /* some error */
 			printf(" %3i %4u/%4u %f %u %f %f %f", sec, tlow, t,
 			    frac, bit, realfreq, realfreq / tf, a);
-			if (tunetime == 1) {
-				printf(" | %lli", diff);
-				diff = 0;
-			}
 			if (sec == 0) {
 				if (bit == 0)
 					bit0 = bit0 + 0.5 * (tlow - bit0);
@@ -198,34 +176,12 @@ main(int argc, char **argv)
 			printf("\n");
 			t = 0;
 		}
-		if (tunetime == 1 &&
-		    clock_gettime(CLOCK_MONOTONIC, &tp1) != 0) {
-			perror("before sleep");
-			break;
-		}
 		twait = sec2 * realfreq;
-		if (tunetime == 1)
-			twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1e9 -
-		    (tp1.tv_nsec - tp0.tv_nsec);
-		if (twait <= 0)
-			/* 1000 Hz -> -713 us seen */
-			printf(" <%li> ", twait);
-		else {
 			slp.tv_sec = twait / 1e9;
 			/* clang 3.3 does not like 1e9 here */
 			slp.tv_nsec = twait % 1000000000;
 			while (nanosleep(&slp, &slp))
 				;
-			if (tunetime == 1) {
-				if (clock_gettime(CLOCK_MONOTONIC, &tp0) != 0) {
-					perror("after sleep");
-					break;
-				}
-				twait = (tp0.tv_sec - tp1.tv_sec) * 1e9 +
-				    (tp0.tv_nsec - tp1.tv_nsec) - twait;
-				diff += twait;
-			}
-		}
 	}
 	cleanup();
 	return 0;
