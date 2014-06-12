@@ -111,10 +111,9 @@ main(int argc, char **argv)
 		if (t > realfreq * 5/2) {
 			realfreq = realfreq + 0.05 * ((t/2.5) - realfreq);
 			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-			printf(" ! %3i %4u/%4u %f %f %f", sec, tlow, t,
+			printf(" ! %3i %4u/%4u %f %f %f\n", sec, tlow, t,
 			    realfreq, realfreq / tf, a);
 			t = 0; /* timeout */
-			printf("\n");
 		}
 		/*
 		 * Schmitt trigger, minimize/maximize value of y to introduce
@@ -177,11 +176,11 @@ main(int argc, char **argv)
 			t = 0;
 		}
 		twait = sec2 * realfreq;
-			slp.tv_sec = twait / 1e9;
-			/* clang 3.3 does not like 1e9 here */
-			slp.tv_nsec = twait % 1000000000;
-			while (nanosleep(&slp, &slp))
-				;
+		slp.tv_sec = twait / 1e9;
+		/* clang 3.3 does not like 1e9 here */
+		slp.tv_nsec = twait % 1000000000;
+		while (nanosleep(&slp, &slp))
+			;
 	}
 	cleanup();
 	return 0;
