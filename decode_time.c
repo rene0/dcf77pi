@@ -205,6 +205,7 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 	unsigned int tmp, tmp0, tmp1, tmp2, tmp4, tmp5;
 	uint32_t rval = 0;
 	int tmp3, utchour, increase;
+	struct tm newtime;
 
 	if (minlen < 59)
 		rval |= DT_SHORT;
@@ -242,7 +243,7 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 		tmp = tmp0 + 10 * tmp1;
 		if ((init & 2) == 0 && time->tm_min != tmp)
 			rval |= DT_MINJUMP;
-		time->tm_min = tmp;
+		newtime.tm_min = tmp;
 	}
 
 	p2 = getpar(buffer, 29, 35);
@@ -256,7 +257,7 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 		tmp = tmp0 + 10 * tmp1;
 		if ((init & 2) == 0 && time->tm_hour != tmp)
 			rval |= DT_HOURJUMP;
-		time->tm_hour = tmp;
+		newtime.tm_hour = tmp;
 	}
 
 	p3 = getpar(buffer, 36, 58);
@@ -283,8 +284,8 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 			rval |= DT_WDAYJUMP;
 		if ((init & 2) == 0 && time->tm_mon != tmp0)
 			rval |= DT_MONTHJUMP;
-		time->tm_wday = tmp2;
-		time->tm_mon = tmp0;
+		newtime.tm_wday = tmp2;
+		newtime.tm_mon = tmp0;
 		tmp3 = century_offset(tmp1, tmp0, tmp, tmp2);
 		if (tmp3 == -1) {
 			rval |= DT_DATE;
@@ -293,13 +294,13 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 			if ((init & 2) == 0 && time->tm_year !=
 			    BASEYEAR + 100 * tmp3 + tmp1)
 				rval |= DT_YEARJUMP;
-			time->tm_year = BASEYEAR + 100 * tmp3 + tmp1;
+			newtime.tm_year = BASEYEAR + 100 * tmp3 + tmp1;
 		}
 		if (tmp > lastday(*time)) {
 			rval |= DT_DATE;
 			p3 = 1;
 		} else
-			time->tm_mday = tmp;
+			newtime.tm_mday = tmp;
 	}
 
 	ok = !generr && !p1 && !p2 && !p3; /* shorthand */
@@ -372,7 +373,7 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 		    (time->tm_mon == summermonth || time->tm_mon == wintermonth);
 		if (tmp || (((rval & DT_DSTERR) == 0) &&
 		    ((olderr && ok) || (init & 1) == 1))) {
-			time->tm_isdst = buffer[17]; /* expected change */
+			newtime.tm_isdst = buffer[17]; /* expected change */
 			if (tmp) {
 				announce &= ~ANN_CHDST;
 				rval |= DT_CHDST;
@@ -385,11 +386,13 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 	}
 	if ((announce & ANN_CHDST) && time->tm_min == 0)
 		announce &= ~ANN_CHDST; /* reset DST announcement at hh:00 */
-	time->tm_gmtoff = time->tm_isdst ? 7200 : 3600;
+	newtime.tm_gmtoff = newtime.tm_isdst ? 7200 : 3600;
 
 	if (olderr && ok)
 		olderr = 0;
-	if (!ok)
+	if (ok)
+		memcpy((void *)time, (const void *)&newtime, sizeof(newtime));
+	else
 		olderr = 1;
 
 	return rval | announce;
