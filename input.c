@@ -268,6 +268,7 @@ get_bit_live(void)
 	struct timespec slp;
 	float y, sec2;
 	static int init = 1;
+	int is_eom = state & GETBIT_EOM;
 
 	bit.freq_reset = 0;
 	bit.frac = bit.maxone = -0.01;
@@ -363,8 +364,18 @@ get_bit_live(void)
 
 			bit.frac = (float)bit.tlow / (float)bit.t;
 			if (newminute) {
-				bit.frac *= 2;
-				state |= GETBIT_EOM;
+				/*
+				 * Reset the frequency and the EOM flag if two
+				 * consecutive EOM markers come in, which means
+				 * something is wrong.
+				 */
+				if (is_eom) {
+					state &= ~GETBIT_EOM;
+					reset_frequency();
+				} else {
+					state |= GETBIT_EOM;
+					bit.frac *= 2;
+				}
 			}
 			break; /* start of new second */
 		}
