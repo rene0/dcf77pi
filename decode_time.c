@@ -347,10 +347,8 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 				rval |= DT_SHORT;
 				ok = 0;
 				/* leap second processed, but missing */
-			} else {
-				if (buffer[59] == 1)
-					rval |= DT_LEAPONE;
-			}
+			} else if (buffer[59] == 1)
+				rval |= DT_LEAPONE;
 		}
 	}
 	if ((minlen == 60) && !(rval & DT_LEAP)) {
