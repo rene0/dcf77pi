@@ -242,6 +242,16 @@ set_new_state(void)
 	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
 }
 
+void
+reset_frequency(void)
+{
+	if (logfile != NULL)
+		fprintf(logfile, bit.realfreq < hw.freq / 2 ?  "<" :
+		    bit.realfreq > hw.freq * 3/2 ? ">" : "");
+	bit.realfreq = hw.freq;
+	bit.freq_reset = 1;
+}
+
 uint16_t
 get_bit_live(void)
 {
@@ -305,14 +315,8 @@ get_bit_live(void)
 		 * Prevent algorithm collapse during thunderstorms
 		 * or scheduler abuse
 		 */
-		if (bit.realfreq < hw.freq / 2 ||
-		    bit.realfreq > hw.freq * 3/2) {
-			if (logfile != NULL)
-				fprintf(logfile, bit.realfreq < hw.freq / 2 ?
-				    "<" : ">");
-			bit.realfreq = hw.freq;
-			bit.freq_reset = 1;
-		}
+		if (bit.realfreq < hw.freq / 2 || bit.realfreq > hw.freq * 3/2)
+			reset_frequency();
 
 		if (bit.t > bit.realfreq * 5/2) {
 			bit.realfreq = bit.realfreq + 0.05 *
