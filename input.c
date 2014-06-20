@@ -232,6 +232,16 @@ get_pulse(void)
 	return tmpch;
 }
 
+/*
+ * Clear previous flags, except GETBIT_TOOLONG to be able
+ * to determine if this flag can be cleared again.
+ */
+void
+set_new_state(void)
+{
+	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
+}
+
 uint16_t
 get_bit_live(void)
 {
@@ -252,11 +262,7 @@ get_bit_live(void)
 	bit.freq_reset = 0;
 	bit.frac = bit.maxone = -0.01;
 
-	/*
-	 * Clear previous flags, except GETBIT_TOOLONG to be able
-	 * to determine if this flag can be cleared again.
-	 */
-	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
+	set_new_state();
 
 	/*
 	 * One period is either 1000 ms or 2000 ms long (normal or
@@ -411,11 +417,7 @@ get_bit_file(void)
 {
 	int oldinch, inch, valid = 0;
 
-	/*
-	 * Clear previous flags, except GETBIT_TOOLONG to be able
-	 * to determine if this flag can be cleared again.
-	 */
-	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
+	set_new_state();
 
 	while (valid == 0) {
 		inch = getc(datafile);
