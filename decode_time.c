@@ -307,21 +307,6 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 
 	/* these flags are saved between invocations: */
 
-	/* h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
-	 * last Sunday of month (reference?) */
-	if (buffer[16] == 1 && ok) {
-		if ((time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7 &&
-		    (time->tm_mon == summermonth ||
-		    time->tm_mon == wintermonth)) && ((time->tm_min > 0 &&
-		    utchour == 0) || (time->tm_min == 0 &&
-		    utchour == 1 + buffer[17] - buffer[18]))) {
-			announce |= ANN_CHDST;
-			if (time->tm_min == 0)
-				utchour = 1; /* time zone just changed */
-		} else
-			rval |= DT_CHDSTERR;
-	}
-
 	/*
 	 * h==23, last day of month (UTC) or h==0, first day of next month (UTC)
 	 * according to IERS Bulletin C
@@ -350,6 +335,21 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 		rval |= DT_LONG;
 		ok = 0;
 		/* leap second not processed, so bad minute */
+	}
+
+	/* h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
+	 * last Sunday of month (reference?) */
+	if (buffer[16] == 1 && ok) {
+		if ((time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7 &&
+		    (time->tm_mon == summermonth ||
+		    time->tm_mon == wintermonth)) && ((time->tm_min > 0 &&
+		    utchour == 0) || (time->tm_min == 0 &&
+		    utchour == 1 + buffer[17] - buffer[18]))) {
+			announce |= ANN_CHDST;
+			if (time->tm_min == 0)
+				utchour = 1; /* time zone just changed */
+		} else
+			rval |= DT_CHDSTERR;
 	}
 
 	if (buffer[17] != time->tm_isdst || buffer[18] == time->tm_isdst) {
