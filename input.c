@@ -297,7 +297,7 @@ get_bit_live(void)
 	 */
 	bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
 	y = -1;
-	bit.tlow = 0;
+	bit.tlow = -1;
 	stv = 2;
 
 	for (bit.t = 0; ; bit.t++) {
