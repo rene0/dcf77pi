@@ -393,9 +393,7 @@ get_utchour(struct tm time)
 {
 	int utchour;
 
-	utchour = time.tm_hour - 1;
-	if (time.tm_isdst)
-		utchour--;
+	utchour = time.tm_hour - 1 - time.tm_isdst;
 	if (utchour < 0)
 		utchour += 24;
 	return utchour;
