@@ -79,7 +79,7 @@ mainloop(char *logfilename,
 			post_process_input(&logfilename, &change_logfile, &bit,
 			    bitpos);
 		if (bit & GETBIT_EOM) {
-			/* handle the missing minute marker */
+			/* handle the missing bit due to the  minute marker */
 			minlen = bitpos + 1;
 			acc_minlen += 1000;
 		}
@@ -93,7 +93,7 @@ mainloop(char *logfilename,
 			minlen = 61;
 			/*
 			 * leave acc_minlen alone,
-			 * any missing marker already processed
+			 * any minute marker already processed
 			 */
 			print_long_minute();
 		}
