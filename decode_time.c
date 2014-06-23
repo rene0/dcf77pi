@@ -305,8 +305,6 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 
 	utchour = get_utchour(*time);
 
-	/* these flags are saved between invocations: */
-
 	/*
 	 * h==23, last day of month (UTC) or h==0, first day of next month (UTC)
 	 * according to IERS Bulletin C
@@ -354,10 +352,10 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 
 	if (buffer[17] != time->tm_isdst || buffer[18] == time->tm_isdst) {
 		/* Time offset change is OK if:
+		 * announced and time is Sunday, lastday, 01:00 UTC
 		 * there was an error but not any more (needed if decoding at
 		 *   startup is problematic)
 		 * initial state (otherwise DST would never be valid)
-		 * actually announced and time is Sunday, lastday, 01:00 UTC
 		 */
 		if (((announce & ANN_CHDST) && time->tm_min == 0) ||
 		    (olderr && ok) ||
