@@ -204,6 +204,7 @@ cleanup(void)
 	if (datafile != NULL && fclose(datafile) == EOF)
 		perror("fclose (datafile)");
 	datafile = NULL;
+	free(bit.signal);
 }
 
 uint8_t
@@ -290,6 +291,7 @@ get_bit_live(void)
 		bit.realfreq = hw.freq;
 		bit.bit0 = 0.1 * bit.realfreq;
 		bit.bit20 = 0.2 * bit.realfreq;
+		bit.signal = malloc(5/2 * 3/2 * hw.freq);
 	}
 	sec2 = 1e9 / hw.freq / hw.freq;
 	/*
@@ -305,9 +307,10 @@ get_bit_live(void)
 		p = get_pulse();
 		if (p == GETBIT_IO) {
 			state |= GETBIT_IO;
-			outch = '*';
+			bit.signal[bit.t] = outch = '*';
 			goto report;
 		}
+		bit.signal[bit.t] = p ? '+' : '-';
 
 		y = y < 0 ? (float)p : y + bit.a * (p - y);
 		if (y >= 0 & y < bit.a / 2 /* fp error margin */)

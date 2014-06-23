@@ -73,11 +73,13 @@ struct hardware {
  *   a 1 bit, or -1 % in case of an error
  * a          = the amount to update the wave of the pulse with
  *   (see blinkenlight link in README.md)
+ * signal[]   = the raw received radio signal, 2.5 * 1.5 * hw.freq items
  */
 struct bitinfo {
 	int tlow, tlast0, t, freq_reset;
 	float realfreq, bit0, bit20; /* static */
 	float frac, maxone, a;
+	char *signal;
 };
 
 /**
