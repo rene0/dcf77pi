@@ -102,8 +102,8 @@ mainloop(char *logfilename,
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			print_minute(acc_minlen, minlen);
-			dt = decode_time(init, minlen, get_buffer(),
-			    &time, &acc_minlen);
+			dt = decode_time(init, minlen, get_buffer(), &time,
+			    &acc_minlen);
 
 			if (time.tm_min % 3 == 0 && init == 0) {
 				civbuf = get_civil_buffer();
