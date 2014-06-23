@@ -298,6 +298,7 @@ get_bit_live(void)
 	bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
 	y = -1;
 	bit.tlow = -1;
+	bit.tlast0 = -1;
 	stv = 2;
 
 	for (bit.t = 0; ; bit.t++) {
@@ -309,6 +310,8 @@ get_bit_live(void)
 		}
 
 		y = y < 0 ? (float)p : y + bit.a * (p - y);
+		if (y >= 0 & y < bit.a / 2 /* fp error margin */)
+			bit.tlast0 = bit.t;
 		if (stv == 2)
 			stv = p;
 

@@ -61,6 +61,7 @@ struct hardware {
 /*
  * (Internal) information about the currently received bit:
  * tlow       = time in samples when the signal went low again
+ * tlast0     = time in samples when the signal was last measured as 0
  * t          = length of this bit in samples
  * freq_reset = realfreq was reset to hw.freq (normally because of reception
  *    errors)
@@ -74,7 +75,7 @@ struct hardware {
  *   (see blinkenlight link in README.md)
  */
 struct bitinfo {
-	int tlow, t, freq_reset;
+	int tlow, tlast0, t, freq_reset;
 	float realfreq, bit0, bit20; /* static */
 	float frac, maxone, a;
 };
