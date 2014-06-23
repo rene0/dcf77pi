@@ -175,8 +175,7 @@ add_minute(struct tm *time)
 		    time->tm_mday > lastday(*time) - 7) {
 			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
 				time->tm_hour--; /* will become non-DST */
-			else if (time->tm_isdst == 0 &&
-			    time->tm_mon == summermonth)
+			if (time->tm_isdst == 0 && time->tm_mon == summermonth)
 				time->tm_hour++; /* will become DST */
 		}
 		time->tm_min = 0;
