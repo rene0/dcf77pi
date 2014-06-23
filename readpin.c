@@ -23,12 +23,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-/*
- * Idea and partial implementation for the exponential low-pass filter and
- * Schmitt trigger taken from Udo Klein, with permisssion.
- * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
- */
-
 #include "config.h"
 #include "input.h"
 
@@ -41,15 +35,9 @@ SUCH DAMAGE.
 int
 main(int argc, char **argv)
 {
-	int t, tf, tlow, sec;
-	int min;
-	int res, verbose = 1;
-	uint8_t p, bit, init, stv, newminute;
-	struct hardware *hw;
-	struct timespec slp;
-	long twait;
-	float a, y, realfreq;
-	float frac, bit0, bit20, maxone, sec2;
+	int min, res, verbose = 1;
+	uint16_t bit;
+	struct bitinfo *bi;
 
 	if ((argc == 2) && !strncmp(argv[1], "-q", strlen(argv[1])))
 		verbose = 0;
@@ -68,119 +56,25 @@ main(int argc, char **argv)
 		cleanup();
 		return res;
 	}
-	hw = get_hardware_parameters();
 
-	sec = -1;
 	min = -1;
-	init = 1;
-	tlow = 0;
-	stv = 2;
-	realfreq = hw->freq;
-	tf = hw->freq * 2;
-	bit0 = 0.1 * realfreq;
-	bit20 = 0.2 * realfreq;
-	maxone = 0.32;
-	sec2 = 1e9 / hw->freq / hw->freq;
 
-	/* Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms) */
-	a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-	y = -1;
-	printf("realfreq=%f filter_a=%f\n", realfreq, a);
-
-	for (t = 0;; t++) {
-		p = get_pulse();
-		if (p & GETBIT_IO) {
-			printf("IO error!\n");
-			break;
+	for (;;) {
+		bit = get_bit_live();
+		bi = get_bitinfo();
+		if (verbose) {
+			if (bi->freq_reset)
+				printf("!");
+			bi->signal[bi->t] = '\0';
+			printf("%s\n", bi->signal);
 		}
-		y = y < 0 ? (float)p : y + a * (p - y);
-		if (stv == 2)
-			stv = p;
-		if (verbose == 1)
-			printf("%c", p == 0 ? '-' : p == 1 ? '+' : '?');
-
-		if (realfreq < hw->freq / 2) {
-			printf("<");
-			realfreq = hw->freq;
-		}
-		if (realfreq > hw->freq * 3/2) {
-			printf(">");
-			realfreq = hw->freq;
-		}
-
-		if (t > realfreq * 5/2) {
-			realfreq = realfreq + 0.05 * ((t/2.5) - realfreq);
-			a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-			printf(" ! %3i %4u/%4u %f %f %f\n", sec, tlow, t,
-			    realfreq, realfreq / tf, a);
-			t = 0; /* timeout */
-		}
-		/*
-		 * Schmitt trigger, minimize/maximize value of y to introduce
-		 * hysteresis and avoid infinite memory
-		 * */
-		if (y < 0.5 && stv == 1) {
-			y = 0.0;
-			stv = 0;
-			tlow = t;
-		}
-		if (y > 0.5 && stv == 0) {
-			y = 1.0;
-			stv = 1;
-			newminute = t > realfreq * 3/2;
-			if (init == 1)
-				init = 0;
-			else {
-				sec++;
-				if (newminute)
-					realfreq = realfreq + 0.05 *
-					    ((t/2) - realfreq);
-				else
-					realfreq = realfreq + 0.05 *
-					    (t - realfreq);
-				/* adjust filter */
-				a = 1.0 - exp2(-1.0 / (realfreq / 20.0));
-			}
-			frac = (float)tlow / (float)t;
-			if (newminute)
-				frac *= 2.0;
-			/* in general, pulses are a bit wider than specified */
-			if (frac <= maxone / 2.0)
-				bit = 0;
-			else if (frac <= maxone)
-				bit = 1;
-			else
-				bit = 2; /* some error */
-			printf(" %3i %4u/%4u %f %u %f %f %f", sec, tlow, t,
-			    frac, bit, realfreq, realfreq / tf, a);
-			if (sec == 0) {
-				if (bit == 0)
-					bit0 = bit0 + 0.5 * (tlow - bit0);
-				else
-					printf(" bit 0 = 1 ");
-			} else if (sec == 20) {
-				if (bit == 1)
-					bit20 = bit20 + 0.5 * (tlow - bit20);
-				else
-					printf(" bit 20 = 0 ");
-			}
-			if (newminute) {
-				sec = -1;
-				min++;
-				maxone = (bit0 + bit20) / realfreq;
-				tf = tf + 0.5 * (t - tf);
-				printf(" | %f %f %f-%f %i", bit0, bit20,
-				    maxone/2.0, maxone, min);
-			}
-			printf("\n");
-			t = 0;
-		}
-		twait = sec2 * realfreq;
-		slp.tv_sec = twait / 1e9;
-		/* clang 3.3 does not like 1e9 here */
-		slp.tv_nsec = twait % 1000000000;
-		while (nanosleep(&slp, &slp))
-			;
+		printf("%x (%i %i %i %f %f %f %f %f %f) %i:%i\n", bit,
+		    bi->tlow, bi->tlast0, bi->t, bi->frac, bi->bit0,
+		    bi->bit20, bi->maxone, bi->realfreq, bi->a, min,
+		    get_bitpos());
+		if (bit & GETBIT_EOM)
+			min++;
+		bit = next_bit();
 	}
 	cleanup();
 	return 0;
