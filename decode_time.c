@@ -314,8 +314,10 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 		    ((time->tm_min > 0 && utchour == 23) ||
 		    (time->tm_min == 0 && utchour == 0)))
 			announce |= ANN_LEAP;
-		else
+		else {
+			announce &= ~ANN_LEAP;
 			rval |= DT_LEAPERR;
+		}
 	}
 
 	/* process possible leap second, always reset announcement at hh:00 */
@@ -346,8 +348,10 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 			announce |= ANN_CHDST;
 			if (time->tm_min == 0)
 				utchour = 1; /* time zone just changed */
-		} else
+		} else {
+			announce &= ~ANN_CHDST;
 			rval |= DT_CHDSTERR;
+		}
 	}
 
 	if (buffer[17] != time->tm_isdst || buffer[18] == time->tm_isdst) {
