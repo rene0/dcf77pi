@@ -340,11 +340,11 @@ decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
 	/* process possible leap second, always reset announcement at hh:00 */
 	if ((announce & ANN_LEAP) && time->tm_min == 0) {
 		announce &= ~ANN_LEAP;
-			rval |= DT_LEAP;
-			if (minlen == 59) {
-				rval |= DT_SHORT;
-				ok = 0;
-				/* leap second processed, but missing */
+		rval |= DT_LEAP;
+		if (minlen == 59) {
+			rval |= DT_SHORT;
+			ok = 0;
+			/* leap second processed, but missing */
 		} else if (minlen == 60 && buffer[59] == 1)
 			rval |= DT_LEAPONE;
 	}
