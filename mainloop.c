@@ -51,7 +51,7 @@ mainloop(char *logfilename,
 	int minlen = 0, acc_minlen = 0;
 	int bitpos = 0;
 	int init = 3;
-	struct tm time, oldtime;
+	struct tm time;
 	struct alm civwarn;
 	uint8_t *civbuf;
 	int settime = 0;
@@ -102,9 +102,6 @@ mainloop(char *logfilename,
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			print_minute(acc_minlen, minlen);
-			if ((init & 1) == 1 || minlen >= 59)
-				memcpy((void *)&oldtime, (const void *)&time,
-				    sizeof(time));
 			dt = decode_time(init, minlen, get_buffer(),
 			    &time, &acc_minlen);
 
