@@ -72,7 +72,7 @@ main(int argc, char **argv)
 		    bi->tlow, bi->tlast0, bi->t, bi->frac, bi->bit0,
 		    bi->bit20, bi->maxone, bi->realfreq, bi->a, min,
 		    get_bitpos());
-		if (bit & GETBIT_EOM)
+		if (bit & GETBIT_EOM || bit & GETBIT_TOOLONG)
 			min++;
 		bit = next_bit();
 	}
