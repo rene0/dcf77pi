@@ -312,9 +312,9 @@ get_bit_live(void)
 		}
 		bit.signal[bit.t] = p ? '+' : '-';
 
-		y = y < 0 ? (float)p : y + bit.a * (p - y);
 		if (y >= 0 && y < bit.a / 2 /* fp error margin */)
 			bit.tlast0 = bit.t;
+		y = y < 0 ? (float)p : y + bit.a * (p - y);
 		if (stv == 2)
 			stv = p;
 
