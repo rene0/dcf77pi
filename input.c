@@ -392,13 +392,11 @@ get_bit_live(void)
 	}
 
 	bit.maxone = (bit.bit0 + bit.bit20) / bit.realfreq;
-	if (bit.frac < 0) {
-		/* radio error, results already set */
-	} else if (bit.frac <= bit.maxone / 2.0) {
+	if (bit.frac >= 0 && bit.frac <= bit.maxone / 2.0) {
 		/* zero bit, ~100 ms active signal */
 		outch = '0';
 		buffer[bitpos] = 0;
-	} else if (bit.frac <= bit.maxone) {
+	} else if (bit.frac > bit.maxone / 2.0 && bit.frac <= bit.maxone) {
 		/* one bit, ~200 ms active signal */
 		state |= GETBIT_ONE;
 		outch = '1';
