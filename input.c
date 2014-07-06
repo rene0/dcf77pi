@@ -292,8 +292,8 @@ get_bit_live(void)
 		bit.bit0 = 0.1 * bit.realfreq;
 		bit.bit20 = 0.2 * bit.realfreq;
 		bit.signal = malloc(5/2 * 3/2 * hw.freq);
+		sec2 = 1e9 / hw.freq / hw.freq;
 	}
-	sec2 = 1e9 / hw.freq / hw.freq;
 	/*
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
