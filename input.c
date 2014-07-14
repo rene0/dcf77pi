@@ -265,9 +265,9 @@ get_bit_live(void)
 
 	char outch;
 	int newminute;
-	uint8_t p, stv;
+	uint8_t p, stv = 1;
 	struct timespec slp;
-	float y, sec2;
+	float y = 1.0, sec2;
 	static int init = 1;
 	int is_eom = state & GETBIT_EOM;
 
@@ -298,10 +298,8 @@ get_bit_live(void)
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
 	bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
-	y = -1;
 	bit.tlow = -1;
 	bit.tlast0 = -1;
-	stv = 2;
 
 	for (bit.t = 0; ; bit.t++) {
 		p = get_pulse();
@@ -314,9 +312,7 @@ get_bit_live(void)
 
 		if (y >= 0 && y < bit.a / 2 /* fp error margin */)
 			bit.tlast0 = bit.t;
-		y = y < 0 ? (float)p : y + bit.a * (p - y);
-		if (stv == 2)
-			stv = p;
+		y = y + bit.a * (p - y);
 
 		/*
 		 * Prevent algorithm collapse during thunderstorms
