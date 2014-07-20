@@ -218,9 +218,9 @@ display_bit_gui(uint16_t state, int bitpos)
 	    bitinf->realfreq, (int)bitinf->bit0, (int)bitinf->bit20,
 	    bitinf->maxone * 100, bitinf->a);
 	if (bitinf->freq_reset)
-		mvwchgat(input_win, 3, 24, 8, A_BOLD, 3, NULL);
+		mvwchgat(input_win, 3, 22, 8, A_BOLD, 3, NULL);
 	else
-		mvwchgat(input_win, 3, 24, 8, A_NORMAL, 7, NULL);
+		mvwchgat(input_win, 3, 22, 8, A_NORMAL, 7, NULL);
 
 	mvwprintw(input_win, 3, 1, "%2u", bitpos);
 
