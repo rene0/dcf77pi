@@ -384,7 +384,7 @@ show_thirdparty_buffer(uint8_t *buf)
 	int i;
 
 	for (i = 0; i < TPBUFLEN; i++)
-		mvwprintw(tp_win, 0, i + 14, "%u", buf[i]);
+		mvwprintw(tp_win, 0, i + 20, "%u", buf[i]);
 	wclrtoeol(tp_win);
 	wrefresh(tp_win);
 }
@@ -392,7 +392,9 @@ show_thirdparty_buffer(uint8_t *buf)
 void
 display_alarm_gui(struct alm alarm)
 {
+	wattron(tp_win, COLOR_PAIR(3) | A_BOLD);
 	mvwprintw(tp_win, 1, 22, "German civil warning");
+	wattroff(tp_win, COLOR_PAIR(3) | A_BOLD);
 	wclrtoeol(tp_win);
 	wrefresh(tp_win);
 }
@@ -410,7 +412,9 @@ display_unknown_gui(void)
 void
 display_weather_gui(void)
 {
+	wattron(tp_win, COLOR_PAIR(2));
 	mvwprintw(tp_win, 1, 22, "Meteotime weather");
+	wattroff(tp_win, COLOR_PAIR(2));
 	wclrtoeol(tp_win);
 	wrefresh(tp_win);
 }
