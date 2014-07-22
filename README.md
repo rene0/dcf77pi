@@ -20,7 +20,7 @@ The software currently comes with four binaries:
   * -q do not show the raw input, default is to show it
 * libdcf77.so: the shared library containing common routines for reading bits
   (either from a log file or the GPIO pin) and to decode the date, time and
-  civil warning buffer. Both dcf77pi and dcf77pi-analyze use this library.
+  third party buffer. Both dcf77pi and dcf77pi-analyze use this library.
   Header files to use in your own software are supplied.
 
 The meaning of the keywords in config.txt is:
