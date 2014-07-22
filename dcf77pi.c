@@ -384,7 +384,7 @@ show_thirdparty_buffer(uint8_t *buf)
 	int i;
 
 	for (i = 0; i < TPBUFLEN; i++)
-		mvwprintw(tp_win, 0, i + 20, "%u", buf[i]);
+		mvwprintw(tp_win, 0, i + 22, "%u", buf[i]);
 	wclrtoeol(tp_win);
 	wrefresh(tp_win);
 }
@@ -422,7 +422,7 @@ display_weather_gui(void)
 void
 draw_tp_window(void)
 {
-	mvwprintw(tp_win, 0, 0, "Third party buffer:");
+	mvwprintw(tp_win, 0, 0, "Third party buffer  :");
 	mvwprintw(tp_win, 1, 0, "Third party contents:");
 	wrefresh(tp_win);
 }
