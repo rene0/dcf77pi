@@ -25,6 +25,7 @@ SUCH DAMAGE.
 
 #include "mainloop.h"
 
+#include "bits1to14.h"
 #include "decode_time.h"
 
 #include <string.h>
@@ -38,10 +39,10 @@ mainloop(char *logfilename,
     void (*print_minute)(int, int),
     void (*process_new_minute)(void),
     void (*display_alarm)(struct alm),
-    void (*display_alarm_error)(void),
-    void (*display_alarm_ok)(void),
+    void (*display_unknown)(void),
+    void (*display_weather)(void),
     void (*display_time)(uint32_t, struct tm),
-    void (*print_civil_buffer)(uint8_t *),
+    void (*print_thirdparty_buffer)(uint8_t *),
     void (*set_time)(int, uint32_t, uint16_t, int, struct tm),
     void (*process_input)(uint16_t *, int, char *, int *, int *),
     void (*post_process_input)(char **, int *, uint16_t *, int))
@@ -53,13 +54,13 @@ mainloop(char *logfilename,
 	int init = 3;
 	struct tm time;
 	struct alm civwarn;
-	uint8_t *civbuf;
+	uint8_t *tpbuf;
 	int settime = 0;
 	int change_logfile = 0;
 
 	init_time();
 	bzero(&time, sizeof(time));
-	init_alarm();
+	init_thirdparty();
 
 	for (;;) {
 		bit = get_bit();
@@ -86,7 +87,7 @@ mainloop(char *logfilename,
 		display_bit(bit, bitpos);
 
 		if (init == 0)
-			fill_civil_buffer(time.tm_min, bitpos, bit);
+			fill_thirdparty_buffer(time.tm_min, bitpos, bit);
 
 		bit = next_bit();
 		if (bit & GETBIT_TOOLONG) {
@@ -106,19 +107,18 @@ mainloop(char *logfilename,
 			    &acc_minlen);
 
 			if (time.tm_min % 3 == 0 && init == 0) {
-				civbuf = get_civil_buffer();
-				print_civil_buffer(civbuf);
-				decode_alarm(&civwarn);
-				switch (get_civil_status()) {
-				case 3:
+				tpbuf = get_thirdparty_buffer();
+				print_thirdparty_buffer(tpbuf);
+				switch (get_thirdparty_type()) {
+				case TP_ALARM:
+					decode_alarm(&civwarn);
 					display_alarm(civwarn);
 					break;
-				case 2:
-				case 1:
-					display_alarm_error();
+				case TP_UNKNOWN:
+					display_unknown();
 					break;
-				case 0:
-					display_alarm_ok();
+				case TP_WEATHER:
+					display_weather();
 					break;
 				}
 			}

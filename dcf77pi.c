@@ -23,6 +23,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
+#include "bits1to14.h"
 #include "config.h"
 #include "decode_time.h"
 #include "mainloop.h"
@@ -38,7 +39,7 @@ SUCH DAMAGE.
 
 WINDOW *input_win;
 WINDOW *decode_win;
-WINDOW *alarm_win;
+WINDOW *tp_win;
 WINDOW *main_win;
 int old_bitpos = -1; /* timer for statusbar inactive */
 int input_mode = 0;  /* normal input (statusbar keys) or string input */
@@ -194,8 +195,8 @@ curses_cleanup(char *reason)
 {
 	if (decode_win != NULL)
 		delwin(decode_win);
-	if (alarm_win != NULL)
-		delwin(alarm_win);
+	if (tp_win != NULL)
+		delwin(tp_win);
 	if (input_win != NULL)
 		delwin(input_win);
 	if (main_win != NULL)
@@ -378,55 +379,48 @@ draw_time_window(void)
 }
 
 void
-show_civbuf_gui(uint8_t *buf)
+show_thirdparty_buffer(uint8_t *buf)
 {
 	int i;
 
-	for (i = 0; i < CIVBUFLEN; i++)
-		mvwprintw(alarm_win, 0, i + 14, "%u", buf[i]);
-	wclrtoeol(alarm_win);
-	wrefresh(alarm_win);
+	for (i = 0; i < TPBUFLEN; i++)
+		mvwprintw(tp_win, 0, i + 14, "%u", buf[i]);
+	wclrtoeol(tp_win);
+	wrefresh(tp_win);
 }
 
 void
 display_alarm_gui(struct alm alarm)
 {
-	wattron(alarm_win, COLOR_PAIR(3) | A_BOLD);
-	mvwprintw(alarm_win, 1, 22,
-	    "0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x 0x%1x",
-	    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
-	    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
-	wattroff(alarm_win, COLOR_PAIR(3) | A_BOLD);
-	wclrtoeol(alarm_win);
-	wrefresh(alarm_win);
+	mvwprintw(tp_win, 1, 22, "German civil warning");
+	wclrtoeol(tp_win);
+	wrefresh(tp_win);
 }
 
 void
-display_alarm_error_gui(void)
+display_unknown_gui(void)
 {
-	wattron(alarm_win, COLOR_PAIR(1));
-	mvwprintw(alarm_win, 1, 22, "error");
-	wattroff(alarm_win, COLOR_PAIR(1));
-	wclrtoeol(alarm_win);
-	wrefresh(alarm_win);
+	wattron(tp_win, COLOR_PAIR(1));
+	mvwprintw(tp_win, 1, 22, "unknown contents");
+	wattroff(tp_win, COLOR_PAIR(1));
+	wclrtoeol(tp_win);
+	wrefresh(tp_win);
 }
 
 void
-clear_alarm_gui(void)
+display_weather_gui(void)
 {
-	wattron(alarm_win, COLOR_PAIR(2));
-	mvwprintw(alarm_win, 1, 22, "none");
-	wattroff(alarm_win, COLOR_PAIR(2));
-	wclrtoeol(alarm_win);
-	wrefresh(alarm_win);
+	mvwprintw(tp_win, 1, 22, "Meteotime weather");
+	wclrtoeol(tp_win);
+	wrefresh(tp_win);
 }
 
 void
-draw_alarm_window(void)
+draw_tp_window(void)
 {
-	mvwprintw(alarm_win, 0, 0, "Civil buffer:");
-	mvwprintw(alarm_win, 1, 0, "German civil warning:");
-	wrefresh(alarm_win);
+	mvwprintw(tp_win, 0, 0, "Third party buffer:");
+	mvwprintw(tp_win, 1, 0, "Third party contents:");
+	wrefresh(tp_win);
 }
 
 void
@@ -569,7 +563,7 @@ main(int argc, char *argv[])
 	}
 
 	decode_win = NULL;
-	alarm_win = NULL;
+	tp_win = NULL;
 	input_win = NULL;
 	main_win = NULL;
 
@@ -582,9 +576,9 @@ main(int argc, char *argv[])
 		curses_cleanup("Creating decode_win failed.\n");
 		return 0;
 	}
-	alarm_win = newwin(2, 80, 3, 0);
-	if (alarm_win == NULL) {
-		curses_cleanup("Creating alarm_win failed.\n");
+	tp_win = newwin(2, 80, 3, 0);
+	if (tp_win == NULL) {
+		curses_cleanup("Creating tp_win failed.\n");
 		return 0;
 	}
 	input_win = newwin(4, 80, 6, 0);
@@ -599,14 +593,14 @@ main(int argc, char *argv[])
 	}
 	/* draw initial screen */
 	draw_time_window();
-	draw_alarm_window();
+	draw_tp_window();
 	draw_input_window();
 	draw_keys(main_win);
 
 	res = mainloop(logfilename, get_bit_live, display_bit_gui,
 	    print_long_minute, print_minute, wipe_input, display_alarm_gui,
-	    display_alarm_error_gui, clear_alarm_gui, display_time_gui,
-	    show_civbuf_gui, set_time_gui, process_input, post_process_input);
+	    display_unknown_gui, display_weather_gui, display_time_gui,
+	    show_thirdparty_buffer, set_time_gui, process_input, post_process_input);
 
 	curses_cleanup(NULL);
 	if (logfilename != NULL)

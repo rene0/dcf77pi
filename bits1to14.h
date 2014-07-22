@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2014 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -23,30 +23,42 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include "decode_alarm.h"
+#ifndef DCF77PI_BITS1TO14_H
+#define DCF77PI_BITS1TO14_H
 
-#include "bits1to14.h"
+/* Length of the third-party buffer in bits */
+#define TPBUFLEN 40
 
-void
-decode_alarm(struct alm *alarm)
-{
-	uint8_t *civbuf = get_thirdparty_buffer();
+enum TPTYPE { TP_UNKNOWN, TP_WEATHER, TP_ALARM };
 
-	alarm->ds1 = civbuf[0] + 2 * civbuf[1] + 4 * civbuf[3];
-	alarm->ps1 = civbuf[2] + 2 * civbuf[4] + 4 * civbuf[5];
-	alarm->dl1 = civbuf[12] + 2 * civbuf[13] + 4 * civbuf[14] +
-	    8 * civbuf[15] + 16 * civbuf[16] + 32 * civbuf[17] +
-	    64 * civbuf[19] + 128 * civbuf[20] + 256 * civbuf[21] +
-	    512 * civbuf[23];
-	alarm->pl1 = civbuf[18] + 2 * civbuf[22] + 4 * civbuf[24] +
-	    8 * civbuf[25];
+#include <stdint.h>
 
-	alarm->ds2 = civbuf[6] + 2 * civbuf[7] + 4 * civbuf[9];
-	alarm->ps2 = civbuf[8] + 2 * civbuf[10] + 4 * civbuf[11];
-	alarm->dl2 = civbuf[26] + 2 * civbuf[27] + 4 * civbuf[28] +
-	    8 * civbuf[29] + 16 * civbuf[30] + 32 * civbuf[31] +
-	    64 * civbuf[33] + 128 * civbuf[34] + 256 * civbuf[35] +
-	    512 * civbuf[37];
-	alarm->pl2 = civbuf[32] + 2 * civbuf[36] + 4 * civbuf[38] +
-	    8 * civbuf[39];
-}
+/**
+ * Initialize internal structures.
+ */
+void init_thirdparty(void);
+
+/**
+ * Add the current bit value to the third party buffer.
+ *
+ * @param minute The current value of the minute.
+ * @param bitpos The current bit position.
+ * @param bit The current bit value.
+ */
+void fill_thirdparty_buffer(int minute, int bitpos, uint16_t bit);
+
+/**
+ * Retrieve the third party buffer.
+ *
+ * @return The third party buffer.
+ */
+uint8_t *get_thirdparty_buffer(void);
+
+/**
+ * Retrieve the type of the third party contents.
+ *
+ * @return The third party status.
+ */
+enum TPTYPE get_thirdparty_type(void);
+
+#endif

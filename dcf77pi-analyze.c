@@ -23,6 +23,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
+#include "bits1to14.h"
 #include "config.h"
 #include "decode_time.h"
 #include "mainloop.h"
@@ -116,13 +117,13 @@ display_alarm_file(struct alm alarm)
 }
 
 void
-display_alarm_error_file(void)
+display_unknown_file(void)
 {
-	printf("Civil warning error\n");
+	printf("Unknown third party contents\n");
 }
 
 void
-display_alarm_ok_file(void)
+display_weather_file(void)
 {
 	/* Nothing to do in this callback function */
 }
@@ -140,13 +141,13 @@ print_minute(int acc_minlen, int minlen)
 }
 
 void
-print_civil_buffer(uint8_t *civbuf)
+print_thirdparty_buffer(uint8_t *tpbuf)
 {
 	int i;
 
-	printf("German civil buffer: ");
-	for (i = 0; i < CIVBUFLEN; i++)
-		printf("%u", civbuf[i]);
+	printf("Third party buffer: ");
+	for (i = 0; i < TPBUFLEN; i++)
+		printf("%u", tpbuf[i]);
 	printf("\n");
 }
 
@@ -178,8 +179,8 @@ main(int argc, char *argv[])
 
 	res = mainloop(NULL, get_bit_file, display_bit_file,
 	    print_long_minute, print_minute, NULL, display_alarm_file,
-	    display_alarm_error_file, display_alarm_ok_file, display_time_file,
-	    print_civil_buffer, NULL, NULL, NULL);
+	    display_unknown_file, display_weather_file, display_time_file,
+	    print_thirdparty_buffer, NULL, NULL, NULL);
 	free(logfilename);
 	return res;
 }

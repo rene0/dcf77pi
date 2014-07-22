@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2014 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -23,30 +23,71 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include "decode_alarm.h"
-
 #include "bits1to14.h"
 
+#include "input.h"
+
+#include <strings.h>
+
+uint8_t tpbuf[TPBUFLEN];
+enum TPTYPE tptype = TP_UNKNOWN;
+
+uint8_t tpstat = 0;
+
 void
-decode_alarm(struct alm *alarm)
+init_thirdparty(void)
 {
-	uint8_t *civbuf = get_thirdparty_buffer();
+	bzero(tpbuf, sizeof(tpbuf));
+	tptype = TP_UNKNOWN;
+}
 
-	alarm->ds1 = civbuf[0] + 2 * civbuf[1] + 4 * civbuf[3];
-	alarm->ps1 = civbuf[2] + 2 * civbuf[4] + 4 * civbuf[5];
-	alarm->dl1 = civbuf[12] + 2 * civbuf[13] + 4 * civbuf[14] +
-	    8 * civbuf[15] + 16 * civbuf[16] + 32 * civbuf[17] +
-	    64 * civbuf[19] + 128 * civbuf[20] + 256 * civbuf[21] +
-	    512 * civbuf[23];
-	alarm->pl1 = civbuf[18] + 2 * civbuf[22] + 4 * civbuf[24] +
-	    8 * civbuf[25];
+void
+fill_thirdparty_buffer(int minute, int bitpos, uint16_t bit)
+{
+	switch (minute % 3) {
+	case 0:
+		/* copy third party data */
+		if (bitpos > 1 && bitpos < 8)
+			tpbuf[bitpos - 2] = bit & GETBIT_ONE;
+			/* 2..7 -> 0..5 */
+		if (bitpos > 8 && bitpos < 15)
+			tpbuf[bitpos - 3] = bit & GETBIT_ONE;
+			/* 9..14 -> 6..11 */
 
-	alarm->ds2 = civbuf[6] + 2 * civbuf[7] + 4 * civbuf[9];
-	alarm->ps2 = civbuf[8] + 2 * civbuf[10] + 4 * civbuf[11];
-	alarm->dl2 = civbuf[26] + 2 * civbuf[27] + 4 * civbuf[28] +
-	    8 * civbuf[29] + 16 * civbuf[30] + 32 * civbuf[31] +
-	    64 * civbuf[33] + 128 * civbuf[34] + 256 * civbuf[35] +
-	    512 * civbuf[37];
-	alarm->pl2 = civbuf[32] + 2 * civbuf[36] + 4 * civbuf[38] +
-	    8 * civbuf[39];
+		/* copy third party type */
+		if (bitpos == 1)
+			tpstat = (bit & GETBIT_ONE) << 1;
+		if (bitpos == 8) {
+			tpstat |= bit & GETBIT_ONE;
+			if (tpstat == 0)
+				tptype = TP_WEATHER;
+			else if (tpstat == 3)
+				tptype = TP_ALARM;
+		}
+		break;
+	case 1:
+		/* copy third party data */
+		if (bitpos > 0 && bitpos < 15)
+			tpbuf[bitpos + 11] = bit & GETBIT_ONE;
+			/* 1..14 -> 12..25 */
+		break;
+	case 2:
+		/* copy third party data */
+		if (bitpos > 0 && bitpos < 15)
+			tpbuf[bitpos + 25] = bit & GETBIT_ONE;
+			/* 1..14 -> 26..39 */
+		break;
+	}
+}
+
+uint8_t *
+get_thirdparty_buffer(void)
+{
+	return tpbuf;
+}
+
+enum TPTYPE
+get_thirdparty_type(void)
+{
+	return tptype;
 }
