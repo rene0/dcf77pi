@@ -222,6 +222,10 @@ display_bit_gui(uint16_t state, int bitpos)
 		mvwchgat(input_win, 3, 22, 8, A_BOLD, 3, NULL);
 	else
 		mvwchgat(input_win, 3, 22, 8, A_NORMAL, 7, NULL);
+	if (bitinf->bitlen_reset)
+		mvwchgat(input_win, 3, 31, 9, A_BOLD, 3, NULL);
+	else
+		mvwchgat(input_win, 3, 31, 9, A_NORMAL, 7, NULL);
 
 	mvwprintw(input_win, 3, 1, "%2u", bitpos);
 

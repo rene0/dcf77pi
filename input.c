@@ -253,6 +253,16 @@ reset_frequency(void)
 	bit.freq_reset = 1;
 }
 
+void
+reset_bitlen(void)
+{
+	if (logfile != NULL)
+		fprintf(logfile, "!");
+	bit.bit0 = 0.1 * bit.realfreq;
+	bit.bit20 = 0.2 * bit.realfreq;
+	bit.bitlen_reset = 1;
+}
+
 uint16_t
 get_bit_live(void)
 {
@@ -272,6 +282,7 @@ get_bit_live(void)
 	int is_eom = state & GETBIT_EOM;
 
 	bit.freq_reset = 0;
+	bit.bitlen_reset = 0;
 	bit.frac = bit.maxone = -0.01;
 
 	set_new_state();
@@ -415,6 +426,9 @@ get_bit_live(void)
 			bit.bit0 = bit.bit0 + 0.5 * (bit.tlow - bit.bit0);
 		if (bitpos == 20 && buffer[20] == 1)
 			bit.bit20 = bit.bit20 + 0.5 * (bit.tlow - bit.bit20);
+	/* During a thunderstorm the value of bit20 might underflow */
+	if (bit.bit20 < bit.bit0)
+		reset_bitlen();
 	}
 report:
 	if (logfile != NULL)

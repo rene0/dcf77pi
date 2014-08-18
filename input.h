@@ -80,6 +80,7 @@ struct bitinfo {
 	float realfreq, bit0, bit20; /* static */
 	float frac, maxone, a;
 	char *signal;
+	int bitlen_reset;
 };
 
 /**
