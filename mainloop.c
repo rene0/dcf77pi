@@ -29,7 +29,6 @@ SUCH DAMAGE.
 #include "decode_time.h"
 
 #include <string.h>
-#include <strings.h>
 
 int
 mainloop(char *logfilename,
@@ -59,7 +58,7 @@ mainloop(char *logfilename,
 	int change_logfile = 0;
 
 	init_time();
-	bzero(&time, sizeof(time));
+	(void)memset(&time, '\0', sizeof(time));
 	init_thirdparty();
 
 	for (;;) {

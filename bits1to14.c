@@ -27,7 +27,7 @@ SUCH DAMAGE.
 
 #include "input.h"
 
-#include <strings.h>
+#include <string.h>
 
 uint8_t tpbuf[TPBUFLEN];
 enum TPTYPE tptype = TP_UNKNOWN;
@@ -37,7 +37,7 @@ uint8_t tpstat = 0;
 void
 init_thirdparty(void)
 {
-	bzero(tpbuf, sizeof(tpbuf));
+	(void)memset(tpbuf, '\0', sizeof(tpbuf));
 	tptype = TP_UNKNOWN;
 }
 

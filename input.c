@@ -32,7 +32,7 @@ SUCH DAMAGE.
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -149,7 +149,7 @@ set_state_vars(void)
 {
 	bitpos = 0;
 	state = 0;
-	bzero(buffer, sizeof(buffer));
+	(void)memset(buffer, '\0', sizeof(buffer));
 }
 
 int
