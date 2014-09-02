@@ -302,7 +302,11 @@ get_bit_live(void)
 		bit.realfreq = hw.freq;
 		bit.bit0 = 0.1 * bit.realfreq;
 		bit.bit20 = 0.2 * bit.realfreq;
-		bit.signal = malloc(5/2 * 3/2 * hw.freq);
+		bit.signal = malloc(2 + 5/2 * 3/2 * hw.freq);
+		/*
+		 * 2 (because bit.t starts at 0 and strict > comparison) +
+		 * radio error limit * frequency reset limit * hw.freq
+		 */
 	}
 	sec2 = 1e9 / hw.freq / hw.freq;
 	/*

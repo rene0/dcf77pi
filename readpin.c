@@ -65,7 +65,11 @@ main(int argc, char **argv)
 		if (verbose) {
 			if (bi->freq_reset)
 				printf("!");
-			bi->signal[bi->t] = '\0';
+			/*
+			 * bi->t == 0 means that pulse 0 is available,
+			 * so length is 0-based
+			 */
+			bi->signal[bi->t + 1] = '\0';
 			printf("%s\n", bi->signal);
 		}
 		printf("%x (%i %i %i %f %f %f %f %f %f) %i:%i\n", bit,
