@@ -21,19 +21,19 @@ srcfile = dcf77pi-analyze.c
 objfile = dcf77pi-analyze.o
 
 input.o: input.h config.h
-	$(CC) -fPIC $(CFLAGS) -c input.c -o $@
+	$(CC) -fpic $(CFLAGS) -c input.c -o $@
 decode_time.o: decode_time.h config.h
-	$(CC) -fPIC $(CFLAGS) -c decode_time.c -o $@
+	$(CC) -fpic $(CFLAGS) -c decode_time.c -o $@
 decode_alarm.o: decode_alarm.h
-	$(CC) -fPIC $(CFLAGS) -c decode_alarm.c -o $@
+	$(CC) -fpic $(CFLAGS) -c decode_alarm.c -o $@
 config.o: config.h
-	$(CC) -fPIC $(CFLAGS) -c config.c -o $@
+	$(CC) -fpic $(CFLAGS) -c config.c -o $@
 setclock.o: setclock.h
-	$(CC) -fPIC $(CFLAGS) -c setclock.c -o $@
+	$(CC) -fpic $(CFLAGS) -c setclock.c -o $@
 mainloop.o: mainloop.h
-	$(CC) -fPIC $(CFLAGS) -c mainloop.c -o $@
+	$(CC) -fpic $(CFLAGS) -c mainloop.c -o $@
 bits1to14.o: bits1to14.h
-	$(CC) -fPIC $(CFLAGS) -c bits1to14.c -o $@
+	$(CC) -fpic $(CFLAGS) -c bits1to14.c -o $@
 
 libdcf77.so: $(objlib) $(hdrlib)
 	$(CC) -shared -o $@ $(objlib) -lm
