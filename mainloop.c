@@ -48,7 +48,7 @@ mainloop(char *logfilename,
 {
 	uint16_t bit;
 	uint32_t dt = 0;
-	int minlen = 0, acc_minlen = 0;
+	unsigned int minlen = 0, acc_minlen = 0;
 	int bitpos = 0;
 	int init = 3;
 	struct tm time;

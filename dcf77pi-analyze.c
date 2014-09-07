@@ -135,9 +135,9 @@ print_long_minute(void)
 }
 
 void
-print_minute(int acc_minlen, int minlen)
+print_minute(unsigned int acc_minlen, unsigned int minlen)
 {
-	printf(" (%d) %d\n", acc_minlen, minlen);
+	printf(" (%u) %u\n", acc_minlen, minlen);
 }
 
 void

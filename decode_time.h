@@ -122,8 +122,8 @@ void add_minute(struct tm *time);
  * @return The state of this minute, the combination of the various DT_* and
  *   ANN_* values that are applicable.
  */
-uint32_t decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
-    int *acc_minlen);
+uint32_t decode_time(int init, unsigned int minlen, uint8_t *buffer,
+    struct tm *time, unsigned int *acc_minlen);
 
 /**
  * Calculates the hour in UTC from the given time.

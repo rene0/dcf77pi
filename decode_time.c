@@ -196,8 +196,8 @@ add_minute(struct tm *time)
 }
 
 uint32_t
-decode_time(int init, int minlen, uint8_t *buffer, struct tm *time,
-    int *acc_minlen)
+decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time,
+    unsigned int *acc_minlen)
 {
 	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
 	unsigned int tmp, tmp0, tmp1, tmp2, tmp4, tmp5;

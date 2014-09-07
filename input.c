@@ -71,7 +71,7 @@ struct hardware hw;
 struct bitinfo bit;
 
 int
-init_hardware(int pin_nr)
+init_hardware(unsigned int pin_nr)
 {
 #if defined(__FreeBSD__) && !defined(NOLIVE)
 	struct gpio_pin pin;
@@ -96,7 +96,7 @@ init_hardware(int pin_nr)
 		perror("open (/sys/class/gpio/export)");
 		return -errno;
 	}
-	res = snprintf(buf, sizeof(buf), "%d", pin_nr);
+	res = snprintf(buf, sizeof(buf), "%u", pin_nr);
 	if (res < 0 || res > sizeof(buf)-1) {
 		printf("pin_nr too high? (%i)\n", res);
 		return -1;
@@ -110,7 +110,7 @@ init_hardware(int pin_nr)
 		perror("close(export)");
 		return -errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/direction",
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction",
 	    pin_nr);
 	if (res < 0 || res > sizeof(buf)-1) {
 		printf("pin_nr too high? (%i)\n", res);
@@ -129,7 +129,7 @@ init_hardware(int pin_nr)
 		perror("close(direction)");
 		return -errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/value",
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value",
 	    pin_nr);
 	if (res < 0 || res > sizeof(buf)-1) {
 		printf("pin_nr too high? (%i)\n", res);
