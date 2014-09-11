@@ -8,6 +8,9 @@ For the Raspberry Pi, connect a stand-alone DCF77 receiver to a GPIO
 communication pin (default is 17) and the GPIO GND/3.3V pins (not 5V, this will
 break the Raspberry Pi).
 
+An example schematics of a receiver is shown in receiver.fcd which can be shown
+using the FidoCadJ package.
+
 The software comes with three binaries and a library:
 
 * dcf77pi : Live decoding from the GPIO pins in interactive mode. Useable keys
