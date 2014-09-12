@@ -27,11 +27,9 @@ SUCH DAMAGE.
 #include "input.h"
 
 #include <inttypes.h>
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <sysexits.h>
-#include <time.h>
 
 int
 main(int argc, char **argv)
@@ -73,10 +71,12 @@ main(int argc, char **argv)
 			bi->signal[bi->t + 1] = '\0';
 			printf("%s\n", bi->signal);
 		}
+		if (bit & GETBIT_TOOLONG)
+			min++;
 		printf("%x (%"PRIi64" %"PRIi64" %"PRIi64" %"PRIi64" %"PRIi64
 		    " %"PRIi64") %i:%i\n", bit, bi->tlow, bi->tlast0, bi->t,
 		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
-		if (bit & GETBIT_EOM || bit & GETBIT_TOOLONG)
+		if (bit & GETBIT_EOM)
 			min++;
 		bit = next_bit();
 	}
