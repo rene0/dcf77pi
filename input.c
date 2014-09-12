@@ -247,9 +247,9 @@ void
 reset_frequency(void)
 {
 	if (logfile != NULL)
-		fprintf(logfile, bit.realfreq < hw.freq / 2 ?  "<" :
-		    bit.realfreq > hw.freq * 3/2 ? ">" : "");
-	bit.realfreq = hw.freq;
+		fprintf(logfile, bit.realfreq < hw.freq * 500000 ?  "<" :
+		    bit.realfreq > hw.freq * 1500000 ? ">" : "");
+	bit.realfreq = hw.freq * 1000000;
 	bit.freq_reset = 1;
 }
 
@@ -258,8 +258,8 @@ reset_bitlen(void)
 {
 	if (logfile != NULL)
 		fprintf(logfile, "!");
-	bit.bit0 = 0.1 * bit.realfreq;
-	bit.bit20 = 0.2 * bit.realfreq;
+	bit.bit0 = bit.realfreq / 10;
+	bit.bit20 = bit.realfreq / 5;
 	bit.bitlen_reset = 1;
 }
 
@@ -277,7 +277,8 @@ get_bit_live(void)
 	int newminute;
 	uint8_t p, stv = 1;
 	struct timespec slp;
-	float y = 1.0, sec2;
+	uint32_t sec2;
+	int64_t a, y = 1000000000;
 	static int init = 1;
 	int is_eom = state & GETBIT_EOM;
 
@@ -298,20 +299,20 @@ get_bit_live(void)
 	 */
 
 	if (init == 1) {
-		bit.realfreq = hw.freq;
-		bit.bit0 = 0.1 * bit.realfreq;
-		bit.bit20 = 0.2 * bit.realfreq;
+		bit.realfreq = hw.freq * 1000000;
+		bit.bit0 = bit.realfreq / 10;
+		bit.bit20 = bit.realfreq / 5;
 		bit.signal = malloc(2 + 5/2 * 3/2 * hw.freq);
 		/*
 		 * 2 (because bit.t starts at 0 and strict > comparison) +
 		 * radio error limit * frequency reset limit * hw.freq
 		 */
 	}
-	sec2 = 1e9 / hw.freq / hw.freq;
+	sec2 = 1000000000 / (hw.freq * hw.freq);
 	/*
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
-	bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
+	a = 1000000000 - 1000000000 * exp2(-2e7 / bit.realfreq);
 	bit.tlow = -1;
 	bit.tlast0 = -1;
 
@@ -324,21 +325,21 @@ get_bit_live(void)
 		}
 		bit.signal[bit.t] = p ? '+' : '-';
 
-		if (y >= 0 && y < bit.a / 2 /* fp error margin */)
+		if (y >= 0 && y < a / 2 /* fp error margin */)
 			bit.tlast0 = bit.t;
-		y = y + bit.a * (p - y);
+		y += a * (p * 1000000000 - y) / 1000000000;
 
 		/*
 		 * Prevent algorithm collapse during thunderstorms
 		 * or scheduler abuse
 		 */
-		if (bit.realfreq < hw.freq / 2 || bit.realfreq > hw.freq * 3/2)
+		if (bit.realfreq < hw.freq * 500000 || bit.realfreq > hw.freq * 1500000)
 			reset_frequency();
 
-		if (bit.t > bit.realfreq * 5/2) {
-			bit.realfreq = bit.realfreq + 0.05 *
-			    ((bit.t / 2.5) - bit.realfreq);
-			bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
+		if (bit.t > bit.realfreq * 2500000) {
+			bit.realfreq = bit.realfreq +
+			    (bit.t * 2500000 - bit.realfreq) / 20;
+			a = 1000000000 - 1000000000 * exp2(-2e7 / bit.realfreq);
 			if (bit.tlow * 100 / bit.t < 1) {
 				state |= GETBIT_RECV;
 				outch = 'r';
@@ -356,26 +357,26 @@ get_bit_live(void)
 		 * Schmitt trigger, maximize value to introduce
 		 * hysteresis and to avoid infinite memory.
 		 */
-		if (y < 0.5 && stv == 1) {
-			y = 0.0;
+		if (y < 500000000 && stv == 1) {
+			y = 0;
 			stv = 0;
 			bit.tlow = bit.t; /* end of high part of second */
 		}
-		if (y > 0.5 && stv == 0) {
-			y = 1.0;
+		if (y > 500000000 && stv == 0) {
+			y = 1000000000;
 			stv = 1;
 
-			newminute = bit.t > bit.realfreq * 3/2;
+			newminute = bit.t * 2000000 > bit.realfreq * 3;
 			if (init == 1)
 				init = 2;
 			else {
 				if (newminute)
-					bit.realfreq = bit.realfreq + 0.05 *
-					    ((bit.t/2) - bit.realfreq);
+					bit.realfreq = bit.realfreq +
+					    (bit.t * 500000 - bit.realfreq) / 20;
 				else
-					bit.realfreq = bit.realfreq + 0.05 *
-					    (bit.t - bit.realfreq);
-				bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
+					bit.realfreq = bit.realfreq +
+					    (bit.t * 1000000 - bit.realfreq) / 20;
+				a = 1000000000 - 1000000000 * exp2(-2e7 / bit.realfreq);
 			}
 
 			if (newminute) {
@@ -394,7 +395,7 @@ get_bit_live(void)
 			break; /* start of new second */
 		}
 		slp.tv_sec = 0;
-		slp.tv_nsec = sec2 * bit.realfreq;
+		slp.tv_nsec = sec2 * bit.realfreq / 1000000;
 		while (nanosleep(&slp, &slp))
 			;
 	}
@@ -423,9 +424,9 @@ get_bit_live(void)
 	else if ((state & (GETBIT_RND | GETBIT_XMIT |
 	    GETBIT_RECV | GETBIT_EOM | GETBIT_TOOLONG)) == 0) {
 		if (bitpos == 0 && buffer[0] == 0 && (state & GETBIT_READ) == 0)
-			bit.bit0 = bit.bit0 + 0.5 * (bit.tlow - bit.bit0);
+			bit.bit0 = bit.bit0 + (bit.tlow * 1000000 - bit.bit0) / 2;
 		if (bitpos == 20 && buffer[20] == 1)
-			bit.bit20 = bit.bit20 + 0.5 * (bit.tlow - bit.bit20);
+			bit.bit20 = bit.bit20 + (bit.tlow * 1000000 - bit.bit20) / 2;
 	/* During a thunderstorm the value of bit20 might underflow */
 	if (bit.bit20 < bit.bit0)
 		reset_bitlen();

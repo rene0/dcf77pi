@@ -26,6 +26,7 @@ SUCH DAMAGE.
 #include "config.h"
 #include "input.h"
 
+#include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -72,9 +73,9 @@ main(int argc, char **argv)
 			bi->signal[bi->t + 1] = '\0';
 			printf("%s\n", bi->signal);
 		}
-		printf("%x (%i %i %i %f %f %f %f) %i:%i\n", bit,
-		    bi->tlow, bi->tlast0, bi->t, bi->bit0, bi->bit20,
-		    bi->realfreq, bi->a, min, get_bitpos());
+		printf("%x (%"PRIi64" %"PRIi64" %"PRIi64" %"PRIi64" %"PRIi64
+		    " %"PRIi64") %i:%i\n", bit, bi->tlow, bi->tlast0, bi->t,
+		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
 		if (bit & GETBIT_EOM || bit & GETBIT_TOOLONG)
 			min++;
 		bit = next_bit();

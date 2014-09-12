@@ -73,11 +73,10 @@ struct hardware {
  * signal[]   = the raw received radio signal, 2.5 * 1.5 * hw.freq items
  */
 struct bitinfo {
-	int tlow, tlast0, t, freq_reset;
-	float realfreq, bit0, bit20; /* static */
-	float a;
+	int64_t tlow, tlast0, t;
+	int64_t realfreq, bit0, bit20; /* static */
+	int bitlen_reset, freq_reset;
 	char *signal;
-	int bitlen_reset;
 };
 
 /**
