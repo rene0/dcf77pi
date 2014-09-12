@@ -68,9 +68,6 @@ struct hardware {
  * realfreq   = the average length of a bit in samples
  * bit0       = the average length of bit 0 (a 0 bit) in samples
  * bit20      = the average length of bit 20 (a 1 bit) in samples
- * frac       = tlow / t, or -1 % in case of an error
- * maxone     = the maximum allowed length of the high part of the pulse for
- *   a 1 bit, or -1 % in case of an error
  * a          = the amount to update the wave of the pulse with
  *   (see blinkenlight link in README.md)
  * signal[]   = the raw received radio signal, 2.5 * 1.5 * hw.freq items
@@ -78,7 +75,7 @@ struct hardware {
 struct bitinfo {
 	int tlow, tlast0, t, freq_reset;
 	float realfreq, bit0, bit20; /* static */
-	float frac, maxone, a;
+	float a;
 	char *signal;
 	int bitlen_reset;
 };

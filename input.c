@@ -283,19 +283,18 @@ get_bit_live(void)
 
 	bit.freq_reset = 0;
 	bit.bitlen_reset = 0;
-	bit.frac = bit.maxone = -0.01;
 
 	set_new_state();
 
 	/*
-	 * One period is either 1000 ms or 2000 ms long (normal or
-	 * padding for last). The active part is either 100 ms ('0')
-	 * or 200 ms ('1') long, the maximum allowed values as
-	 * percentage of the second length are specified with maxone/2
-	 * and maxone respectively.
+	 * One period is either 1000 ms or 2000 ms long (normal or padding for
+	 * last). The active part is either 100 ms ('0') or 200 ms ('1') long.
+	 * The maximum allowed values as percentage of the second length are
+	 * secified as half the value and the whole value of the lengths of
+	 * bit 0 and bit 20 respectively.
 	 *
-	 *  ~A > 1.5 * realfreq: value |= GETBIT_EOM
-	 *  ~A > 2.5 * realfreq: timeout
+	 *  ~A > 3/2 * realfreq: value |= GETBIT_EOM
+	 *  ~A > 5/2 * realfreq: timeout
 	 */
 
 	if (init == 1) {
@@ -379,7 +378,6 @@ get_bit_live(void)
 				bit.a = 1.0 - exp2(-1.0 / (bit.realfreq / 20.0));
 			}
 
-			bit.frac = (float)bit.tlow / (float)bit.t;
 			if (newminute) {
 				/*
 				 * Reset the frequency and the EOM flag if two
@@ -391,7 +389,6 @@ get_bit_live(void)
 					reset_frequency();
 				} else {
 					state |= GETBIT_EOM;
-					bit.frac *= 2;
 				}
 			}
 			break; /* start of new second */
@@ -402,12 +399,11 @@ get_bit_live(void)
 			;
 	}
 
-	bit.maxone = (bit.bit0 + bit.bit20) / bit.realfreq;
-	if (bit.frac >= 0 && bit.frac <= bit.maxone / 2.0) {
+	if (2 * bit.realfreq * bit.tlow * (1 + newminute) < (bit.bit0 + bit.bit20) * bit.t) {
 		/* zero bit, ~100 ms active signal */
 		outch = '0';
 		buffer[bitpos] = 0;
-	} else if (bit.frac > bit.maxone / 2.0 && bit.frac <= bit.maxone) {
+	} else if (bit.realfreq * bit.tlow * (1 + newminute) <= (bit.bit0 + bit.bit20) * bit.t) {
 		/* one bit, ~200 ms active signal */
 		state |= GETBIT_ONE;
 		outch = '1';

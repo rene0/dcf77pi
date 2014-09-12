@@ -214,10 +214,9 @@ display_bit_gui(uint16_t state, int bitpos)
 
 	bitinf = get_bitinfo();
 
-	mvwprintw(input_win, 3, 4, "%4d  %4d  %4u  %8.3f %4u %4u %4.1f%%"
-	    "  %8.6f", bitinf->tlow, bitinf->tlast0, bitinf->t,
-	    bitinf->realfreq, (int)bitinf->bit0, (int)bitinf->bit20,
-	    bitinf->maxone * 100, bitinf->a);
+	mvwprintw(input_win, 3, 4, "%4i  %4i  %4u  %8.3f %4u %4u  %8.6f",
+	    bitinf->tlow, bitinf->tlast0, bitinf->t, bitinf->realfreq,
+	    (int)bitinf->bit0, (int)bitinf->bit20, bitinf->a);
 	if (bitinf->freq_reset)
 		mvwchgat(input_win, 3, 22, 8, A_BOLD, 3, NULL);
 	else
@@ -231,27 +230,27 @@ display_bit_gui(uint16_t state, int bitpos)
 
 	wattron(input_win, COLOR_PAIR(2));
 	if (state & GETBIT_EOM)
-		mvwprintw(input_win, 3, 57, "minute   ");
+		mvwprintw(input_win, 3, 52, "minute   ");
 	else if (state == 0 || state == GETBIT_ONE)
-		mvwprintw(input_win, 3, 57, "OK       ");
+		mvwprintw(input_win, 3, 52, "OK       ");
 	else
-		mvwprintw(input_win, 3, 57, "         ");
+		mvwprintw(input_win, 3, 52, "         ");
 	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
 	if (state & GETBIT_READ)
-		mvwprintw(input_win, 3, 57, "read     ");
+		mvwprintw(input_win, 3, 52, "read     ");
 	if (state & GETBIT_RECV)
-		mvwprintw(input_win, 3, 68, "receive ");
+		mvwprintw(input_win, 3, 63, "receive ");
 	else if (state & GETBIT_XMIT)
-		mvwprintw(input_win, 3, 68, "transmit");
+		mvwprintw(input_win, 3, 63, "transmit");
 	else if (state & GETBIT_RND)
-		mvwprintw(input_win, 3, 68, "random  ");
+		mvwprintw(input_win, 3, 63, "random  ");
 	else if (state & GETBIT_IO)
-		mvwprintw(input_win, 3, 68, "IO      ");
+		mvwprintw(input_win, 3, 63, "IO      ");
 	else {
 		wattron(input_win, COLOR_PAIR(2));
-		mvwprintw(input_win, 3, 68, "OK      ");
+		mvwprintw(input_win, 3, 63, "OK      ");
 		wattroff(input_win, COLOR_PAIR(2));
 	}
 	wattroff(input_win, COLOR_PAIR(1));
@@ -271,7 +270,7 @@ draw_input_window(void)
 {
 	mvwprintw(input_win, 0, 0, "new");
 	mvwprintw(input_win, 2, 0, "bit  act last0 total  realfreq   b0"
-	    "  b20  max1 increment state      radio");
+	    "  b20  increment state      radio");
 	wrefresh(input_win);
 }
 
@@ -495,7 +494,7 @@ void
 print_long_minute(void)
 {
 	wattron(input_win, COLOR_PAIR(1));
-	mvwprintw(input_win, 3, 57, "no minute");
+	mvwprintw(input_win, 3, 52, "no minute");
 	wattroff(input_win, COLOR_PAIR(1));
 }
 
