@@ -333,7 +333,8 @@ get_bit_live(void)
 		 * Prevent algorithm collapse during thunderstorms
 		 * or scheduler abuse
 		 */
-		if (bit.realfreq < hw.freq * 500000 || bit.realfreq > hw.freq * 1500000)
+		if (bit.realfreq < hw.freq * 500000 ||
+		    bit.realfreq > hw.freq * 1500000)
 			reset_frequency();
 
 		if (bit.t > bit.realfreq * 2500000) {
@@ -371,12 +372,13 @@ get_bit_live(void)
 				init = 2;
 			else {
 				if (newminute)
-					bit.realfreq = bit.realfreq +
-					    (bit.t * 500000 - bit.realfreq) / 20;
+					bit.realfreq = bit.realfreq + (bit.t *
+					    500000 - bit.realfreq) / 20;
 				else
-					bit.realfreq = bit.realfreq +
-					    (bit.t * 1000000 - bit.realfreq) / 20;
-				a = 1000000000 - 1000000000 * exp2(-2e7 / bit.realfreq);
+					bit.realfreq = bit.realfreq + (bit.t *
+					    1000000 - bit.realfreq) / 20;
+				a = 1000000000 - 1000000000 *
+				    exp2(-2e7 / bit.realfreq);
 			}
 
 			if (newminute) {
@@ -388,9 +390,8 @@ get_bit_live(void)
 				if (is_eom) {
 					state &= ~GETBIT_EOM;
 					reset_frequency();
-				} else {
+				} else
 					state |= GETBIT_EOM;
-				}
 			}
 			break; /* start of new second */
 		}
@@ -400,11 +401,13 @@ get_bit_live(void)
 			;
 	}
 
-	if (2 * bit.realfreq * bit.tlow * (1 + newminute) < (bit.bit0 + bit.bit20) * bit.t) {
+	if (2 * bit.realfreq * bit.tlow * (1 + newminute) <
+	    (bit.bit0 + bit.bit20) * bit.t) {
 		/* zero bit, ~100 ms active signal */
 		outch = '0';
 		buffer[bitpos] = 0;
-	} else if (bit.realfreq * bit.tlow * (1 + newminute) <= (bit.bit0 + bit.bit20) * bit.t) {
+	} else if (bit.realfreq * bit.tlow * (1 + newminute) <=
+	    (bit.bit0 + bit.bit20) * bit.t) {
 		/* one bit, ~200 ms active signal */
 		state |= GETBIT_ONE;
 		outch = '1';
@@ -424,12 +427,14 @@ get_bit_live(void)
 	else if ((state & (GETBIT_RND | GETBIT_XMIT |
 	    GETBIT_RECV | GETBIT_EOM | GETBIT_TOOLONG)) == 0) {
 		if (bitpos == 0 && buffer[0] == 0 && (state & GETBIT_READ) == 0)
-			bit.bit0 = bit.bit0 + (bit.tlow * 1000000 - bit.bit0) / 2;
+			bit.bit0 = bit.bit0 +
+			    (bit.tlow * 1000000 - bit.bit0) / 2;
 		if (bitpos == 20 && buffer[20] == 1)
-			bit.bit20 = bit.bit20 + (bit.tlow * 1000000 - bit.bit20) / 2;
-	/* During a thunderstorm the value of bit20 might underflow */
-	if (bit.bit20 < bit.bit0)
-		reset_bitlen();
+			bit.bit20 = bit.bit20 +
+			    (bit.tlow * 1000000 - bit.bit20) / 2;
+		/* During a thunderstorm the value of bit20 might underflow */
+		if (bit.bit20 < bit.bit0)
+			reset_bitlen();
 	}
 report:
 	if (logfile != NULL)
