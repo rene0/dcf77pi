@@ -60,17 +60,19 @@ struct hardware {
 
 /*
  * (Internal) information about the currently received bit:
- * tlow       = time in samples when the signal went low again
- * tlast0     = time in samples when the signal was last measured as 0
- * t          = length of this bit in samples
- * freq_reset = realfreq was reset to hw.freq (normally because of reception
- *    errors)
- * realfreq   = the average length of a bit in samples
- * bit0       = the average length of bit 0 (a 0 bit) in samples
- * bit20      = the average length of bit 20 (a 1 bit) in samples
- * a          = the amount to update the wave of the pulse with
- *   (see blinkenlight link in README.md)
- * signal[]   = the raw received radio signal, 2.5 * 1.5 * hw.freq items
+ * tlow         = time in samples when the signal went low again
+ * tlast0       = time in samples when the signal was last measured as 0
+ * t            = length of this bit in samples
+ * realfreq     = the average length of a bit in samples
+ * bit0         = the average length of the high part of bit 0 (a 0 bit) in
+ *                samples
+ * bit20        = the average length of the high part of bit 20 (a 1 bit) in
+ *                samples
+ * bitlen_reset = bit0 and bit20 were reset to their initial values (normally
+ *                because of reception errors)
+ * freq_reset   = realfreq was reset to hw.freq (normally because of reception
+ *                errors)
+ * signal[]     = the raw received radio signal, 2.5 * 1.5 * hw.freq items
  */
 struct bitinfo {
 	int64_t tlow, tlast0, t;
