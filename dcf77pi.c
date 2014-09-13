@@ -208,7 +208,7 @@ curses_cleanup(char *reason)
 }
 
 void
-display_bit_gui(uint16_t state, int bitpos)
+display_bit(uint16_t state, int bitpos)
 {
 	int xpos, i;
 	struct bitinfo *bitinf;
@@ -310,7 +310,7 @@ switch_logfile(WINDOW *win, char **logfilename, int bitpos)
 }
 
 void
-display_time_gui(uint32_t dt, struct tm time)
+display_time(uint32_t dt, struct tm time)
 {
 	/* color bits depending on the results */
 	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, dt & DT_B0 ? 1 : 2, NULL);
@@ -393,7 +393,7 @@ show_thirdparty_buffer(uint8_t *buf)
 }
 
 void
-display_alarm_gui(struct alm alarm)
+display_alarm(struct alm alarm)
 {
 	wattron(tp_win, COLOR_PAIR(3) | A_BOLD);
 	mvwprintw(tp_win, 1, 22, "German civil warning");
@@ -403,7 +403,7 @@ display_alarm_gui(struct alm alarm)
 }
 
 void
-display_unknown_gui(void)
+display_unknown(void)
 {
 	wattron(tp_win, COLOR_PAIR(1));
 	mvwprintw(tp_win, 1, 22, "unknown contents");
@@ -413,7 +413,7 @@ display_unknown_gui(void)
 }
 
 void
-display_weather_gui(void)
+display_weather(void)
 {
 	wattron(tp_win, COLOR_PAIR(2));
 	mvwprintw(tp_win, 1, 22, "Meteotime weather");
@@ -520,7 +520,7 @@ print_minute(unsigned int acc_minlen, unsigned int minlen)
 }
 
 void
-set_time_gui(int init, uint32_t dt, uint16_t bit, int bitpos, struct tm time)
+set_time(int init, uint32_t dt, uint16_t bit, int bitpos, struct tm time)
 {
 	if (init == 0 && ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
 	    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0))
@@ -604,10 +604,11 @@ main(int argc, char *argv[])
 	draw_input_window();
 	draw_keys(main_win);
 
-	res = mainloop(logfilename, get_bit_live, display_bit_gui,
-	    print_long_minute, print_minute, wipe_input, display_alarm_gui,
-	    display_unknown_gui, display_weather_gui, display_time_gui,
-	    show_thirdparty_buffer, set_time_gui, process_input, post_process_input);
+	res = mainloop(logfilename, get_bit_live, display_bit,
+	    print_long_minute, print_minute, wipe_input, display_alarm,
+	    display_unknown, display_weather, display_time,
+	    show_thirdparty_buffer, set_time, process_input,
+	    post_process_input);
 
 	curses_cleanup(NULL);
 	if (logfilename != NULL)

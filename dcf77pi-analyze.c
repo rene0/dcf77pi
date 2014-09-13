@@ -34,7 +34,7 @@ SUCH DAMAGE.
 #include <sysexits.h>
 
 void
-display_bit_file(uint16_t state, int bitpos)
+display_bit(uint16_t state, int bitpos)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
@@ -51,7 +51,7 @@ display_bit_file(uint16_t state, int bitpos)
 }
 
 void
-display_time_file(uint32_t dt, struct tm time)
+display_time(uint32_t dt, struct tm time)
 {
 	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
@@ -108,7 +108,7 @@ display_time_file(uint32_t dt, struct tm time)
 }
 
 void
-display_alarm_file(struct alm alarm)
+display_alarm(struct alm alarm)
 {
 	printf("German civil warning:"
 	    " 0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x 0x%1x\n",
@@ -117,13 +117,13 @@ display_alarm_file(struct alm alarm)
 }
 
 void
-display_unknown_file(void)
+display_unknown(void)
 {
 	printf("Unknown third party contents\n");
 }
 
 void
-display_weather_file(void)
+display_weather(void)
 {
 	/* Nothing to do in this callback function */
 }
@@ -177,10 +177,9 @@ main(int argc, char *argv[])
 		return res;
 	}
 
-	res = mainloop(NULL, get_bit_file, display_bit_file,
-	    print_long_minute, print_minute, NULL, display_alarm_file,
-	    display_unknown_file, display_weather_file, display_time_file,
-	    print_thirdparty_buffer, NULL, NULL, NULL);
+	res = mainloop(NULL, get_bit_file, display_bit, print_long_minute,
+	    print_minute, NULL, display_alarm, display_unknown, display_weather,
+	    display_time, print_thirdparty_buffer, NULL, NULL, NULL);
 	free(logfilename);
 	return res;
 }
