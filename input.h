@@ -51,11 +51,11 @@ SUCH DAMAGE.
  * Hardware parameters:
  * freq        = sample frequency in Hz
  * pin         = pin number to read from
- * active_high = pin value is high (1) for active signal
+ * active_high = pin value is high (1) or low (0) for active signal
  */
 struct hardware {
-	unsigned long freq;
-	unsigned int pin, active_high;
+	uint32_t freq;
+	uint8_t pin, active_high;
 };
 
 /*

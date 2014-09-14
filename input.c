@@ -177,13 +177,23 @@ set_mode_live(void)
 #else
 	/* fill hardware structure and initialize hardware */
 	hw.pin = strtol(get_config_value("pin"), NULL, 10);
+	hw.active_high = strtol(get_config_value("activehigh"), NULL, 10);
+	if (hw.active_high > 1) {
+		printf("hw.active_high must either be 0 or 1\n");
+		cleanup();
+		return -1;
+	}
+	hw.freq = strtol(get_config_value("freq"), NULL, 10);
+	if (hw.freq < 10 || hw.freq > 666666 || (hw.freq & 1) == 1) {
+		printf("hw.freq must be an even number between 10 and 666666 inclusive\n");
+		cleanup();
+		return -1;
+	}
 	res = init_hardware(hw.pin);
 	if (res < 0) {
 		cleanup();
 		return res;
 	}
-	hw.active_high = strtol(get_config_value("activehigh"), NULL, 10);
-	hw.freq = strtol(get_config_value("freq"), NULL, 10);
 #endif
 	return 0;
 }
@@ -247,8 +257,8 @@ void
 reset_frequency(void)
 {
 	if (logfile != NULL)
-		fprintf(logfile, bit.realfreq < hw.freq * 500000 ?  "<" :
-		    bit.realfreq > hw.freq * 1500000 ? ">" : "");
+		fprintf(logfile, bit.realfreq <= hw.freq * 500000 ?  "<" :
+		    bit.realfreq >= hw.freq * 1500000 ? ">" : "");
 	bit.realfreq = hw.freq * 1000000;
 	bit.freq_reset = 1;
 }
@@ -333,8 +343,8 @@ get_bit_live(void)
 		 * Prevent algorithm collapse during thunderstorms
 		 * or scheduler abuse
 		 */
-		if (bit.realfreq < hw.freq * 500000 ||
-		    bit.realfreq > hw.freq * 1500000)
+		if (bit.realfreq <= hw.freq * 500000 ||
+		    bit.realfreq >= hw.freq * 1500000)
 			reset_frequency();
 
 		if (bit.t > bit.realfreq * 2500000) {
