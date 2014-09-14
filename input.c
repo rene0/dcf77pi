@@ -332,7 +332,7 @@ get_bit_live(void)
 		if ((bit.t & 7) == 0)
 			bit.signal[bit.t / 8] = 0;
 			/* clear data from previous second */
-		bit.signal[bit.t / 8] |= p << (bit.t & 7);
+		bit.signal[bit.t / 8] |= p << (uint8_t)(bit.t & 7);
 
 		if (y >= 0 && y < a / 2)
 			bit.tlast0 = bit.t;
