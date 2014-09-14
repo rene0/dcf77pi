@@ -26,12 +26,23 @@ SUCH DAMAGE.
 #ifndef DCF77PI_SETCLOCK_H
 #define DCF77PI_SETCLOCK_H
 
+#include <stdint.h>
 #include <time.h>
+
+/**
+ * Check if it is OK to set the system clock.
+ *
+ * @param init Indicates whether the state of the decoder is initial
+ * @param dt The currently decoded date, time, and status
+ * @param bit The current bit information
+ * @return Whether it is OK to set the system clock
+ */
+int setclock_ok(int init, uint32_t dt, uint16_t bit);
 
 /**
  * Set the system clock according to the given time.
  *
- * @param time: The time to set the system clock to.
+ * @param time The time to set the system clock to.
  * @return The clock was set successfully (0), or the time was invalid (-1),
  *   or setting the clock somehow failed (-2).
  *

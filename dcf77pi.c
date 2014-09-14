@@ -522,8 +522,7 @@ print_minute(unsigned int acc_minlen, unsigned int minlen)
 void
 set_time(int init, uint32_t dt, uint16_t bit, int bitpos, struct tm time)
 {
-	if (init == 0 && ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
-	    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0))
+	if (setclock_ok(init, dt, bit))
 		switch (setclock(time)) {
 		case -1:
 			statusbar(main_win, bitpos, "mktime() failed!");
