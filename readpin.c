@@ -62,14 +62,23 @@ main(int argc, char **argv)
 		bit = get_bit_live();
 		bi = get_bitinfo();
 		if (verbose) {
+			int i, j;
+
 			if (bi->freq_reset)
 				printf("!");
+			/* display first bi->t pulses */
+			for (i = 0; i < bi->t / 8; i++)
+				for (j = 0; j < 8; j++)
+					printf("%c", bi->signal[i] & (1 << j) ?
+					    '+' : '-');
 			/*
-			 * bi->t == 0 means that pulse 0 is available,
-			 * so length is 0-based
+			 * display pulses in the last partially filled item
+			 * bi->t is 0-based, hence the <= comparison
 			 */
-			bi->signal[bi->t + 1] = '\0';
-			printf("%s\n", bi->signal);
+			for (j = 0; j <= (bi->t & 7); j++)
+				printf("%c", bi->signal[bi->t / 8] & (1 << j) ?
+				    '+' : '-');
+			printf("\n");
 		}
 		if (bit & GETBIT_TOOLONG)
 			min++;

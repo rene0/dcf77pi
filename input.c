@@ -312,11 +312,7 @@ get_bit_live(void)
 		bit.realfreq = hw.freq * 1000000;
 		bit.bit0 = bit.realfreq / 10;
 		bit.bit20 = bit.realfreq / 5;
-		bit.signal = malloc(2 + 5/2 * 3/2 * hw.freq);
-		/*
-		 * 2 (because bit.t starts at 0 and strict > comparison) +
-		 * radio error limit * frequency reset limit * hw.freq
-		 */
+		bit.signal = malloc(hw.freq / 2);
 	}
 	sec2 = 1000000000 / (hw.freq * hw.freq);
 	/*
@@ -330,10 +326,13 @@ get_bit_live(void)
 		p = get_pulse();
 		if (p == GETBIT_IO) {
 			state |= GETBIT_IO;
-			bit.signal[bit.t] = outch = '*';
+			outch = '*';
 			goto report;
 		}
-		bit.signal[bit.t] = p ? '+' : '-';
+		if ((bit.t & 7) == 0)
+			bit.signal[bit.t / 8] = 0;
+			/* clear data from previous second */
+		bit.signal[bit.t / 8] |= p << (bit.t & 7);
 
 		if (y >= 0 && y < a / 2 /* fp error margin */)
 			bit.tlast0 = bit.t;

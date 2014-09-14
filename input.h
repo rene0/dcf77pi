@@ -72,13 +72,14 @@ struct hardware {
  *                because of reception errors)
  * freq_reset   = realfreq was reset to hw.freq (normally because of reception
  *                errors)
- * signal[]     = the raw received radio signal, 2.5 * 1.5 * hw.freq items
+ * signal[]     = the raw received radio signal, hw.freq / 2 items, with each
+ *                item holding 8 bits
  */
 struct bitinfo {
 	int64_t tlow, tlast0, t;
 	int64_t realfreq, bit0, bit20; /* static */
 	int bitlen_reset, freq_reset;
-	char *signal;
+	uint8_t *signal;
 };
 
 /**
@@ -154,7 +155,7 @@ uint8_t get_bitpos(void);
 /**
  * Retrieve the current bit buffer.
  *
- * @return The bit buffer, an array of 0 and 1 values.
+ * @return The bit buffer, a packed array of 0 and 1 values (8 bits per item).
  */
 uint8_t *get_buffer(void);
 
