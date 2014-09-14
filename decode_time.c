@@ -36,6 +36,7 @@ int summermonth;
 int wintermonth;
 int leapsecmonths[12];
 int num_leapsecmonths;
+unsigned int acc_minlen = 0;
 
 char *weekday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
@@ -196,8 +197,7 @@ add_minute(struct tm *time)
 }
 
 uint32_t
-decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time,
-    unsigned int *acc_minlen)
+decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 {
 	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
 	unsigned int tmp, tmp0, tmp1, tmp2, tmp4, tmp5;
@@ -224,9 +224,9 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time,
 		rval |= DT_XMIT;
 
 	increase = 0;
-	while ((init & 1) == 0 && *acc_minlen >= 60000) {
+	while ((init & 1) == 0 && acc_minlen >= 60000) {
 		add_minute(time);
-		*acc_minlen -= 60000;
+		acc_minlen -= 60000;
 		increase++;
 	}
 
@@ -397,4 +397,22 @@ get_utchour(struct tm time)
 	if (utchour < 0)
 		utchour += 24;
 	return utchour;
+}
+
+unsigned int
+get_acc_minlen(void)
+{
+	return acc_minlen;
+}
+
+void
+reset_acc_minlen(void)
+{
+	acc_minlen = 0;
+}
+
+void
+add_acc_minlen(unsigned int ms)
+{
+	acc_minlen += ms;
 }

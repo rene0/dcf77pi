@@ -106,7 +106,7 @@ void add_minute(struct tm *time);
  * parities and other checks match these values are replaced by their
  * calculated counterparts.
  *
- * @param init Indicates that the state of the decoder is initial:
+ * @param init Indicates whether the state of the decoder is initial:
  *   0 = normal, first two minute marks passed
  *   1 = first minute mark passed
  *   2 = (unused)
@@ -115,15 +115,11 @@ void add_minute(struct tm *time);
  *   case of a leap second).
  * @param buffer The bit buffer.
  * @param time The current time, to be updated.
- * @param acc_minlen The accumulated length of this minute in milliseconds.
- *   This parameter is used to accumulate short minutes into one minute,
- *   meaning that 60,000 is subtracted from it each minute. It should be
- *   reset to 0 when an error-free minute is received.
  * @return The state of this minute, the combination of the various DT_* and
  *   ANN_* values that are applicable.
  */
 uint32_t decode_time(int init, unsigned int minlen, uint8_t *buffer,
-    struct tm *time, unsigned int *acc_minlen);
+    struct tm *time);
 
 /**
  * Calculates the hour in UTC from the given time.
@@ -141,4 +137,30 @@ int get_utchour(struct tm time);
  */
 char *get_weekday(int wday);
 
+/**
+ * Functions for the accumulated minute length. This counter keeps the
+ * estimated wall clock time in milliseconds since startup. This way short
+ * minutes are accumulated into one minute.
+ * It should be reset to 0 when a minute with the correct length is received.
+ * For other minutes, 60,000 should be substracted.
+ */
+
+/**
+ * Retrieve the current value of the accumulated minute length.
+ *
+ * @return The accumulated minute length in milliseconds.
+ */
+unsigned int get_acc_minlen(void);
+
+/**
+ * Reset the accumulated minute length to 0.
+ */
+void reset_acc_minlen(void);
+
+/**
+ * Add a given amount of milliseconds to the accumulated minute length.
+ *
+ * @param ms The amount to add in milliseconds
+ */
+void add_acc_minlen(unsigned int ms);
 #endif

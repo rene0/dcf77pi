@@ -499,9 +499,10 @@ print_long_minute(void)
 }
 
 void
-print_minute(unsigned int acc_minlen, unsigned int minlen)
+print_minute(unsigned int minlen)
 {
 	int i, xpos;
+	unsigned int acc_minlen;
 
 	/* display bits of previous minute */
 	for (xpos = 4, i = 0; i < minlen; i++, xpos++) {
@@ -514,6 +515,7 @@ print_minute(unsigned int acc_minlen, unsigned int minlen)
 	wclrtoeol(decode_win);
 	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
 
+	acc_minlen = get_acc_minlen();
 	mvwprintw(decode_win, 1, 28, "(%6u)",
 	    acc_minlen >= 1000000 ? 999999 : acc_minlen);
 	wrefresh(decode_win);

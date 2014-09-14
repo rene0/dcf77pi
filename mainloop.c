@@ -35,7 +35,7 @@ mainloop(char *logfilename,
     uint16_t (*get_bit)(void),
     void (*display_bit)(uint16_t, int),
     void (*print_long_minute)(void),
-    void (*print_minute)(unsigned int, unsigned int),
+    void (*print_minute)(unsigned int),
     void (*process_new_minute)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
@@ -48,7 +48,7 @@ mainloop(char *logfilename,
 {
 	uint16_t bit;
 	uint32_t dt = 0;
-	unsigned int minlen = 0, acc_minlen = 0;
+	unsigned int minlen = 0;
 	int bitpos = 0;
 	int init = 3;
 	struct tm time;
@@ -70,9 +70,9 @@ mainloop(char *logfilename,
 			break;
 
 		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
-			acc_minlen += 2500;
+			add_acc_minlen(2500);
 		else
-			acc_minlen += 1000;
+			add_acc_minlen(1000);
 
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
@@ -81,7 +81,7 @@ mainloop(char *logfilename,
 		if (bit & GETBIT_EOM) {
 			/* handle the missing bit due to the  minute marker */
 			minlen = bitpos + 1;
-			acc_minlen += 1000;
+			add_acc_minlen(1000);
 		}
 		display_bit(bit, bitpos);
 
@@ -101,9 +101,8 @@ mainloop(char *logfilename,
 			process_new_minute();
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
-			print_minute(acc_minlen, minlen);
-			dt = decode_time(init, minlen, get_buffer(), &time,
-			    &acc_minlen);
+			print_minute(minlen);
+			dt = decode_time(init, minlen, get_buffer(), &time);
 
 			if (time.tm_min % 3 == 0 && init == 0) {
 				tpbuf = get_thirdparty_buffer();
@@ -128,7 +127,7 @@ mainloop(char *logfilename,
 				set_time(init, dt, bit, bitpos, time);
 			if ((init & 1) == 1 ||
 			    !((dt & DT_LONG) || (dt & DT_SHORT)))
-				acc_minlen = 0; /* really a new minute */
+				reset_acc_minlen(); /* really a new minute */
 			if (init == 2)
 				init &= ~2;
 			if ((init & 1) == 1)
