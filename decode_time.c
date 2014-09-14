@@ -205,6 +205,8 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 	int tmp3, utchour, increase;
 	struct tm newtime;
 
+	memset(&newtime, '\0', sizeof(newtime));
+
 	if (minlen < 59)
 		rval |= DT_SHORT;
 	if (minlen > 60)
