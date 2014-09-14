@@ -45,8 +45,8 @@ SUCH DAMAGE.
 #    define NOLIVE 1
 #  endif
 #elif defined(__NetBSD__)
-#  define NOLIVE 1
 #  warning NetBSD, GPIO support not yet implemented
+#  define NOLIVE 1
 #elif defined(__linux__)
 #  include <sys/types.h>
 #elif defined(__APPLE__) && (defined(__OSX__) || defined(__MACH__))
@@ -334,7 +334,7 @@ get_bit_live(void)
 			/* clear data from previous second */
 		bit.signal[bit.t / 8] |= p << (bit.t & 7);
 
-		if (y >= 0 && y < a / 2 /* fp error margin */)
+		if (y >= 0 && y < a / 2)
 			bit.tlast0 = bit.t;
 		y += a * (p * 1000000000 - y) / 1000000000;
 
@@ -415,7 +415,7 @@ get_bit_live(void)
 		/* zero bit, ~100 ms active signal */
 		outch = '0';
 		buffer[bitpos] = 0;
-	} else if (bit.realfreq * bit.tlow * (1 + newminute) <=
+	} else if (bit.realfreq * bit.tlow * (1 + newminute) <
 	    (bit.bit0 + bit.bit20) * bit.t) {
 		/* one bit, ~200 ms active signal */
 		state |= GETBIT_ONE;
