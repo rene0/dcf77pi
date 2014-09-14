@@ -51,14 +51,14 @@ mainloop(char *logfilename,
 	unsigned int minlen = 0;
 	int bitpos = 0;
 	int init = 3;
-	struct tm time;
+	struct tm curtime;
 	struct alm civwarn;
 	uint8_t *tpbuf;
 	int settime = 0;
 	int change_logfile = 0;
 
 	init_time();
-	(void)memset(&time, '\0', sizeof(time));
+	(void)memset(&curtime, '\0', sizeof(curtime));
 	init_thirdparty();
 
 	for (;;) {
@@ -86,7 +86,7 @@ mainloop(char *logfilename,
 		display_bit(bit, bitpos);
 
 		if (init == 0)
-			fill_thirdparty_buffer(time.tm_min, bitpos, bit);
+			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
 
 		bit = next_bit();
 		if (bit & GETBIT_TOOLONG) {
@@ -102,9 +102,9 @@ mainloop(char *logfilename,
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			print_minute(minlen);
-			dt = decode_time(init, minlen, get_buffer(), &time);
+			dt = decode_time(init, minlen, get_buffer(), &curtime);
 
-			if (time.tm_min % 3 == 0 && init == 0) {
+			if (curtime.tm_min % 3 == 0 && init == 0) {
 				tpbuf = get_thirdparty_buffer();
 				print_thirdparty_buffer(tpbuf);
 				switch (get_thirdparty_type()) {
@@ -121,10 +121,10 @@ mainloop(char *logfilename,
 				}
 			}
 
-			display_time(dt, time);
+			display_time(dt, curtime);
 
 			if (set_time != NULL && settime == 1)
-				set_time(init, dt, bit, bitpos, time);
+				set_time(init, dt, bit, bitpos, curtime);
 			if ((init & 1) == 1 ||
 			    !((dt & DT_LONG) || (dt & DT_SHORT)))
 				reset_acc_minlen(); /* really a new minute */
