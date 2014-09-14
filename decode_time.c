@@ -229,6 +229,15 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 		acc_minlen -= 60000;
 		increase++;
 	}
+	/*
+	 * Allow for "almost-complete" minutes. These minutes _are_ complete
+	 * but acc_minlen is short.
+	 */
+	if ((init & 1) == 0 && acc_minlen > 59000) {
+		add_minute(time);
+		acc_minlen -= 59000;
+		increase++;
+	}
 
 	p1 = getpar(buffer, 21, 28);
 	tmp0 = getbcd(buffer, 21, 24);

@@ -56,6 +56,7 @@ mainloop(char *logfilename,
 	uint8_t *tpbuf;
 	int settime = 0;
 	int change_logfile = 0;
+	struct bitinfo *bi;
 
 	init_time();
 	(void)memset(&curtime, '\0', sizeof(curtime));
@@ -69,20 +70,16 @@ mainloop(char *logfilename,
 		if (bit & GETBIT_EOD)
 			break;
 
-		if (bit & (GETBIT_RECV | GETBIT_XMIT | GETBIT_RND))
-			add_acc_minlen(2500);
-		else
-			add_acc_minlen(1000);
+		bi = get_bitinfo();
+		add_acc_minlen((unsigned int)(1000000000 * bi->t / bi->realfreq));
 
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
 			post_process_input(&logfilename, &change_logfile, &bit,
 			    bitpos);
-		if (bit & GETBIT_EOM) {
-			/* handle the missing bit due to the  minute marker */
+		if (bit & GETBIT_EOM)
 			minlen = bitpos + 1;
-			add_acc_minlen(1000);
-		}
+			/* handle the missing bit due to the minute marker */
 		display_bit(bit, bitpos);
 
 		if (init == 0)

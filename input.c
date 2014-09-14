@@ -468,6 +468,9 @@ get_bit_file(void)
 
 	set_new_state();
 
+	bit.realfreq = 1000000000; /* fake realfreq for mainloop() */
+	bit.t = 1000;
+
 	while (valid == 0) {
 		inch = getc(datafile);
 		switch (inch) {
@@ -486,22 +489,27 @@ get_bit_file(void)
 			/* handle multiple consecutive EOM markers */
 			state |= GETBIT_EOM; /* otherwise empty bit */
 			valid = 1;
+			bit.t = 2000;
 			break;
 		case 'x':
 			state |= GETBIT_XMIT;
 			valid = 1;
+			bit.t = 2500;
 			break;
 		case 'r':
 			state |= GETBIT_RECV;
 			valid = 1;
+			bit.t = 2500;
 			break;
 		case '#':
 			state |= GETBIT_RND;
 			valid = 1;
+			bit.t = 2500;
 			break;
 		case '*':
 			state |= GETBIT_IO;
 			valid = 1;
+			bit.t = 0;
 			break;
 		case '_':
 			/* retain old value in buffer[bitpos] */
@@ -515,6 +523,7 @@ get_bit_file(void)
 	/* Only allow \r , \n , \r\n , and \n\r as single EOM markers */
 	TRYCHAR else {
 		state |= GETBIT_EOM;
+		bit.t = 2000;
 		/* Check for B\r\n or B\n\r */
 		TRYCHAR
 	}
