@@ -27,9 +27,19 @@ SUCH DAMAGE.
 #include "input.h"
 
 #include <inttypes.h>
+#include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
+
+void
+do_cleanup(int sig)
+{
+	cleanup();
+	printf("done\n");
+	exit(0);
+}
 
 int
 main(int argc, char **argv)
@@ -37,6 +47,7 @@ main(int argc, char **argv)
 	int min, res, verbose = 1;
 	uint16_t bit;
 	struct bitinfo *bi;
+	struct sigaction sigact;
 
 	if ((argc == 2) && !strncmp(argv[1], "-q", strlen(argv[1])))
 		verbose = 0;
@@ -55,6 +66,11 @@ main(int argc, char **argv)
 		cleanup();
 		return res;
 	}
+
+	sigact.sa_handler = do_cleanup;
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+	sigaction(SIGINT, &sigact, (struct sigaction *)NULL);
 
 	min = -1;
 
@@ -89,6 +105,4 @@ main(int argc, char **argv)
 			min++;
 		bit = next_bit();
 	}
-	cleanup();
-	return 0;
 }
