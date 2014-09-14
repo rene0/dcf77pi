@@ -125,7 +125,7 @@ display_unknown(void)
 void
 display_weather(void)
 {
-	/* Nothing to do in this callback function */
+	printf("Meteotime weather\n");
 }
 
 void
