@@ -163,4 +163,20 @@ void reset_acc_minlen(void);
  * @param ms The amount to add in milliseconds
  */
 void add_acc_minlen(unsigned int ms);
+
+/**
+ * Convert the given time in ISO format to DCF77 format.
+ *
+ * @param dcftime The time in ISO format to convert
+ * @return The time in DCF77 format, with the tm_zone field left to NULL.
+ */
+struct tm dcftime(struct tm isotime);
+
+/**
+ * Convert the given time in DCF77 format to ISO format.
+ *
+ * @param dcftime The time in DCF77 format to convert
+ * @return The time in ISO format, with the tm_zone field left to NULL.
+ */
+struct tm isotime(struct tm dcftime);
 #endif

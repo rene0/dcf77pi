@@ -39,6 +39,7 @@ int num_leapsecmonths;
 unsigned int acc_minlen = 0;
 
 char *weekday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+int dayinleapyear[12] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
 
 char *
 get_weekday(int wday)
@@ -115,8 +116,6 @@ century_offset(int year, int month, int day, int weekday)
 {
 	int d, nw, nd;
 	int tmp; /* resulting day of year, 02-28 if xx00 is leap */
-	int dayinleapyear[12] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274,
-	    305, 335};
 
 	/* substract year days from weekday, including normal leap years */
 	weekday = (weekday - year - year / 4 - ((year % 4) > 0)) % 7;
@@ -426,4 +425,40 @@ void
 add_acc_minlen(unsigned int ms)
 {
 	acc_minlen += ms;
+}
+
+struct tm
+dcftime(struct tm isotime)
+{
+	struct tm dt;
+
+	memcpy((void *)&dt, (const void*)&isotime, sizeof(isotime));
+	/* keep original tm_sec */
+	dt.tm_mon++;
+	dt.tm_year += 1900;
+	if (dt.tm_wday == 0)
+		dt.tm_wday = 7;
+	dt.tm_yday = dayinleapyear[isotime.tm_mon] + dt.tm_mday -
+	    (isotime.tm_mon > 1 && !isleap(dt));
+	dt.tm_zone = NULL;
+
+	return dt;
+}
+
+struct tm
+isotime(struct tm dcftime)
+{
+	struct tm it;
+
+	memcpy((void *)&it, (const void *)&dcftime, sizeof(dcftime));
+	it.tm_sec = 0;
+	it.tm_mon--;
+	it.tm_year -= 1900;
+	if (it.tm_wday == 7)
+		it.tm_wday = 0;
+	it.tm_yday = dayinleapyear[it.tm_mon] + it.tm_mday -
+	    (it.tm_mon > 1 && !isleap(dcftime));
+	it.tm_zone = NULL;
+
+	return it;
 }
