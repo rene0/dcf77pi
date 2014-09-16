@@ -42,23 +42,19 @@ int
 setclock(struct tm time)
 {
 	time_t epochtime;
-	struct tm isotime;
+	struct tm it;
 	struct timeval tv;
 	struct timezone tz;
 
 	tzset(); /* does not help for TZ=UTC */
 
-	memcpy((void *)&isotime, (const void *)&time, sizeof(time));
-	isotime.tm_year -= 1900;
-	isotime.tm_mon--;
-	isotime.tm_wday %= 7;
-	isotime.tm_sec = 0;
-	epochtime = mktime(&isotime);
+	it = isotime(time);
+	epochtime = mktime(&it);
 	if (epochtime == -1)
 		return -1;
 	tv.tv_sec = epochtime;
 	tv.tv_usec = 50000; /* adjust for bit reception algorithm */
 	tz.tz_minuteswest = -60;
-	tz.tz_dsttime = isotime.tm_isdst;
+	tz.tz_dsttime = it.tm_isdst;
 	return (settimeofday(&tv, &tz) == -1) ? -2 : 0;
 }
