@@ -52,6 +52,7 @@ SUCH DAMAGE.
 #elif defined(__APPLE__) && (defined(__OSX__) || defined(__MACH__))
 #  warning MacOS, GPIO support available but no port for Rapberry Pi
 #  define NOLIVE 1
+#  define MACOS 1
 #elif defined(__CYGWIN__)
 #  warning Cygwin, GPIO support not yet implemented
 #  define NOLIVE 1
@@ -287,8 +288,12 @@ get_bit_live(void)
 	int newminute;
 	uint8_t p, stv = 1;
 	struct timespec slp;
+#if !defined(MACOS)
+	struct timespec tp0, tp1;
+#endif
 	uint32_t sec2;
 	int64_t a, y = 1000000000;
+	int64_t twait;
 	static int init = 1;
 	int is_eom = state & GETBIT_EOM;
 
@@ -323,6 +328,9 @@ get_bit_live(void)
 	bit.tlast0 = -1;
 
 	for (bit.t = 0; ; bit.t++) {
+#if !defined(MACOS)
+		(void)clock_gettime(CLOCK_MONOTONIC, &tp0);
+#endif
 		p = get_pulse();
 		if (p == GETBIT_IO) {
 			state |= GETBIT_IO;
@@ -404,9 +412,15 @@ get_bit_live(void)
 			}
 			break; /* start of new second */
 		}
-		slp.tv_sec = 0;
-		slp.tv_nsec = sec2 * bit.realfreq / 1000000;
-		while (nanosleep(&slp, &slp))
+		twait = sec2 * bit.realfreq / 1000000;
+#if !defined(MACOS)
+		(void)clock_gettime(CLOCK_MONOTONIC, &tp1);
+		twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1000000000 -
+		   (tp1.tv_nsec - tp0.tv_nsec);
+#endif
+		slp.tv_sec = twait / 1000000000;
+		slp.tv_nsec = twait % 1000000000;
+		while (twait > 0 && nanosleep(&slp, &slp))
 			;
 	}
 
