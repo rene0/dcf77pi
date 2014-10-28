@@ -88,7 +88,7 @@ init_hardware(unsigned int pin_nr)
 		perror("ioctl(GPIOGETCONFIG)");
 		return -errno;
 	}
-#elif defined(__linux__)
+#elif defined(__linux__) && !defined(NOLIVE)
 	char buf[64];
 	int res;
 
@@ -230,7 +230,7 @@ get_pulse(void)
 	count = ioctl(fd, GPIOGET, &req);
 	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
 	if (count < 0)
-#elif defined(__linux__)
+#elif defined(__linux__) && !defined(NOLIVE)
 	count = read(fd, &tmpch, sizeof(tmpch));
 	tmpch -= '0';
 	if (lseek(fd, 0, SEEK_SET) == (off_t)-1)
