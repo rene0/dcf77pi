@@ -211,6 +211,7 @@ void
 display_bit(uint16_t state, int bitpos)
 {
 	int xpos, i;
+	unsigned int acc_minlen;
 	struct bitinfo *bitinf;
 
 	bitinf = get_bitinfo();
@@ -263,6 +264,11 @@ display_bit(uint16_t state, int bitpos)
 	if (state & GETBIT_READ)
 		mvwchgat(input_win, 0, xpos, 1, A_BOLD, 3, NULL);
 	wrefresh(input_win);
+
+	acc_minlen = get_acc_minlen();
+	mvwprintw(decode_win, 1, 28, "(%6u)",
+	    acc_minlen >= 1000000 ? 999999 : acc_minlen);
+	wrefresh(decode_win);
 }
 
 void
@@ -502,7 +508,6 @@ void
 print_minute(unsigned int minlen)
 {
 	int i, xpos;
-	unsigned int acc_minlen;
 
 	/* display bits of previous minute */
 	for (xpos = 4, i = 0; i < minlen; i++, xpos++) {
@@ -514,10 +519,6 @@ print_minute(unsigned int minlen)
 	}
 	wclrtoeol(decode_win);
 	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
-
-	acc_minlen = get_acc_minlen();
-	mvwprintw(decode_win, 1, 28, "(%6u)",
-	    acc_minlen >= 1000000 ? 999999 : acc_minlen);
 	wrefresh(decode_win);
 }
 
