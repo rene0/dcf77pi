@@ -339,6 +339,7 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 			rval |= DT_SHORT;
 			ok = 0;
 			/* leap second processed, but missing */
+			generr = 1;
 		} else if (minlen == 60 && buffer[59] == 1)
 			rval |= DT_LEAPONE;
 	}
@@ -346,6 +347,7 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 		rval |= DT_LONG;
 		ok = 0;
 		/* leap second not processed, so bad minute */
+		generr = 1;
 	}
 
 	/* h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
@@ -384,14 +386,30 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 			if ((rval & DT_DSTERR) == 0)
 				rval |= DT_DSTJUMP; /* sudden change, ignore */
 			ok = 0;
+			generr = 1;
 		}
 	}
 	newtime.tm_gmtoff = newtime.tm_isdst ? 7200 : 3600;
 
 	if (olderr && ok)
 		olderr = 0;
-	if (ok)
-		memcpy((void *)time, (const void *)&newtime, sizeof(newtime));
+	if (generr == 0) {
+		if (p1 == 0)
+			time->tm_min = newtime.tm_min;
+		if (p2 == 0)
+			time->tm_hour = newtime.tm_hour;
+		if (p3 == 0) {
+			time->tm_mday = newtime.tm_mday;
+			time->tm_mon = newtime.tm_mon;
+			time->tm_year = newtime.tm_year;
+			time->tm_wday = newtime.tm_wday;
+			time->tm_yday = newtime.tm_yday;
+		}
+	}
+	if (ok) {
+		time->tm_isdst = newtime.tm_isdst;
+		time->tm_gmtoff = newtime.tm_gmtoff;
+	}
 	else
 		olderr = 1;
 
