@@ -336,17 +336,17 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 		announce &= ~ANN_LEAP;
 		rval |= DT_LEAP;
 		if (minlen == 59) {
+			/* leap second processed, but missing */
 			rval |= DT_SHORT;
 			ok = 0;
-			/* leap second processed, but missing */
 			generr = 1;
 		} else if (minlen == 60 && buffer[59] == 1)
 			rval |= DT_LEAPONE;
 	}
 	if ((minlen == 60) && !(rval & DT_LEAP)) {
+		/* leap second not processed, so bad minute */
 		rval |= DT_LONG;
 		ok = 0;
-		/* leap second not processed, so bad minute */
 		generr = 1;
 	}
 
