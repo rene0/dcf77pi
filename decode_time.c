@@ -205,6 +205,7 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 	struct tm newtime;
 
 	memset(&newtime, '\0', sizeof(newtime));
+	newtime.tm_isdst = time->tm_isdst; /* save DST value */
 
 	if (minlen < 59)
 		rval |= DT_SHORT;
@@ -364,7 +365,6 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 		}
 	}
 
-	newtime.tm_isdst = time->tm_isdst;
 	if (buffer[17] != time->tm_isdst || buffer[18] == time->tm_isdst) {
 		/* Time offset change is OK if:
 		 * announced and time is Sunday, lastday, 01:00 UTC
