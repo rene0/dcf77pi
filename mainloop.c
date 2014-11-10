@@ -36,7 +36,7 @@ mainloop(char *logfilename,
     void (*display_bit)(uint16_t, int),
     void (*print_long_minute)(void),
     void (*print_minute)(unsigned int),
-    void (*process_new_minute)(void),
+    void (*print_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
@@ -94,8 +94,8 @@ mainloop(char *logfilename,
 			 */
 			print_long_minute();
 		}
-		if (process_new_minute != NULL)
-			process_new_minute();
+		if (print_new_second != NULL)
+			print_new_second();
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			print_minute(minlen);
