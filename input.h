@@ -131,7 +131,7 @@ uint16_t get_bit_file(void);
 /**
  * Retrieve one live bit from the hardware.
  * This function determines several values which can be retrieved using
- * get_bit_info().
+ * get_bitinfo().
  *
  * @return The currently received bit, a mask of GETBIT_* values.
  */
