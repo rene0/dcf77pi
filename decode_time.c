@@ -403,7 +403,6 @@ decode_time(int init, unsigned int minlen, uint8_t *buffer, struct tm *time)
 			time->tm_mon = newtime.tm_mon;
 			time->tm_year = newtime.tm_year;
 			time->tm_wday = newtime.tm_wday;
-			time->tm_yday = newtime.tm_yday;
 		}
 	}
 	if (ok) {
