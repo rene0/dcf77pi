@@ -80,7 +80,8 @@ mainloop(char *logfilename,
 		if (bit & GETBIT_EOM)
 			minlen = bitpos + 1;
 			/* handle the missing bit due to the minute marker */
-		display_bit(bit, bitpos);
+		if ((bit & GETBIT_SKIP) == 0)
+			display_bit(bit, bitpos);
 
 		if (init == 0)
 			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);

@@ -474,6 +474,8 @@ report:
 	inch = getc(datafile); \
 	if (feof(datafile)) \
 		return state; \
+	if (inch == 'c') \
+		state |= GETBIT_SKIPNEXT; \
 	if ((inch != '\r' && inch != '\n') || inch == oldinch) { \
 		if (ungetc(inch, datafile) == EOF) /* EOF remains, IO error */\
 			state |= GETBIT_EOD; \
@@ -535,6 +537,17 @@ get_bit_file(void)
 			valid = 1;
 			bit.t = 1000;
 			break;
+		case 'c':
+			/* cutoff for newminute, eat value */
+			state &= ~GETBIT_SKIPNEXT;
+			state |= GETBIT_SKIP;
+			valid = 1;
+			bit.t = 0;
+			if (fseek(datafile, 6, SEEK_CUR)) {
+				state |= GETBIT_EOD;
+				return state;
+			}
+			break;
 		default:
 			break;
 		}
@@ -561,7 +574,8 @@ is_space_bit(int bitpos)
 uint16_t
 next_bit(void)
 {
-	bitpos = (state & GETBIT_EOM) ? 0 : bitpos + 1;
+	bitpos = (state & GETBIT_EOM) ? 0 : (state & GETBIT_SKIPNEXT) ?
+	    bitpos : bitpos + 1;
 	if (bitpos == sizeof(buffer)) {
 		state |= GETBIT_TOOLONG;
 		bitpos = 0;

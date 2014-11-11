@@ -44,6 +44,10 @@ SUCH DAMAGE.
 #define GETBIT_RECV	(1 << 7)
 /* random radio error, both positive and negative pulses but no proper signal */
 #define GETBIT_RND	(1 << 8)
+/* this bit should be skipped (i.e. not displayed) */
+#define GETBIT_SKIP	(1 << 9)
+/* next bit should be skipped (i.e. not added to bitpos) */
+#define GETBIT_SKIPNEXT	(1 << 10)
 
 #include <stdint.h> /* uintX_t */
 
