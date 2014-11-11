@@ -460,8 +460,12 @@ get_bit_live(void)
 			reset_bitlen();
 	}
 report:
-	if (logfile != NULL)
-		fprintf(logfile, "%c%s", outch, state & GETBIT_EOM ? "\n" : "");
+	if (logfile != NULL) {
+		fprintf(logfile, "%c", outch);
+		if (state & GETBIT_EOM)
+			fprintf(logfile, "c%6.4f\n",
+			    (bit.t * 1e6) / bit.realfreq);
+	}
 	return state;
 }
 
