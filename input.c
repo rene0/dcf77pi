@@ -168,7 +168,9 @@ set_mode_file(char *infilename)
 int
 set_mode_live(void)
 {
+#if !defined(NOLIVE)
 	int res;
+#endif
 
 	set_state_vars();
 #if defined(NOLIVE)
@@ -222,20 +224,22 @@ uint8_t
 get_pulse(void)
 {
 	uint8_t tmpch = 0;
+#if !defined(NOLIVE)
 	int count = 0;
-#if defined(__FreeBSD__) && !defined(NOLIVE)
+#if defined(__FreeBSD__)
 	struct gpio_req req;
 
 	req.gp_pin = hw.pin;
 	count = ioctl(fd, GPIOGET, &req);
 	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
 	if (count < 0)
-#elif defined(__linux__) && !defined(NOLIVE)
+#elif defined(__linux__)
 	count = read(fd, &tmpch, sizeof(tmpch));
 	tmpch -= '0';
 	if (lseek(fd, 0, SEEK_SET) == (off_t)-1)
 		return GETBIT_IO; /* rewind to prevent EBUSY/no read */
 	if (count != sizeof(tmpch))
+#endif
 #endif
 		return GETBIT_IO; /* hardware failure? */
 
