@@ -388,7 +388,7 @@ draw_time_window(void)
 }
 
 void
-show_thirdparty_buffer(uint8_t *buf)
+display_thirdparty_buffer(uint8_t *buf)
 {
 	int i;
 
@@ -497,7 +497,7 @@ wipe_input()
 }
 
 void
-print_long_minute(void)
+display_long_minute(void)
 {
 	wattron(input_win, COLOR_PAIR(1));
 	mvwprintw(input_win, 3, 54, "no minute");
@@ -505,7 +505,7 @@ print_long_minute(void)
 }
 
 void
-print_minute(unsigned int minlen)
+display_minute(unsigned int minlen)
 {
 	int i, xpos;
 
@@ -607,9 +607,9 @@ main(int argc, char *argv[])
 	draw_keys(main_win);
 
 	res = mainloop(logfilename, get_bit_live, display_bit,
-	    print_long_minute, print_minute, wipe_input, display_alarm,
+	    display_long_minute, display_minute, wipe_input, display_alarm,
 	    display_unknown, display_weather, display_time,
-	    show_thirdparty_buffer, set_time, process_input,
+	    display_thirdparty_buffer, set_time, process_input,
 	    post_process_input);
 
 	curses_cleanup(NULL);

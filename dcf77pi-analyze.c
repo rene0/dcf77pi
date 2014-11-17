@@ -129,19 +129,19 @@ display_weather(void)
 }
 
 void
-print_long_minute(void)
+display_long_minute(void)
 {
 	printf(" L");
 }
 
 void
-print_minute(unsigned int minlen)
+display_minute(unsigned int minlen)
 {
 	printf(" (%u) %u\n", get_acc_minlen(), minlen);
 }
 
 void
-print_thirdparty_buffer(uint8_t *tpbuf)
+display_thirdparty_buffer(uint8_t *tpbuf)
 {
 	int i;
 
@@ -177,9 +177,10 @@ main(int argc, char *argv[])
 		return res;
 	}
 
-	res = mainloop(NULL, get_bit_file, display_bit, print_long_minute,
-	    print_minute, NULL, display_alarm, display_unknown, display_weather,
-	    display_time, print_thirdparty_buffer, NULL, NULL, NULL);
+	res = mainloop(NULL, get_bit_file, display_bit, display_long_minute,
+	    display_minute, NULL, display_alarm, display_unknown,
+	    display_weather, display_time, display_thirdparty_buffer, NULL,
+	    NULL, NULL);
 	free(logfilename);
 	return res;
 }

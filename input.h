@@ -26,63 +26,70 @@ SUCH DAMAGE.
 #ifndef DCF77PI_INPUT_H
 #define DCF77PI_INPUT_H
 
-/* this bit has value 1 */
+/** this bit has value 1 */
 #define GETBIT_ONE	(1 << 0)
-/* end-of-minute bit */
+/** end-of-minute bit */
 #define GETBIT_EOM	(1 << 1)
-/* end of data, either end-of-file or user quit */
+/** end of data, either end-of-file or user quit */
 #define GETBIT_EOD	(1 << 2)
-/* bit value could not be determined */
+/** bit value could not be determined */
 #define GETBIT_READ	(1 << 3)
-/* bit buffer would overflow */
+/** bit buffer would overflow */
 #define GETBIT_TOOLONG	(1 << 4)
-/* I/O error while reading bit from hardware */
+/** I/O error while reading bit from hardware */
 #define GETBIT_IO	(1 << 5)
-/* transmitter error, all positive pulses */
+/** transmitter error, all positive pulses */
 #define GETBIT_XMIT	(1 << 6)
-/* receiver error, all negative pulses */
+/** receiver error, all negative pulses */
 #define GETBIT_RECV	(1 << 7)
-/* random radio error, both positive and negative pulses but no proper signal */
+/** random radio error, both positive and negative pulses but no proper
+  * signal */
 #define GETBIT_RND	(1 << 8)
-/* this bit should be skipped (i.e. not displayed) */
+/** this bit should be skipped (i.e. not displayed) */
 #define GETBIT_SKIP	(1 << 9)
-/* next bit should be skipped (i.e. not added to bitpos) */
+/** next bit should be skipped (i.e. not added to bitpos) */
 #define GETBIT_SKIPNEXT	(1 << 10)
 
 #include <stdint.h> /* uintX_t */
 
-/*
+/**
  * Hardware parameters:
- * freq        = sample frequency in Hz
- * pin         = pin number to read from
- * active_high = pin value is high (1) or low (0) for active signal
  */
 struct hardware {
+	/** sample frequency in Hz */
 	uint32_t freq;
-	uint8_t pin, active_high;
+	/* pin number to read from */
+	uint8_t pin;
+	/** pin value is high (1) or low (0) for active signal */
+	uint8_t active_high;
 };
 
-/*
+/**
  * (Internal) information about the currently received bit:
- * tlow         = time in samples when the signal went low again
- * tlast0       = time in samples when the signal was last measured as 0
- * t            = length of this bit in samples
- * realfreq     = the average length of a bit in samples
- * bit0         = the average length of the high part of bit 0 (a 0 bit) in
- *                samples
- * bit20        = the average length of the high part of bit 20 (a 1 bit) in
- *                samples
- * bitlen_reset = bit0 and bit20 were reset to their initial values (normally
- *                because of reception errors)
- * freq_reset   = realfreq was reset to hw.freq (normally because of reception
- *                errors)
- * signal[]     = the raw received radio signal, hw.freq / 2 items, with each
- *                item holding 8 bits
  */
 struct bitinfo {
-	int64_t tlow, tlast0, t;
-	int64_t realfreq, bit0, bit20; /* static */
-	int bitlen_reset, freq_reset;
+	/** time in samples when the signal went low again */
+	int64_t tlow;
+	/** time in samples when the signal was last measured as 0 */
+	int64_t tlast0;
+	/** length of this bit in samples */
+	int64_t t;
+	/** the average length of a bit in samples */
+	int64_t realfreq;
+	/** the average length of the high part of bit 0 (a 0 bit) in
+	  * samples */
+	int64_t bit0;
+	/** the average length of the high part of bit 20 (a 1 bit) in
+	  * samples */
+	int64_t bit20;
+	/** bit0 and bit20 were reset to their initial values (normally because
+	  * of reception errors or fluctuations in CPU usage) */
+	int bitlen_reset;
+	/** realfreq was reset to {@link hardware.freq} (normally because of
+	  * reception errors or fluctuations in CPU usage) */
+	int freq_reset;
+	/** the raw received radio signal, {@link hardware.freq} / 2 items, with
+	  * each item holding 8 bits */
 	uint8_t *signal;
 };
 
@@ -97,8 +104,8 @@ int set_mode_file(char *infilename);
 /**
  * Prepare for live input.
  *
- * The sample rate is set to hw.freq Hz, reading from pin hw.pin using
- * hw.active_high logic.
+ * The sample rate is set to {@link hardware.freq} Hz, reading from pin
+ * {@link hardware.pin} using {@link hardware.active_high} logic.
  *
  * @return Preparation was succesful (0), -1 or -errno otherwise.
  */
@@ -112,16 +119,16 @@ int set_mode_live(void);
 struct hardware *get_hardware_parameters(void);
 
 /**
- * Clean up when: close the device or input logfile, and output log file
- *   if applicable.
+ * Clean up when: close the device or input logfile, and output log file if
+ * applicable.
  */
 void cleanup(void);
 
 /**
  * Retrieve one pulse from the hardware.
  *
- * @return: 0 or 1 depending on the pin value and hw.active_high, or
- *   GETBIT_IO if obtaining the pulse failed.
+ * @return: 0 or 1 depending on the pin value and {@link hardware.active_high},
+ *   or GETBIT_IO if obtaining the pulse failed.
  */
 uint8_t get_pulse(void);
 
@@ -133,9 +140,8 @@ uint8_t get_pulse(void);
 uint16_t get_bit_file(void);
 
 /**
- * Retrieve one live bit from the hardware.
- * This function determines several values which can be retrieved using
- * get_bitinfo().
+ * Retrieve one live bit from the hardware. This function determines several
+ * values which can be retrieved using get_bitinfo().
  *
  * @return The currently received bit, a mask of GETBIT_* values.
  */
@@ -144,8 +150,8 @@ uint16_t get_bit_live(void);
 /**
  * Prepare for the next bit: update the bit position or wrap it around.
  *
- * @return The current bit state mask, ORed with GETBIT_TOOLONG if the
- *   bit buffer just became full.
+ * @return The current bit state mask, ORed with GETBIT_TOOLONG if the bit
+ *   buffer just became full.
  */
 uint16_t next_bit(void);
 
@@ -164,10 +170,10 @@ uint8_t get_bitpos(void);
 uint8_t *get_buffer(void);
 
 /**
- * Determine if there should be a space between the last bit and the current
- * bit when displaying the bit buffer.
+ * Determine if there should be a space between the last bit and the current bit
+ * when displaying the bit buffer.
  *
- * @param bit The current bit position.
+ * @param bitpos The current bit position.
  */
 int is_space_bit(int bitpos);
 
@@ -189,7 +195,7 @@ int close_logfile(void);
 /**
  * Retrieve "internal" information about the currently received bit.
  *
- * @return The bit information as described for {@link struct bitinfo}.
+ * @return The bit information as described for {@link bitinfo}.
  */
 struct bitinfo *get_bitinfo(void);
 

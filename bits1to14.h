@@ -26,10 +26,18 @@ SUCH DAMAGE.
 #ifndef DCF77PI_BITS1TO14_H
 #define DCF77PI_BITS1TO14_H
 
-/* Length of the third-party buffer in bits */
+/** Length of the third-party buffer in bits */
 #define TPBUFLEN 40
 
-enum TPTYPE { TP_UNKNOWN, TP_WEATHER, TP_ALARM };
+/** Indicates the type of the third party contents. */
+enum TPTYPE {
+	/** unknown content */
+	TP_UNKNOWN,
+	/** Meteotime weather (encrypted) */
+	TP_WEATHER,
+	/** German civil warning (unused) */
+	TP_ALARM
+};
 
 #include <stdint.h>
 

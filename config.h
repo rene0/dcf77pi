@@ -38,8 +38,8 @@ int read_config_file(char *filename);
  * Rerieve a configuration value from the internal dictionary.
  *
  * @param keyword: the key for the value to retrieve. Valid keys are:
- * "pin", "activehigh", "freq", "summermonth", "wintermonth",
- * "leapsecmonths", "outlogfile"
+ *   "pin", "activehigh", "freq", "summermonth", "wintermonth",
+ *   "leapsecmonths", "outlogfile"
  * @return The corresponding value, or NULL when the key was not found.
  */
 char *get_config_value(char *keyword);

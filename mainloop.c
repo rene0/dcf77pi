@@ -34,14 +34,14 @@ int
 mainloop(char *logfilename,
     uint16_t (*get_bit)(void),
     void (*display_bit)(uint16_t, int),
-    void (*print_long_minute)(void),
-    void (*print_minute)(unsigned int),
-    void (*print_new_second)(void),
+    void (*display_long_minute)(void),
+    void (*display_minute)(unsigned int),
+    void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(uint32_t, struct tm),
-    void (*print_thirdparty_buffer)(uint8_t *),
+    void (*display_thirdparty_buffer)(uint8_t *),
     void (*set_time)(int, uint32_t, uint16_t, int, struct tm),
     void (*process_input)(uint16_t *, int, char *, int *, int *),
     void (*post_process_input)(char **, int *, uint16_t *, int))
@@ -71,7 +71,8 @@ mainloop(char *logfilename,
 			break;
 
 		bi = get_bitinfo();
-		add_acc_minlen((unsigned int)(1000000000 * bi->t / bi->realfreq));
+		add_acc_minlen((unsigned int)(1000000000 * bi->t /
+		    bi->realfreq));
 
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
@@ -93,18 +94,18 @@ mainloop(char *logfilename,
 			 * leave acc_minlen alone,
 			 * any minute marker already processed
 			 */
-			print_long_minute();
+			display_long_minute();
 		}
-		if (print_new_second != NULL)
-			print_new_second();
+		if (display_new_second != NULL)
+			display_new_second();
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
-			print_minute(minlen);
+			display_minute(minlen);
 			dt = decode_time(init, minlen, get_buffer(), &curtime);
 
 			if (curtime.tm_min % 3 == 0 && init == 0) {
 				tpbuf = get_thirdparty_buffer();
-				print_thirdparty_buffer(tpbuf);
+				display_thirdparty_buffer(tpbuf);
 				switch (get_thirdparty_type()) {
 				case TP_ALARM:
 					decode_alarm(&civwarn);
