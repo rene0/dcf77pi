@@ -298,7 +298,7 @@ get_bit_live(void)
 	uint32_t sec2;
 	int64_t a, y = 1000000000;
 	int64_t twait;
-	static int init = 1;
+	static int init_bit = 2;
 	int is_eom = state & GETBIT_EOM;
 
 	bit.freq_reset = 0;
@@ -317,7 +317,7 @@ get_bit_live(void)
 	 *  ~A > 5/2 * realfreq: timeout
 	 */
 
-	if (init == 1) {
+	if (init_bit == 2) {
 		bit.realfreq = hw.freq * 1000000;
 		bit.bit0 = bit.realfreq / 10;
 		bit.bit20 = bit.realfreq / 5;
@@ -389,8 +389,8 @@ get_bit_live(void)
 			stv = 1;
 
 			newminute = bit.t * 2000000 > bit.realfreq * 3;
-			if (init == 1)
-				init = 2;
+			if (init_bit == 2)
+				init_bit--;
 			else {
 				if (newminute)
 					bit.realfreq = bit.realfreq + (bit.t *
@@ -449,8 +449,8 @@ get_bit_live(void)
 			buffer[bitpos] = 1;
 		}
 	}
-	if (init == 2)
-		init = 0;
+	if (init_bit == 1)
+		init_bit--;
 	else if ((state & (GETBIT_RND | GETBIT_XMIT |
 	    GETBIT_RECV | GETBIT_EOM | GETBIT_TOOLONG)) == 0) {
 		if (bitpos == 0 && buffer[0] == 0 && (state & GETBIT_READ) == 0)
