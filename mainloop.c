@@ -42,7 +42,7 @@ mainloop(char *logfilename,
     void (*display_weather)(void),
     void (*display_time)(uint32_t, struct tm),
     void (*display_thirdparty_buffer)(uint8_t *),
-    void (*set_time)(int, uint32_t, uint16_t, int, struct tm),
+    void (*set_time)(uint8_t, uint32_t, uint16_t, int, struct tm),
     void (*process_input)(uint16_t *, int, char *, int *, int *),
     void (*post_process_input)(char **, int *, uint16_t *, int))
 {
@@ -50,7 +50,7 @@ mainloop(char *logfilename,
 	uint32_t dt = 0;
 	unsigned int minlen = 0;
 	int bitpos = 0;
-	int init = 3;
+	uint8_t init_min = 2;
 	struct tm curtime;
 	struct alm civwarn;
 	uint8_t *tpbuf;
@@ -81,7 +81,7 @@ mainloop(char *logfilename,
 		if ((bit & GETBIT_SKIP) == 0)
 			display_bit(bit, bitpos);
 
-		if (init == 0)
+		if (init_min == 0)
 			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
 
 		bit = next_bit();
@@ -101,9 +101,10 @@ mainloop(char *logfilename,
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			display_minute(minlen);
-			dt = decode_time(init, minlen, get_buffer(), &curtime);
+			dt = decode_time(init_min, minlen, get_buffer(),
+			    &curtime);
 
-			if (curtime.tm_min % 3 == 0 && init == 0) {
+			if (curtime.tm_min % 3 == 0 && init_min == 0) {
 				tpbuf = get_thirdparty_buffer();
 				display_thirdparty_buffer(tpbuf);
 				switch (get_thirdparty_type()) {
@@ -123,14 +124,12 @@ mainloop(char *logfilename,
 			display_time(dt, curtime);
 
 			if (set_time != NULL && settime == 1)
-				set_time(init, dt, bit, bitpos, curtime);
-			if ((init & 1) == 1 ||
+				set_time(init_min, dt, bit, bitpos, curtime);
+			if (init_min == 2 ||
 			    !((dt & DT_LONG) || (dt & DT_SHORT)))
 				reset_acc_minlen(); /* really a new minute */
-			if (init == 2)
-				init &= ~2;
-			if ((init & 1) == 1)
-				init &= ~1;
+			if (init_min > 0)
+				init_min--;
 		}
 	}
 

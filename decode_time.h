@@ -106,11 +106,10 @@ void add_minute(struct tm *time);
  * parities and other checks match these values are replaced by their
  * calculated counterparts.
  *
- * @param init Indicates whether the state of the decoder is initial:
+ * @param init_min Indicates whether the state of the decoder is initial:
  *   0 = normal, first two minute marks passed
  *   1 = first minute mark passed
- *   2 = (unused)
- *   3 = just starting
+ *   2 = just starting
  * @param minlen The length of this minute in bits (normally 59 or 60 in
  *   case of a leap second).
  * @param buffer The bit buffer.
@@ -118,7 +117,7 @@ void add_minute(struct tm *time);
  * @return The state of this minute, the combination of the various DT_* and
  *   ANN_* values that are applicable.
  */
-uint32_t decode_time(int init, unsigned int minlen, uint8_t *buffer,
+uint32_t decode_time(uint8_t init_min, unsigned int minlen, uint8_t *buffer,
     struct tm *time);
 
 /**

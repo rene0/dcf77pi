@@ -523,9 +523,10 @@ display_minute(unsigned int minlen)
 }
 
 void
-set_time(int init, uint32_t dt, uint16_t bit, int bitpos, struct tm time)
+set_time(uint8_t init_min, uint32_t dt, uint16_t bit, int bitpos,
+    struct tm time)
 {
-	if (setclock_ok(init, dt, bit))
+	if (setclock_ok(init_min, dt, bit))
 		switch (setclock(time)) {
 		case -1:
 			statusbar(main_win, bitpos, "mktime() failed!");

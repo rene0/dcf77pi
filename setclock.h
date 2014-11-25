@@ -32,12 +32,12 @@ SUCH DAMAGE.
 /**
  * Check if it is OK to set the system clock.
  *
- * @param init Indicates whether the state of the decoder is initial
+ * @param init_min Indicates whether the state of the decoder is initial
  * @param dt The currently decoded date, time, and status
  * @param bit The current bit information
  * @return Whether it is OK to set the system clock
  */
-int setclock_ok(int init, uint32_t dt, uint16_t bit);
+int setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit);
 
 /**
  * Set the system clock according to the given time. Note that this does *not*
