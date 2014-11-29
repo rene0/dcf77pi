@@ -485,6 +485,18 @@ report:
 			state |= GETBIT_EOD; \
 	}
 
+#define READVALUE(COND) \
+do { \
+	state &= ~GETBIT_SKIPNEXT; \
+	state |= GETBIT_SKIP; \
+	valid = 1; \
+	bit.t = 0; \
+	if (COND) { \
+		state |= GETBIT_EOD; \
+		return state; \
+	} \
+} while (0)
+
 uint16_t
 get_bit_file(void)
 {
@@ -543,14 +555,7 @@ get_bit_file(void)
 			break;
 		case 'c':
 			/* cutoff for newminute, eat value */
-			state &= ~GETBIT_SKIPNEXT;
-			state |= GETBIT_SKIP;
-			valid = 1;
-			bit.t = 0;
-			if (fseek(datafile, 6, SEEK_CUR)) {
-				state |= GETBIT_EOD;
-				return state;
-			}
+			READVALUE(fseek(datafile, 6, SEEK_CUR));
 			break;
 		default:
 			break;
