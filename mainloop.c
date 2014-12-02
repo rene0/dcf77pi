@@ -31,8 +31,9 @@ SUCH DAMAGE.
 #include <string.h>
 
 int
-mainloop(char *logfilename,
-    uint16_t (*get_bit)(void),
+mainloop(int read_acc_minlen,
+    char *logfilename,
+    uint16_t (*get_bit)(int *),
     void (*display_bit)(uint16_t, int),
     void (*display_long_minute)(void),
     void (*display_minute)(unsigned int),
@@ -57,13 +58,17 @@ mainloop(char *logfilename,
 	int settime = 0;
 	int change_logfile = 0;
 	struct bitinfo *bi;
+	static int acc_minlen = -1;
 
 	init_time();
 	(void)memset(&curtime, '\0', sizeof(curtime));
 	init_thirdparty();
 
 	for (;;) {
-		bit = get_bit();
+		if (!read_acc_minlen)
+			acc_minlen = get_acc_minlen();
+		bit = get_bit(&acc_minlen);
+
 		if (process_input != NULL)
 			process_input(&bit, bitpos, logfilename, &settime,
 			    &change_logfile);
@@ -71,8 +76,14 @@ mainloop(char *logfilename,
 			break;
 
 		bi = get_bitinfo();
-		add_acc_minlen((unsigned int)(1000000000 * bi->t /
-		    bi->realfreq));
+		if (read_acc_minlen && acc_minlen >= 0) {
+			/* replace by value from log file */
+			reset_acc_minlen();
+			add_acc_minlen((unsigned int)acc_minlen);
+			acc_minlen = -2;
+		} else if (acc_minlen != -2)
+			add_acc_minlen((unsigned int)(1000 * 1000000 * bi->t /
+			    bi->realfreq));
 
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
@@ -85,9 +96,12 @@ mainloop(char *logfilename,
 			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
 
 		bit = next_bit();
-		if (bit & GETBIT_EOM)
-			minlen = bitpos + 1;
+		if (bit & GETBIT_EOM) {
 			/* handle the missing bit due to the minute marker */
+			minlen = bitpos + 1;
+			/* add to acc_minlen again */
+			acc_minlen = -1;
+		}
 		if (bit & GETBIT_TOOLONG) {
 			minlen = 61;
 			/*

@@ -75,7 +75,7 @@ main(int argc, char **argv)
 	min = -1;
 
 	for (;;) {
-		bit = get_bit_live();
+		bit = get_bit_live(NULL);
 		bi = get_bitinfo();
 		if (verbose) {
 			int i, j;

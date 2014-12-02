@@ -36,6 +36,8 @@ SUCH DAMAGE.
  * Provide a ready-to-use mainloop function for the main program. Both dcf77pi
  * and dcf77pi-analyze use it.
  *
+ * @param read_acc_minlen Flag indicating that the the accumulated minute
+ *   length is read from the log file.
  * @param logfilename The name of the log file to write the live data to or NULL
  *   if not in live mode.
  * @param get_bit The callback to obtain a bit (either live or from a log file).
@@ -60,8 +62,9 @@ SUCH DAMAGE.
  *   interactive user input.
  * @return Any error that happened (currently just 0 ).
  */
-int mainloop(char *logfilename,
-    uint16_t (*get_bit)(void),
+int mainloop(int read_acc_minlen,
+    char *logfilename,
+    uint16_t (*get_bit)(int *),
     void (*display_bit)(uint16_t, int),
     void (*display_long_minute)(void),
     void (*display_minute)(unsigned int),

@@ -279,7 +279,7 @@ reset_bitlen(void)
 }
 
 uint16_t
-get_bit_live(void)
+get_bit_live(int *acc_minlen)
 {
 	/*
 	 * The bits are decoded from the signal using an exponential low-pass
@@ -466,9 +466,15 @@ get_bit_live(void)
 report:
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
-		if (state & GETBIT_EOM)
+		if (state & GETBIT_EOM) {
+			if (acc_minlen != NULL)
+				fprintf(logfile, "a%u", (unsigned int)
+				    (*acc_minlen + 1000 * 1000000 * bit.t /
+				     bit.realfreq));
+				/* add last second, not added by mainloop yet */
 			fprintf(logfile, "c%6.4f\n",
 			    (bit.t * 1e6) / bit.realfreq);
+		}
 	}
 	return state;
 }
@@ -478,7 +484,7 @@ report:
 	inch = getc(datafile); \
 	if (feof(datafile)) \
 		return state; \
-	if (inch == 'c') \
+	if (inch == 'a' || inch == 'c') \
 		state |= GETBIT_SKIPNEXT; \
 	if ((inch != '\r' && inch != '\n') || inch == oldinch) { \
 		if (ungetc(inch, datafile) == EOF) /* EOF remains, IO error */\
@@ -498,7 +504,7 @@ do { \
 } while (0)
 
 uint16_t
-get_bit_file(void)
+get_bit_file(int *acc_minlen)
 {
 	int oldinch, inch, valid = 0;
 
@@ -552,6 +558,10 @@ get_bit_file(void)
 			state |= GETBIT_READ;
 			valid = 1;
 			bit.t = 1000;
+			break;
+		case 'a':
+			/* acc_minlen */
+			READVALUE(fscanf(datafile, "%u", acc_minlen) != 1);
 			break;
 		case 'c':
 			/* cutoff for newminute, eat value */

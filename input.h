@@ -135,17 +135,21 @@ uint8_t get_pulse(void);
 /**
  * Retrieve one bit from the log file.
  *
+ * @param acc_minlen Pointer to the accumulated minute length, if given by the
+ *   log file.
  * @return The current bit from the log file, a mask of GETBIT_* values.
  */
-uint16_t get_bit_file(void);
+uint16_t get_bit_file(int *acc_minlen);
 
 /**
  * Retrieve one live bit from the hardware. This function determines several
  * values which can be retrieved using get_bitinfo().
  *
+ * @param acc_minlen Pointer to the accumulated minute length to store in the
+ *   log file (NULL means no storage, e.g. for readpin).
  * @return The currently received bit, a mask of GETBIT_* values.
  */
-uint16_t get_bit_live(void);
+uint16_t get_bit_live(int *acc_minlen);
 
 /**
  * Prepare for the next bit: update the bit position or wrap it around.
