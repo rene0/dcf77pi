@@ -528,10 +528,11 @@ get_bit_file(int *acc_minlen)
 			break;
 		case '\r':
 		case '\n':
-			/* handle multiple consecutive EOM markers */
-			state |= GETBIT_EOM; /* otherwise empty bit */
-			valid = 1;
-			bit.t += 1000;
+			/*
+			 * Skip multiple consecutive EOM markers,
+			 * these are made impossible by the reset_minlen()
+			 * invocation in get_bit_live()
+			 */
 			break;
 		case 'x':
 			state |= GETBIT_XMIT;
