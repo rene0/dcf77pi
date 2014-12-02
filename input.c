@@ -510,7 +510,11 @@ get_bit_file(int *acc_minlen)
 
 	set_new_state();
 
-	bit.realfreq = 1000000000; /* fake realfreq for mainloop() */
+	/*
+	 * bit.realfreq and bit.t are set to fake value for mainloop() for
+	 * compatibility with old log files not storing acc_minlen values
+	 */
+	bit.realfreq = 1000 * 1000000;
 
 	while (valid == 0) {
 		inch = getc(datafile);
