@@ -187,8 +187,8 @@ set_mode_live(void)
 		return -1;
 	}
 	hw.freq = strtol(get_config_value("freq"), NULL, 10);
-	if (hw.freq < 10 || hw.freq > 666666 || (hw.freq & 1) == 1) {
-		printf("hw.freq must be an even number between 10 and 666666 inclusive\n");
+	if (hw.freq < 10 || hw.freq > 155000 || (hw.freq & 1) == 1) {
+		printf("hw.freq must be an even number between 10 and 155000 inclusive\n");
 		cleanup();
 		return -1;
 	}
