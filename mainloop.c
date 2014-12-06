@@ -92,7 +92,7 @@ mainloop(int read_acc_minlen,
 		if ((bit & GETBIT_SKIP) == 0)
 			display_bit(bit, bitpos);
 
-		if (init_min == 0)
+		if (init_min < 2)
 			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
 
 		bit = next_bit();
