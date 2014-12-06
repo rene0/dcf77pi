@@ -137,7 +137,14 @@ display_long_minute(void)
 void
 display_minute(unsigned int minlen)
 {
-	printf(" (%u) %u\n", get_acc_minlen(), minlen);
+	uint32_t cutoff;
+
+	cutoff = get_cutoff();
+	printf(" (%u) %u ", get_acc_minlen(), minlen);
+	if (cutoff == 0xffff)
+		printf("?\n");
+	else
+		printf("%6.4f\n", cutoff/10000.0);
 }
 
 void

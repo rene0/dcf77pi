@@ -203,4 +203,11 @@ int close_logfile(void);
  */
 struct bitinfo *get_bitinfo(void);
 
+
+/**
+ * Retrieve the cutoff value written to the log file.
+ *
+ * @return The cutoff value (multiplied by 10,000)
+ */
+uint16_t get_cutoff(void);
 #endif

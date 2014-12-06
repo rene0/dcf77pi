@@ -70,6 +70,7 @@ FILE *logfile = NULL; /* auto-appended in live mode */
 int fd = 0; /* gpio file */
 struct hardware hw;
 struct bitinfo bit;
+uint16_t cutoff;
 
 int
 init_hardware(unsigned int pin_nr)
@@ -507,6 +508,7 @@ uint16_t
 get_bit_file(int *acc_minlen)
 {
 	int oldinch, inch, valid = 0;
+	char co[6];
 
 	set_new_state();
 
@@ -515,6 +517,7 @@ get_bit_file(int *acc_minlen)
 	 * compatibility with old log files not storing acc_minlen values
 	 */
 	bit.realfreq = 1000 * 1000000;
+	cutoff = 0xffff;
 
 	while (valid == 0) {
 		inch = getc(datafile);
@@ -569,8 +572,11 @@ get_bit_file(int *acc_minlen)
 			READVALUE(fscanf(datafile, "%u", acc_minlen) != 1);
 			break;
 		case 'c':
-			/* cutoff for newminute, eat value */
-			READVALUE(fseek(datafile, 6, SEEK_CUR));
+			/* cutoff for newminute */
+			READVALUE(fscanf(datafile, "%6c", co) != 1);
+			if (co[1] == '.')
+				cutoff = (co[0] - '0') * 10000 +
+				    (uint16_t)strtol(co + 2, (char **)NULL, 10);
 			break;
 		default:
 			break;
@@ -649,4 +655,10 @@ struct bitinfo *
 get_bitinfo(void)
 {
 	return &bit;
+}
+
+uint16_t
+get_cutoff(void)
+{
+	return cutoff;
 }
