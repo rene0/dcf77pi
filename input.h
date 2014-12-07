@@ -26,6 +26,9 @@ SUCH DAMAGE.
 #ifndef DCF77PI_INPUT_H
 #define DCF77PI_INPUT_H
 
+/** maximum number of bits in a minute */
+#define BUFLEN 60
+
 /** this bit has value 1 */
 #define GETBIT_ONE	(1 << 0)
 /** end-of-minute bit */

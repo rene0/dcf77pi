@@ -63,7 +63,7 @@ SUCH DAMAGE.
 #endif
 
 uint8_t bitpos; /* second */
-uint8_t buffer[60]; /* wrap after 60 positions */
+uint8_t buffer[BUFLEN]; /* wrap after BUFLEN positions */
 uint16_t state; /* any errors, or high bit */
 FILE *datafile = NULL; /* input file (recorded data) */
 FILE *logfile = NULL; /* auto-appended in live mode */
@@ -151,7 +151,7 @@ set_state_vars(void)
 {
 	bitpos = 0;
 	state = 0;
-	(void)memset(buffer, '\0', sizeof(buffer));
+	(void)memset(buffer, '\0', BUFLEN);
 }
 
 int
@@ -608,7 +608,7 @@ next_bit(void)
 {
 	bitpos = (state & GETBIT_EOM) ? 0 : (state & GETBIT_SKIPNEXT) ?
 	    bitpos : bitpos + 1;
-	if (bitpos == sizeof(buffer)) {
+	if (bitpos == BUFLEN) {
 		state |= GETBIT_TOOLONG;
 		bitpos = 0;
 		return state;
