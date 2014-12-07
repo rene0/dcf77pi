@@ -318,6 +318,8 @@ switch_logfile(WINDOW *win, char **logfilename, int bitpos)
 void
 display_time(uint32_t dt, struct tm time)
 {
+	uint16_t cutoff;
+
 	/* color bits depending on the results */
 	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, dt & DT_B0 ? 1 : 2, NULL);
 	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt & DT_DSTERR ? 1 : 2, NULL);
@@ -332,6 +334,12 @@ display_time(uint32_t dt, struct tm time)
 	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
 	    time.tm_mday, get_weekday(time.tm_wday), time.tm_hour, time.tm_min);
+	/* display minute cutoff value at end of line (for now at least) */
+	cutoff = get_cutoff();
+	if (cutoff == 0xffff)
+		mvwprintw(decode_win, 1, 79, "?");
+	else
+		mvwprintw(decode_win, 1, 74, "%6.4f", cutoff/10000.0);
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 	/* color date/time string depending on the results */
 	if (dt & DT_DSTJUMP)

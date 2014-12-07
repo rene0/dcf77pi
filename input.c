@@ -250,12 +250,13 @@ get_pulse(void)
 }
 
 /*
- * Clear previous flags, except GETBIT_TOOLONG to be able
- * to determine if this flag can be cleared again.
+ * Clear the cutoff value and the previous flags, except GETBIT_TOOLONG to be
+ * able to determine if this flag can be cleared again.
  */
 void
 set_new_state(void)
 {
+	cutoff = 0xffff;
 	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
 }
 
@@ -477,6 +478,8 @@ report:
 			    (bit.t * 1e6) / bit.realfreq);
 		}
 	}
+	if (state & GETBIT_EOM)
+		cutoff = (uint16_t)(10000 * bit.t * 1000000 / bit.realfreq);
 	return state;
 }
 
@@ -517,7 +520,6 @@ get_bit_file(int *acc_minlen)
 	 * compatibility with old log files not storing acc_minlen values
 	 */
 	bit.realfreq = 1000 * 1000000;
-	cutoff = 0xffff;
 
 	while (valid == 0) {
 		inch = getc(datafile);
