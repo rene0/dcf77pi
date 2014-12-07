@@ -267,7 +267,7 @@ display_bit(uint16_t state, int bitpos)
 
 	acc_minlen = get_acc_minlen();
 	mvwprintw(decode_win, 1, 28, "(%6u)",
-	    acc_minlen >= 1000000 ? 999999 : acc_minlen);
+	    acc_minlen > 999999 ? 999999 : acc_minlen);
 	wrefresh(decode_win);
 }
 
@@ -341,6 +341,7 @@ display_time(uint32_t dt, struct tm time)
 	else
 		mvwprintw(decode_win, 1, 74, "%6.4f", cutoff/10000.0);
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
+
 	/* color date/time string depending on the results */
 	if (dt & DT_DSTJUMP)
 		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
