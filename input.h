@@ -172,7 +172,7 @@ uint8_t get_bitpos(void);
 /**
  * Retrieve the current bit buffer.
  *
- * @return The bit buffer, a packed array of 0 and 1 values (8 bits per item).
+ * @return The bit buffer, an array of 0 and 1 values.
  */
 uint8_t *get_buffer(void);
 

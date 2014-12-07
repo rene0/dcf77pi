@@ -516,8 +516,9 @@ get_bit_file(int *acc_minlen)
 	set_new_state();
 
 	/*
-	 * bit.realfreq and bit.t are set to fake value for mainloop() for
-	 * compatibility with old log files not storing acc_minlen values
+	 * bit.realfreq and bit.t are set to fake value for compatibility with
+	 * old log files not storing acc_minlen values or to increase time
+	 * when mainloop() splits too long minutes
 	 */
 	bit.realfreq = 1000 * 1000000;
 
@@ -588,7 +589,7 @@ get_bit_file(int *acc_minlen)
 	TRYCHAR else {
 		state |= GETBIT_EOM;
 		bit.t += 1000;
-		/* Check for B\r\n or B\n\r */
+		/* Check for \r\n or \n\r */
 		TRYCHAR
 	}
 	return state;
