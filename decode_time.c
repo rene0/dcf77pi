@@ -199,10 +199,10 @@ uint32_t
 decode_time(uint8_t init_min, unsigned int minlen, uint8_t *buffer,
     struct tm *time)
 {
-	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0;
+	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0, increase;
 	unsigned int tmp, tmp0, tmp1, tmp2, tmp4, tmp5;
 	uint32_t rval = 0;
-	int tmp3, utchour, increase;
+	int tmp3, utchour;
 	struct tm newtime;
 
 	memset(&newtime, '\0', sizeof(newtime));
