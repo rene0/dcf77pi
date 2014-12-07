@@ -203,6 +203,7 @@ decode_time(uint8_t init_min, unsigned int minlen, uint32_t acc_minlen,
 	uint32_t rval = 0;
 	int tmp3, utchour;
 	struct tm newtime;
+	static unsigned int toolong = 0;
 
 	memset(&newtime, '\0', sizeof(newtime));
 	newtime.tm_isdst = time->tm_isdst; /* save DST value */
@@ -225,8 +226,14 @@ decode_time(uint8_t init_min, unsigned int minlen, uint32_t acc_minlen,
 	if (buffer[15] == 1)
 		rval |= DT_XMIT;
 
+	toolong = (minlen == 61) ? toolong + 1 : 0;
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
+		/*
+		 * Overflowing minutes are already added, so reduce acc_minlen
+		 * to prevent adding them again:
+		 */
+		acc_minlen -= 60000 * toolong;
 		increase = acc_minlen / 60000;
 		acc_minlen %= 60000;
 		/*
