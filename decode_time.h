@@ -112,13 +112,15 @@ void add_minute(struct tm *time);
  *   2 = just starting
  * @param minlen The length of this minute in bits (normally 59 or 60 in
  *   case of a leap second).
+ * @param acc_minlen The accumulated minute length of this minute in
+ *   milliseconds.
  * @param buffer The bit buffer.
  * @param time The current time, to be updated.
  * @return The state of this minute, the combination of the various DT_* and
  *   ANN_* values that are applicable.
  */
-uint32_t decode_time(uint8_t init_min, unsigned int minlen, uint8_t *buffer,
-    struct tm *time);
+uint32_t decode_time(uint8_t init_min, unsigned int minlen, uint32_t acc_minlen,
+    uint8_t *buffer, struct tm *time);
 
 /**
  * Calculates the hour in UTC from the given time.
@@ -143,25 +145,6 @@ char *get_weekday(int wday);
  * It should be reset to 0 when a minute with the correct length is received.
  * For other minutes, 60,000 should be substracted.
  */
-
-/**
- * Retrieve the current value of the accumulated minute length.
- *
- * @return The accumulated minute length in milliseconds.
- */
-unsigned int get_acc_minlen(void);
-
-/**
- * Reset the accumulated minute length to 0.
- */
-void reset_acc_minlen(void);
-
-/**
- * Add a given amount of milliseconds to the accumulated minute length.
- *
- * @param ms The amount to add in milliseconds
- */
-void add_acc_minlen(unsigned int ms);
 
 /**
  * Convert the given time in ISO format to DCF77 format.

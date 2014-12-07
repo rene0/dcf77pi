@@ -31,9 +31,8 @@ SUCH DAMAGE.
 #include <string.h>
 
 int
-mainloop(int read_acc_minlen,
-    char *logfilename,
-    uint16_t (*get_bit)(int *),
+mainloop(char *logfilename,
+    uint16_t (*get_bit)(void),
     void (*display_bit)(uint16_t, int),
     void (*display_long_minute)(void),
     void (*display_minute)(unsigned int),
@@ -58,16 +57,13 @@ mainloop(int read_acc_minlen,
 	int settime = 0;
 	int change_logfile = 0;
 	struct bitinfo *bi;
-	static int acc_minlen = -1;
 
 	init_time();
 	(void)memset(&curtime, '\0', sizeof(curtime));
 	init_thirdparty();
 
 	for (;;) {
-		if (!read_acc_minlen)
-			acc_minlen = get_acc_minlen();
-		bit = get_bit(&acc_minlen);
+		bit = get_bit();
 
 		if (process_input != NULL)
 			process_input(&bit, bitpos, logfilename, &settime,
@@ -76,15 +72,6 @@ mainloop(int read_acc_minlen,
 			break;
 
 		bi = get_bitinfo();
-		if (read_acc_minlen && acc_minlen >= 0) {
-			/* replace by value from log file */
-			reset_acc_minlen();
-			add_acc_minlen((unsigned int)acc_minlen);
-			acc_minlen = -2;
-		} else if (acc_minlen != -2)
-			add_acc_minlen((unsigned int)(1000 * 1000000 * bi->t /
-			    bi->realfreq));
-
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
 			post_process_input(&logfilename, &change_logfile, &bit,
@@ -99,8 +86,6 @@ mainloop(int read_acc_minlen,
 		if (bit & GETBIT_EOM) {
 			/* handle the missing bit due to the minute marker */
 			minlen = bitpos + 1;
-			/* add to acc_minlen again */
-			acc_minlen = -1;
 		}
 		if (bit & GETBIT_TOOLONG) {
 			minlen = 61;
@@ -115,8 +100,8 @@ mainloop(int read_acc_minlen,
 
 		if (bit & (GETBIT_EOM | GETBIT_TOOLONG)) {
 			display_minute(minlen);
-			dt = decode_time(init_min, minlen, get_buffer(),
-			    &curtime);
+			dt = decode_time(init_min, minlen, get_acc_minlen(),
+			    get_buffer(), &curtime);
 
 			if (curtime.tm_min % 3 == 0 && init_min == 0) {
 				tpbuf = get_thirdparty_buffer();

@@ -70,6 +70,7 @@ FILE *logfile = NULL; /* auto-appended in live mode */
 int fd = 0; /* gpio file */
 struct hardware hw;
 struct bitinfo bit;
+uint32_t acc_minlen;
 uint16_t cutoff;
 
 int
@@ -149,6 +150,7 @@ init_hardware(unsigned int pin_nr)
 void
 set_state_vars(void)
 {
+	acc_minlen = 0;
 	bitpos = 0;
 	state = 0;
 	(void)memset(buffer, '\0', BUFLEN);
@@ -281,7 +283,7 @@ reset_bitlen(void)
 }
 
 uint16_t
-get_bit_live(int *acc_minlen)
+get_bit_live(void)
 {
 	/*
 	 * The bits are decoded from the signal using an exponential low-pass
@@ -466,17 +468,12 @@ get_bit_live(int *acc_minlen)
 			reset_bitlen();
 	}
 report:
+	acc_minlen += 1000 * 1000000 * bit.t / bit.realfreq;
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
-		if (state & GETBIT_EOM) {
-			if (acc_minlen != NULL)
-				fprintf(logfile, "a%u", (unsigned int)
-				    (*acc_minlen + 1000 * 1000000 * bit.t /
-				     bit.realfreq));
-				/* add last second, not added by mainloop yet */
-			fprintf(logfile, "c%6.4f\n",
+		if (state & GETBIT_EOM)
+			fprintf(logfile, "a%uc%6.4f\n", acc_minlen,
 			    (bit.t * 1e6) / bit.realfreq);
-		}
 	}
 	if (state & GETBIT_EOM)
 		cutoff = (uint16_t)(10000 * bit.t * 1000000 / bit.realfreq);
@@ -508,9 +505,10 @@ do { \
 } while (0)
 
 uint16_t
-get_bit_file(int *acc_minlen)
+get_bit_file(void)
 {
 	int oldinch, inch, valid = 0;
+	static int read_acc_minlen = 0;
 	char co[6];
 
 	set_new_state();
@@ -572,7 +570,8 @@ get_bit_file(int *acc_minlen)
 			break;
 		case 'a':
 			/* acc_minlen */
-			READVALUE(fscanf(datafile, "%u", acc_minlen) != 1);
+			READVALUE(fscanf(datafile, "%u", &acc_minlen) != 1);
+			read_acc_minlen = 1;
 			break;
 		case 'c':
 			/* cutoff for newminute */
@@ -588,10 +587,16 @@ get_bit_file(int *acc_minlen)
 	/* Only allow \r , \n , \r\n , and \n\r as single EOM markers */
 	TRYCHAR else {
 		state |= GETBIT_EOM;
-		bit.t += 1000;
+		if (!read_acc_minlen)
+			bit.t += 1000;
+		else
+			read_acc_minlen = 0;
 		/* Check for \r\n or \n\r */
 		TRYCHAR
 	}
+	if (!read_acc_minlen)
+		acc_minlen += 1000 * 1000000 * bit.t / bit.realfreq;
+
 	return state;
 }
 
@@ -658,6 +663,24 @@ struct bitinfo *
 get_bitinfo(void)
 {
 	return &bit;
+}
+
+uint32_t
+get_acc_minlen(void)
+{
+	return acc_minlen;
+}
+
+void
+reset_acc_minlen(void)
+{
+	acc_minlen = 0;
+}
+
+void
+add_acc_minlen(uint32_t ms)
+{
+	acc_minlen += ms;
 }
 
 uint16_t

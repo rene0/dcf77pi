@@ -211,7 +211,7 @@ void
 display_bit(uint16_t state, int bitpos)
 {
 	int xpos, i;
-	unsigned int acc_minlen;
+	uint32_t acc_minlen;
 	struct bitinfo *bitinf;
 
 	bitinf = get_bitinfo();
@@ -616,7 +616,7 @@ main(int argc, char *argv[])
 	draw_input_window();
 	draw_keys(main_win);
 
-	res = mainloop(0, logfilename, get_bit_live, display_bit,
+	res = mainloop(logfilename, get_bit_live, display_bit,
 	    display_long_minute, display_minute, wipe_input, display_alarm,
 	    display_unknown, display_weather, display_time,
 	    display_thirdparty_buffer, set_time, process_input,

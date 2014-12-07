@@ -36,7 +36,6 @@ int summermonth;
 int wintermonth;
 int leapsecmonths[12];
 int num_leapsecmonths;
-unsigned int acc_minlen = 0;
 
 char *weekday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 int dayinleapyear[12] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
@@ -196,8 +195,8 @@ add_minute(struct tm *time)
 }
 
 uint32_t
-decode_time(uint8_t init_min, unsigned int minlen, uint8_t *buffer,
-    struct tm *time)
+decode_time(uint8_t init_min, unsigned int minlen, uint32_t acc_minlen,
+    uint8_t *buffer, struct tm *time)
 {
 	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0, increase;
 	unsigned int tmp, tmp0, tmp1, tmp2, tmp4, tmp5;
@@ -226,20 +225,18 @@ decode_time(uint8_t init_min, unsigned int minlen, uint8_t *buffer,
 	if (buffer[15] == 1)
 		rval |= DT_XMIT;
 
-	increase = 0;
-	while (init_min < 2 && acc_minlen >= 60000) {
-		add_minute(time);
-		acc_minlen -= 60000;
-		increase++;
-	}
-	/*
-	 * Allow for "almost-complete" minutes. These minutes _are_ complete
-	 * but acc_minlen is short.
-	 */
-	if (init_min < 2 && acc_minlen > 59000) {
-		add_minute(time);
-		acc_minlen -= 59000;
-		increase++;
+	/* There is no previous time on the very first (partial) minute: */
+	if (init_min < 2) {
+		increase = acc_minlen / 60000;
+		acc_minlen %= 60000;
+		/*
+		 * Account for minutes which are complete but where acc_minlen
+		 * is short:
+		 */
+		if (acc_minlen > 59000)
+			increase++;
+		for (tmp = 0; tmp < increase; tmp++)
+			add_minute(time);
 	}
 
 	p1 = getpar(buffer, 21, 28);
@@ -425,24 +422,6 @@ get_utchour(struct tm time)
 	if (utchour < 0)
 		utchour += 24;
 	return utchour;
-}
-
-unsigned int
-get_acc_minlen(void)
-{
-	return acc_minlen;
-}
-
-void
-reset_acc_minlen(void)
-{
-	acc_minlen = 0;
-}
-
-void
-add_acc_minlen(unsigned int ms)
-{
-	acc_minlen += ms;
 }
 
 struct tm
