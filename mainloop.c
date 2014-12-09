@@ -56,7 +56,6 @@ mainloop(char *logfilename,
 	uint8_t *tpbuf;
 	int settime = 0;
 	int change_logfile = 0;
-	struct bitinfo *bi;
 
 	init_time();
 	(void)memset(&curtime, '\0', sizeof(curtime));
@@ -71,7 +70,6 @@ mainloop(char *logfilename,
 		if (bit & GETBIT_EOD)
 			break;
 
-		bi = get_bitinfo();
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
 			post_process_input(&logfilename, &change_logfile, &bit,
