@@ -26,7 +26,7 @@ SUCH DAMAGE.
 #include "config.h"
 #include "input.h"
 
-#include <inttypes.h>
+#include <inttypes.h> /* for PRIiXX */
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
