@@ -337,7 +337,7 @@ display_time(uint32_t dt, struct tm time)
 	/* display minute cutoff value at end of line (for now at least) */
 	cutoff = get_cutoff();
 	if (cutoff == 0xffff)
-		mvwprintw(decode_win, 1, 79, "?");
+		mvwprintw(decode_win, 1, 74, "?     ");
 	else
 		mvwprintw(decode_win, 1, 74, "%6.4f", cutoff/10000.0);
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
