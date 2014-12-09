@@ -144,7 +144,7 @@ display_minute(unsigned int minlen)
 	if (cutoff == 0xffff)
 		printf("?\n");
 	else
-		printf("%6.4f\n", cutoff/10000.0);
+		printf("%6.4f\n", cutoff / 10000.0);
 }
 
 void

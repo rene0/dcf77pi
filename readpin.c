@@ -105,4 +105,5 @@ main(int argc, char **argv)
 			min++;
 		bit = next_bit();
 	}
+	// NOTREACHED
 }

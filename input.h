@@ -71,9 +71,10 @@ struct hardware {
  * (Internal) information about the currently received bit:
  */
 struct bitinfo {
-	/** time in samples when the signal went low again */
+	/** time in samples when the signal went low again, -1 initially */
 	int64_t tlow;
-	/** time in samples when the signal was last measured as 0 */
+	/** time in samples when the signal was last measured as 0,
+	  * -1 initially */
 	int64_t tlast0;
 	/** length of this bit in samples */
 	int64_t t;
@@ -100,7 +101,7 @@ struct bitinfo {
  * Prepare for input from a log file.
  *
  * @param infilename The name of the log file to use.
- * @return Preparation was succesful (0), errno otherwise.
+ * @return Preparation was succesful (0), -1 or errno otherwise.
  */
 int set_mode_file(char *infilename);
 
@@ -115,7 +116,7 @@ int set_mode_file(char *infilename);
 int set_mode_live(void);
 
 /**
- * Return the hardware paramters.
+ * Return the hardware parameters.
  *
  * @return The hardware parameters.
  */
@@ -227,4 +228,5 @@ void add_acc_minlen(uint32_t ms);
  * @return The cutoff value (multiplied by 10,000)
  */
 uint16_t get_cutoff(void);
+
 #endif

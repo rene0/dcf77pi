@@ -161,4 +161,5 @@ struct tm dcftime(struct tm isotime);
  * @return The time in ISO format, with the tm_zone field left to NULL.
  */
 struct tm isotime(struct tm dcftime);
+
 #endif

@@ -282,16 +282,15 @@ reset_bitlen(void)
 	bit.bitlen_reset = 1;
 }
 
+/*
+ * The bits are decoded from the signal using an exponential low-pass filter in
+ * conjunction with a Schmitt trigger. The idea and the initial implementation
+ * for this come from Udo Klein, with permission.
+ * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
+ */
 uint16_t
 get_bit_live(void)
 {
-	/*
-	 * The bits are decoded from the signal using an exponential low-pass
-	 * filter in conjunction with a Schmitt trigger. The idea and the
-	 * initial implementation for this come from Udo Klein, with permission.
-	 * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
-	 */
-
 	char outch;
 	int newminute;
 	uint8_t p, stv = 1;
@@ -655,6 +654,7 @@ int
 close_logfile(void)
 {
 	int f;
+
 	f = fclose(logfile);
 	return (f == EOF) ? errno : 0;
 }
