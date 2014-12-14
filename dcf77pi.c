@@ -92,7 +92,7 @@ curses_cleanup(char *reason)
 void
 display_bit(uint16_t state, int bitpos)
 {
-	int xpos, i;
+	uint8_t xpos, bp;
 	uint32_t acc_minlen;
 	struct bitinfo *bitinf;
 
@@ -138,8 +138,8 @@ display_bit(uint16_t state, int bitpos)
 	}
 	wattroff(input_win, COLOR_PAIR(1));
 
-	for (xpos = bitpos + 4, i = 0; i <= bitpos; i++)
-		if (is_space_bit(i))
+	for (xpos = bitpos + 4, bp = 0; bp <= bitpos; bp++)
+		if (is_space_bit(bp))
 			xpos++;
 
 	mvwprintw(input_win, 0, xpos, "%u", get_buffer()[bitpos]);
@@ -415,15 +415,15 @@ display_long_minute(void)
 void
 display_minute(unsigned int minlen)
 {
-	int i, xpos;
+	uint8_t bp, xpos;
 
 	/* display bits of previous minute */
-	for (xpos = 4, i = 0; i < minlen; i++, xpos++) {
-		if (i > 59)
+	for (xpos = 4, bp = 0; bp < minlen; bp++, xpos++) {
+		if (bp > 59)
 			break;
-		if (is_space_bit(i))
+		if (is_space_bit(bp))
 			xpos++;
-		mvwprintw(decode_win, 0, xpos, "%u", get_buffer()[i]);
+		mvwprintw(decode_win, 0, xpos, "%u", get_buffer()[bp]);
 	}
 	wclrtoeol(decode_win);
 	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
