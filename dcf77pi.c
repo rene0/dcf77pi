@@ -457,8 +457,6 @@ main(int argc, char *argv[])
 	int res;
 	char *logfilename;
 
-	logfilename = NULL;
-
 	res = read_config_file(ETCDIR"/config.txt");
 	if (res != 0) {
 		/* non-existent file? */
