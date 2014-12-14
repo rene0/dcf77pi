@@ -64,7 +64,7 @@ init_time(void)
 	for (i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
 		m = strtol(mon, NULL, 10);
 		if (m >= 1 && m <= 12) {
-			leapsecmonths[i] = strtol(mon, NULL, 10);
+			leapsecmonths[i] = m;
 			num_leapsecmonths++;
 		}
 	}
