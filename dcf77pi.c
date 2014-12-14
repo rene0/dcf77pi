@@ -46,32 +46,6 @@ int old_bitpos = -1; /* timer for statusbar inactive */
 int input_mode = 0;  /* normal input (statusbar keys) or string input */
 char keybuf[MAXBUF]; /* accumulator for string input */
 uint8_t input_count, input_xpos;
-int msglen;
-
-int
-init_curses(void)
-{
-	initscr();
-	if (has_colors() == FALSE)
-		return -1;
-	start_color();
-	init_pair(1, COLOR_RED, COLOR_BLACK);
-	init_pair(2, COLOR_GREEN, COLOR_BLACK);
-	init_pair(3, COLOR_YELLOW, COLOR_BLACK); /* turn on A_BOLD */
-	init_pair(4, COLOR_BLUE, COLOR_BLACK);
-	init_pair(7, COLOR_WHITE, COLOR_BLACK);
-	init_pair(8, COLOR_BLACK, COLOR_BLACK); /* A_INVIS does not work? */
-
-	noecho();
-	nonl();
-	cbreak();
-	nodelay(stdscr, TRUE);
-	keypad(stdscr, TRUE);
-	curs_set(0);
-	refresh(); /* prevent clearing windows upon getch() / refresh() */
-
-	return 0;
-}
 
 void
 statusbar(WINDOW *win, int bitpos, char *fmt, ...)
@@ -98,97 +72,6 @@ draw_keys(WINDOW *win)
 	mvwchgat(win, 1, 13, 1, A_BOLD, 4, NULL); /* [L] */
 	mvwchgat(win, 1, 36, 1, A_BOLD, 4, NULL); /* [S] */
 	wrefresh(win);
-}
-
-void
-check_timer(WINDOW *win, int bitpos)
-{
-	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 2) % 60 ||
-	    (old_bitpos == 57 && bitpos == 0))) {
-		/*
-		 * Time for status text passed, cannot use *sleep()
-		 * in statusbar() because that pauses reception
-		 */
-		old_bitpos = -1;
-		draw_keys(win);
-	}
-}
-
-void
-input_line(WINDOW *win, char *msg)
-{
-	mvwprintw(win, 1, 0, "%s", msg);
-	wclrtoeol(win);
-	wrefresh(win);
-	input_mode = 1;
-	input_count = 0;
-	input_xpos = strlen(msg);
-	msglen = strlen(msg);
-}
-
-void
-end_input(WINDOW *win)
-{
-	keybuf[input_count] = '\0'; /* terminate to prevent overflow */
-	draw_keys(win);
-	input_mode = -1;
-}
-
-void
-process_key(WINDOW *win, int inkey)
-{
-	char dispbuf[80];
-
-	if (inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127) {
-		if (input_count > 0) {
-			input_count--;
-			input_xpos--;
-			if (input_xpos > 78) {
-				/* Shift display line one character to right */
-				(void)strncpy(dispbuf, keybuf +
-				    (input_xpos - 79), 79 - msglen);
-				dispbuf[80 - msglen] = '\0';
-				mvwprintw(win, 1, msglen + 1, "%s", dispbuf);
-			} else {
-				wmove(win, 1, input_xpos + 1);
-				wclrtoeol(win);
-			}
-			wrefresh(win);
-		}
-	} else if ((inkey == KEY_ENTER || inkey == '\r' || inkey == '\n') ||
-	    input_count == MAXBUF-1)
-		end_input(win);
-	else {
-		keybuf[input_count++] = inkey;
-		input_xpos++;
-		if (input_xpos > 79) {
-			/* Shift displayed line one character to the left */
-			(void)strncpy(dispbuf, keybuf +
-			    (input_xpos - 79), 79 - msglen);
-			dispbuf[80 - msglen] = '\0';
-			mvwprintw(win, 1, msglen + 1, "%s", dispbuf);
-		} else
-			mvwprintw(win, 1, input_xpos, "%c", inkey);
-		wrefresh(win);
-	}
-}
-
-int
-get_inputmode(void)
-{
-	return input_mode;
-}
-
-void
-set_inputmode(int mode)
-{
-	input_mode = mode;
-}
-
-char *
-get_keybuf(void)
-{
-	return keybuf;
 }
 
 void
@@ -272,50 +155,6 @@ display_bit(uint16_t state, int bitpos)
 }
 
 void
-draw_input_window(void)
-{
-	mvwprintw(input_win, 0, 0, "new");
-	mvwprintw(input_win, 2, 0, "bit    act   last0   total    realfreq"
-	    "     b0    b20  state      radio");
-	wrefresh(input_win);
-}
-
-int
-switch_logfile(WINDOW *win, char **logfilename, int bitpos)
-{
-	int res;
-	char *old_logfilename;
-
-	if (*logfilename == NULL)
-		*logfilename = strdup("");
-	old_logfilename = strdup(*logfilename);
-	free(*logfilename);
-	*logfilename = strdup(get_keybuf());
-	if (!strcmp(*logfilename, ".")) {
-		free(*logfilename);
-		*logfilename = strdup(old_logfilename);
-	}
-
-	if (strcmp(old_logfilename, *logfilename)) {
-		if (strlen(old_logfilename) > 0) {
-			if (close_logfile() != 0) {
-				statusbar(win, bitpos,
-				    "Error closing old log file");
-				return errno;
-			}
-		}
-		if (strlen(*logfilename) > 0) {
-			if ((res = write_new_logfile(*logfilename)) != 0) {
-				statusbar(win, bitpos, strerror(res));
-				return res;
-			}
-		}
-	}
-	free(old_logfilename);
-	return 0;
-}
-
-void
 display_time(uint32_t dt, struct tm time)
 {
 	uint16_t cutoff;
@@ -388,15 +227,6 @@ display_time(uint32_t dt, struct tm time)
 }
 
 void
-draw_time_window(void)
-{
-	mvwprintw(decode_win, 0, 0, "old");
-	mvwprintw(decode_win, 1, 39, "txcall dst leap");
-	mvwchgat(decode_win, 1, 39, 15, A_NORMAL, 8, NULL);
-	wrefresh(decode_win);
-}
-
-void
 display_thirdparty_buffer(uint8_t *buf)
 {
 	int i;
@@ -438,21 +268,15 @@ display_weather(void)
 }
 
 void
-draw_tp_window(void)
-{
-	mvwprintw(tp_win, 0, 0, "Third party buffer  :");
-	mvwprintw(tp_win, 1, 0, "Third party contents:");
-	wrefresh(tp_win);
-}
-
-void
 process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime,
     int *change_logfile)
 {
 	int inkey;
+	int msglen;
+	char dispbuf[80];
 
 	inkey = getch();
-	if (get_inputmode() == 0 && inkey != ERR)
+	if (input_mode == 0 && inkey != ERR)
 		switch (inkey) {
 		case 'Q':
 			*bit |= GETBIT_EOD; /* quit main loop */
@@ -462,17 +286,57 @@ process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime,
 			mvwprintw(main_win, 0, 0, "Current log (.): %s",
 			    (logfilename && strlen(logfilename) > 0) ?
 			    logfilename : "(none)");
-			input_line(main_win, "Log file (empty for none):");
-			*change_logfile = 1;
+			mvwprintw(main_win, 1, 0, "Log file (empty for none):");
+			wclrtoeol(main_win);
+			wrefresh(main_win);
+			input_mode = 1;
+			input_count = 0;
+			input_xpos = 26;
+			msglen = 26;
+			*change_logfile = true;
 			break;
 		case 'S':
-			*settime = 1 - *settime;
+			*settime = ! *settime;
 			statusbar(main_win, bitpos, "Time synchronization %s",
 			    *settime ? "on" : "off");
 			break;
 		}
-	while (get_inputmode() == 1 && inkey != ERR) {
-		process_key(main_win, inkey);
+
+	while (input_mode == 1 && inkey != ERR) {
+		if (input_count > 0 &&
+		    (inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127)) {
+			input_count--;
+			input_xpos--;
+			if (input_xpos > 78) {
+				/* Shift display line one character to right */
+				(void)strncpy(dispbuf, keybuf +
+				    (input_xpos - 79), 79 - msglen);
+				dispbuf[80 - msglen] = '\0';
+				mvwprintw(main_win, 1, msglen+1, "%s", dispbuf);
+			} else {
+				wmove(main_win, 1, input_xpos + 1);
+				wclrtoeol(main_win);
+			}
+			wrefresh(main_win);
+		} else if (input_count == MAXBUF - 1 ||
+		    (inkey == KEY_ENTER || inkey == '\r' || inkey == '\n')) {
+			/* terminate to prevent overflow */
+			keybuf[input_count] = '\0';
+			draw_keys(main_win);
+			input_mode = -1;
+		} else {
+			keybuf[input_count++] = inkey;
+			input_xpos++;
+			if (input_xpos > 79) {
+				/* Shift displayed line one character left */
+				(void)strncpy(dispbuf, keybuf +
+				    (input_xpos - 79), 79 - msglen);
+				dispbuf[80 - msglen] = '\0';
+				mvwprintw(main_win, 1, msglen+1, "%s", dispbuf);
+			} else
+				mvwprintw(main_win, 1, input_xpos, "%c", inkey);
+			wrefresh(main_win);
+		}
 		inkey = getch();
 	}
 }
@@ -481,17 +345,54 @@ void
 post_process_input(char **logfilename, int *change_logfile, uint16_t *bit,
     int bitpos)
 {
-	check_timer(main_win, bitpos);
-	if (get_inputmode() == -1) {
+	int res;
+	char *old_logfilename;
+
+	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 2) % 60 ||
+	    (old_bitpos == 57 && bitpos == 0))) {
+		/*
+		 * Time for status text passed, cannot use *sleep()
+		 * in statusbar() because that pauses reception
+		 */
+		old_bitpos = -1;
+		draw_keys(main_win);
+	}
+	if (input_mode == -1) {
 		if (*change_logfile) {
 			wmove(main_win, 0, 0);
 			wclrtoeol(main_win);
 			wrefresh(main_win);
-			if (switch_logfile(main_win, logfilename, bitpos))
-				*bit |= GETBIT_EOD; /* error */
-			*change_logfile = 0;
+
+			if (*logfilename == NULL)
+				*logfilename = strdup("");
+			old_logfilename = strdup(*logfilename);
+			free(*logfilename);
+			*logfilename = strdup(keybuf);
+			if (!strcmp(*logfilename, ".")) {
+				free(*logfilename);
+				*logfilename = strdup(old_logfilename);
+			}
+
+			if (strcmp(old_logfilename, *logfilename)) {
+				if (strlen(old_logfilename) > 0 &&
+				    close_logfile() != 0) {
+					statusbar(main_win, bitpos,
+					    "Error closing old log file");
+					*bit |= GETBIT_EOD; /* error */
+				}
+				if (strlen(*logfilename) > 0) {
+					res = write_new_logfile(*logfilename);
+					if (res != 0) {
+						statusbar(main_win, bitpos,
+						    strerror(res));
+						*bit |= GETBIT_EOD; /* error */
+					}
+				}
+			}
+			free(old_logfilename);
+			*change_logfile = false;
 		}
-		set_inputmode(0);
+		input_mode = 0;
 	}
 }
 
@@ -586,8 +487,27 @@ main(int argc, char *argv[])
 	input_win = NULL;
 	main_win = NULL;
 
-	if (init_curses())
+	initscr();
+	if (has_colors() == FALSE) {
 		curses_cleanup("No required color support.\n");
+		return 0;
+	}
+
+	start_color();
+	init_pair(1, COLOR_RED, COLOR_BLACK);
+	init_pair(2, COLOR_GREEN, COLOR_BLACK);
+	init_pair(3, COLOR_YELLOW, COLOR_BLACK); /* turn on A_BOLD */
+	init_pair(4, COLOR_BLUE, COLOR_BLACK);
+	init_pair(7, COLOR_WHITE, COLOR_BLACK);
+	init_pair(8, COLOR_BLACK, COLOR_BLACK); /* A_INVIS does not work? */
+
+	noecho();
+	nonl();
+	cbreak();
+	nodelay(stdscr, TRUE);
+	keypad(stdscr, TRUE);
+	curs_set(0);
+	refresh(); /* prevent clearing windows upon getch() / refresh() */
 
 	/* allocate windows */
 	decode_win = newwin(2, 80, 0, 0);
@@ -611,9 +531,21 @@ main(int argc, char *argv[])
 		return 0;
 	}
 	/* draw initial screen */
-	draw_time_window();
-	draw_tp_window();
-	draw_input_window();
+
+	mvwprintw(decode_win, 0, 0, "old");
+	mvwprintw(decode_win, 1, 39, "txcall dst leap");
+	mvwchgat(decode_win, 1, 39, 15, A_NORMAL, 8, NULL);
+	wrefresh(decode_win);
+
+	mvwprintw(tp_win, 0, 0, "Third party buffer  :");
+	mvwprintw(tp_win, 1, 0, "Third party contents:");
+	wrefresh(tp_win);
+
+	mvwprintw(input_win, 0, 0, "new");
+	mvwprintw(input_win, 2, 0, "bit    act   last0   total    realfreq"
+	    "     b0    b20  state      radio");
+	wrefresh(input_win);
+
 	draw_keys(main_win);
 
 	res = mainloop(logfilename, get_bit_live, display_bit,
