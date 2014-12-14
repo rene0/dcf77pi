@@ -45,7 +45,6 @@ WINDOW *main_win;
 int old_bitpos = -1; /* timer for statusbar inactive */
 int input_mode = 0;  /* normal input (statusbar keys) or string input */
 char keybuf[MAXBUF]; /* accumulator for string input */
-uint8_t input_count, input_xpos;
 
 void
 statusbar(WINDOW *win, int bitpos, char *fmt, ...)
@@ -272,8 +271,8 @@ process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime,
     int *change_logfile)
 {
 	int inkey;
-	int msglen;
 	char dispbuf[80];
+	uint8_t input_count, input_xpos;
 
 	inkey = getch();
 	if (input_mode == 0 && inkey != ERR)
@@ -292,7 +291,6 @@ process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime,
 			input_mode = 1;
 			input_count = 0;
 			input_xpos = 26;
-			msglen = 26;
 			*change_logfile = true;
 			break;
 		case 'S':
@@ -310,9 +308,9 @@ process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime,
 			if (input_xpos > 78) {
 				/* Shift display line one character to right */
 				(void)strncpy(dispbuf, keybuf +
-				    (input_xpos - 79), 79 - msglen);
-				dispbuf[80 - msglen] = '\0';
-				mvwprintw(main_win, 1, msglen+1, "%s", dispbuf);
+				    (input_xpos - 79), 53);
+				dispbuf[54] = '\0';
+				mvwprintw(main_win, 1, 27, "%s", dispbuf);
 			} else {
 				wmove(main_win, 1, input_xpos + 1);
 				wclrtoeol(main_win);
@@ -330,9 +328,9 @@ process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime,
 			if (input_xpos > 79) {
 				/* Shift displayed line one character left */
 				(void)strncpy(dispbuf, keybuf +
-				    (input_xpos - 79), 79 - msglen);
-				dispbuf[80 - msglen] = '\0';
-				mvwprintw(main_win, 1, msglen+1, "%s", dispbuf);
+				    (input_xpos - 79), 53);
+				dispbuf[54] = '\0';
+				mvwprintw(main_win, 1, 27, "%s", dispbuf);
 			} else
 				mvwprintw(main_win, 1, input_xpos, "%c", inkey);
 			wrefresh(main_win);
