@@ -73,80 +73,6 @@ struct bitinfo bit;
 uint32_t acc_minlen;
 uint16_t cutoff;
 
-int
-init_hardware(unsigned int pin_nr)
-{
-#if defined(__FreeBSD__) && !defined(NOLIVE)
-	struct gpio_pin pin;
-
-	fd = open("/dev/gpioc0", O_RDONLY);
-	if (fd < 0) {
-		perror("open (/dev/gpioc0)");
-		return -errno;
-	}
-
-	pin.gp_pin = pin_nr;
-	if (ioctl(fd, GPIOGETCONFIG, &pin) < 0) {
-		perror("ioctl(GPIOGETCONFIG)");
-		return -errno;
-	}
-#elif defined(__linux__) && !defined(NOLIVE)
-	char buf[64];
-	int res;
-
-	fd = open("/sys/class/gpio/export", O_WRONLY);
-	if (fd < 0) {
-		perror("open (/sys/class/gpio/export)");
-		return -errno;
-	}
-	res = snprintf(buf, sizeof(buf), "%u", pin_nr);
-	if (res < 0 || res > sizeof(buf)-1) {
-		printf("pin_nr too high? (%i)\n", res);
-		return -1;
-	}
-	if (write(fd, buf, res) < 0) {
-		perror("write(export)");
-		if (errno != EBUSY)
-			return -errno; /* EBUSY -> pin already exported ? */
-	}
-	if (close(fd) == -1) {
-		perror("close(export)");
-		return -errno;
-	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction",
-	    pin_nr);
-	if (res < 0 || res > sizeof(buf)-1) {
-		printf("pin_nr too high? (%i)\n", res);
-		return -1;
-	}
-	fd = open(buf, O_WRONLY);
-	if (fd < 0) {
-		perror("open (direction)");
-		return -errno;
-	}
-	if (write(fd, "in", 3) < 0) {
-		perror("write(in)");
-		return -errno;
-	}
-	if (close(fd) == -1) {
-		perror("close(direction)");
-		return -errno;
-	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value",
-	    pin_nr);
-	if (res < 0 || res > sizeof(buf)-1) {
-		printf("pin_nr too high? (%i)\n", res);
-		return -1;
-	}
-	fd = open(buf, O_RDONLY | O_NONBLOCK);
-	if (fd < 0) {
-		perror("open (value)");
-		return -errno;
-	}
-#endif
-	return fd;
-}
-
 void
 set_state_vars(void)
 {
@@ -172,7 +98,11 @@ int
 set_mode_live(void)
 {
 #if !defined(NOLIVE)
-	int res;
+#if defined(__FreeBSD__)
+	struct gpio_pin pin;
+#elif defined(__linux__)
+	char buf[64];
+#endif
 #endif
 
 	set_state_vars();
@@ -195,11 +125,81 @@ set_mode_live(void)
 		cleanup();
 		return -1;
 	}
-	res = init_hardware(hw.pin);
-	if (res < 0) {
+#if defined(__FreeBSD__)
+	fd = open("/dev/gpioc0", O_RDONLY);
+	if (fd < 0) {
+		perror("open (/dev/gpioc0)");
 		cleanup();
-		return res;
+		return errno;
 	}
+
+	pin.gp_pin = hw.pin;
+	if (ioctl(fd, GPIOGETCONFIG, &pin) < 0) {
+		perror("ioctl(GPIOGETCONFIG)");
+		cleanup();
+		return errno;
+	}
+#elif defined(__linux__)
+	fd = open("/sys/class/gpio/export", O_WRONLY);
+	if (fd < 0) {
+		perror("open (/sys/class/gpio/export)");
+		cleanup();
+		return errno;
+	}
+	res = snprintf(buf, sizeof(buf), "%u", hw.pin);
+	if (res < 0 || res > sizeof(buf)-1) {
+		printf("hw.pin too high? (%i)\n", res);
+		cleanup();
+		return -1;
+	}
+	if (write(fd, buf, res) < 0) {
+		perror("write(export)");
+		cleanup();
+		if (errno != EBUSY)
+			return errno; /* EBUSY -> pin already exported ? */
+	}
+	if (close(fd) == -1) {
+		perror("close(export)");
+		cleanup();
+		return errno;
+	}
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction",
+	    hw.pin);
+	if (res < 0 || res > sizeof(buf)-1) {
+		printf("hw.pin too high? (%i)\n", res);
+		cleanup();
+		return -1;
+	}
+	fd = open(buf, O_WRONLY);
+	if (fd < 0) {
+		perror("open (direction)");
+		cleanup();
+		return errno;
+	}
+	if (write(fd, "in", 3) < 0) {
+		perror("write(in)");
+		cleanup();
+		return errno;
+	}
+	if (close(fd) == -1) {
+		perror("close(direction)");
+		cleanup();
+		return errno;
+	}
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value",
+	    hw.pin);
+	if (res < 0 || res > sizeof(buf)-1) {
+		printf("hw.pin too high? (%i)\n", res);
+		cleanup();
+		return -1;
+	}
+	fd = open(buf, O_RDONLY | O_NONBLOCK);
+	if (fd < 0) {
+		perror("open (value)");
+		cleanup();
+		return errno;
+	}
+#endif
 #endif
 	return 0;
 }
