@@ -37,10 +37,12 @@ int wintermonth;
 int leapsecmonths[12];
 int num_leapsecmonths;
 
-char *weekday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-int dayinleapyear[12] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
 
-char *
+const char * const weekday[8] =
+    {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+const int dayinleapyear[12] =
+    {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
+const char * const
 get_weekday(int wday)
 {
 	return weekday[wday & 7];
@@ -85,7 +87,7 @@ is_leapsecmonth(int month)
 }
 
 uint8_t
-getpar(uint8_t *buffer, int start, int stop)
+getpar(const uint8_t * const buffer, int start, int stop)
 {
 	int i;
 	uint8_t par = 0;
@@ -96,7 +98,7 @@ getpar(uint8_t *buffer, int start, int stop)
 }
 
 uint8_t
-getbcd(uint8_t *buffer, int start, int stop)
+getbcd(const uint8_t * const buffer, int start, int stop)
 {
 	int i;
 	uint8_t val = 0;
@@ -165,7 +167,7 @@ lastday(struct tm time)
 }
 
 void
-add_minute(struct tm *time)
+add_minute(struct tm * const time)
 {
 	/* time->tm_isdst indicates the old situation */
 	if (++time->tm_min == 60) {
@@ -196,7 +198,7 @@ add_minute(struct tm *time)
 
 uint32_t
 decode_time(uint8_t init_min, unsigned int minlen, uint32_t acc_minlen,
-    uint8_t *buffer, struct tm *time)
+    const uint8_t * const buffer, struct tm * const time)
 {
 	unsigned int generr = 0, p1 = 0, p2 = 0, p3 = 0, ok = 0, increase;
 	unsigned int tmp, tmp0, tmp1, tmp2, tmp4, tmp5;

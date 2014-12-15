@@ -148,7 +148,7 @@ display_minute(unsigned int minlen)
 }
 
 void
-display_thirdparty_buffer(uint8_t *tpbuf)
+display_thirdparty_buffer(const uint8_t * const tpbuf)
 {
 	int i;
 

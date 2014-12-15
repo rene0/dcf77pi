@@ -32,7 +32,7 @@ SUCH DAMAGE.
  * @param filename The name of the configuration file.
  * @return Reading the file is succesful (0), errno or -1 otherwise.
  */
-int read_config_file(char *filename);
+int read_config_file(const char * const filename);
 
 /**
  * Rerieve a configuration value from the internal dictionary.
@@ -42,6 +42,6 @@ int read_config_file(char *filename);
  *   "leapsecmonths", "outlogfile"
  * @return The corresponding value, or NULL when the key was not found.
  */
-char *get_config_value(char *keyword);
+char *get_config_value(const char * const keyword);
 
 #endif

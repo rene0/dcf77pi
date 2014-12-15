@@ -80,7 +80,7 @@ fill_thirdparty_buffer(int minute, int bitpos, uint16_t bit)
 	}
 }
 
-uint8_t *
+const uint8_t * const
 get_thirdparty_buffer(void)
 {
 	return tpbuf;

@@ -28,9 +28,9 @@ SUCH DAMAGE.
 #include "bits1to14.h"
 
 void
-decode_alarm(struct alm *alarm)
+decode_alarm(struct alm * const alarm)
 {
-	uint8_t *civbuf = get_thirdparty_buffer();
+	const uint8_t * const civbuf = get_thirdparty_buffer();
 
 	alarm->ds1 = civbuf[0] + 2 * civbuf[1] + 4 * civbuf[3];
 	alarm->ps1 = civbuf[2] + 2 * civbuf[4] + 4 * civbuf[5];

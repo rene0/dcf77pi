@@ -47,6 +47,6 @@ struct alm {
  *
  * @param alarm The structure containing the decoded values.
  */
-void decode_alarm(struct alm *alarm);
+void decode_alarm(struct alm * const alarm);
 
 #endif

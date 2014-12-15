@@ -30,7 +30,7 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-char *key[] = {
+const char *key[] = {
 	"pin", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
@@ -44,7 +44,7 @@ char *key[] = {
 char *value[NUM_KEYS];
 
 int
-getpos(char *kw)
+getpos(const char * const kw)
 {
 	int i;
 
@@ -54,7 +54,7 @@ getpos(char *kw)
 	return -1;
 }
 
-char *
+char * const
 strip(char *s)
 {
 	int i;
@@ -77,7 +77,7 @@ do { \
 } while (0)
 
 int
-read_config_file(char *filename)
+read_config_file(const char * const filename)
 {
 	int i;
 	FILE *configfile;
@@ -147,7 +147,7 @@ read_config_file(char *filename)
 }
 
 char *
-get_config_value(char *keyword)
+get_config_value(const char * const keyword)
 {
 	int i;
 

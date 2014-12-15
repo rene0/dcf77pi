@@ -47,7 +47,7 @@ int input_mode = 0;  /* normal input (statusbar keys) or string input */
 char keybuf[MAXBUF]; /* accumulator for string input */
 
 void
-statusbar(WINDOW *win, int bitpos, char *fmt, ...)
+statusbar(WINDOW * const win, int bitpos, const char * const fmt, ...)
 {
 	va_list ap;
 
@@ -62,7 +62,7 @@ statusbar(WINDOW *win, int bitpos, char *fmt, ...)
 }
 
 void
-draw_keys(WINDOW *win)
+draw_keys(WINDOW * const win)
 {
 	mvwprintw(win, 1, 0, "[Q] -> quit [L] -> change log file"
 	    " [S] -> toggle time sync");
@@ -74,7 +74,7 @@ draw_keys(WINDOW *win)
 }
 
 void
-curses_cleanup(char *reason)
+curses_cleanup(const char * const reason)
 {
 	if (decode_win != NULL)
 		delwin(decode_win);
@@ -94,7 +94,7 @@ display_bit(uint16_t state, int bitpos)
 {
 	uint8_t xpos, bp;
 	uint32_t acc_minlen;
-	struct bitinfo *bitinf;
+	const struct bitinfo *bitinf;
 
 	bitinf = get_bitinfo();
 
@@ -226,7 +226,7 @@ display_time(uint32_t dt, struct tm time)
 }
 
 void
-display_thirdparty_buffer(uint8_t *buf)
+display_thirdparty_buffer(const uint8_t *buf)
 {
 	int i;
 
@@ -267,8 +267,9 @@ display_weather(void)
 }
 
 void
-process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime,
-    int *change_logfile)
+process_input(uint16_t * const bit, int bitpos,
+    const char * const logfilename, int * const settime,
+    int * const change_logfile)
 {
 	int inkey;
 	char dispbuf[80];
@@ -340,8 +341,8 @@ process_input(uint16_t *bit, int bitpos, char *logfilename, int *settime,
 }
 
 void
-post_process_input(char **logfilename, int *change_logfile, uint16_t *bit,
-    int bitpos)
+post_process_input(char **logfilename, int * const change_logfile,
+    uint16_t * const bit, int bitpos)
 {
 	int res;
 	char *old_logfilename;
@@ -431,19 +432,19 @@ display_minute(unsigned int minlen)
 }
 
 void
-set_time(uint8_t init_min, uint32_t dt, uint16_t bit, int bitpos,
+set_time(uint8_t init_min, uint32_t dt, uint16_t * const bit, int bitpos,
     struct tm time)
 {
-	if (setclock_ok(init_min, dt, bit))
+	if (setclock_ok(init_min, dt, *bit))
 		switch (setclock(time)) {
 		case -1:
 			statusbar(main_win, bitpos, "mktime() failed!");
-			bit |= GETBIT_EOD; /* error */
+			*bit |= GETBIT_EOD; /* error */
 			break;
 		case -2:
 			statusbar(main_win, bitpos, "settimeofday(): %s",
 			    strerror(errno));
-			bit |= GETBIT_EOD; /* error */
+			*bit |= GETBIT_EOD; /* error */
 			break;
 		default:
 			statusbar(main_win, bitpos, "Time set");

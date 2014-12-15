@@ -46,7 +46,7 @@ main(int argc, char **argv)
 {
 	int min, res, verbose = 1;
 	uint16_t bit;
-	struct bitinfo *bi;
+	const struct bitinfo *bi;
 	struct sigaction sigact;
 
 	if ((argc == 2) && !strncmp(argv[1], "-q", strlen(argv[1])))

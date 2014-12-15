@@ -103,7 +103,7 @@ struct bitinfo {
  * @param infilename The name of the log file to use.
  * @return Preparation was succesful (0), -1 or errno otherwise.
  */
-int set_mode_file(char *infilename);
+int set_mode_file(const char * const infilename);
 
 /**
  * Prepare for live input.
@@ -120,7 +120,7 @@ int set_mode_live(void);
  *
  * @return The hardware parameters.
  */
-struct hardware *get_hardware_parameters(void);
+const struct hardware * const get_hardware_parameters(void);
 
 /**
  * Clean up when: close the device or input logfile, and output log file if
@@ -171,7 +171,7 @@ uint8_t get_bitpos(void);
  *
  * @return The bit buffer, an array of 0 and 1 values.
  */
-uint8_t *get_buffer(void);
+const uint8_t * const get_buffer(void);
 
 /**
  * Determine if there should be a space between the last bit and the current bit
@@ -187,7 +187,7 @@ int is_space_bit(int bitpos);
  * @param logfile The name of the log file to use.
  * @return The log file was opened succesfully (0), or errno on error.
  */
-int write_new_logfile(char *logfile);
+int write_new_logfile(const char * const logfile);
 
 /**
  * Close the currently opened log file.
@@ -201,7 +201,7 @@ int close_logfile(void);
  *
  * @return The bit information as described for {@link bitinfo}.
  */
-struct bitinfo *get_bitinfo(void);
+const struct bitinfo * const get_bitinfo(void);
 
 /**
  * Retrieve the accumulated minute length in milliseconds.

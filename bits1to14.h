@@ -60,7 +60,7 @@ void fill_thirdparty_buffer(int minute, int bitpos, uint16_t bit);
  *
  * @return The third party buffer.
  */
-uint8_t *get_thirdparty_buffer(void);
+const uint8_t * const get_thirdparty_buffer(void);
 
 /**
  * Retrieve the type of the third party contents.

@@ -83,7 +83,7 @@ set_state_vars(void)
 }
 
 int
-set_mode_file(char *infilename)
+set_mode_file(const char * const infilename)
 {
 	set_state_vars();
 	datafile = fopen(infilename, "r");
@@ -628,20 +628,20 @@ get_bitpos(void)
 	return bitpos;
 }
 
-uint8_t *
+const uint8_t * const
 get_buffer(void)
 {
 	return buffer;
 }
 
-struct hardware *
+const struct hardware * const
 get_hardware_parameters(void)
 {
 	return &hw;
 }
 
 int
-write_new_logfile(char *logfilename)
+write_new_logfile(const char * const logfilename)
 {
 	logfile = fopen(logfilename, "a");
 	if (logfile == NULL)
@@ -659,7 +659,7 @@ close_logfile(void)
 	return (f == EOF) ? errno : 0;
 }
 
-struct bitinfo *
+const struct bitinfo * const
 get_bitinfo(void)
 {
 	return &bit;

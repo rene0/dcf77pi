@@ -41,10 +41,11 @@ mainloop(char *logfilename,
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(uint32_t, struct tm),
-    void (*display_thirdparty_buffer)(uint8_t *),
-    void (*set_time)(uint8_t, uint32_t, uint16_t, int, struct tm),
-    void (*process_input)(uint16_t *, int, char *, int *, int *),
-    void (*post_process_input)(char **, int *, uint16_t *, int))
+    void (*display_thirdparty_buffer)(const uint8_t * const),
+    void (*set_time)(uint8_t, uint32_t, uint16_t * const, int, struct tm),
+    void (*process_input)(uint16_t * const, int, const char * const,
+	int * const, int * const),
+    void (*post_process_input)(char **, int * const, uint16_t * const, int))
 {
 	uint16_t bit;
 	uint32_t dt = 0;
@@ -53,7 +54,7 @@ mainloop(char *logfilename,
 	uint8_t init_min = 2;
 	struct tm curtime;
 	struct alm civwarn;
-	uint8_t *tpbuf;
+	const uint8_t * tpbuf;
 	int settime = 0;
 	int change_logfile = 0;
 
@@ -121,7 +122,7 @@ mainloop(char *logfilename,
 			display_time(dt, curtime);
 
 			if (set_time != NULL && settime == 1)
-				set_time(init_min, dt, bit, bitpos, curtime);
+				set_time(init_min, dt, &bit, bitpos, curtime);
 			if (init_min == 2 ||
 			    !((dt & DT_LONG) || (dt & DT_SHORT)))
 				reset_acc_minlen(); /* really a new minute */
