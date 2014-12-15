@@ -258,10 +258,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		p1 = false;
 	}
 	if ((init_min == 2 || increase > 0) && p1 && !generr) {
-		tmp = tmp0 + 10 * tmp1;
-		if (init_min == 0 && time->tm_min != tmp)
+		newtime.tm_min = tmp0 + 10 * tmp1;
+		if (init_min == 0 && time->tm_min != newtime.tm_min)
 			rval |= DT_MINJUMP;
-		newtime.tm_min = tmp;
 	}
 
 	p2 = getpar(buffer, 29, 35);
@@ -272,10 +271,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		p2 = false;
 	}
 	if ((init_min == 2 || increase > 0) && p2 && !generr) {
-		tmp = tmp0 + 10 * tmp1;
-		if (init_min == 0 && time->tm_hour != tmp)
+		newtime.tm_hour = tmp0 + 10 * tmp1;
+		if (init_min == 0 && time->tm_hour != newtime.tm_hour)
 			rval |= DT_HOURJUMP;
-		newtime.tm_hour = tmp;
 	}
 
 	p3 = getpar(buffer, 36, 58);
@@ -293,32 +291,31 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		p3 = false;
 	}
 	if ((init_min == 2 || increase > 0) && p3 && !generr) {
-		tmp = tmp0 + 10 * tmp1;
-		tmp0 = tmp3 + 10 * buffer[49];
-		tmp1 = tmp4 + 10 * tmp5;
-		if (init_min == 0 && time->tm_mday != tmp)
-			rval |= DT_MDAYJUMP;
-		if (init_min == 0 && time->tm_wday != tmp2)
-			rval |= DT_WDAYJUMP;
-		if (init_min == 0 && time->tm_mon != tmp0)
-			rval |= DT_MONTHJUMP;
+		newtime.tm_mday = tmp0 + 10 * tmp1;
+		newtime.tm_mon = tmp3 + 10 * buffer[49];
+		newtime.tm_year = tmp4 + 10 * tmp5;
 		newtime.tm_wday = tmp2;
-		newtime.tm_mon = tmp0;
-		centofs = century_offset(tmp1, tmp0, tmp, tmp2);
+		if (init_min == 0 && time->tm_mday != newtime.tm_mday)
+			rval |= DT_MDAYJUMP;
+		if (init_min == 0 && time->tm_wday != newtime.tm_wday)
+			rval |= DT_WDAYJUMP;
+		if (init_min == 0 && time->tm_mon != newtime.tm_mon)
+			rval |= DT_MONTHJUMP;
+		centofs = century_offset(newtime.tm_year, newtime.tm_mon,
+		    newtime.tm_mday, newtime.tm_wday);
 		if (centofs == -1) {
 			rval |= DT_DATE;
 			p3 = false;
 		} else {
 			if (init_min == 0 && time->tm_year !=
-			    BASEYEAR + 100 * centofs + tmp1)
+			    BASEYEAR + 100 * centofs + newtime.tm_year)
 				rval |= DT_YEARJUMP;
-			newtime.tm_year = BASEYEAR + 100 * centofs + tmp1;
+			newtime.tm_year += BASEYEAR + 100 * centofs;
+			if (newtime.tm_mday > lastday(newtime)) {
+				rval |= DT_DATE;
+				p3 = false;
+			}
 		}
-		if (tmp > lastday(*time)) {
-			rval |= DT_DATE;
-			p3 = false;
-		} else
-			newtime.tm_mday = tmp;
 	}
 
 	ok = !generr && p1 && p2 && p3; /* shorthand */
