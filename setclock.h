@@ -26,6 +26,7 @@ SUCH DAMAGE.
 #ifndef DCF77PI_SETCLOCK_H
 #define DCF77PI_SETCLOCK_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
@@ -37,7 +38,7 @@ SUCH DAMAGE.
  * @param bit The current bit information
  * @return Whether it is OK to set the system clock
  */
-int setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit);
+bool setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit);
 
 /**
  * Set the system clock according to the given time. Note that this does *not*
@@ -47,6 +48,6 @@ int setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit);
  * @return The clock was set successfully (0), or the time was invalid (-1), or
  *   setting the clock somehow failed (-2).
  */
-int setclock(struct tm time);
+int8_t setclock(struct tm time);
 
 #endif

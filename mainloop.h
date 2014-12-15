@@ -29,6 +29,7 @@ SUCH DAMAGE.
 #include "decode_alarm.h"
 #include "input.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
@@ -62,17 +63,17 @@ SUCH DAMAGE.
  */
 int mainloop(char *logfilename,
     uint16_t (*get_bit)(void),
-    void (*display_bit)(uint16_t, int),
+    void (*display_bit)(uint16_t, uint8_t),
     void (*display_long_minute)(void),
-    void (*display_minute)(unsigned int),
+    void (*display_minute)(uint8_t),
     void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(uint32_t, struct tm),
-    void (*display_thirdparty_buffer)(uint8_t *),
-    void (*set_time)(uint8_t, uint32_t, uint16_t, int, struct tm),
-    void (*process_input)(uint16_t *, int, char *, int *, int *),
-    void (*post_process_input)(char **, int *, uint16_t *, int));
+    void (*display_thirdparty_buffer)(const uint8_t * const),
+    void (*set_time)(uint8_t, uint32_t, uint16_t * const, uint8_t, struct tm),
+    void (*process_input)(uint16_t * const, uint8_t, const char * const, bool * const, bool * const),
+    void (*post_process_input)(char **, bool * const, uint16_t * const, uint8_t));
 
 #endif

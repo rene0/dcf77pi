@@ -42,7 +42,7 @@ init_thirdparty(void)
 }
 
 void
-fill_thirdparty_buffer(int minute, int bitpos, uint16_t bit)
+fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 {
 	switch (minute % 3) {
 	case 0:

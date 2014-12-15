@@ -34,7 +34,7 @@ SUCH DAMAGE.
 #include <sysexits.h>
 
 void
-display_bit(uint16_t state, int bitpos)
+display_bit(uint16_t state, uint8_t bitpos)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
@@ -135,7 +135,7 @@ display_long_minute(void)
 }
 
 void
-display_minute(unsigned int minlen)
+display_minute(uint8_t minlen)
 {
 	uint32_t cutoff;
 
@@ -150,7 +150,7 @@ display_minute(unsigned int minlen)
 void
 display_thirdparty_buffer(const uint8_t * const tpbuf)
 {
-	int i;
+	uint8_t i;
 
 	printf("Third party buffer: ");
 	for (i = 0; i < TPBUFLEN; i++)

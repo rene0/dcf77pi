@@ -42,12 +42,13 @@ WINDOW *input_win;
 WINDOW *decode_win;
 WINDOW *tp_win;
 WINDOW *main_win;
-int old_bitpos = -1; /* timer for statusbar inactive */
-int input_mode = 0;  /* normal input (statusbar keys) or string input */
+
+int8_t old_bitpos = -1; /* timer for statusbar inactive */
+int8_t input_mode =  0; /* normal input (statusbar keys) or string input */
 char keybuf[MAXBUF]; /* accumulator for string input */
 
 void
-statusbar(WINDOW * const win, int bitpos, const char * const fmt, ...)
+statusbar(WINDOW * const win, int8_t bitpos, const char * const fmt, ...)
 {
 	va_list ap;
 
@@ -90,7 +91,7 @@ curses_cleanup(const char * const reason)
 }
 
 void
-display_bit(uint16_t state, int bitpos)
+display_bit(uint16_t state, uint8_t bitpos)
 {
 	uint8_t xpos, bp;
 	uint32_t acc_minlen;
@@ -228,7 +229,7 @@ display_time(uint32_t dt, struct tm time)
 void
 display_thirdparty_buffer(const uint8_t *buf)
 {
-	int i;
+	uint8_t i;
 
 	for (i = 0; i < TPBUFLEN; i++)
 		mvwprintw(tp_win, 0, i + 22, "%u", buf[i]);
@@ -267,9 +268,9 @@ display_weather(void)
 }
 
 void
-process_input(uint16_t * const bit, int bitpos,
-    const char * const logfilename, int * const settime,
-    int * const change_logfile)
+process_input(uint16_t * const bit, uint8_t bitpos,
+    const char * const logfilename, bool * const settime,
+    bool * const change_logfile)
 {
 	int inkey;
 	char dispbuf[80];
@@ -341,8 +342,8 @@ process_input(uint16_t * const bit, int bitpos,
 }
 
 void
-post_process_input(char **logfilename, int * const change_logfile,
-    uint16_t * const bit, int bitpos)
+post_process_input(char **logfilename, bool * const change_logfile,
+    uint16_t * const bit, uint8_t bitpos)
 {
 	int res;
 	char *old_logfilename;
@@ -414,7 +415,7 @@ display_long_minute(void)
 }
 
 void
-display_minute(unsigned int minlen)
+display_minute(uint8_t minlen)
 {
 	uint8_t bp, xpos;
 
@@ -432,7 +433,7 @@ display_minute(unsigned int minlen)
 }
 
 void
-set_time(uint8_t init_min, uint32_t dt, uint16_t * const bit, int bitpos,
+set_time(uint8_t init_min, uint32_t dt, uint16_t * const bit, uint8_t bitpos,
     struct tm time)
 {
 	if (setclock_ok(init_min, dt, *bit))

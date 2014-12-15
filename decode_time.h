@@ -97,7 +97,7 @@ void init_time(void);
  *
  * @param time The current time increased with one minute.
  */
-void add_minute(struct tm *time);
+void add_minute(struct tm * const time);
 
 /**
  * Decodes the current time from the internal bit buffer.
@@ -119,8 +119,8 @@ void add_minute(struct tm *time);
  * @return The state of this minute, the combination of the various DT_* and
  *   ANN_* values that are applicable.
  */
-uint32_t decode_time(uint8_t init_min, unsigned int minlen, uint32_t acc_minlen,
-    uint8_t *buffer, struct tm *time);
+uint32_t decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
+    const uint8_t * const buffer, struct tm * const time);
 
 /**
  * Calculates the hour in UTC from the given time.
@@ -128,7 +128,7 @@ uint32_t decode_time(uint8_t init_min, unsigned int minlen, uint32_t acc_minlen,
  * @param time The time to calculate the hour in UTC from.
  * @return The hour value in UTC.
  */
-int get_utchour(struct tm time);
+uint8_t get_utchour(struct tm time);
 
 /**
  * Return a textual representation of the given day-of-week.
@@ -136,7 +136,7 @@ int get_utchour(struct tm time);
  * @param wday The day of week (1 = Monday, 7 = Sunday)
  * @return The textual representation of wday ("Mon" .. "Sun")
  */
-char *get_weekday(int wday);
+const char * const get_weekday(uint8_t wday);
 
 /*
  * Functions for the accumulated minute length. This counter keeps the

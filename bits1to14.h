@@ -53,7 +53,7 @@ void init_thirdparty(void);
  * @param bitpos The current bit position.
  * @param bit The current bit value.
  */
-void fill_thirdparty_buffer(int minute, int bitpos, uint16_t bit);
+void fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit);
 
 /**
  * Retrieve the third party buffer.

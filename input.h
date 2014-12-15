@@ -53,7 +53,8 @@ SUCH DAMAGE.
 /** next bit should be skipped (i.e. not added to bitpos) */
 #define GETBIT_SKIPNEXT	(1 << 10)
 
-#include <stdint.h> /* uintX_t */
+#include <stdbool.h>
+#include <stdint.h> /* *intX_t */
 
 /**
  * Hardware parameters:
@@ -64,7 +65,7 @@ struct hardware {
 	/* pin number to read from */
 	uint8_t pin;
 	/** pin value is high (1) or low (0) for active signal */
-	uint8_t active_high;
+	bool active_high;
 };
 
 /**
@@ -88,10 +89,10 @@ struct bitinfo {
 	int64_t bit20;
 	/** bit0 and bit20 were reset to their initial values (normally because
 	  * of reception errors or fluctuations in CPU usage) */
-	int bitlen_reset;
+	bool bitlen_reset;
 	/** realfreq was reset to {@link hardware.freq} (normally because of
 	  * reception errors or fluctuations in CPU usage) */
-	int freq_reset;
+	bool freq_reset;
 	/** the raw received radio signal, {@link hardware.freq} / 2 items, with
 	  * each item holding 8 bits */
 	uint8_t *signal;
@@ -179,7 +180,7 @@ const uint8_t * const get_buffer(void);
  *
  * @param bitpos The current bit position.
  */
-int is_space_bit(int bitpos);
+bool is_space_bit(uint8_t bitpos);
 
 /**
  * Open the log file and append a "new log" marker to it.

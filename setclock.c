@@ -31,14 +31,14 @@ SUCH DAMAGE.
 #include <string.h>
 #include <sys/time.h>
 
-int
+bool
 setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit)
 {
 	return init_min == 0 && ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
 	    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0);
 }
 
-int
+int8_t
 setclock(struct tm time)
 {
 	time_t epochtime;

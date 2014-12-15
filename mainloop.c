@@ -33,30 +33,31 @@ SUCH DAMAGE.
 int
 mainloop(char *logfilename,
     uint16_t (*get_bit)(void),
-    void (*display_bit)(uint16_t, int),
+    void (*display_bit)(uint16_t, uint8_t),
     void (*display_long_minute)(void),
-    void (*display_minute)(unsigned int),
+    void (*display_minute)(uint8_t),
     void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(uint32_t, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
-    void (*set_time)(uint8_t, uint32_t, uint16_t * const, int, struct tm),
-    void (*process_input)(uint16_t * const, int, const char * const,
-	int * const, int * const),
-    void (*post_process_input)(char **, int * const, uint16_t * const, int))
+    void (*set_time)(uint8_t, uint32_t, uint16_t * const, uint8_t, struct tm),
+    void (*process_input)(uint16_t * const, uint8_t, const char * const,
+	bool * const, bool * const),
+    void (*post_process_input)(char **, bool * const, uint16_t * const,
+	uint8_t))
 {
 	uint16_t bit;
 	uint32_t dt = 0;
-	unsigned int minlen = 0;
-	int bitpos = 0;
+	uint8_t minlen = 0;
+	uint8_t bitpos = 0;
 	uint8_t init_min = 2;
 	struct tm curtime;
 	struct alm civwarn;
 	const uint8_t * tpbuf;
-	int settime = 0;
-	int change_logfile = 0;
+	bool settime = false;
+	bool change_logfile = false;
 
 	init_time();
 	(void)memset(&curtime, '\0', sizeof(curtime));
@@ -121,7 +122,7 @@ mainloop(char *logfilename,
 
 			display_time(dt, curtime);
 
-			if (set_time != NULL && settime == 1)
+			if (set_time != NULL && settime)
 				set_time(init_min, dt, &bit, bitpos, curtime);
 			if (init_min == 2 ||
 			    !((dt & DT_LONG) || (dt & DT_SHORT)))

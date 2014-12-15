@@ -292,7 +292,7 @@ uint16_t
 get_bit_live(void)
 {
 	char outch;
-	int newminute;
+	bool newminute;
 	uint8_t p, stv = 1;
 	struct timespec slp;
 #if !defined(MACOS)
@@ -302,10 +302,10 @@ get_bit_live(void)
 	int64_t a, y = 1000000000;
 	int64_t twait;
 	static int init_bit = 2;
-	int is_eom = state & GETBIT_EOM;
+	bool is_eom = state & GETBIT_EOM;
 
-	bit.freq_reset = 0;
-	bit.bitlen_reset = 0;
+	bit.freq_reset = false;
+	bit.bitlen_reset = false;
 
 	set_new_state();
 
@@ -495,7 +495,7 @@ report:
 do { \
 	state &= ~GETBIT_SKIPNEXT; \
 	state |= GETBIT_SKIP; \
-	valid = 1; \
+	valid = true; \
 	bit.t = 0; \
 	if (COND) { \
 		state |= GETBIT_EOD; \
@@ -506,8 +506,9 @@ do { \
 uint16_t
 get_bit_file(void)
 {
-	int oldinch, inch, valid = 0;
-	static int read_acc_minlen = 0;
+	int oldinch, inch;
+	bool valid = false;
+	static bool read_acc_minlen = false;
 	char co[6];
 
 	set_new_state();
@@ -519,7 +520,7 @@ get_bit_file(void)
 	 */
 	bit.realfreq = 1000 * 1000000;
 
-	while (valid == 0) {
+	while (!valid) {
 		inch = getc(datafile);
 		switch (inch) {
 		case EOF:
@@ -530,7 +531,7 @@ get_bit_file(void)
 			buffer[bitpos] = (uint8_t)(inch - '0');
 			if (inch == '1')
 				state |= GETBIT_ONE;
-			valid = 1;
+			valid = true;
 			bit.t = 1000;
 			break;
 		case '\r':
@@ -543,34 +544,34 @@ get_bit_file(void)
 			break;
 		case 'x':
 			state |= GETBIT_XMIT;
-			valid = 1;
+			valid = true;
 			bit.t = 2500;
 			break;
 		case 'r':
 			state |= GETBIT_RECV;
-			valid = 1;
+			valid = true;
 			bit.t = 2500;
 			break;
 		case '#':
 			state |= GETBIT_RND;
-			valid = 1;
+			valid = true;
 			bit.t = 2500;
 			break;
 		case '*':
 			state |= GETBIT_IO;
-			valid = 1;
+			valid = true;
 			bit.t = 0;
 			break;
 		case '_':
 			/* retain old value in buffer[bitpos] */
 			state |= GETBIT_READ;
-			valid = 1;
+			valid = true;
 			bit.t = 1000;
 			break;
 		case 'a':
 			/* acc_minlen */
 			READVALUE(fscanf(datafile, "%u", &acc_minlen) != 1);
-			read_acc_minlen = 1;
+			read_acc_minlen = true;
 			break;
 		case 'c':
 			/* cutoff for newminute */
@@ -589,7 +590,7 @@ get_bit_file(void)
 		if (!read_acc_minlen)
 			bit.t += 1000;
 		else
-			read_acc_minlen = 0;
+			read_acc_minlen = false;
 		/* Check for \r\n or \n\r */
 		TRYCHAR
 	}
@@ -599,8 +600,8 @@ get_bit_file(void)
 	return state;
 }
 
-int
-is_space_bit(int bitpos)
+bool
+is_space_bit(uint8_t bitpos)
 {
 	return (bitpos == 1 || bitpos == 15 || bitpos == 16 || bitpos == 19 ||
 	    bitpos == 20 || bitpos == 21 || bitpos == 28 || bitpos == 29 ||

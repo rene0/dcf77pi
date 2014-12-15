@@ -44,13 +44,16 @@ do_cleanup(int sig)
 int
 main(int argc, char **argv)
 {
-	int min, res, verbose = 1;
+	int min, res;
+	bool verbose = true;
+	uint64_t i;
+	uint8_t j;
 	uint16_t bit;
 	const struct bitinfo *bi;
 	struct sigaction sigact;
 
 	if ((argc == 2) && !strncmp(argv[1], "-q", strlen(argv[1])))
-		verbose = 0;
+		verbose = false;
 	else if (argc != 1) {
 		printf("usage: %s [-q]\n", argv[0]);
 		return EX_USAGE;
@@ -78,8 +81,6 @@ main(int argc, char **argv)
 		bit = get_bit_live();
 		bi = get_bitinfo();
 		if (verbose) {
-			int i, j;
-
 			if (bi->freq_reset)
 				printf("!");
 			/* display first bi->t pulses */
@@ -99,7 +100,7 @@ main(int argc, char **argv)
 		if (bit & GETBIT_TOOLONG)
 			min++;
 		printf("%x (%"PRIi64" %"PRIi64" %"PRIi64" %"PRIi64" %"PRIi64
-		    " %"PRIi64") %i:%i\n", bit, bi->tlow, bi->tlast0, bi->t,
+		    " %"PRIi64") %i:%u\n", bit, bi->tlow, bi->tlast0, bi->t,
 		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
 		if (bit & GETBIT_EOM)
 			min++;
