@@ -112,7 +112,7 @@ int set_mode_file(const char * const infilename);
  * The sample rate is set to {@link hardware.freq} Hz, reading from pin
  * {@link hardware.pin} using {@link hardware.active_high} logic.
  *
- * @return Preparation was succesful (0), -1 or -errno otherwise.
+ * @return Preparation was succesful (0), -1 or errno otherwise.
  */
 int set_mode_live(void);
 
