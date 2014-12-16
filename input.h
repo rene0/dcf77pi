@@ -78,15 +78,15 @@ struct bitinfo {
 	  * -1 initially */
 	int64_t tlast0;
 	/** length of this bit in samples */
-	int64_t t;
+	uint64_t t;
 	/** the average length of a bit in samples */
-	int64_t realfreq;
+	uint64_t realfreq;
 	/** the average length of the high part of bit 0 (a 0 bit) in
 	  * samples */
-	int64_t bit0;
+	uint64_t bit0;
 	/** the average length of the high part of bit 20 (a 1 bit) in
 	  * samples */
-	int64_t bit20;
+	uint64_t bit20;
 	/** bit0 and bit20 were reset to their initial values (normally because
 	  * of reception errors or fluctuations in CPU usage) */
 	bool bitlen_reset;

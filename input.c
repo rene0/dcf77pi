@@ -362,8 +362,8 @@ get_bit_live(void)
 			reset_frequency();
 
 		if (bit.t > bit.realfreq * 2500000) {
-			bit.realfreq = bit.realfreq +
-			    (bit.t * 2500000 - bit.realfreq) / 20;
+			bit.realfreq += ((int64_t)
+			    (bit.t * 2500000 - bit.realfreq) / 20);
 			a = 1000000000 - 1000000000 * exp2(-2e7 / bit.realfreq);
 			if (bit.tlow * 100 / bit.t < 1) {
 				state |= GETBIT_RECV;
@@ -396,11 +396,11 @@ get_bit_live(void)
 				init_bit--;
 			else {
 				if (newminute)
-					bit.realfreq = bit.realfreq + (bit.t *
-					    500000 - bit.realfreq) / 20;
+					bit.realfreq += ((int64_t)(bit.t *
+					    500000 - bit.realfreq) / 20);
 				else
-					bit.realfreq = bit.realfreq + (bit.t *
-					    1000000 - bit.realfreq) / 20;
+					bit.realfreq += ((int64_t)(bit.t *
+					    1000000 - bit.realfreq) / 20);
 				a = 1000000000 - 1000000000 *
 				    exp2(-2e7 / bit.realfreq);
 			}
@@ -457,11 +457,11 @@ get_bit_live(void)
 	else if ((state & (GETBIT_RND | GETBIT_XMIT |
 	    GETBIT_RECV | GETBIT_EOM | GETBIT_TOOLONG)) == 0) {
 		if (bitpos == 0 && buffer[0] == 0 && (state & GETBIT_READ) == 0)
-			bit.bit0 = bit.bit0 +
-			    (bit.tlow * 1000000 - bit.bit0) / 2;
+			bit.bit0 += ((int64_t)
+			    (bit.tlow * 1000000 - bit.bit0) / 2);
 		if (bitpos == 20 && buffer[20] == 1)
-			bit.bit20 = bit.bit20 +
-			    (bit.tlow * 1000000 - bit.bit20) / 2;
+			bit.bit20 += ((int64_t)
+			    (bit.tlow * 1000000 - bit.bit20) / 2);
 		/* During a thunderstorm the value of bit20 might underflow */
 		if (bit.bit20 < bit.bit0)
 			reset_bitlen();
