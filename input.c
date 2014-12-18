@@ -508,7 +508,7 @@ get_bit_file(void)
 {
 	int oldinch, inch;
 	bool valid = false;
-	static bool read_acc_minlen = false;
+	static bool read_acc_minlen;
 	char co[6];
 
 	set_new_state();

@@ -207,7 +207,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	int8_t centofs;
 	struct tm newtime;
 	uint16_t increase = 0, inc;
-	static uint16_t toolong = 0; /* 1092 hours */
+	static uint16_t toolong; /* 1092 hours */
 
 	memset(&newtime, '\0', sizeof(newtime));
 	newtime.tm_isdst = time->tm_isdst; /* save DST value */
