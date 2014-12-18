@@ -99,7 +99,7 @@ main(int argc, char **argv)
 		}
 		if (bit & GETBIT_TOOLONG)
 			min++;
-		printf("%x (%"PRIi64" %"PRIi64" %"PRIi64" %"PRIi64" %"PRIi64
+		printf("%x (%"PRIi32" %"PRIi32" %"PRIi32" %"PRIi64" %"PRIi64
 		    " %"PRIi64") %i:%u\n", bit, bi->tlow, bi->tlast0, bi->t,
 		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
 		if (bit & GETBIT_EOM)

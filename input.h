@@ -73,12 +73,12 @@ struct hardware {
  */
 struct bitinfo {
 	/** time in samples when the signal went low again, -1 initially */
-	int64_t tlow;
+	int32_t tlow;
 	/** time in samples when the signal was last measured as 0,
 	  * -1 initially */
-	int64_t tlast0;
+	int32_t tlast0;
 	/** length of this bit in samples */
-	uint64_t t;
+	uint32_t t;
 	/** the average length of a bit in samples */
 	uint64_t realfreq;
 	/** the average length of the high part of bit 0 (a 0 bit) in
