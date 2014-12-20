@@ -237,11 +237,15 @@ display_thirdparty_buffer(const uint8_t *buf)
 	wrefresh(tp_win);
 }
 
+/*
+ * In live mode, reaching this point means a decoding error as alarm messages
+ * were only broadcasted for testing between 2003-10-13 and 2003-12-10.
+ */
 void
 display_alarm(struct alm alarm)
 {
 	wattron(tp_win, COLOR_PAIR(3) | A_BOLD);
-	mvwprintw(tp_win, 1, 22, "German civil warning");
+	mvwprintw(tp_win, 1, 22, "German civil warning (decoding error)");
 	wattroff(tp_win, COLOR_PAIR(3) | A_BOLD);
 	wclrtoeol(tp_win);
 	wrefresh(tp_win);
