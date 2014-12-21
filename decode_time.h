@@ -99,7 +99,7 @@ void init_time(void);
  * leap years are handled. Note that the year will fall back to BASEYEAR when
  * it reaches BASEYEAR + 400.
  *
- * @param time The current time increased with one minute.
+ * @param time The current time to be increased with one minute.
  */
 void add_minute(struct tm * const time);
 
