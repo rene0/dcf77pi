@@ -482,8 +482,8 @@ report:
 #define TRYCHAR \
 	oldinch = inch; \
 	inch = getc(datafile); \
-	if (feof(datafile)) \
-		return state; \
+	if (inch == EOF) \
+		state |= GETBIT_EOD; \
 	if (inch == 'a' || inch == 'c') \
 		state |= GETBIT_SKIPNEXT; \
 	if ((inch != '\r' && inch != '\n') || inch == oldinch) { \
@@ -497,10 +497,8 @@ do { \
 	state |= GETBIT_SKIP; \
 	valid = true; \
 	bit.t = 0; \
-	if (COND) { \
+	if (COND) \
 		state |= GETBIT_EOD; \
-		return state; \
-	} \
 } while (0)
 
 uint16_t
@@ -571,12 +569,12 @@ get_bit_file(void)
 		case 'a':
 			/* acc_minlen */
 			READVALUE(fscanf(datafile, "%u", &acc_minlen) != 1);
-			read_acc_minlen = true;
+			read_acc_minlen = !(state & GETBIT_EOD);
 			break;
 		case 'c':
 			/* cutoff for newminute */
 			READVALUE(fscanf(datafile, "%6c", co) != 1);
-			if (co[1] == '.')
+			if (!(state & GETBIT_EOD) & (co[1] == '.'))
 				cutoff = (co[0] - '0') * 10000 +
 				    (uint16_t)strtol(co + 2, (char **)NULL, 10);
 			break;

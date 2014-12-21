@@ -69,14 +69,12 @@ mainloop(char *logfilename,
 		if (process_input != NULL)
 			process_input(&bit, bitpos, logfilename, &settime,
 			    &change_logfile);
-		if (bit & GETBIT_EOD)
-			break;
 
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
 			post_process_input(&logfilename, &change_logfile, &bit,
 			    bitpos);
-		if ((bit & GETBIT_SKIP) == 0)
+		if (!((bit & GETBIT_SKIP) || (bit & GETBIT_EOD)))
 			display_bit(bit, bitpos);
 
 		if (init_min < 2)
@@ -129,6 +127,9 @@ mainloop(char *logfilename,
 			if (init_min > 0)
 				init_min--;
 		}
+
+		if (bit & GETBIT_EOD)
+			break;
 	}
 
 	cleanup();
