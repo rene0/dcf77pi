@@ -83,10 +83,9 @@ mainloop(char *logfilename,
 			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
 
 		bit = next_bit();
-		if (bit & GETBIT_EOM) {
-			/* handle the missing bit due to the minute marker */
+		if (bit & GETBIT_EOM)
 			minlen = bitpos + 1;
-		}
+			/* handle the missing bit due to the minute marker */
 		if (bit & GETBIT_TOOLONG) {
 			minlen = 61;
 			/*
