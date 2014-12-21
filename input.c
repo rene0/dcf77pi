@@ -595,7 +595,7 @@ get_bit_file(void)
 		TRYCHAR
 	}
 	if (!read_acc_minlen)
-		acc_minlen += 1000 * 1000000 * bit.t / bit.realfreq;
+		acc_minlen += 1000000 * bit.t / bit.realfreq * 1000;
 
 	return state;
 }
