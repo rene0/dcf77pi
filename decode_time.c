@@ -363,11 +363,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		    (time->tm_mon == summermonth ||
 		    time->tm_mon == wintermonth)) && ((time->tm_min > 0 &&
 		    utchour == 0) || (time->tm_min == 0 &&
-		    utchour == 1 + buffer[17] - buffer[18]))) {
-			announce |= ANN_CHDST;
-			if (time->tm_min == 0)
-				utchour = 1; /* time zone just changed */
-		} else {
+		    utchour == 1 + buffer[17] - buffer[18])))
+			announce |= ANN_CHDST; /* time zone just changed */
+		else {
 			announce &= ~ANN_CHDST;
 			rval |= DT_CHDSTERR;
 		}
