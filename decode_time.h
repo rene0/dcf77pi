@@ -106,6 +106,16 @@ void init_time(void);
 void add_minute(struct tm * const time, bool checkflag);
 
 /**
+ * Subtract one minute from the curretn time. Daylight saving time transitions
+ * and leap years are handled. Note that the year will fall back to
+ * BASEYEAR + 399 when it reaches BASEYEAR - 1.
+ *
+ * @param time The current time to be decreased with one minute.
+ * @param checkflag If set, check ANN_CHDST flag.
+ */
+void substract_minute(struct tm * const time, bool checkflag);
+
+/**
  * Decodes the current time from the internal bit buffer.
  *
  * The current time is first increased using add_minute(), and only if the

@@ -198,6 +198,38 @@ add_minute(struct tm * const time, bool checkflag)
 	}
 }
 
+void
+substract_minute(struct tm * const time, bool checkflag)
+{
+	if (--time->tm_min == -1) {
+		/* DST flag transmitted until 00:59:16 UTC */
+		if (((announce & ANN_CHDST) || !checkflag) &&
+		    get_utchour(*time) == 1 && time->tm_wday == 7 &&
+		    time->tm_mday > lastday(*time) - 7) {
+			/* logic is backwards here */
+			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
+				time->tm_hour++; /* will become DST */
+			if (time->tm_isdst == 0 && time->tm_mon == summermonth)
+				time->tm_hour--; /* will become non-DST */
+		}
+		time->tm_min = 59;
+		if (--time->tm_hour == -1) {
+			time->tm_hour = 23;
+			if (--time->tm_wday == 0)
+				time->tm_wday = 7;
+			if (--time->tm_mday == 0) {
+				if (--time->tm_mon == 0) {
+					time->tm_mon = 12;
+					if (--time->tm_year == BASEYEAR - 1)
+						time->tm_year = BASEYEAR + 399;
+						/* bump! */
+				}
+				time->tm_mday = lastday(*time);
+			}
+		}
+	}
+}
+
 uint32_t
 decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
     const uint8_t * const buffer, struct tm * const time)
