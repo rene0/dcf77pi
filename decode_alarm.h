@@ -29,17 +29,13 @@ SUCH DAMAGE.
 #include <stdint.h>
 
 /*
- * From German wikipedia mostly, long regions and parities are unspecified
- * short regions: 1=north, 2=middle, 4=south
- * xx1 and xx2 must be equal
- * ds = short region
- * dl = long region
- * ps = parity over ds
- * pl = parity over dl
+ * confirmed by "Vortrag INS Bevoelkerungswarnung Hannovermesse 2008.pdf"
+ * (c) 2008 DIN e.V.
+ * With permission from Mr. Karl Wenzelewski of DIN
  */
 struct alm {
-	uint8_t ds1, ds2, ps1, ps2, pl1, pl2;
-	uint16_t dl1, dl2;
+	struct { uint8_t r1, r2, r3, r4; } region[2];
+	struct { uint8_t ps, pl; } parity[2];
 };
 
 /**
@@ -48,5 +44,13 @@ struct alm {
  * @param alarm The structure containing the decoded values.
  */
 void decode_alarm(struct alm * const alarm);
+
+/**
+ * Determines the name of the region which the alarm is broadcasted for.
+ *
+ * @param alarm The structure containing the alarm information.
+ * @return The region name.
+ */
+const char * const get_region_name(struct alm alarm);
 
 #endif

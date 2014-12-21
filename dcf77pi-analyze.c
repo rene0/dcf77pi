@@ -110,10 +110,13 @@ display_time(uint32_t dt, struct tm time)
 void
 display_alarm(struct alm alarm)
 {
-	printf("German civil warning:"
-	    " 0x%1x 0x%1x 0x%1x 0x%1x 0x%03x 0x%1x 0x%03x 0x%1x\n",
-	    alarm.ds1, alarm.ps1, alarm.ds2, alarm.ps2,
-	    alarm.dl1, alarm.pl1, alarm.dl2, alarm.pl2);
+	uint8_t i;
+
+	printf("German civil warning for: %s\n", get_region_name(alarm));
+	for (i = 0; i < 2; i++)
+		printf("%u Regions: %x %x %x %x parities %x %x\n", i,
+		    alarm.region[i].r1, alarm.region[i].r2, alarm.region[i].r3,
+		    alarm.region[i].r4, alarm.parity[i].ps, alarm.parity[i].pl);
 }
 
 void

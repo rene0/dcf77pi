@@ -27,26 +27,74 @@ SUCH DAMAGE.
 
 #include "bits1to14.h"
 
+#include <stdlib.h>
+#include <string.h>
+
+const char * const reg1n = "SWH, HH, NS, BR, MVP";
+const char * const reg1m = "NRW, SA, BRA, B, TH, S";
+const char * const reg1s = "RP, SAA, HS, BW, BYN, BYS";
+
 void
 decode_alarm(struct alm * const alarm)
 {
+	/* Partial information only, no parity checks */
 	const uint8_t * const civbuf = get_thirdparty_buffer();
+	uint8_t i;
 
-	alarm->ds1 = civbuf[0] + 2 * civbuf[1] + 4 * civbuf[3];
-	alarm->ps1 = civbuf[2] + 2 * civbuf[4] + 4 * civbuf[5];
-	alarm->dl1 = civbuf[12] + 2 * civbuf[13] + 4 * civbuf[14] +
-	    8 * civbuf[15] + 16 * civbuf[16] + 32 * civbuf[17] +
-	    64 * civbuf[19] + 128 * civbuf[20] + 256 * civbuf[21] +
-	    512 * civbuf[23];
-	alarm->pl1 = civbuf[18] + 2 * civbuf[22] + 4 * civbuf[24] +
-	    8 * civbuf[25];
+	for (i = 0; i < 2; i++) {
+		alarm->region[i].r1 = civbuf[6 * i] +
+		    2 * civbuf[1 + 6 * i] +
+		    4 * civbuf[3 + 6 * i];
+		alarm->region[i].r2 = civbuf[12 + 14 * i] +
+		    2 * civbuf[13 + 14 * i] +
+		    4 * civbuf[14 + 14 * i];
+		alarm->region[i].r3 = civbuf[15 + 14 * i] +
+		    2 * civbuf[16 + 14 * i] +
+		    4 * civbuf[17 + 14 * i];
+		alarm->region[i].r4 = civbuf[19 + 14 * i] +
+		    2 * civbuf[20 + 14 * i] +
+		    4 * civbuf[21 + 14 * i] +
+		    8 * civbuf[23 + 14 * i];
 
-	alarm->ds2 = civbuf[6] + 2 * civbuf[7] + 4 * civbuf[9];
-	alarm->ps2 = civbuf[8] + 2 * civbuf[10] + 4 * civbuf[11];
-	alarm->dl2 = civbuf[26] + 2 * civbuf[27] + 4 * civbuf[28] +
-	    8 * civbuf[29] + 16 * civbuf[30] + 32 * civbuf[31] +
-	    64 * civbuf[33] + 128 * civbuf[34] + 256 * civbuf[35] +
-	    512 * civbuf[37];
-	alarm->pl2 = civbuf[32] + 2 * civbuf[36] + 4 * civbuf[38] +
-	    8 * civbuf[39];
+		alarm->parity[i].ps = civbuf[2 + 6 * i] +
+		    2 * civbuf[4 + 6 * i] +
+		    4 * civbuf[5 + 6 * i];
+		alarm->parity[i].pl = civbuf[18 + 14 * i] +
+		    2 * civbuf[22 + 14 * i] +
+		    4 * civbuf[24 + 14 * i] +
+		    8 * civbuf[25 + 14 * i];
+	}
+}
+
+const char * const
+get_region_name(struct alm alarm)
+{
+	char *res;
+	uint8_t r;
+
+	/* Partial information only */
+
+	if (alarm.region[0].r1 != alarm.region[1].r1 ||
+	    alarm.parity[0].ps != alarm.parity[1].ps)
+		return "(inconsistent)";
+
+	res = malloc(strlen(reg1n) + 2 + strlen(reg1m) + 2 + strlen(reg1s) + 1);
+
+	if (res == NULL)
+		return res;
+
+	r = alarm.region[0].r1;
+	if (r & 1)
+		res = strcat(res, reg1n);
+	if (r & 2) {
+		if (r & 1)
+			res = strcat(res, ", ");
+		res = strcat(res, reg1m);
+	}
+	if (r & 4) {
+		if ((r & 1) || (r & 2))
+			res = strcat(res, ", ");
+		res = strcat(res, reg1s);
+	}
+	return res;
 }
