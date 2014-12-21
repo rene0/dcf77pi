@@ -26,6 +26,7 @@ SUCH DAMAGE.
 #ifndef DCF77PI_DECODE_TIME_H
 #define DCF77PI_DECODE_TIME_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
@@ -100,8 +101,9 @@ void init_time(void);
  * it reaches BASEYEAR + 400.
  *
  * @param time The current time to be increased with one minute.
+ * @param checkflag If set, check ANN_CHDST flag.
  */
-void add_minute(struct tm * const time);
+void add_minute(struct tm * const time, bool checkflag);
 
 /**
  * Decodes the current time from the internal bit buffer.

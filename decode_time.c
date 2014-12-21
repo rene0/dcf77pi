@@ -27,7 +27,6 @@ SUCH DAMAGE.
 
 #include "config.h"
 
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -168,12 +167,14 @@ lastday(struct tm time)
 }
 
 void
-add_minute(struct tm * const time)
+add_minute(struct tm * const time, bool checkflag)
 {
 	/* time->tm_isdst indicates the old situation */
 	if (++time->tm_min == 60) {
-		if ((announce & ANN_CHDST) && get_utchour(*time) == 0 &&
-		    time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7) {
+		/* DST flag transmitted until 00:59:16 UTC */
+		if (((announce & ANN_CHDST) || !checkflag) &&
+		    get_utchour(*time) == 0 && time->tm_wday == 7 &&
+		    time->tm_mday > lastday(*time) - 7) {
 			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
 				time->tm_hour--; /* will become non-DST */
 			if (time->tm_isdst == 0 && time->tm_mon == summermonth)
