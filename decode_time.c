@@ -290,7 +290,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		rval |= DT_MIN;
 		p1 = false;
 	}
-	if ((init_min == 2 || increase > 0) && p1 && !generr) {
+	if ((init_min == 2 || increase != 0) && p1 && !generr) {
 		newtime.tm_min = tmp0 + 10 * tmp1;
 		if (init_min == 0 && time->tm_min != newtime.tm_min)
 			rval |= DT_MINJUMP;
@@ -303,7 +303,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		rval |= DT_HOUR;
 		p2 = false;
 	}
-	if ((init_min == 2 || increase > 0) && p2 && !generr) {
+	if ((init_min == 2 || increase != 0) && p2 && !generr) {
 		newtime.tm_hour = tmp0 + 10 * tmp1;
 		if (init_min == 0 && time->tm_hour != newtime.tm_hour)
 			rval |= DT_HOURJUMP;
@@ -323,7 +323,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		rval |= DT_DATE;
 		p3 = false;
 	}
-	if ((init_min == 2 || increase > 0) && p3 && !generr) {
+	if ((init_min == 2 || increase != 0) && p3 && !generr) {
 		newtime.tm_mday = tmp0 + 10 * tmp1;
 		newtime.tm_mon = tmp3 + 10 * buffer[49];
 		newtime.tm_year = tmp4 + 10 * tmp5;
