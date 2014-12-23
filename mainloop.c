@@ -66,9 +66,12 @@ mainloop(char *logfilename,
 	for (;;) {
 		bit = get_bit();
 
-		if (process_input != NULL)
+		if (process_input != NULL) {
 			process_input(&bit, bitpos, logfilename, &settime,
 			    &change_logfile);
+			if (bit & GETBIT_EOD)
+				break;
+		}
 
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
