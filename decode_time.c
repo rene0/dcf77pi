@@ -239,8 +239,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	uint32_t rval = 0;
 	int8_t centofs;
 	struct tm newtime;
-	uint16_t increase = 0, inc;
-	static uint16_t toolong; /* 1092 hours */
+	int16_t increase, i;
+	static uint32_t acc_minlen_partial, old_acc_minlen;
+	static bool prev_toolong;
 
 	memset(&newtime, '\0', sizeof(newtime));
 	newtime.tm_isdst = time->tm_isdst; /* save DST value */
@@ -263,24 +264,36 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	if (buffer[15] == 1)
 		rval |= DT_XMIT;
 
-	toolong = (minlen == 61) ? toolong + 1 : 0;
+	/* See if there are any partial / split minutes to be combined: */
+	if (acc_minlen <= 59000) {
+		acc_minlen_partial += acc_minlen;
+		if (acc_minlen_partial >= 60000) {
+			acc_minlen = acc_minlen_partial;
+			acc_minlen_partial %= 60000;
+		}
+	}
+	/* Calculate number of minutes to increase time with: */
+	if (prev_toolong)
+		increase = (acc_minlen - old_acc_minlen) / 60000;
+	else
+		increase = acc_minlen / 60000;
+	if (acc_minlen >= 60000)
+		acc_minlen_partial %= 60000;
+	/* Account for complete minutes with a short acc_minlen: */
+	if (acc_minlen % 60000 > 59000) {
+		increase++;
+		acc_minlen_partial %= 60000;
+	}
+
+	prev_toolong = (minlen == 61);
+	old_acc_minlen = acc_minlen - (acc_minlen % 60000);
+
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
-		/*
-		 * Overflowing minutes are already added, so reduce acc_minlen
-		 * to prevent adding them again:
-		 */
-		acc_minlen -= 60000 * toolong;
-		increase = acc_minlen / 60000;
-		acc_minlen %= 60000;
-		/*
-		 * Account for minutes which are complete but where acc_minlen
-		 * is short:
-		 */
-		if (acc_minlen > 59000)
-			increase++;
-		for (inc = increase; inc > 0; inc--)
+		for (i = increase; increase > 0 && i > 0; i--)
 			add_minute(time, true);
+		for (i = increase; increase < 0 && i < 0; i++)
+			substract_minute(time, false);
 	}
 
 	p1 = getpar(buffer, 21, 28);

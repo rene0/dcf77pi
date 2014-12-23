@@ -121,9 +121,8 @@ mainloop(char *logfilename,
 
 			if (set_time != NULL && settime)
 				set_time(init_min, dt, &bit, bitpos, curtime);
-			if (init_min == 2 ||
-			    !((dt & DT_LONG) || (dt & DT_SHORT)))
-				reset_acc_minlen(); /* really a new minute */
+			if (bit & GETBIT_EOM)
+				reset_acc_minlen();
 			if (init_min > 0)
 				init_min--;
 		}
