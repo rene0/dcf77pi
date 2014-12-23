@@ -234,12 +234,12 @@ uint32_t
 decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
     const uint8_t * const buffer, struct tm * const time)
 {
-	bool generr, p1, p2, p3, ok;
-	uint8_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, utchour;
-	uint32_t rval = 0;
-	int8_t centofs;
 	struct tm newtime;
+	uint32_t rval = 0;
 	int16_t increase, i;
+	uint8_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, utchour;
+	int8_t centofs;
+	bool generr, p1, p2, p3, ok;
 	static uint32_t acc_minlen_partial, old_acc_minlen;
 	static bool prev_toolong;
 
