@@ -99,8 +99,8 @@ display_bit(uint16_t state, uint8_t bitpos)
 
 	bitinf = get_bitinfo();
 
-	mvwprintw(input_win, 3, 1, "%2u %6"PRIi64"  %6"PRIi64"  %6"PRIi64
-	    "  %10.3f %6.0f %6.0f", bitpos, bitinf->tlow, bitinf->tlast0,
+	mvwprintw(input_win, 3, 1, "%2u %6u  %6u  %6u  %10.3f %6.0f %6.0f",
+	    bitpos, bitinf->tlow, bitinf->tlast0,
 	    bitinf->t, bitinf->realfreq / 1e6, bitinf->bit0 / 1e6,
 	    bitinf->bit20 / 1e6);
 	if (bitinf->freq_reset)
