@@ -285,7 +285,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		acc_minlen_partial %= 60000;
 	}
 
-	prev_toolong = (minlen == 61);
+	prev_toolong = (minlen == 0xff);
 	old_acc_minlen = acc_minlen - (acc_minlen % 60000);
 
 	/* There is no previous time on the very first (partial) minute: */

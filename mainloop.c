@@ -85,7 +85,7 @@ mainloop(char *logfilename,
 			minlen = bitpos + 1;
 			/* handle the missing bit due to the minute marker */
 		if (bit & GETBIT_TOOLONG) {
-			minlen = 61;
+			minlen = 0xff;
 			/*
 			 * leave acc_minlen alone,
 			 * any minute marker already processed
