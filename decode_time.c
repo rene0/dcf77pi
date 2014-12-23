@@ -280,7 +280,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		if (acc_minlen > 59000)
 			increase++;
 		for (inc = increase; inc > 0; inc--)
-			add_minute(time);
+			add_minute(time, true);
 	}
 
 	p1 = getpar(buffer, 21, 28);
