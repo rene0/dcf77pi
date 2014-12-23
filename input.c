@@ -676,12 +676,6 @@ reset_acc_minlen(void)
 	acc_minlen = 0;
 }
 
-void
-add_acc_minlen(uint32_t ms)
-{
-	acc_minlen += ms;
-}
-
 uint16_t
 get_cutoff(void)
 {

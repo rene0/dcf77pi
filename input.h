@@ -217,13 +217,6 @@ uint32_t get_acc_minlen(void);
 void reset_acc_minlen(void);
 
 /**
- * Increase the accumulated minute length by the given amount.
- *
- * @param ms The number of milliseconds to add to the accumulated minute length.
- */
-void add_acc_minlen(uint32_t ms);
-
-/**
  * Retrieve the cutoff value written to the log file.
  *
  * @return The cutoff value (multiplied by 10,000)
