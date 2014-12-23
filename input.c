@@ -467,7 +467,7 @@ get_bit_live(void)
 			reset_bitlen();
 	}
 report:
-	acc_minlen += 1000 * 1000000 * bit.t / bit.realfreq;
+	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
 		if (state & GETBIT_EOM)
@@ -475,7 +475,7 @@ report:
 			    (bit.t * 1e6) / bit.realfreq);
 	}
 	if (state & GETBIT_EOM)
-		cutoff = (uint16_t)(10000 * bit.t * 1000000 / bit.realfreq);
+		cutoff = (uint16_t)(bit.t * 1000000 / (bit.realfreq / 10000));
 	return state;
 }
 
