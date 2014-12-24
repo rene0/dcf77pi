@@ -269,7 +269,7 @@ reset_frequency(void)
 		fprintf(logfile, bit.realfreq <= hw.freq * 500000 ?  "<" :
 		    bit.realfreq >= hw.freq * 1500000 ? ">" : "");
 	bit.realfreq = hw.freq * 1000000;
-	bit.freq_reset = 1;
+	bit.freq_reset = true;
 }
 
 void
@@ -279,7 +279,7 @@ reset_bitlen(void)
 		fprintf(logfile, "!");
 	bit.bit0 = bit.realfreq / 10;
 	bit.bit20 = bit.realfreq / 5;
-	bit.bitlen_reset = 1;
+	bit.bitlen_reset = true;
 }
 
 /*
