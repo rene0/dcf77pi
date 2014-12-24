@@ -278,7 +278,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 {
 	int inkey;
 	char dispbuf[80];
-	uint8_t input_count, input_xpos;
+	static uint8_t input_count, input_xpos;
 
 	inkey = getch();
 	if (input_mode == 0 && inkey != ERR)
