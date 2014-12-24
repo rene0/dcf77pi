@@ -65,27 +65,17 @@ SUCH DAMAGE.
 uint8_t bitpos; /* second */
 uint8_t buffer[BUFLEN]; /* wrap after BUFLEN positions */
 uint16_t state; /* any errors, or high bit */
-FILE *datafile = NULL; /* input file (recorded data) */
-FILE *logfile = NULL; /* auto-appended in live mode */
-int fd = 0; /* gpio file */
+FILE *datafile;         /* input file (recorded data) */
+FILE *logfile;          /* auto-appended in live mode */
+int fd;                 /* gpio file */
 struct hardware hw;
 struct bitinfo bit;
 uint32_t acc_minlen;
 uint16_t cutoff;
 
-void
-set_state_vars(void)
-{
-	acc_minlen = 0;
-	bitpos = 0;
-	state = 0;
-	(void)memset(buffer, '\0', BUFLEN);
-}
-
 int
 set_mode_file(const char * const infilename)
 {
-	set_state_vars();
 	datafile = fopen(infilename, "r");
 	if (datafile == NULL) {
 		perror("fopen (datafile)");
@@ -105,7 +95,6 @@ set_mode_live(void)
 #endif
 #endif
 
-	set_state_vars();
 #if defined(NOLIVE)
 	printf("No GPIO interface available, disabling live decoding\n");
 	cleanup();

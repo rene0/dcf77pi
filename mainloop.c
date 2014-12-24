@@ -61,7 +61,6 @@ mainloop(char *logfilename,
 
 	init_time();
 	(void)memset(&curtime, '\0', sizeof(curtime));
-	init_thirdparty();
 
 	for (;;) {
 		bit = get_bit();

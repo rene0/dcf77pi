@@ -30,7 +30,7 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-uint32_t announce = 0; /* save DST change and leap second announcements */
+uint32_t announce; /* save DST change and leap second announcements */
 uint8_t summermonth;
 uint8_t wintermonth;
 uint8_t leapsecmonths[12];

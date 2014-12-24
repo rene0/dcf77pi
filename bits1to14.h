@@ -42,11 +42,6 @@ enum TPTYPE {
 #include <stdint.h>
 
 /**
- * Initialize internal structures.
- */
-void init_thirdparty(void);
-
-/**
  * Add the current bit value to the third party buffer.
  *
  * @param minute The current value of the minute.

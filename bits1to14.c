@@ -33,13 +33,6 @@ uint8_t tpbuf[TPBUFLEN];
 enum TPTYPE tptype = TP_UNKNOWN;
 
 void
-init_thirdparty(void)
-{
-	(void)memset(tpbuf, '\0', sizeof(tpbuf));
-	tptype = TP_UNKNOWN;
-}
-
-void
 fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 {
 	static uint8_t tpstat;

@@ -44,7 +44,7 @@ WINDOW *tp_win;
 WINDOW *main_win;
 
 int8_t old_bitpos = -1; /* timer for statusbar inactive */
-int8_t input_mode =  0; /* normal input (statusbar keys) or string input */
+int8_t input_mode;      /* normal input (statusbar keys) or string input */
 char keybuf[MAXBUF]; /* accumulator for string input */
 
 void
