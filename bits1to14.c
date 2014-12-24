@@ -32,8 +32,6 @@ SUCH DAMAGE.
 uint8_t tpbuf[TPBUFLEN];
 enum TPTYPE tptype = TP_UNKNOWN;
 
-uint8_t tpstat = 0;
-
 void
 init_thirdparty(void)
 {
@@ -44,6 +42,8 @@ init_thirdparty(void)
 void
 fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 {
+	static uint8_t tpstat;
+
 	switch (minute % 3) {
 	case 0:
 		/* copy third party data */

@@ -31,8 +31,6 @@ SUCH DAMAGE.
 #include <string.h>
 
 uint32_t announce = 0; /* save DST change and leap second announcements */
-/* old error state to determine if DST change might be valid */
-bool olderr = false;
 uint8_t summermonth;
 uint8_t wintermonth;
 uint8_t leapsecmonths[12];
@@ -241,7 +239,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	int8_t centofs;
 	bool generr, p1, p2, p3, ok;
 	static uint32_t acc_minlen_partial, old_acc_minlen;
-	static bool prev_toolong;
+	static bool olderr, prev_toolong;
 
 	memset(&newtime, '\0', sizeof(newtime));
 	newtime.tm_isdst = time->tm_isdst; /* save DST value */
