@@ -62,9 +62,9 @@ SUCH DAMAGE.
 #  error Unsupported operating system, please send a patch to the author
 #endif
 
-uint8_t bitpos; /* second */
+uint8_t bitpos;         /* second */
 uint8_t buffer[BUFLEN]; /* wrap after BUFLEN positions */
-uint16_t state; /* any errors, or high bit */
+uint16_t state;         /* any errors, or high bit */
 FILE *datafile;         /* input file (recorded data) */
 FILE *logfile;          /* auto-appended in live mode */
 int fd;                 /* gpio file */
