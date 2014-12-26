@@ -551,7 +551,7 @@ main(int argc, char *argv[])
 
 	draw_keys();
 
-	res = mainloop(logfilename, get_bit_live, display_bit,
+	mainloop(logfilename, get_bit_live, display_bit,
 	    display_long_minute, display_minute, wipe_input, display_alarm,
 	    display_unknown, display_weather, display_time,
 	    display_thirdparty_buffer, show_mainloop_result, process_input,

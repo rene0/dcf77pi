@@ -188,7 +188,7 @@ main(int argc, char *argv[])
 		return res;
 	}
 
-	res = mainloop(NULL, get_bit_file, display_bit, display_long_minute,
+	mainloop(NULL, get_bit_file, display_bit, display_long_minute,
 	    display_minute, NULL, display_alarm, display_unknown,
 	    display_weather, display_time, display_thirdparty_buffer, NULL,
 	    NULL, NULL);

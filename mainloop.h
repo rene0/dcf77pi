@@ -58,9 +58,8 @@ SUCH DAMAGE.
  * @param process_input The optional callback to handle interactive user input.
  * @param post_process_input The optional callback to finish handling
  *   interactive user input.
- * @return Any error that happened (currently just 0).
  */
-int mainloop(char *logfilename,
+void mainloop(char *logfilename,
     uint16_t (*get_bit)(void),
     void (*display_bit)(uint16_t, uint8_t),
     void (*display_long_minute)(void),

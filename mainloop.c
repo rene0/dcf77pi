@@ -34,7 +34,7 @@ SUCH DAMAGE.
 
 int8_t mainloop_result;
 
-int
+void
 mainloop(char *logfilename,
     uint16_t (*get_bit)(void),
     void (*display_bit)(uint16_t, uint8_t),
