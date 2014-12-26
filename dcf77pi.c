@@ -404,7 +404,7 @@ void
 wipe_input()
 {
 	if (get_bitpos() == 0) {
-		mvwdelch(input_win, 0, 4);
+		wmove(input_win, 0, 3);
 		wclrtoeol(input_win);
 	}
 	wrefresh(input_win);
