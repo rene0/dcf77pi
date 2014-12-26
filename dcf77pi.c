@@ -64,15 +64,15 @@ statusbar(WINDOW * const win, int8_t bitpos, const char * const fmt, ...)
 }
 
 void
-draw_keys(WINDOW * const win)
+draw_keys(void)
 {
-	mvwprintw(win, 1, 0, "[Q] -> quit [L] -> change log file"
+	mvwprintw(main_win, 1, 0, "[Q] -> quit [L] -> change log file"
 	    " [S] -> toggle time sync");
-	wclrtoeol(win);
-	mvwchgat(win, 1, 1, 1, A_BOLD, 4, NULL); /* [Q] */
-	mvwchgat(win, 1, 13, 1, A_BOLD, 4, NULL); /* [L] */
-	mvwchgat(win, 1, 36, 1, A_BOLD, 4, NULL); /* [S] */
-	wrefresh(win);
+	wclrtoeol(main_win);
+	mvwchgat(main_win, 1, 1, 1, A_BOLD, 4, NULL); /* [Q] */
+	mvwchgat(main_win, 1, 13, 1, A_BOLD, 4, NULL); /* [L] */
+	mvwchgat(main_win, 1, 36, 1, A_BOLD, 4, NULL); /* [S] */
+	wrefresh(main_win);
 }
 
 void
@@ -327,7 +327,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 		    (inkey == KEY_ENTER || inkey == '\r' || inkey == '\n')) {
 			/* terminate to prevent overflow */
 			keybuf[input_count] = '\0';
-			draw_keys(main_win);
+			draw_keys();
 			input_mode = -1;
 		} else {
 			keybuf[input_count++] = inkey;
@@ -360,7 +360,7 @@ post_process_input(char **logfilename, bool * const change_logfile,
 		 * in statusbar() because that pauses reception
 		 */
 		old_bitpos = -1;
-		draw_keys(main_win);
+		draw_keys();
 	}
 	if (input_mode == -1) {
 		if (*change_logfile) {
@@ -549,7 +549,7 @@ main(int argc, char *argv[])
 	    "     b0    b20  state      radio");
 	wrefresh(input_win);
 
-	draw_keys(main_win);
+	draw_keys();
 
 	res = mainloop(logfilename, get_bit_live, display_bit,
 	    display_long_minute, display_minute, wipe_input, display_alarm,
