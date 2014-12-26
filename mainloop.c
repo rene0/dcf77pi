@@ -28,8 +28,11 @@ SUCH DAMAGE.
 #include "bits1to14.h"
 #include "decode_time.h"
 #include "input.h"
+#include "setclock.h"
 
 #include <string.h>
+
+int8_t mainloop_result;
 
 int
 mainloop(char *logfilename,
@@ -43,7 +46,7 @@ mainloop(char *logfilename,
     void (*display_weather)(void),
     void (*display_time)(uint32_t, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
-    void (*set_time)(uint8_t, uint32_t, uint16_t * const, uint8_t, struct tm),
+    void (*show_mainloop_result)(uint16_t * const, uint8_t),
     void (*process_input)(uint16_t * const, uint8_t, const char * const,
 	bool * const, bool * const),
     void (*post_process_input)(char **, bool * const, uint16_t * const,
@@ -122,18 +125,28 @@ mainloop(char *logfilename,
 
 			display_time(dt, curtime);
 
-			if (set_time != NULL && settime)
-				set_time(init_min, dt, &bit, bitpos, curtime);
+			if (settime) {
+				if (setclock_ok(init_min, dt, bit))
+					mainloop_result = setclock(curtime);
+				else mainloop_result = -3;
+			}
 			if (bit & GETBIT_EOM)
 				reset_acc_minlen();
 			if (init_min > 0)
 				init_min--;
 		}
 
+		if (show_mainloop_result != NULL)
+			show_mainloop_result(&bit, bitpos);
 		if (bit & GETBIT_EOD)
 			break;
 	}
 
 	cleanup();
-	return 0;
+}
+
+int8_t
+get_mainloop_result(void)
+{
+	return mainloop_result;
 }

@@ -53,8 +53,8 @@ SUCH DAMAGE.
  * @param display_time The callback to display the decoded time.
  * @param display_thirdparty_buffer The callback to display the third party
  *   buffer.
- * @param set_time The optional callback to set the system time after a valid
- *   minute is received.
+ * @param show_mainloop_result The optional callback to display the result of
+ *   actions performed by {@link mainloop}.
  * @param process_input The optional callback to handle interactive user input.
  * @param post_process_input The optional callback to finish handling
  *   interactive user input.
@@ -71,9 +71,16 @@ int mainloop(char *logfilename,
     void (*display_weather)(void),
     void (*display_time)(uint32_t, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
-    void (*set_time)(uint8_t, uint32_t, uint16_t * const, uint8_t, struct tm),
+    void (*show_mainloop_result)(uint16_t * const, uint8_t),
     void (*process_input)(uint16_t * const, uint8_t, const char * const,
 	bool * const, bool * const),
     void (*post_process_input)(char **, bool * const, uint16_t * const, uint8_t));
+
+/**
+ * Get the result value set by {@link mainloop}.
+ *
+ * @return The result value set by {@link mainloop}.
+ */
+int8_t get_mainloop_result(void);
 
 #endif

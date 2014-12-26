@@ -28,7 +28,6 @@ SUCH DAMAGE.
 #include "decode_time.h"
 #include "input.h"
 #include "mainloop.h"
-#include "setclock.h"
 
 #include <errno.h>
 #include <inttypes.h>
@@ -438,24 +437,25 @@ display_minute(uint8_t minlen)
 }
 
 void
-set_time(uint8_t init_min, uint32_t dt, uint16_t * const bit, uint8_t bitpos,
-    struct tm time)
+show_mainloop_result(uint16_t * const bit, uint8_t bitpos)
 {
-	if (setclock_ok(init_min, dt, *bit))
-		switch (setclock(time)) {
-		case -1:
-			statusbar(bitpos, "mktime() failed!");
-			*bit |= GETBIT_EOD; /* error */
-			break;
-		case -2:
-			statusbar(bitpos, "settimeofday(): %s",
-			    strerror(errno));
-			*bit |= GETBIT_EOD; /* error */
-			break;
-		default:
-			statusbar(bitpos, "Time set");
-			break;
-		}
+	switch (get_mainloop_result()) {
+	case -1:
+		statusbar(bitpos, "mktime() failed!");
+		*bit |= GETBIT_EOD; /* error */
+		break;
+	case -2:
+		statusbar(bitpos, "settimeofday(): %s",
+		    strerror(errno));
+		*bit |= GETBIT_EOD; /* error */
+		break;
+	case -3:
+		statusbar(bitpos, "Too early to set the time");
+		break;
+	default:
+		statusbar(bitpos, "Time set");
+		break;
+	}
 }
 
 int
@@ -554,7 +554,7 @@ main(int argc, char *argv[])
 	res = mainloop(logfilename, get_bit_live, display_bit,
 	    display_long_minute, display_minute, wipe_input, display_alarm,
 	    display_unknown, display_weather, display_time,
-	    display_thirdparty_buffer, set_time, process_input,
+	    display_thirdparty_buffer, show_mainloop_result, process_input,
 	    post_process_input);
 
 	curses_cleanup(NULL);
