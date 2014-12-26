@@ -72,7 +72,8 @@ int mainloop(char *logfilename,
     void (*display_time)(uint32_t, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
     void (*set_time)(uint8_t, uint32_t, uint16_t * const, uint8_t, struct tm),
-    void (*process_input)(uint16_t * const, uint8_t, const char * const, bool * const, bool * const),
+    void (*process_input)(uint16_t * const, uint8_t, const char * const,
+	bool * const, bool * const),
     void (*post_process_input)(char **, bool * const, uint16_t * const, uint8_t));
 
 #endif
