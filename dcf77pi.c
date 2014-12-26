@@ -49,18 +49,18 @@ int8_t input_mode;      /* normal input (statusbar keys) or string input */
 char keybuf[MAXBUF];    /* accumulator for string input */
 
 void
-statusbar(WINDOW * const win, int8_t bitpos, const char * const fmt, ...)
+statusbar(int8_t bitpos, const char * const fmt, ...)
 {
 	va_list ap;
 
 	old_bitpos = bitpos;
 
-	wmove(win, 1, 0);
+	wmove(main_win, 1, 0);
 	va_start(ap, fmt);
-	vw_printw(win, fmt, ap);
+	vw_printw(main_win, fmt, ap);
 	va_end(ap);
-	wclrtoeol(win);
-	wrefresh(win);
+	wclrtoeol(main_win);
+	wrefresh(main_win);
 }
 
 void
@@ -302,7 +302,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 			break;
 		case 'S':
 			*settime = ! *settime;
-			statusbar(main_win, bitpos, "Time synchronization %s",
+			statusbar(bitpos, "Time synchronization %s",
 			    *settime ? "on" : "off");
 			break;
 		}
@@ -381,14 +381,14 @@ post_process_input(char **logfilename, bool * const change_logfile,
 			if (strcmp(old_logfilename, *logfilename)) {
 				if (strlen(old_logfilename) > 0 &&
 				    close_logfile() != 0) {
-					statusbar(main_win, bitpos,
+					statusbar(bitpos,
 					    "Error closing old log file");
 					*bit |= GETBIT_EOD; /* error */
 				}
 				if (strlen(*logfilename) > 0) {
 					res = write_new_logfile(*logfilename);
 					if (res != 0) {
-						statusbar(main_win, bitpos,
+						statusbar(bitpos,
 						    strerror(res));
 						*bit |= GETBIT_EOD; /* error */
 					}
@@ -444,16 +444,16 @@ set_time(uint8_t init_min, uint32_t dt, uint16_t * const bit, uint8_t bitpos,
 	if (setclock_ok(init_min, dt, *bit))
 		switch (setclock(time)) {
 		case -1:
-			statusbar(main_win, bitpos, "mktime() failed!");
+			statusbar(bitpos, "mktime() failed!");
 			*bit |= GETBIT_EOD; /* error */
 			break;
 		case -2:
-			statusbar(main_win, bitpos, "settimeofday(): %s",
+			statusbar(bitpos, "settimeofday(): %s",
 			    strerror(errno));
 			*bit |= GETBIT_EOD; /* error */
 			break;
 		default:
-			statusbar(main_win, bitpos, "Time set");
+			statusbar(bitpos, "Time set");
 			break;
 		}
 }
