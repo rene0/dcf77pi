@@ -27,7 +27,6 @@ SUCH DAMAGE.
 #define DCF77PI_MAINLOOP_H
 
 #include "decode_alarm.h"
-#include "input.h"
 
 #include <stdbool.h>
 #include <stdint.h>

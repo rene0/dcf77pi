@@ -26,6 +26,7 @@ SUCH DAMAGE.
 #include "bits1to14.h"
 #include "config.h"
 #include "decode_time.h"
+#include "input.h"
 #include "mainloop.h"
 
 #include <stdlib.h>

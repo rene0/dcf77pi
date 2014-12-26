@@ -27,6 +27,7 @@ SUCH DAMAGE.
 #include "config.h"
 #include "decode_time.h"
 #include "mainloop.h"
+#include "input.h"
 #include "setclock.h"
 
 #include <errno.h>
