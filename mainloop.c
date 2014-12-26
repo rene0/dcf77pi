@@ -62,6 +62,7 @@ mainloop(char *logfilename,
 	const uint8_t * tpbuf;
 	bool settime = false;
 	bool change_logfile = false;
+	bool have_result = false;
 
 	init_time();
 	(void)memset(&curtime, '\0', sizeof(curtime));
@@ -126,19 +127,25 @@ mainloop(char *logfilename,
 			display_time(dt, curtime);
 
 			if (settime) {
+				have_result = true;
 				if (setclock_ok(init_min, dt, bit))
 					mainloop_result = setclock(curtime);
 				else
 					mainloop_result = -3;
 			}
+
 			if (bit & GETBIT_EOM)
 				reset_acc_minlen();
 			if (init_min > 0)
 				init_min--;
 		}
 
-		if (show_mainloop_result != NULL)
-			show_mainloop_result(&bit, bitpos);
+		if (have_result) {
+			if (show_mainloop_result != NULL)
+				show_mainloop_result(&bit, bitpos);
+			have_result = false;
+		}
+
 		if (bit & GETBIT_EOD)
 			break;
 	}
