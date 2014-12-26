@@ -35,10 +35,9 @@ const char * const reg1m = "NRW, SA, BRA, B, TH, S";
 const char * const reg1s = "RP, SAA, HS, BW, BYN, BYS";
 
 void
-decode_alarm(struct alm * const alarm)
+decode_alarm(const uint8_t * const civbuf, struct alm * const alarm)
 {
 	/* Partial information only, no parity checks */
-	const uint8_t * const civbuf = get_thirdparty_buffer();
 	uint8_t i;
 
 	for (i = 0; i < 2; i++) {

@@ -41,9 +41,10 @@ struct alm {
 /**
  * Decode the alarm buffer into the various fields of "struct alm"
  *
+ * @param civbuf The input buffer containing the civil alarm.
  * @param alarm The structure containing the decoded values.
  */
-void decode_alarm(struct alm * const alarm);
+void decode_alarm(const uint8_t * const civbuf, struct alm * const alarm);
 
 /**
  * Determines the name of the region which the alarm is broadcasted for.

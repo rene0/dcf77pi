@@ -108,7 +108,7 @@ mainloop(char *logfilename,
 				display_thirdparty_buffer(tpbuf);
 				switch (get_thirdparty_type()) {
 				case TP_ALARM:
-					decode_alarm(&civwarn);
+					decode_alarm(tpbuf, &civwarn);
 					display_alarm(civwarn);
 					break;
 				case TP_UNKNOWN:
