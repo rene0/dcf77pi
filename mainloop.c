@@ -128,7 +128,8 @@ mainloop(char *logfilename,
 			if (settime) {
 				if (setclock_ok(init_min, dt, bit))
 					mainloop_result = setclock(curtime);
-				else mainloop_result = -3;
+				else
+					mainloop_result = -3;
 			}
 			if (bit & GETBIT_EOM)
 				reset_acc_minlen();
