@@ -94,7 +94,6 @@ void
 display_bit(uint16_t state, uint8_t bitpos)
 {
 	uint8_t xpos, bp;
-	uint32_t acc_minlen;
 	const struct bitinfo *bitinf;
 
 	bitinf = get_bitinfo();
@@ -147,9 +146,8 @@ display_bit(uint16_t state, uint8_t bitpos)
 		mvwchgat(input_win, 0, xpos, 1, A_BOLD, 3, NULL);
 	wrefresh(input_win);
 
-	acc_minlen = get_acc_minlen();
-	mvwprintw(decode_win, 1, 28, "(%6u)",
-	    acc_minlen > 999999 ? 999999 : acc_minlen);
+	mvwprintw(decode_win, 1, 28, "(%10u", get_acc_minlen());
+	mvwprintw(decode_win, 1, 46, ")");
 	wrefresh(decode_win);
 }
 
@@ -172,12 +170,13 @@ display_time(uint32_t dt, struct tm time)
 	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d",
 	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
 	    time.tm_mday, get_weekday(time.tm_wday), time.tm_hour, time.tm_min);
-	/* display minute cutoff value at end of line (for now at least) */
+	/* display minute cutoff value */
 	cutoff = get_cutoff();
-	if (cutoff == 0xffff)
-		mvwprintw(decode_win, 1, 74, "?     ");
-	else
-		mvwprintw(decode_win, 1, 74, "%6.4f", cutoff/10000.0);
+	if (cutoff == 0xffff) {
+		mvwchgat(decode_win, 1, 40, 1, A_BOLD, 3, NULL);
+		mvwprintw(decode_win, 1, 40, "?     ");
+	} else
+		mvwprintw(decode_win, 1, 40, "%6.4f", cutoff / 1e4);
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 
 	/* color date/time string depending on the results */
@@ -198,29 +197,29 @@ display_time(uint32_t dt, struct tm time)
 
 	/* flip lights depending on the results */
 	if ((dt & DT_XMIT) == 0)
-		mvwchgat(decode_win, 1, 39, 6, A_NORMAL, 8, NULL);
+		mvwchgat(decode_win, 1, 50, 6, A_NORMAL, 8, NULL);
 	if ((dt & ANN_CHDST) == 0)
-		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 8, NULL);
+		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 8, NULL);
 	if (dt & DT_CHDST)
-		mvwchgat(decode_win, 1, 46, 3, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 2, NULL);
 	else if (dt & DT_CHDSTERR)
-		mvwchgat(decode_win, 1, 46, 3, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 57, 3, A_BOLD, 3, NULL);
 	if ((dt & ANN_LEAP) == 0)
-		mvwchgat(decode_win, 1, 50, 4, A_NORMAL, 8, NULL);
+		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 8, NULL);
 	if (dt & DT_LEAP)
-		mvwchgat(decode_win, 1, 50, 4, A_NORMAL, 2, NULL);
+		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 2, NULL);
 	else if (dt & DT_LEAPERR)
-		mvwchgat(decode_win, 1, 50, 4, A_BOLD, 3, NULL);
+		mvwchgat(decode_win, 1, 61, 4, A_BOLD, 3, NULL);
 	if (dt & DT_LONG) {
-		mvwprintw(decode_win, 1, 56, "long ");
-		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 1, NULL);
+		mvwprintw(decode_win, 1, 67, "long ");
+		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 1, NULL);
 	}
 	else if (dt & DT_SHORT) {
-		mvwprintw(decode_win, 1, 56, "short");
-		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 1, NULL);
+		mvwprintw(decode_win, 1, 67, "short");
+		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 1, NULL);
 	}
 	else
-		mvwchgat(decode_win, 1, 56, 5, A_NORMAL, 8, NULL);
+		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 8, NULL);
 
 	wrefresh(decode_win);
 }
@@ -535,8 +534,8 @@ main(int argc, char *argv[])
 	/* draw initial screen */
 
 	mvwprintw(decode_win, 0, 0, "old");
-	mvwprintw(decode_win, 1, 39, "txcall dst leap");
-	mvwchgat(decode_win, 1, 39, 15, A_NORMAL, 8, NULL);
+	mvwprintw(decode_win, 1, 50, "txcall dst leap");
+	mvwchgat(decode_win, 1, 50, 15, A_NORMAL, 8, NULL);
 	wrefresh(decode_win);
 
 	mvwprintw(tp_win, 0, 0, "Third party buffer  :");
