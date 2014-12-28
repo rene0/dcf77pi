@@ -1,10 +1,12 @@
-.PHONY: all clean install install-strip uninstall lint
+.PHONY: all clean install install-strip doxygen install-doxygen uninstall \
+	uninstall-doxygen lint
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
 CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
+DOXYGEN?=doxygen
 
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin
 
@@ -46,6 +48,9 @@ readpin.o: config.h input.h
 readpin: readpin.o libdcf77.so
 	$(CC) -o $@ readpin.o -lm libdcf77.so
 
+doxygen:
+	$(DOXYGEN)
+
 clean:
 	rm dcf77pi dcf77pi.o
 	rm dcf77pi-analyze dcf77pi-analyze.o
@@ -67,6 +72,10 @@ install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
 
+install-doxygen: html
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/html/search
+	cp -R html $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
+
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/lib/libdcf77.so
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi
@@ -74,6 +83,9 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/readpin
 	rm -rf $(DESTDIR)$(PREFIX)/include/dcf77pi
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
+
+uninstall-doxygen:
+	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
 lint:
 	lint -aabcehrsx -D__linux__ -Dlint -DETCDIR=\"$(ETCDIR)\" $(srclib) \
