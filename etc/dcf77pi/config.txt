@@ -1,4 +1,5 @@
 pin = 17
+iodev = 0
 activehigh = 1
 freq = 1000
 summermonth = 3

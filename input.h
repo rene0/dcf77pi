@@ -62,6 +62,8 @@ SUCH DAMAGE.
 struct hardware {
 	/** sample frequency in Hz */
 	uint32_t freq;
+	/* GPIO device number (FreeBSD only) */
+	uint8_t iodev;
 	/* pin number to read from */
 	uint8_t pin;
 	/** pin value is high (1) or low (0) for active signal */

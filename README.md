@@ -31,6 +31,7 @@ The software comes with three binaries and a library:
 The meaning of the keywords in config.txt is:
 
 * pin           = GPIO pin number
+* iodev         = GPIO device number (FreeBSD only)
 * activehigh    = pulses are active high (1) or passive high (0)
 * freq          = sample frequency in Hz
 * summermonth   = month in which daylight saving time starts

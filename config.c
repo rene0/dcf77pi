@@ -31,7 +31,7 @@ SUCH DAMAGE.
 #include <string.h>
 
 const char *key[] = {
-	"pin", "activehigh", "freq",
+	"pin", "iodev", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
 

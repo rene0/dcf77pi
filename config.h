@@ -38,7 +38,7 @@ int read_config_file(const char * const filename);
  * Rerieve a configuration value from the internal dictionary.
  *
  * @param keyword: the key for the value to retrieve. Valid keys are:
- *   "pin", "activehigh", "freq", "summermonth", "wintermonth",
+ *   "pin", "iodev", "activehigh", "freq", "summermonth", "wintermonth",
  *   "leapsecmonths", "outlogfile"
  * @return The corresponding value, or NULL when the key was not found.
  */

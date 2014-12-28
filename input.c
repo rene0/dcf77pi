@@ -84,23 +84,30 @@ set_mode_file(const char * const infilename)
 	return 0;
 }
 
+#define TRYWRITE(val, string) \
+do { \
+	res = snprintf(buf, sizeof(buf), string, val); \
+	if (res < 0 || res > sizeof(buf) - 1) { \
+		fprintf(stderr, "Hardware value too high? (%i)\n", res); \
+		cleanup(); \
+		return -1; \
+	} \
+} while (0)
+
 int
 set_mode_live(void)
 {
-#if !defined(NOLIVE)
-#if defined(__FreeBSD__)
-	struct gpio_pin pin;
-#elif defined(__linux__)
-	char buf[64];
-	int res;
-#endif
-#endif
-
 #if defined(NOLIVE)
 	printf("No GPIO interface available, disabling live decoding\n");
 	cleanup();
 	return -1;
 #else
+#if defined(__FreeBSD__)
+	struct gpio_pin pin;
+#endif
+	char buf[64];
+	int res;
+
 	/* fill hardware structure and initialize hardware */
 	hw.pin = strtol(get_config_value("pin"), NULL, 10);
 	hw.active_high = strtol(get_config_value("activehigh"), NULL, 10);
@@ -116,9 +123,12 @@ set_mode_live(void)
 		return -1;
 	}
 #if defined(__FreeBSD__)
-	fd = open("/dev/gpioc0", O_RDONLY);
+	hw.iodev = strtol(get_config_value("iodev"), NULL, 10);
+	TRYWRITE(hw.iodev, "/dev/gpioc%u");
+	fd = open(buf, O_RDONLY);
 	if (fd < 0) {
-		perror("open (/dev/gpioc0)");
+		fprintf(stderr, "open %s: ", buf);
+		perror(NULL);
 		cleanup();
 		return errno;
 	}
@@ -136,12 +146,7 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	res = snprintf(buf, sizeof(buf), "%u", hw.pin);
-	if (res < 0 || res > sizeof(buf)-1) {
-		printf("hw.pin too high? (%i)\n", res);
-		cleanup();
-		return -1;
-	}
+	TRYWRITE(hw.pin, "%u");
 	if (write(fd, buf, res) < 0) {
 		perror("write(export)");
 		cleanup();
@@ -153,13 +158,7 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction",
-	    hw.pin);
-	if (res < 0 || res > sizeof(buf)-1) {
-		printf("hw.pin too high? (%i)\n", res);
-		cleanup();
-		return -1;
-	}
+	TRYWRITE(hw.pin, "/sys/class/gpio/gpio%u/direction");
 	fd = open(buf, O_WRONLY);
 	if (fd < 0) {
 		perror("open (direction)");
@@ -176,13 +175,7 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value",
-	    hw.pin);
-	if (res < 0 || res > sizeof(buf)-1) {
-		printf("hw.pin too high? (%i)\n", res);
-		cleanup();
-		return -1;
-	}
+	TRYWRITE(hw.pin, "/sys/class/gpio/gpio%u/value");
 	fd = open(buf, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror("open (value)");
@@ -199,7 +192,7 @@ cleanup(void)
 {
 	if (fd > 0 && close(fd) == -1)
 #if defined(__FreeBSD__)
-		perror("close (/dev/gpioc0)");
+		perror("close (/dev/gpioc*)");
 #elif defined(__linux__)
 		perror("close (/sys/class/gpio/*)");
 #endif
