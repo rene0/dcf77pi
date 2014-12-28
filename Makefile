@@ -14,12 +14,6 @@ srclib = input.c decode_time.c decode_alarm.c config.c setclock.c mainloop.c \
 objlib = input.o decode_time.o decode_alarm.o config.o setclock.o mainloop.o \
 	bits1to14.o
 
-srcgui = dcf77pi.c
-objgui = dcf77pi.o
-
-srcfile = dcf77pi-analyze.c
-objfile = dcf77pi-analyze.o
-
 input.o: input.h config.h
 	$(CC) -fpic $(CFLAGS) -c input.c -o $@
 decode_time.o: decode_time.h config.h
@@ -39,20 +33,20 @@ libdcf77.so: $(objlib) $(hdrlib)
 	$(CC) -shared -o $@ $(objlib) -lm
 
 dcf77pi.o: $(hdrlib)
-dcf77pi: $(objgui) libdcf77.so
-	$(CC) -o $@ $(objgui) -lncurses libdcf77.so
+dcf77pi: dcf77pi.o libdcf77.so
+	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so
 
 dcf77pi-analyze.o: $(hdrlib)
-dcf77pi-analyze: $(objfile) libdcf77.so
-	$(CC) -o $@ $(objfile) libdcf77.so
+dcf77pi-analyze: dcf77pi-analyze.o libdcf77.so
+	$(CC) -o $@ dcf77pi-analyze.o libdcf77.so
 
 readpin.o: input.h
 readpin: readpin.o libdcf77.so
 	$(CC) -o $@ readpin.o -lm libdcf77.so
 
 clean:
-	rm dcf77pi $(objgui)
-	rm dcf77pi-analyze $(objfile)
+	rm dcf77pi dcf77pi.o
+	rm dcf77pi-analyze dcf77pi-analyze.o
 	rm readpin readpin.o
 	rm libdcf77.so $(objlib)
 
@@ -76,5 +70,8 @@ uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
 
 lint:
-	lint -aabcehrsxgz -D__linux__ -DETCDIR=\"$(ETCDIR)\" $(srclib) $(srcfile) readpin.c $(srcgui) || true
-	lint -aabcehrsxgz -D__FreeBSD__ -D__FreeBSD_version=900022 -DETCDIR=\"$(ETCDIR)\" $(srclib) $(srcfile) readpin.c $(srcgui) || true
+	lint -aabcehrsx -D__linux__ -Dlint -DETCDIR=\"$(ETCDIR)\" $(srclib) \
+		dcf77pi-analyze.c readpin.c dcf77pi.c || true
+	lint -aabcehrsx -D__FreeBSD__ -D__FreeBSD_version=900022 -Dlint \
+		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
+		dcf77pi.c || true
