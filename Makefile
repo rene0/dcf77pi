@@ -73,7 +73,7 @@ install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
 
 install-doxygen: html
-	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/html/search
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 	cp -R html $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
 uninstall:
