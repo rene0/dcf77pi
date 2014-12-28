@@ -33,15 +33,16 @@ bits1to14.o: bits1to14.h
 libdcf77.so: $(objlib) $(hdrlib)
 	$(CC) -shared -o $@ $(objlib) -lm
 
-dcf77pi.o: $(hdrlib)
+dcf77pi.o: bits1to14.h config.h decode_alarm.h decode_time.h input.h mainloop.h
 dcf77pi: dcf77pi.o libdcf77.so
 	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so
 
-dcf77pi-analyze.o: $(hdrlib)
+dcf77pi-analyze.o: bits1to14.h config.h decode_alarm.h decode_time.h input.h \
+	mainloop.h
 dcf77pi-analyze: dcf77pi-analyze.o libdcf77.so
 	$(CC) -o $@ dcf77pi-analyze.o libdcf77.so
 
-readpin.o: input.h
+readpin.o: config.h input.h
 readpin: readpin.o libdcf77.so
 	$(CC) -o $@ readpin.o -lm libdcf77.so
 
