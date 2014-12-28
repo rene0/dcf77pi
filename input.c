@@ -92,6 +92,7 @@ set_mode_live(void)
 	struct gpio_pin pin;
 #elif defined(__linux__)
 	char buf[64];
+	int res;
 #endif
 #endif
 
