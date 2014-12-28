@@ -171,14 +171,14 @@ display_time(uint32_t dt, struct tm time)
 	    time.tm_mday, get_weekday(time.tm_wday), time.tm_hour, time.tm_min);
 	/* display minute cutoff value */
 	cutoff = get_cutoff();
-	if (cutoff == 0xffff) {
-		mvwchgat(decode_win, 1, 40, 1, A_BOLD, 3, NULL);
+	if (cutoff == 0xffff)
 		mvwprintw(decode_win, 1, 40, "?     ");
-	} else
+	else
 		mvwprintw(decode_win, 1, 40, "%6.4f", cutoff / 1e4);
+
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 
-	/* color date/time string depending on the results */
+	/* color date/time string and cutoff value depending on the results */
 	if (dt & DT_DSTJUMP)
 		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
 	if (dt & DT_YEARJUMP)
@@ -193,6 +193,8 @@ display_time(uint32_t dt, struct tm time)
 		mvwchgat(decode_win, 1, 22, 2, A_BOLD, 3, NULL);
 	if (dt & DT_MINJUMP)
 		mvwchgat(decode_win, 1, 25, 2, A_BOLD, 3, NULL);
+	if (cutoff == 0xffff)
+		mvwchgat(decode_win, 1, 40, 1, A_BOLD, 3, NULL);
 
 	/* flip lights depending on the results */
 	if ((dt & DT_XMIT) == 0)
