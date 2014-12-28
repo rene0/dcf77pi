@@ -68,8 +68,10 @@ install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
 
 uninstall:
-	rm -rf $(DESTDIR)$(PREFIX)/lib
-	rm -rf $(DESTDIR)$(PREFIX)/bin
+	rm -f $(DESTDIR)$(PREFIX)/lib/libdcf77.so
+	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi
+	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi-analyze
+	rm -f $(DESTDIR)$(PREFIX)/bin/readpin
 	rm -rf $(DESTDIR)$(PREFIX)/include/dcf77pi
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
 
