@@ -3,7 +3,8 @@
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
 CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
-INSTALL_PROGRAM?=install
+INSTALL?=install
+INSTALL_PROGRAM?=$(INSTALL)
 
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin
 
@@ -54,14 +55,16 @@ install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	$(INSTALL_PROGRAM) libdcf77.so $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL_PROGRAM) dcf77pi dcf77pi-analyze readpin $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL_PROGRAM) dcf77pi dcf77pi-analyze readpin \
+		$(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(PREFIX)/include/dcf77pi
-	$(INSTALL) $(hdrlib) $(DESTDIR)$(PREFIX)/include/dcf77pi
+	$(INSTALL) -m 0644 $(hdrlib) $(DESTDIR)$(PREFIX)/include/dcf77pi
 	mkdir -p $(DESTDIR)$(PREFIX)/$(ETCDIR)
-	install etc/dcf77pi/config.txt $(DESTDIR)$(PREFIX)/$(ETCDIR)/config.txt.sample
+	$(INSTALL) -m 0644 etc/dcf77pi/config.txt \
+		$(DESTDIR)$(PREFIX)/$(ETCDIR)/config.txt.sample
 
 install-strip:
-	$(MAKE) INSTALL_PROGRAM='install -s' install
+	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
 
 uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/lib
