@@ -30,7 +30,6 @@ SUCH DAMAGE.
 #include "mainloop.h"
 
 #include <errno.h>
-#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 
