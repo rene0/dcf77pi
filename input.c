@@ -98,7 +98,8 @@ int
 set_mode_live(void)
 {
 #if defined(NOLIVE)
-	printf("No GPIO interface available, disabling live decoding\n");
+	fprintf(stderr, "No GPIO interface available, "
+	    "disabling live decoding\n");
 	cleanup();
 	return -1;
 #else
@@ -112,13 +113,14 @@ set_mode_live(void)
 	hw.pin = strtol(get_config_value("pin"), NULL, 10);
 	hw.active_high = strtol(get_config_value("activehigh"), NULL, 10);
 	if (hw.active_high > 1) {
-		printf("hw.active_high must either be 0 or 1\n");
+		fprintf(stderr, "hw.active_high must either be 0 or 1\n");
 		cleanup();
 		return -1;
 	}
 	hw.freq = strtol(get_config_value("freq"), NULL, 10);
 	if (hw.freq < 10 || hw.freq > 155000 || (hw.freq & 1) == 1) {
-		printf("hw.freq must be an even number between 10 and 155000 inclusive\n");
+		fprintf(stderr, "hw.freq must be an even number between 10 "
+		    "and 155000 inclusive\n");
 		cleanup();
 		return -1;
 	}
