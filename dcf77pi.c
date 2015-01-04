@@ -85,8 +85,10 @@ curses_cleanup(const char * const reason)
 	if (main_win != NULL)
 		delwin(main_win);
 	endwin();
-	if (reason != NULL)
+	if (reason != NULL) {
 		printf("%s", reason);
+		cleanup();
+	}
 }
 
 void
