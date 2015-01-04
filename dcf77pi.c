@@ -390,7 +390,7 @@ post_process_input(char **logfilename, bool * const change_logfile,
 					*bit |= GETBIT_EOD; /* error */
 				}
 				if (strlen(*logfilename) > 0) {
-					res = write_new_logfile(*logfilename);
+					res = append_logfile(*logfilename);
 					if (res != 0) {
 						statusbar(bitpos,
 						    strerror(res));
@@ -479,7 +479,7 @@ main(int argc, char *argv[])
 	}
 	logfilename = get_config_value("outlogfile");
 	if (logfilename != NULL && strlen(logfilename) != 0) {
-		res = write_new_logfile(logfilename);
+		res = append_logfile(logfilename);
 		if (res != 0) {
 			perror("fopen (logfile)");
 			return res;

@@ -625,7 +625,7 @@ get_hardware_parameters(void)
 }
 
 int
-write_new_logfile(const char * const logfilename)
+append_logfile(const char * const logfilename)
 {
 	logfile = fopen(logfilename, "a");
 	if (logfile == NULL)

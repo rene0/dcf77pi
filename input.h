@@ -190,7 +190,7 @@ bool is_space_bit(uint8_t bitpos);
  * @param logfile The name of the log file to use.
  * @return The log file was opened succesfully (0), or errno on error.
  */
-int write_new_logfile(const char * const logfile);
+int append_logfile(const char * const logfile);
 
 /**
  * Close the currently opened log file.
