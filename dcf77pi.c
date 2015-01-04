@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2013-2015 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -58,7 +58,7 @@ statusbar(int8_t bitpos, const char * const fmt, ...)
 	vw_printw(main_win, fmt, ap);
 	va_end(ap);
 	wclrtoeol(main_win);
-	wrefresh(main_win);
+	wnoutrefresh(main_win);
 }
 
 void
@@ -70,7 +70,7 @@ draw_keys(void)
 	mvwchgat(main_win, 1, 1, 1, A_BOLD, 4, NULL); /* [Q] */
 	mvwchgat(main_win, 1, 13, 1, A_BOLD, 4, NULL); /* [L] */
 	mvwchgat(main_win, 1, 36, 1, A_BOLD, 4, NULL); /* [S] */
-	wrefresh(main_win);
+	wnoutrefresh(main_win);
 }
 
 void
@@ -143,11 +143,12 @@ display_bit(uint16_t state, uint8_t bitpos)
 	mvwprintw(input_win, 0, xpos, "%u", get_buffer()[bitpos]);
 	if (state & GETBIT_READ)
 		mvwchgat(input_win, 0, xpos, 1, A_BOLD, 3, NULL);
-	wrefresh(input_win);
+	wnoutrefresh(input_win);
 
 	mvwprintw(decode_win, 1, 28, "(%10u", get_acc_minlen());
 	mvwprintw(decode_win, 1, 46, ")");
-	wrefresh(decode_win);
+	wnoutrefresh(decode_win);
+	doupdate();
 }
 
 void
@@ -280,7 +281,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 	static uint8_t input_count, input_xpos;
 
 	inkey = getch();
-	if (input_mode == 0 && inkey != ERR)
+	if (input_mode == 0 && inkey != ERR) {
 		switch (inkey) {
 		case 'Q':
 			*bit |= GETBIT_EOD; /* quit main loop */
@@ -292,7 +293,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 			    logfilename : "(none)");
 			mvwprintw(main_win, 1, 0, "Log file (empty for none):");
 			wclrtoeol(main_win);
-			wrefresh(main_win);
+			wnoutrefresh(main_win);
 			input_mode = 1;
 			input_count = 0;
 			input_xpos = 26;
@@ -304,6 +305,8 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 			    *settime ? "on" : "off");
 			break;
 		}
+		doupdate();
+	}
 
 	while (input_mode == 1 && inkey != ERR) {
 		if (input_count > 0 &&
@@ -320,7 +323,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 				wmove(main_win, 1, input_xpos + 1);
 				wclrtoeol(main_win);
 			}
-			wrefresh(main_win);
+			wnoutrefresh(main_win);
 		} else if (input_count == MAXBUF - 1 ||
 		    (inkey == KEY_ENTER || inkey == '\r' || inkey == '\n')) {
 			/* terminate to prevent overflow */
@@ -338,8 +341,9 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 				mvwprintw(main_win, 1, 27, "%s", dispbuf);
 			} else
 				mvwprintw(main_win, 1, input_xpos, "%c", inkey);
-			wrefresh(main_win);
+			wnoutrefresh(main_win);
 		}
+		doupdate();
 		inkey = getch();
 	}
 }
@@ -364,7 +368,7 @@ post_process_input(char **logfilename, bool * const change_logfile,
 		if (*change_logfile) {
 			wmove(main_win, 0, 0);
 			wclrtoeol(main_win);
-			wrefresh(main_win);
+			wnoutrefresh(main_win);
 
 			if (*logfilename == NULL)
 				*logfilename = strdup("");
@@ -397,6 +401,7 @@ post_process_input(char **logfilename, bool * const change_logfile,
 		}
 		input_mode = 0;
 	}
+	doupdate();
 }
 
 void
@@ -455,6 +460,7 @@ show_mainloop_result(uint16_t * const bit, uint8_t bitpos)
 		statusbar(bitpos, "Time set");
 		break;
 	}
+	doupdate();
 }
 
 int
@@ -509,7 +515,7 @@ main(int argc, char *argv[])
 	nodelay(stdscr, TRUE);
 	keypad(stdscr, TRUE);
 	curs_set(0);
-	refresh(); /* prevent clearing windows upon getch() / refresh() */
+	refresh(); /* prevent clearing windows upon getch() */
 
 	/* allocate windows */
 	decode_win = newwin(2, 80, 0, 0);
@@ -532,23 +538,25 @@ main(int argc, char *argv[])
 		curses_cleanup("Creating main_win failed.\n");
 		return 0;
 	}
+
 	/* draw initial screen */
 
 	mvwprintw(decode_win, 0, 0, "old");
 	mvwprintw(decode_win, 1, 50, "txcall dst leap");
 	mvwchgat(decode_win, 1, 50, 15, A_NORMAL, 8, NULL);
-	wrefresh(decode_win);
+	wnoutrefresh(decode_win);
 
 	mvwprintw(tp_win, 0, 0, "Third party buffer  :");
 	mvwprintw(tp_win, 1, 0, "Third party contents:");
-	wrefresh(tp_win);
+	wnoutrefresh(tp_win);
 
 	mvwprintw(input_win, 0, 0, "new");
 	mvwprintw(input_win, 2, 0, "bit    act  last0  total   realfreq"
 	    "         b0        b20 state     radio");
-	wrefresh(input_win);
+	wnoutrefresh(input_win);
 
 	draw_keys();
+	doupdate();
 
 	mainloop(logfilename, get_bit_live, display_bit,
 	    display_long_minute, display_minute, wipe_input, display_alarm,
