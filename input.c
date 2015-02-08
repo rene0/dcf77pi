@@ -553,7 +553,7 @@ get_bit_file(void)
 			break;
 		case 'a':
 			/* acc_minlen */
-			READVALUE(fscanf(datafile, "%u", &acc_minlen) != 1);
+			READVALUE(fscanf(datafile, "%10u", &acc_minlen) != 1);
 			read_acc_minlen = !(state & GETBIT_EOD);
 			break;
 		case 'c':

@@ -179,6 +179,7 @@ main(int argc, char *argv[])
 	if (res != 0) {
 		/* non-existent file? */
 		cleanup();
+		free(logfilename);
 		return res;
 	}
 	res = set_mode_file(logfilename);

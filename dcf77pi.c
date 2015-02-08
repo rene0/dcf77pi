@@ -354,9 +354,6 @@ void
 post_process_input(char **logfilename, bool * const change_logfile,
     uint16_t * const bit, uint8_t bitpos)
 {
-	int res;
-	char *old_logfilename;
-
 	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 2) % 60 ||
 	    (old_bitpos == 57 && bitpos == 0))) {
 		/*
@@ -368,6 +365,8 @@ post_process_input(char **logfilename, bool * const change_logfile,
 	}
 	if (input_mode == -1) {
 		if (*change_logfile) {
+			char *old_logfilename;
+
 			wmove(main_win, 0, 0);
 			wclrtoeol(main_win);
 			wnoutrefresh(main_win);
@@ -390,7 +389,7 @@ post_process_input(char **logfilename, bool * const change_logfile,
 					*bit |= GETBIT_EOD; /* error */
 				}
 				if (strlen(*logfilename) > 0) {
-					res = append_logfile(*logfilename);
+					int res = append_logfile(*logfilename);
 					if (res != 0) {
 						statusbar(bitpos,
 						    strerror(res));

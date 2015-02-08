@@ -49,7 +49,6 @@ main(int argc, char **argv)
 	uint64_t i;
 	uint8_t j;
 	uint16_t bit;
-	const struct bitinfo *bi;
 	struct sigaction sigact;
 
 	if ((argc == 2) && !strncmp(argv[1], "-q", strlen(argv[1])))
@@ -78,6 +77,8 @@ main(int argc, char **argv)
 	min = -1;
 
 	for (;;) {
+		const struct bitinfo *bi;
+
 		bit = get_bit_live();
 		bi = get_bitinfo();
 		if (verbose) {
