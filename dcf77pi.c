@@ -37,16 +37,16 @@ SUCH DAMAGE.
 
 #define MAXBUF 255
 
-WINDOW *input_win;
-WINDOW *decode_win;
-WINDOW *tp_win;
+static WINDOW *input_win;
+static WINDOW *decode_win;
+static WINDOW *tp_win;
 WINDOW *main_win;
 
-int8_t old_bitpos = -1; /* timer for statusbar inactive */
-int8_t input_mode;      /* normal input (statusbar keys) or string input */
-char keybuf[MAXBUF];    /* accumulator for string input */
+static int8_t old_bitpos = -1; /* timer for statusbar inactive */
+static int8_t input_mode;      /* normal input (statusbar) or string input */
+static char keybuf[MAXBUF];    /* accumulator for string input */
 
-void
+static void
 statusbar(int8_t bitpos, const char * const fmt, ...)
 {
 	va_list ap;
@@ -61,7 +61,7 @@ statusbar(int8_t bitpos, const char * const fmt, ...)
 	wnoutrefresh(main_win);
 }
 
-void
+static void
 draw_keys(void)
 {
 	mvwprintw(main_win, 1, 0, "[Q] -> quit [L] -> change log file"
@@ -73,7 +73,7 @@ draw_keys(void)
 	wnoutrefresh(main_win);
 }
 
-void
+static void
 curses_cleanup(const char * const reason)
 {
 	if (decode_win != NULL)
@@ -273,7 +273,7 @@ display_weather(void)
 	wrefresh(tp_win);
 }
 
-void
+static void
 process_input(uint16_t * const bit, uint8_t bitpos,
     const char * const logfilename, bool * const settime,
     bool * const change_logfile)
@@ -350,7 +350,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 	}
 }
 
-void
+static void
 post_process_input(char **logfilename, bool * const change_logfile,
     uint16_t * const bit, uint8_t bitpos)
 {
@@ -405,7 +405,7 @@ post_process_input(char **logfilename, bool * const change_logfile,
 	doupdate();
 }
 
-void
+static void
 wipe_input()
 {
 	if (get_bitpos() == 0) {
@@ -441,7 +441,7 @@ display_minute(uint8_t minlen)
 	wrefresh(decode_win);
 }
 
-void
+static void
 show_mainloop_result(uint16_t * const bit, uint8_t bitpos)
 {
 	switch (get_mainloop_result()) {

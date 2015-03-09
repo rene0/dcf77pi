@@ -30,28 +30,28 @@ SUCH DAMAGE.
 #define BUFLEN 60
 
 /** this bit has value 1 */
-#define GETBIT_ONE	(1 << 0)
+#define GETBIT_ONE	(uint16_t)(1 << 0)
 /** end-of-minute bit */
-#define GETBIT_EOM	(1 << 1)
+#define GETBIT_EOM	(uint16_t)(1 << 1)
 /** end of data, either end-of-file or user quit */
-#define GETBIT_EOD	(1 << 2)
+#define GETBIT_EOD	(uint16_t)(1 << 2)
 /** bit value could not be determined */
-#define GETBIT_READ	(1 << 3)
+#define GETBIT_READ	(uint16_t)(1 << 3)
 /** bit buffer would overflow */
-#define GETBIT_TOOLONG	(1 << 4)
+#define GETBIT_TOOLONG	(uint16_t)(1 << 4)
 /** I/O error while reading bit from hardware */
-#define GETBIT_IO	(1 << 5)
+#define GETBIT_IO	(uint16_t)(1 << 5)
 /** transmitter error, all positive pulses */
-#define GETBIT_XMIT	(1 << 6)
+#define GETBIT_XMIT	(uint16_t)(1 << 6)
 /** receiver error, all negative pulses */
-#define GETBIT_RECV	(1 << 7)
+#define GETBIT_RECV	(uint16_t)(1 << 7)
 /** random radio error, both positive and negative pulses but no proper
   * signal */
-#define GETBIT_RND	(1 << 8)
+#define GETBIT_RND	(uint16_t)(1 << 8)
 /** this bit should be skipped (i.e. not displayed) */
-#define GETBIT_SKIP	(1 << 9)
+#define GETBIT_SKIP	(uint16_t)(1 << 9)
 /** next bit should be skipped (i.e. not added to bitpos) */
-#define GETBIT_SKIPNEXT	(1 << 10)
+#define GETBIT_SKIPNEXT	(uint16_t)(1 << 10)
 
 #include <stdbool.h>
 #include <stdint.h> /* *intX_t */

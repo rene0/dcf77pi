@@ -39,13 +39,13 @@ display_bit(uint16_t state, uint8_t bitpos)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
-	if (state & GETBIT_RECV)
+	if ((state & GETBIT_RECV) == GETBIT_RECV)
 		printf("r");
-	else if (state & GETBIT_XMIT)
+	else if ((state & GETBIT_XMIT) == GETBIT_XMIT)
 		printf("x");
-	else if (state & GETBIT_RND)
+	else if ((state & GETBIT_RND) == GETBIT_RND)
 		printf("#");
-	else if (state & GETBIT_READ)
+	else if ((state & GETBIT_READ) == GETBIT_READ)
 		printf("_");
 	else
 		printf("%u", get_buffer()[bitpos]);
@@ -55,55 +55,56 @@ void
 display_time(uint32_t dt, struct tm time)
 {
 	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
-	    time.tm_isdst ? "summer" : "winter", time.tm_year, time.tm_mon,
-	    time.tm_mday, get_weekday(time.tm_wday), time.tm_hour, time.tm_min);
-	if (dt & DT_LONG)
+	    time.tm_isdst == 1 ? "summer" : "winter", time.tm_year, time.tm_mon,
+	    time.tm_mday, get_weekday((uint8_t)time.tm_wday), time.tm_hour,
+	    time.tm_min);
+	if ((dt & DT_LONG) == DT_LONG)
 		printf("Minute too long\n");
-	if (dt & DT_SHORT)
+	if ((dt & DT_SHORT) == DT_SHORT)
 		printf("Minute too short\n");
-	if (dt & DT_DSTERR)
+	if ((dt & DT_DSTERR) == DT_DSTERR)
 		printf("Time offset error\n");
-	if (dt & DT_DSTJUMP)
+	if ((dt & DT_DSTJUMP) == DT_DSTJUMP)
 		printf("Time offset jump (ignored)\n");
-	if (dt & DT_MIN)
+	if ((dt & DT_MIN) == DT_MIN)
 		printf("Minute parity/value error\n");
-	if (dt & DT_MINJUMP)
+	if ((dt & DT_MINJUMP) == DT_MINJUMP)
 		printf("Minute value jump\n");
-	if (dt & DT_HOUR)
+	if ((dt & DT_HOUR) == DT_HOUR)
 		printf("Hour parity/value error\n");
-	if (dt & DT_HOURJUMP)
+	if ((dt & DT_HOURJUMP) == DT_HOURJUMP)
 		printf("Hour value jump\n");
-	if (dt & DT_DATE)
+	if ((dt & DT_DATE) == DT_DATE)
 		printf("Date parity/value error\n");
-	if (dt & DT_WDAYJUMP)
+	if ((dt & DT_WDAYJUMP) == DT_WDAYJUMP)
 		printf("Day-of-week value jump\n");
-	if (dt & DT_MDAYJUMP)
+	if ((dt & DT_MDAYJUMP) == DT_MDAYJUMP)
 		printf("Day-of-month value jump\n");
-	if (dt & DT_MONTHJUMP)
+	if ((dt & DT_MONTHJUMP) == DT_MONTHJUMP)
 		printf("Month value jump\n");
-	if (dt & DT_YEARJUMP)
+	if ((dt & DT_YEARJUMP) == DT_YEARJUMP)
 		printf("Year value jump\n");
-	if (dt & DT_B0)
+	if ((dt & DT_B0) == DT_B0)
 		printf("Minute marker error\n");
-	if (dt & DT_B20)
+	if ((dt & DT_B20) == DT_B20)
 		printf("Date/time start marker error\n");
-	if (dt & DT_XMIT)
+	if ((dt & DT_XMIT) == DT_XMIT)
 		printf("Transmitter call bit set\n");
-	if (dt & ANN_CHDST)
+	if ((dt & ANN_CHDST) == ANN_CHDST)
 		printf("Time offset change announced\n");
-	if (dt & ANN_LEAP)
+	if ((dt & ANN_LEAP) == ANN_LEAP)
 		printf("Leap second announced\n");
-	if (dt & DT_CHDST)
+	if ((dt & DT_CHDST) == DT_CHDST)
 		printf("Time offset changed\n");
-	if (dt & DT_LEAP) {
+	if ((dt & DT_LEAP) == DT_LEAP) {
 		printf("Leap second processed");
-		if (dt & DT_LEAPONE)
+		if ((dt & DT_LEAPONE) == DT_LEAPONE)
 			printf(", value is 1 instead of 0");
 		printf("\n");
 	}
-	if (dt & DT_CHDSTERR)
+	if ((dt & DT_CHDSTERR) == DT_CHDSTERR)
 		printf("Spurious time offset change announcement\n");
-	if (dt & DT_LEAPERR)
+	if ((dt & DT_LEAPERR) == DT_LEAPERR)
 		printf("Spurious leap second announcement\n");
 	printf("\n");
 }
@@ -144,7 +145,7 @@ display_minute(uint8_t minlen)
 	uint32_t cutoff;
 
 	cutoff = get_cutoff();
-	printf(" (%u) %u ", get_acc_minlen(), minlen);
+	printf(" (%lu) %u ", (unsigned long)get_acc_minlen(), minlen);
 	if (cutoff == 0xffff)
 		printf("?\n");
 	else

@@ -34,56 +34,56 @@ SUCH DAMAGE.
 #define BASEYEAR	2000
 
 /** daylight saving time error, bit 17 = bit 18 */
-#define DT_DSTERR	(1 << 0)
+#define DT_DSTERR	(uint32_t)(1 << 0)
 /** minute value/parity error */
-#define DT_MIN		(1 << 1)
+#define DT_MIN		(uint32_t)(1 << 1)
 /** hour value/parity error */
-#define DT_HOUR		(1 << 2)
+#define DT_HOUR		(uint32_t)(1 << 2)
 /** date value/parity error */
-#define DT_DATE		(1 << 3)
+#define DT_DATE		(uint32_t)(1 << 3)
 /** bit 0 must always be 0 :
   * http://www.eecis.udel.edu/~mills/ntp/dcf77.html
   */
-#define DT_B0		(1 << 4)
+#define DT_B0		(uint32_t)(1 << 4)
 /** bit 20 is 0 */
-#define DT_B20		(1 << 5)
+#define DT_B20		(uint32_t)(1 << 5)
 /** too short minute */
-#define DT_SHORT	(1 << 6)
+#define DT_SHORT	(uint32_t)(1 << 6)
 /** too long minute */
-#define DT_LONG		(1 << 7)
+#define DT_LONG		(uint32_t)(1 << 7)
 /** unexpected daylight saving time change */
-#define DT_DSTJUMP	(1 << 8)
+#define DT_DSTJUMP	(uint32_t)(1 << 8)
 /** unexpected daylight saving time change announcement */
-#define DT_CHDSTERR	(1 << 9)
+#define DT_CHDSTERR	(uint32_t)(1 << 9)
 /** unexpected leap second announcement */
-#define DT_LEAPERR	(1 << 10)
+#define DT_LEAPERR	(uint32_t)(1 << 10)
 /** unexpected minute value change */
-#define DT_MINJUMP	(1 << 11)
+#define DT_MINJUMP	(uint32_t)(1 << 11)
 /** unexpected hour value change */
-#define DT_HOURJUMP	(1 << 12)
+#define DT_HOURJUMP	(uint32_t)(1 << 12)
 /** unexpected day value change */
-#define DT_MDAYJUMP	(1 << 13)
+#define DT_MDAYJUMP	(uint32_t)(1 << 13)
 /** unexpected day-of-week value change */
-#define DT_WDAYJUMP	(1 << 14)
+#define DT_WDAYJUMP	(uint32_t)(1 << 14)
 /** unexpected month value change */
-#define DT_MONTHJUMP	(1 << 15)
+#define DT_MONTHJUMP	(uint32_t)(1 << 15)
 /** unexpected year value change */
-#define DT_YEARJUMP	(1 << 16)
+#define DT_YEARJUMP	(uint32_t)(1 << 16)
 /** leap second should always be 0 if present :
   * http://www.ptb.de/cms/en/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
   */
-#define DT_LEAPONE	(1 << 17)
+#define DT_LEAPONE	(uint32_t)(1 << 17)
 /** transmitter call bit (15) set */
-#define DT_XMIT		(1 << 18)
+#define DT_XMIT		(uint32_t)(1 << 18)
 /** daylight saving time just changed */
-#define DT_CHDST	(1 << 19)
+#define DT_CHDST	(uint32_t)(1 << 19)
 /** leap second just processed */
-#define DT_LEAP		(1 << 20)
+#define DT_LEAP		(uint32_t)(1 << 20)
 
 /** daylight saving time change announced */
-#define ANN_CHDST	(1 << 30)
+#define ANN_CHDST	(uint32_t)(1 << 30)
 /** leap second announced */
-#define ANN_LEAP	(1 << 31)
+#define ANN_LEAP	(uint32_t)(1 << 31)
 
 /**
  * Initialize the month values from the configuration:

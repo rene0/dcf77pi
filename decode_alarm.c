@@ -30,9 +30,9 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-const char * const reg1n = "SWH, HH, NS, BR, MVP";
-const char * const reg1m = "NRW, SA, BRA, B, TH, S";
-const char * const reg1s = "RP, SAA, HS, BW, BYN, BYS";
+static const char * const reg1n = "SWH, HH, NS, BR, MVP";
+static const char * const reg1m = "NRW, SA, BRA, B, TH, S";
+static const char * const reg1s = "RP, SAA, HS, BW, BYN, BYS";
 
 void
 decode_alarm(const uint8_t * const civbuf, struct alm * const alarm)
@@ -65,10 +65,10 @@ decode_alarm(const uint8_t * const civbuf, struct alm * const alarm)
 	}
 }
 
-const char * const
+/*@null@*/const char * const
 get_region_name(struct alm alarm)
 {
-	char *res;
+	/*@null@*/char *res;
 	uint8_t r;
 
 	/* Partial information only */
@@ -83,15 +83,15 @@ get_region_name(struct alm alarm)
 		return res;
 
 	r = alarm.region[0].r1;
-	if (r & 1)
+	if ((r & 1) == 1)
 		res = strcat(res, reg1n);
-	if (r & 2) {
-		if (r & 1)
+	if ((r & 2) == 2) {
+		if ((r & 1) == 1)
 			res = strcat(res, ", ");
 		res = strcat(res, reg1m);
 	}
-	if (r & 4) {
-		if ((r & 1) || (r & 2))
+	if ((r & 4) == 1) {
+		if (((r & 1) == 1) || ((r & 2) == 2))
 			res = strcat(res, ", ");
 		res = strcat(res, reg1s);
 	}

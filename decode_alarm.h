@@ -52,6 +52,6 @@ void decode_alarm(const uint8_t * const civbuf, struct alm * const alarm);
  * @param alarm The structure containing the alarm information.
  * @return The region name.
  */
-const char * const get_region_name(struct alm alarm);
+/*@null@*/const char * const get_region_name(struct alm alarm);
 
 #endif

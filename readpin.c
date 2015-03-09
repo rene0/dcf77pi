@@ -33,8 +33,8 @@ SUCH DAMAGE.
 #include <string.h>
 #include <sysexits.h>
 
-void
-do_cleanup(int sig)
+static void
+do_cleanup(/*@unused@*/ int sig)
 {
 	cleanup();
 	printf("done\n");
@@ -51,7 +51,7 @@ main(int argc, char **argv)
 	uint16_t bit;
 	struct sigaction sigact;
 
-	if ((argc == 2) && !strncmp(argv[1], "-q", strlen(argv[1])))
+	if ((argc == 2) && strncmp(argv[1], "-q", strlen(argv[1])) == 0)
 		verbose = false;
 	else if (argc != 1) {
 		printf("usage: %s [-q]\n", argv[0]);
@@ -87,25 +87,25 @@ main(int argc, char **argv)
 			/* display first bi->t pulses */
 			for (i = 0; i < bi->t / 8; i++)
 				for (j = 0; j < 8; j++)
-					printf("%c", bi->signal[i] & (1 << j) ?
+					printf("%c", (bi->signal[i] & (1 << j)) > 0 ?
 					    '+' : '-');
 			/*
 			 * display pulses in the last partially filled item
 			 * bi->t is 0-based, hence the <= comparison
 			 */
 			for (j = 0; j <= (bi->t & 7); j++)
-				printf("%c", bi->signal[bi->t / 8] & (1 << j) ?
+				printf("%c", (bi->signal[bi->t / 8] & (1 << j)) > 0 ?
 				    '+' : '-');
 			printf("\n");
 		}
-		if (bit & GETBIT_TOOLONG)
+		if ((bit & GETBIT_TOOLONG) == GETBIT_TOOLONG)
 			min++;
 		printf("%x (%"PRIi32" %"PRIi32" %"PRIi32" %"PRIi64" %"PRIi64
 		    " %"PRIi64") %i:%u\n", bit, bi->tlow, bi->tlast0, bi->t,
 		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
-		if (bit & GETBIT_EOM)
+		if ((bit & GETBIT_EOM) == GETBIT_EOM)
 			min++;
 		bit = next_bit();
 	}
-	// NOTREACHED
+	/* NOTREACHED */
 }

@@ -62,16 +62,16 @@ SUCH DAMAGE.
 #  error Unsupported operating system, please send a patch to the author
 #endif
 
-uint8_t bitpos;         /* second */
-uint8_t buffer[BUFLEN]; /* wrap after BUFLEN positions */
-uint16_t state;         /* any errors, or high bit */
-FILE *datafile;         /* input file (recorded data) */
-FILE *logfile;          /* auto-appended in live mode */
-int fd;                 /* gpio file */
-struct hardware hw;
-struct bitinfo bit;
-uint32_t acc_minlen;
-uint16_t cutoff;
+static uint8_t bitpos;         /* second */
+static uint8_t buffer[BUFLEN]; /* wrap after BUFLEN positions */
+static uint16_t state;         /* any errors, or high bit */
+/*@null@*/ static FILE *datafile;         /* input file (recorded data) */
+/*@null@*/ static FILE *logfile;          /* auto-appended in live mode */
+static int fd;                 /* gpio file */
+static struct hardware hw;
+static struct bitinfo bit;
+static uint32_t acc_minlen;
+static uint16_t cutoff;
 
 int
 set_mode_file(const char * const infilename)
@@ -110,14 +110,14 @@ set_mode_live(void)
 	int res;
 
 	/* fill hardware structure and initialize hardware */
-	hw.pin = strtol(get_config_value("pin"), NULL, 10);
-	hw.active_high = strtol(get_config_value("activehigh"), NULL, 10);
 	if (hw.active_high > 1) {
 		fprintf(stderr, "hw.active_high must either be 0 or 1\n");
 		cleanup();
 		return -1;
 	}
-	hw.freq = strtol(get_config_value("freq"), NULL, 10);
+	hw.pin = (uint8_t)strtol(get_config_value("pin"), NULL, 10);
+	hw.active_high = (bool)strtol(get_config_value("activehigh"), NULL, 10);
+	hw.freq = (uint32_t)strtol(get_config_value("freq"), NULL, 10);
 	if (hw.freq < 10 || hw.freq > 155000 || (hw.freq & 1) == 1) {
 		fprintf(stderr, "hw.freq must be an even number between 10 "
 		    "and 155000 inclusive\n");
@@ -125,8 +125,8 @@ set_mode_live(void)
 		return -1;
 	}
 #if defined(__FreeBSD__)
-	hw.iodev = strtol(get_config_value("iodev"), NULL, 10);
-	TRYWRITE(hw.iodev, "/dev/gpioc%u");
+	hw.iodev = (uint8_t)strtol(get_config_value("iodev"), NULL, 10);
+	TRYWRITE(hw.iodev, "/dev/gpioc%hhu");
 	fd = open(buf, O_RDONLY);
 	if (fd < 0) {
 		fprintf(stderr, "open %s: ", buf);
@@ -185,8 +185,8 @@ set_mode_live(void)
 		return errno;
 	}
 #endif
-#endif
 	return 0;
+#endif
 }
 
 void
@@ -219,7 +219,7 @@ get_pulse(void)
 
 	req.gp_pin = hw.pin;
 	count = ioctl(fd, GPIOGET, &req);
-	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
+	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? (uint8_t)1 : (uint8_t)0;
 	if (count < 0)
 #elif defined(__linux__)
 	count = read(fd, &tmpch, sizeof(tmpch));
@@ -228,11 +228,11 @@ get_pulse(void)
 		return GETBIT_IO; /* rewind to prevent EBUSY/no read */
 	if (count != sizeof(tmpch))
 #endif
-#endif
 		return GETBIT_IO; /* hardware failure? */
 
 	if (!hw.active_high)
 		tmpch = 1 - tmpch;
+#endif
 	return tmpch;
 }
 
@@ -240,24 +240,24 @@ get_pulse(void)
  * Clear the cutoff value and the previous flags, except GETBIT_TOOLONG to be
  * able to determine if this flag can be cleared again.
  */
-void
+static void
 set_new_state(void)
 {
 	cutoff = 0xffff;
-	state = (state & GETBIT_TOOLONG) ? GETBIT_TOOLONG : 0;
+	state = ((state & GETBIT_TOOLONG) == GETBIT_TOOLONG) ? GETBIT_TOOLONG : (uint16_t)0;
 }
 
-void
+static void
 reset_frequency(void)
 {
 	if (logfile != NULL)
-		fprintf(logfile, bit.realfreq <= hw.freq * 500000 ?  "<" :
+		fprintf(logfile, "%s", bit.realfreq <= hw.freq * 500000 ? "<" :
 		    bit.realfreq >= hw.freq * 1500000 ? ">" : "");
 	bit.realfreq = hw.freq * 1000000;
 	bit.freq_reset = true;
 }
 
-void
+static void
 reset_bitlen(void)
 {
 	if (logfile != NULL)
@@ -287,7 +287,7 @@ get_bit_live(void)
 	int64_t a, y = 1000000000;
 	int64_t twait;
 	static int init_bit = 2;
-	bool is_eom = state & GETBIT_EOM;
+	bool is_eom = (state & GETBIT_EOM) == GETBIT_EOM;
 
 	bit.freq_reset = false;
 	bit.bitlen_reset = false;
@@ -315,7 +315,7 @@ get_bit_live(void)
 	/*
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
-	a = 1000000000 - 1000000000 * exp2(-2e7 / bit.realfreq);
+	a = 1000000000 - 1000000000 * (int64_t)exp2(-2e7 / bit.realfreq);
 	bit.tlow = -1;
 	bit.tlast0 = -1;
 
@@ -335,7 +335,7 @@ get_bit_live(void)
 		bit.signal[bit.t / 8] |= p << (uint8_t)(bit.t & 7);
 
 		if (y >= 0 && y < a / 2)
-			bit.tlast0 = bit.t;
+			bit.tlast0 = (int32_t)bit.t;
 		y += a * (p * 1000000000 - y) / 1000000000;
 
 		/*
@@ -349,7 +349,8 @@ get_bit_live(void)
 		if (bit.t > bit.realfreq * 2500000) {
 			bit.realfreq += ((int64_t)
 			    (bit.t * 2500000 - bit.realfreq) / 20);
-			a = 1000000000 - 1000000000 * exp2(-2e7 / bit.realfreq);
+			a = 1000000000 - 1000000000 *
+			     (int64_t)exp2(-2e7 / bit.realfreq);
 			if (bit.tlow * 100 / bit.t < 1) {
 				state |= GETBIT_RECV;
 				outch = 'r';
@@ -370,7 +371,7 @@ get_bit_live(void)
 		if (y < 500000000 && stv == 1) {
 			y = 0;
 			stv = 0;
-			bit.tlow = bit.t; /* end of high part of second */
+			bit.tlow = (int32_t)bit.t;
 		}
 		if (y > 500000000 && stv == 0) {
 			y = 1000000000;
@@ -387,7 +388,7 @@ get_bit_live(void)
 					bit.realfreq += ((int64_t)(bit.t *
 					    1000000 - bit.realfreq) / 20);
 				a = 1000000000 - 1000000000 *
-				    exp2(-2e7 / bit.realfreq);
+				    (int64_t)exp2(-2e7 / bit.realfreq);
 			}
 
 			if (newminute) {
@@ -404,7 +405,7 @@ get_bit_live(void)
 			}
 			break; /* start of new second */
 		}
-		twait = sec2 * bit.realfreq / 1000000;
+		twait = (int64_t)(sec2 * bit.realfreq / 1000000);
 #if !defined(MACOS)
 		(void)clock_gettime(CLOCK_MONOTONIC, &tp1);
 		twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1000000000 -
@@ -416,12 +417,12 @@ get_bit_live(void)
 			;
 	}
 
-	if (2 * bit.realfreq * bit.tlow * (1 + newminute) <
+	if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
 	    (bit.bit0 + bit.bit20) * bit.t) {
 		/* zero bit, ~100 ms active signal */
 		outch = '0';
 		buffer[bitpos] = 0;
-	} else if (bit.realfreq * bit.tlow * (1 + newminute) <
+	} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
 	    (bit.bit0 + bit.bit20) * bit.t) {
 		/* one bit, ~200 ms active signal */
 		state |= GETBIT_ONE;
@@ -455,11 +456,11 @@ report:
 	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
-		if (state & GETBIT_EOM)
+		if ((state & GETBIT_EOM) == GETBIT_EOM)
 			fprintf(logfile, "a%uc%6.4f\n", acc_minlen,
-			    (bit.t * 1e6) / bit.realfreq);
+			    (double)((bit.t * 1e6) / bit.realfreq));
 	}
-	if (state & GETBIT_EOM)
+	if ((state & GETBIT_EOM) == GETBIT_EOM)
 		cutoff = (uint16_t)(bit.t * 1000000 / (bit.realfreq / 10000));
 	return state;
 }
@@ -469,9 +470,9 @@ report:
 	inch = getc(datafile); \
 	if (inch == EOF) \
 		state |= GETBIT_EOD; \
-	if (inch == 'a' || inch == 'c') \
+	if (inch == (int)'a' || inch == (int)'c') \
 		state |= GETBIT_SKIPNEXT; \
-	if ((inch != '\r' && inch != '\n') || inch == oldinch) { \
+	if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) { \
 		if (ungetc(inch, datafile) == EOF) /* EOF remains, IO error */\
 			state |= GETBIT_EOD; \
 	}
@@ -511,8 +512,8 @@ get_bit_file(void)
 			return state;
 		case '0':
 		case '1':
-			buffer[bitpos] = (uint8_t)(inch - '0');
-			if (inch == '1')
+			buffer[bitpos] = (uint8_t)(inch - (int)'0');
+			if (inch == (int)'1')
 				state |= GETBIT_ONE;
 			valid = true;
 			bit.t = 1000;
@@ -554,12 +555,13 @@ get_bit_file(void)
 		case 'a':
 			/* acc_minlen */
 			READVALUE(fscanf(datafile, "%10u", &acc_minlen) != 1);
-			read_acc_minlen = !(state & GETBIT_EOD);
+			read_acc_minlen = (state & GETBIT_EOD) == 0;
 			break;
 		case 'c':
 			/* cutoff for newminute */
 			READVALUE(fscanf(datafile, "%6c", co) != 1);
-			if (!(state & GETBIT_EOD) & (co[1] == '.'))
+			if (!((state & GETBIT_EOD) == GETBIT_EOM) &
+			    (co[1] == '.'))
 				cutoff = (co[0] - '0') * 10000 +
 				    (uint16_t)strtol(co + 2, (char **)NULL, 10);
 			break;
@@ -595,8 +597,8 @@ is_space_bit(uint8_t bitpos)
 uint16_t
 next_bit(void)
 {
-	bitpos = (state & GETBIT_EOM) ? 0 : (state & GETBIT_SKIPNEXT) ?
-	    bitpos : bitpos + 1;
+	bitpos = ((state & GETBIT_EOM) == GETBIT_EOM) ? 0 :
+	    ((state & GETBIT_SKIPNEXT) == GETBIT_SKIPNEXT) ? bitpos : bitpos + 1;
 	if (bitpos == BUFLEN) {
 		state |= GETBIT_TOOLONG;
 		bitpos = 0;

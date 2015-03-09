@@ -29,8 +29,8 @@ SUCH DAMAGE.
 
 #include <string.h>
 
-uint8_t tpbuf[TPBUFLEN];
-enum TPTYPE tptype = TP_UNKNOWN;
+static uint8_t tpbuf[TPBUFLEN];
+static enum TPTYPE tptype = TP_UNKNOWN;
 
 void
 fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)

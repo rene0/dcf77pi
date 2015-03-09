@@ -59,21 +59,21 @@ SUCH DAMAGE.
  * @param post_process_input The optional callback to finish handling
  *   interactive user input.
  */
-void mainloop(char *logfilename,
+void mainloop(/*@null@*/char *logfilename,
     uint16_t (*get_bit)(void),
     void (*display_bit)(uint16_t, uint8_t),
     void (*display_long_minute)(void),
     void (*display_minute)(uint8_t),
-    void (*display_new_second)(void),
+    /*@null@*/void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(uint32_t, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
-    void (*show_mainloop_result)(uint16_t * const, uint8_t),
-    void (*process_input)(uint16_t * const, uint8_t, const char * const,
+    /*@null@*/void (*show_mainloop_result)(uint16_t * const, uint8_t),
+    /*@null@*/void (*process_input)(uint16_t * const, uint8_t, const char * const,
 	bool * const, bool * const),
-    void (*post_process_input)(char **, bool * const, uint16_t * const, uint8_t));
+    /*@null@*/void (*post_process_input)(char **, bool * const, uint16_t * const, uint8_t));
 
 /**
  * Get the result value set by {@link mainloop}.

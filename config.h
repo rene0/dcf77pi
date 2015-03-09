@@ -42,6 +42,6 @@ int read_config_file(const char * const filename);
  *   "leapsecmonths", "outlogfile"
  * @return The corresponding value, or NULL when the key was not found.
  */
-char *get_config_value(const char * const keyword);
+/*@null@*/char *get_config_value(const char * const keyword);
 
 #endif

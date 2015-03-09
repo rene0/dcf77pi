@@ -56,5 +56,5 @@ setclock(struct tm time)
 	tv.tv_usec = 50000; /* adjust for bit reception algorithm */
 	tz.tz_minuteswest = -60;
 	tz.tz_dsttime = it.tm_isdst;
-	return (settimeofday(&tv, &tz) == -1) ? -2 : 0;
+	return (settimeofday(&tv, &tz) == -1) ? (int8_t)-2 : (int8_t)0;
 }

@@ -30,15 +30,15 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-uint32_t announce; /* save DST change and leap second announcements */
-uint8_t summermonth;
-uint8_t wintermonth;
-uint8_t leapsecmonths[12];
-uint8_t num_leapsecmonths;
+static uint32_t announce; /* save DST change and leap second announcements */
+static uint8_t summermonth;
+static uint8_t wintermonth;
+static uint8_t leapsecmonths[12];
+static uint8_t num_leapsecmonths;
 
-const char * const weekday[8] =
+static const char * const weekday[8] =
     {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-const uint16_t dayinleapyear[12] =
+static const uint16_t dayinleapyear[12] =
     {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
 
 const char * const
@@ -53,17 +53,17 @@ init_time(void)
 	char *freeptr, *lsm, *mon;
 	uint8_t i, m;
 
-	summermonth = strtol(get_config_value("summermonth"), NULL, 10);
+	summermonth = (uint8_t)strtol(get_config_value("summermonth"), NULL, 10);
 	if (summermonth < 1 || summermonth > 12)
 		summermonth = 0;
-	wintermonth = strtol(get_config_value("wintermonth"), NULL, 10);
+	wintermonth = (uint8_t)strtol(get_config_value("wintermonth"), NULL, 10);
 	if (wintermonth < 1 || wintermonth > 12)
 		wintermonth = 0;
 
 	freeptr = lsm = strdup(get_config_value("leapsecmonths"));
 	num_leapsecmonths = 0;
 	for (i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
-		m = strtol(mon, NULL, 10);
+		m = (uint8_t)strtol(mon, NULL, 10);
 		if (m >= 1 && m <= 12) {
 			leapsecmonths[i] = m;
 			num_leapsecmonths++;
@@ -72,7 +72,7 @@ init_time(void)
 	free(freeptr);
 }
 
-bool
+static bool
 is_leapsecmonth(uint8_t month)
 {
 	uint8_t i;
@@ -85,7 +85,7 @@ is_leapsecmonth(uint8_t month)
 	return false;
 }
 
-bool
+static bool
 getpar(const uint8_t * const buffer, uint8_t start, uint8_t stop)
 {
 	uint8_t i, par = 0;
@@ -95,7 +95,7 @@ getpar(const uint8_t * const buffer, uint8_t start, uint8_t stop)
 	return (par & 1) == 0;
 }
 
-uint8_t
+static uint8_t
 getbcd(const uint8_t * const buffer, uint8_t start, uint8_t stop)
 {
 	uint8_t i, mul = 1, val = 0;
@@ -108,7 +108,7 @@ getbcd(const uint8_t * const buffer, uint8_t start, uint8_t stop)
 }
 
 /* based on: xx00-02-28 is a Monday if and only if xx00 is a leap year */
-int8_t
+static int8_t
 century_offset(uint8_t year, uint8_t month, uint8_t day, uint8_t weekday)
 {
 	uint8_t nw, nd;
@@ -117,7 +117,7 @@ century_offset(uint8_t year, uint8_t month, uint8_t day, uint8_t weekday)
 	uint16_t d;
 
 	/* substract year days from weekday, including normal leap years */
-	wd = (weekday - year - year / 4 - ((year % 4) > 0)) % 7;
+	wd = (int8_t)((weekday - year - year / 4 - (((year % 4) > 0) ? 1 : 0)) % 7);
 	if (wd < 1)
 		wd += 7;
 
@@ -126,12 +126,13 @@ century_offset(uint8_t year, uint8_t month, uint8_t day, uint8_t weekday)
 	d = dayinleapyear[month - 1] + day;
 	if (d < 60) { /* at or before 02-28 (day 59) */
 		nw = (59 - d) / 7;
-		nd = wd == 1 ? 0 : 8 - wd;
+		nd = (uint8_t)((wd == 1 ? 0 : 8) - wd);
 		tmp = d + (nw * 7) + nd;
 	} else { /* after 02-28 (day 59) */
-		d -= ((year % 4) > 0); /* no 02-29 for obvious non-leap years */
+		if ((year % 4) > 0)
+			d--; /* no 02-29 for obvious non-leap years */
 		nw = (d - 59) / 7;
-		nd = wd - 1;
+		nd = (uint8_t)(wd - 1);
 		tmp = d - (nw * 7) - nd;
 	}
 	/* if day-in-year is 59, this year (xx00) is leap */
@@ -146,21 +147,21 @@ century_offset(uint8_t year, uint8_t month, uint8_t day, uint8_t weekday)
 	return -1; /* ERROR */
 }
 
-bool
+static bool
 isleap(struct tm time)
 {
 	return (time.tm_year % 4 == 0 && time.tm_year % 100 != 0) ||
 	    time.tm_year % 400 == 0;
 }
 
-uint8_t
+static uint8_t
 lastday(struct tm time)
 {
 	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 ||
 	    time.tm_mon == 11)
 		return 30;
 	if (time.tm_mon == 2)
-		return 28 + isleap(time);
+		return (uint8_t)(28 + (isleap(time) ? 1 : 0));
 	return 31;
 }
 
@@ -170,12 +171,12 @@ add_minute(struct tm * const time, bool checkflag)
 	/* time->tm_isdst indicates the old situation */
 	if (++time->tm_min == 60) {
 		/* DST flag transmitted until 00:59:16 UTC */
-		if (((announce & ANN_CHDST) || !checkflag) &&
+		if ((((announce & ANN_CHDST) == ANN_CHDST) || !checkflag) &&
 		    get_utchour(*time) == 0 && time->tm_wday == 7 &&
-		    time->tm_mday > lastday(*time) - 7) {
-			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
+		    time->tm_mday > (int)(lastday(*time) - 7)) {
+			if (time->tm_isdst == 1 && time->tm_mon == (int)wintermonth)
 				time->tm_hour--; /* will become non-DST */
-			if (time->tm_isdst == 0 && time->tm_mon == summermonth)
+			if (time->tm_isdst == 0 && time->tm_mon == (int)summermonth)
 				time->tm_hour++; /* will become DST */
 		}
 		time->tm_min = 0;
@@ -183,7 +184,8 @@ add_minute(struct tm * const time, bool checkflag)
 			time->tm_hour = 0;
 			if (++time->tm_wday == 8)
 				time->tm_wday = 1;
-			if (++time->tm_mday > lastday(*time)) {
+			time->tm_mday++;
+			if (time->tm_mday > (int)lastday(*time)) {
 				time->tm_mday = 1;
 				if (++time->tm_mon == 13) {
 					time->tm_mon = 1;
@@ -201,13 +203,13 @@ substract_minute(struct tm * const time, bool checkflag)
 {
 	if (--time->tm_min == -1) {
 		/* DST flag transmitted until 00:59:16 UTC */
-		if (((announce & ANN_CHDST) || !checkflag) &&
+		if ((((announce & ANN_CHDST) == ANN_CHDST) || !checkflag) &&
 		    get_utchour(*time) == 1 && time->tm_wday == 7 &&
-		    time->tm_mday > lastday(*time) - 7) {
+		    time->tm_mday > (int)(lastday(*time) - 7)) {
 			/* logic is backwards here */
-			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
+			if (time->tm_isdst == 1 && time->tm_mon == (int)wintermonth)
 				time->tm_hour++; /* will become DST */
-			if (time->tm_isdst == 0 && time->tm_mon == summermonth)
+			if (time->tm_isdst == 0 && time->tm_mon == (int)summermonth)
 				time->tm_hour--; /* will become non-DST */
 		}
 		time->tm_min = 59;
@@ -222,7 +224,7 @@ substract_minute(struct tm * const time, bool checkflag)
 						time->tm_year = BASEYEAR + 399;
 						/* bump! */
 				}
-				time->tm_mday = lastday(*time);
+				time->tm_mday = (int)lastday(*time);
 			}
 		}
 	}
@@ -241,7 +243,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	static uint32_t acc_minlen_partial, old_acc_minlen;
 	static bool olderr, prev_toolong;
 
-	memset(&newtime, '\0', sizeof(newtime));
+	memset(&newtime, 0, sizeof(newtime));
 	newtime.tm_isdst = time->tm_isdst; /* save DST value */
 
 	if (minlen < 59)
@@ -272,9 +274,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	}
 	/* Calculate number of minutes to increase time with: */
 	if (prev_toolong)
-		increase = (acc_minlen - old_acc_minlen) / 60000;
+		increase = (int16_t)((acc_minlen - old_acc_minlen) / 60000);
 	else
-		increase = acc_minlen / 60000;
+		increase = (int16_t)acc_minlen / 60000;
 	if (acc_minlen >= 60000)
 		acc_minlen_partial %= 60000;
 	/* Account for complete minutes with a short acc_minlen: */
@@ -302,7 +304,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		p1 = false;
 	}
 	if ((init_min == 2 || increase != 0) && p1 && !generr) {
-		newtime.tm_min = tmp0 + 10 * tmp1;
+		newtime.tm_min = (int)(tmp0 + 10 * tmp1);
 		if (init_min == 0 && time->tm_min != newtime.tm_min)
 			rval |= DT_MINJUMP;
 	}
@@ -315,7 +317,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		p2 = false;
 	}
 	if ((init_min == 2 || increase != 0) && p2 && !generr) {
-		newtime.tm_hour = tmp0 + 10 * tmp1;
+		newtime.tm_hour = (int)(tmp0 + 10 * tmp1);
 		if (init_min == 0 && time->tm_hour != newtime.tm_hour)
 			rval |= DT_HOURJUMP;
 	}
@@ -335,27 +337,27 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		p3 = false;
 	}
 	if ((init_min == 2 || increase != 0) && p3 && !generr) {
-		newtime.tm_mday = tmp0 + 10 * tmp1;
-		newtime.tm_mon = tmp3 + 10 * buffer[49];
-		newtime.tm_year = tmp4 + 10 * tmp5;
-		newtime.tm_wday = tmp2;
+		newtime.tm_mday = (int)(tmp0 + 10 * tmp1);
+		newtime.tm_mon = (int)(tmp3 + 10 * buffer[49]);
+		newtime.tm_year = (int)(tmp4 + 10 * tmp5);
+		newtime.tm_wday = (int)tmp2;
 		if (init_min == 0 && time->tm_mday != newtime.tm_mday)
 			rval |= DT_MDAYJUMP;
 		if (init_min == 0 && time->tm_wday != newtime.tm_wday)
 			rval |= DT_WDAYJUMP;
 		if (init_min == 0 && time->tm_mon != newtime.tm_mon)
 			rval |= DT_MONTHJUMP;
-		centofs = century_offset(newtime.tm_year, newtime.tm_mon,
-		    newtime.tm_mday, newtime.tm_wday);
+		centofs = century_offset((uint8_t)newtime.tm_year, (uint8_t)newtime.tm_mon,
+		    (uint8_t)newtime.tm_mday, (uint8_t)newtime.tm_wday);
 		if (centofs == -1) {
 			rval |= DT_DATE;
 			p3 = false;
 		} else {
 			if (init_min == 0 && time->tm_year !=
-			    BASEYEAR + 100 * centofs + newtime.tm_year)
+			    (int)(BASEYEAR + 100 * centofs + newtime.tm_year))
 				rval |= DT_YEARJUMP;
 			newtime.tm_year += BASEYEAR + 100 * centofs;
-			if (newtime.tm_mday > lastday(newtime)) {
+			if (newtime.tm_mday > (int)lastday(newtime)) {
 				rval |= DT_DATE;
 				p3 = false;
 			}
@@ -371,7 +373,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	 * according to IERS Bulletin C
 	 */
 	if (buffer[19] == 1 && ok) {
-		if (time->tm_mday == 1 && is_leapsecmonth(time->tm_mon - 1) &&
+		if (time->tm_mday == 1 && is_leapsecmonth((uint8_t)(time->tm_mon - 1)) &&
 		    ((time->tm_min > 0 && utchour == 23) ||
 		    (time->tm_min == 0 && utchour == 0)))
 			announce |= ANN_LEAP;
@@ -382,7 +384,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	}
 
 	/* process possible leap second, always reset announcement at hh:00 */
-	if ((announce & ANN_LEAP) && time->tm_min == 0) {
+	if (((announce & ANN_LEAP) == ANN_LEAP) && time->tm_min == 0) {
 		announce &= ~ANN_LEAP;
 		rval |= DT_LEAP;
 		if (minlen == 59) {
@@ -393,7 +395,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		} else if (minlen == 60 && buffer[59] == 1)
 			rval |= DT_LEAPONE;
 	}
-	if ((minlen == 60) && !(rval & DT_LEAP)) {
+	if ((minlen == 60) && ((rval & DT_LEAP) == 0)) {
 		/* leap second not processed, so bad minute */
 		rval |= DT_LONG;
 		ok = false;
@@ -403,9 +405,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	/* h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
 	 * last Sunday of month (reference?) */
 	if (buffer[16] == 1 && ok) {
-		if ((time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7 &&
-		    (time->tm_mon == summermonth ||
-		    time->tm_mon == wintermonth)) && ((time->tm_min > 0 &&
+		if ((time->tm_wday == 7 && time->tm_mday > (int)(lastday(*time) - 7) &&
+		    (time->tm_mon == (int)summermonth ||
+		    time->tm_mon == (int)wintermonth)) && ((time->tm_min > 0 &&
 		    utchour == 0) || (time->tm_min == 0 &&
 		    utchour == 1 + buffer[17] - buffer[18])))
 			announce |= ANN_CHDST; /* time zone just changed */
@@ -415,18 +417,18 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		}
 	}
 
-	if (buffer[17] != time->tm_isdst || buffer[18] == time->tm_isdst) {
+	if ((int)buffer[17] != time->tm_isdst || (int)buffer[18] == time->tm_isdst) {
 		/* Time offset change is OK if:
 		 * announced and time is Sunday, lastday, 01:00 UTC
 		 * there was an error but not any more (needed if decoding at
 		 *   startup is problematic)
 		 * initial state (otherwise DST would never be valid)
 		 */
-		if (((announce & ANN_CHDST) && time->tm_min == 0) ||
+		if ((((announce & ANN_CHDST) == ANN_CHDST) && time->tm_min == 0) ||
 		    (olderr && ok) ||
 		    ((rval & DT_DSTERR) == 0 && init_min == 2)) {
-			newtime.tm_isdst = buffer[17]; /* expected change */
-			if ((announce & ANN_CHDST) && time->tm_min == 0) {
+			newtime.tm_isdst = (int)buffer[17]; /* expected change */
+			if (((announce & ANN_CHDST) == ANN_CHDST) && time->tm_min == 0) {
 				announce &= ~ANN_CHDST;
 				rval |= DT_CHDST;
 			}
@@ -437,30 +439,30 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		}
 	}
 	/* check if DST is within expected date range */
-	if ((newtime.tm_mon > summermonth && newtime.tm_mon < wintermonth) ||
-	    (newtime.tm_mon == summermonth && newtime.tm_mday >
-	     lastday(newtime) - 6) ||
-	    (newtime.tm_mon == summermonth && newtime.tm_mday >
-	     lastday(newtime) - 7 && newtime.tm_wday == 7 &&
+	if ((newtime.tm_mon > (int)summermonth && newtime.tm_mon < (int)wintermonth) ||
+	    (newtime.tm_mon == (int)summermonth && newtime.tm_mday >
+	     (int)(lastday(newtime) - 6)) ||
+	    (newtime.tm_mon == (int)summermonth && newtime.tm_mday >
+	     (int)(lastday(newtime) - 7) && newtime.tm_wday == 7 &&
 	     get_utchour(newtime) >= 1) ||
-	    (newtime.tm_mon == wintermonth && newtime.tm_mday <
-	     lastday(newtime) - 6) ||
-	    (newtime.tm_mon == wintermonth && newtime.tm_mday >
-	     lastday(newtime) - 7 && newtime.tm_wday == 7 &&
+	    (newtime.tm_mon == (int)wintermonth && newtime.tm_mday <
+	     (int)(lastday(newtime) - 6)) ||
+	    (newtime.tm_mon == (int)wintermonth && newtime.tm_mday >
+	     (int)(lastday(newtime) - 7) && newtime.tm_wday == 7 &&
 	     get_utchour(newtime) < 1)) {
 		/* expect DST */
-		if (!newtime.tm_isdst) {
+		if (newtime.tm_isdst == 0) {
 			rval |= DT_DSTJUMP; /* sudden change */
 			ok = false;
 		}
 	} else {
 		/* expect non-DST */
-		if (newtime.tm_isdst) {
+		if (newtime.tm_isdst == 1) {
 			//rval |= DT_DSTJUMP; /* sudden change */
 			ok = false;
 		}
 	}
-	newtime.tm_gmtoff = newtime.tm_isdst ? 7200 : 3600;
+	newtime.tm_gmtoff = (newtime.tm_isdst == 1) ? 7200 : 3600;
 
 	if (olderr && ok)
 		olderr = false;
@@ -491,7 +493,7 @@ get_utchour(struct tm time)
 {
 	int8_t utchour;
 
-	utchour = time.tm_hour - 1 - time.tm_isdst;
+	utchour = (int8_t)(time.tm_hour - 1 - time.tm_isdst);
 	if (utchour < 0)
 		utchour += 24;
 	return (uint8_t)utchour;
@@ -508,8 +510,8 @@ dcftime(struct tm isotime)
 	dt.tm_year += 1900;
 	if (dt.tm_wday == 0)
 		dt.tm_wday = 7;
-	dt.tm_yday = dayinleapyear[isotime.tm_mon] + dt.tm_mday -
-	    (isotime.tm_mon > 1 && !isleap(dt));
+	dt.tm_yday = (int)(dayinleapyear[isotime.tm_mon] + dt.tm_mday -
+	    ((isotime.tm_mon > 1 && !isleap(dt)) ? 1 : 0));
 	dt.tm_zone = NULL;
 
 	return dt;
@@ -526,8 +528,8 @@ isotime(struct tm dcftime)
 	it.tm_year -= 1900;
 	if (it.tm_wday == 7)
 		it.tm_wday = 0;
-	it.tm_yday = dayinleapyear[it.tm_mon] + it.tm_mday -
-	    (it.tm_mon > 1 && !isleap(dcftime));
+	it.tm_yday = (int)(dayinleapyear[it.tm_mon] + it.tm_mday -
+	    ((it.tm_mon > 1 && !isleap(dcftime)) ? 1 : 0));
 	it.tm_zone = NULL;
 
 	return it;

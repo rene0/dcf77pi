@@ -30,7 +30,7 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-const char *key[] = {
+static const char *key[] = {
 	"pin", "iodev", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
@@ -41,37 +41,35 @@ const char *key[] = {
 #define MAX_VALLEN 255
 #define MAX_LEN (MAX_KEYLEN + 3 + MAX_VALLEN + 2) /* "k = v\n\0" */
 
-char *value[NUM_KEYS];
+static char *value[NUM_KEYS];
 
-int
+static int
 getpos(const char * const kw)
 {
 	int i;
 
-	for (i = 0; i < NUM_KEYS; i++)
+	for (i = 0; i < (int)NUM_KEYS; i++)
 		if (strcmp(key[i], kw) == 0)
 			return i;
 	return -1;
 }
 
-char * const
+static char * const
 strip(char *s)
 {
 	int i;
-	char *t;
 
-	for (t = s; t[0] == ' ' || t[0] == '\n' || t[0] == '\r' ||
-	    t[0] == '\t'; t++)
-		;
-	for (i = strlen(t) - 1; t[i] == ' ' || t[i] == '\n' || t[i] == '\r' ||
-	    t[i] == '\t'; i--)
-		t[i] = '\0';
-	return t;
+	while (s[0] == ' ' || s[0] == '\n' || s[0] == '\r' || s[0] == '\t')
+		s++;
+	for (i = (int)(strlen(s) - 1); s[i] == ' ' || s[i] == '\n' || s[i] == '\r' ||
+	    s[i] == '\t'; i--)
+		s[i] = '\0';
+	return s;
 }
 
 #define END_CONFIG(ret) \
 do { \
-	fclose(configfile); \
+	(void)fclose(configfile); \
 	free(freeptr); \
 	return (ret); \
 } while (0)
@@ -91,7 +89,7 @@ read_config_file(const char * const filename)
 		return errno;
 	}
 	freeptr = line;
-	for (i = 0; i < NUM_KEYS; i++)
+	for (i = 0; i < (int)NUM_KEYS; i++)
 		value[i] = NULL;
 
 	configfile = fopen(filename, "r");
@@ -103,7 +101,7 @@ read_config_file(const char * const filename)
 
 	while (feof(configfile) == 0) {
 		if (fgets(line, MAX_LEN, configfile) == NULL) {
-			if (feof(configfile))
+			if (feof(configfile) != 0)
 				break;
 			printf("read_config_file: error reading file\n");
 			END_CONFIG(-1);
@@ -114,7 +112,7 @@ read_config_file(const char * const filename)
 			printf("read_config_file: no key/value pair found\n");
 			END_CONFIG(-1);
 		}
-		i = strlen(k);
+		i = (int)strlen(k);
 		k = strip(k);
 		v = strip(v);
 		if (i > MAX_KEYLEN + 1 || strlen(k) == 0 ||
@@ -137,7 +135,7 @@ read_config_file(const char * const filename)
 			    " '%s'\n", k);
 		value[i] = strdup(v);
 	}
-	for (i = 0; i < NUM_KEYS; i++)
+	for (i = 0; i < (int)NUM_KEYS; i++)
 		if (value[i] == NULL) {
 			printf("read_config_file: missing value for key '%s'\n",
 			    key[i]);
@@ -146,7 +144,7 @@ read_config_file(const char * const filename)
 	END_CONFIG(0);
 }
 
-char *
+/*@null@*/char *
 get_config_value(const char * const keyword)
 {
 	int i;
