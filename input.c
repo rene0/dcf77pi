@@ -366,11 +366,13 @@ get_bit_live(void)
 		 * hysteresis and to avoid infinite memory.
 		 */
 		if (y < 500000000 && stv == 1) {
+			/* end of high part of second */
 			y = 0;
 			stv = 0;
 			bit.tlow = (int32_t)bit.t;
 		}
 		if (y > 500000000 && stv == 0) {
+			/* end of low part of second */
 			y = 1000000000;
 			stv = 1;
 
