@@ -87,9 +87,13 @@ uninstall:
 uninstall-doxygen:
 	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
-lint:
-	lint -aabcehrsx -D__linux__ -Dlint -DETCDIR=\"$(ETCDIR)\" $(srclib) \
-		dcf77pi-analyze.c readpin.c dcf77pi.c || true
-	lint -aabcehrsx -D__FreeBSD__ -D__FreeBSD_version=900022 -Dlint \
+splint:
+	splint -D__CYGWIN__ +posixlib \
+		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
+		dcf77pi.c || true
+	splint -D__linux__ +posixlib \
+		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
+		dcf77pi.c || true
+	splint -D__FreeBSD__ -D__FreeBSD_version=900022 +posixlib \
 		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
 		dcf77pi.c || true
