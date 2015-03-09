@@ -135,7 +135,7 @@ void cleanup(void);
  * Retrieve one pulse from the hardware.
  *
  * @return: 0 or 1 depending on the pin value and {@link hardware.active_high},
- *   or GETBIT_IO if obtaining the pulse failed.
+ *   or 2 if obtaining the pulse failed.
  */
 uint8_t get_pulse(void);
 

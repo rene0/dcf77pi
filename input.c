@@ -206,7 +206,7 @@ cleanup(void)
 uint8_t
 get_pulse(void)
 {
-	uint8_t tmpch = 0;
+	uint8_t tmpch = 2;
 #if !defined(NOLIVE)
 	int count = 0;
 #if defined(__FreeBSD__)
@@ -220,10 +220,10 @@ get_pulse(void)
 	count = read(fd, &tmpch, sizeof(tmpch));
 	tmpch -= '0';
 	if (lseek(fd, 0, SEEK_SET) == (off_t)-1)
-		return GETBIT_IO; /* rewind to prevent EBUSY/no read */
+		return (uint8_t)2; /* rewind to prevent EBUSY/no read failed */
 	if (count != sizeof(tmpch))
 #endif
-		return GETBIT_IO; /* hardware failure? */
+		return (uint8_t)2; /* hardware failure? */
 
 	if (!hw.active_high)
 		tmpch = 1 - tmpch;
@@ -319,7 +319,7 @@ get_bit_live(void)
 		(void)clock_gettime(CLOCK_MONOTONIC, &tp0);
 #endif
 		p = get_pulse();
-		if (p == GETBIT_IO) {
+		if (p == 2) {
 			state |= GETBIT_IO;
 			outch = '*';
 			goto report;
