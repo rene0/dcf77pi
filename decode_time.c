@@ -481,8 +481,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	if (ok) {
 		time->tm_isdst = newtime.tm_isdst;
 		time->tm_gmtoff = newtime.tm_gmtoff;
-	}
-	else
+	} else
 		olderr = true;
 
 	return rval | announce;
