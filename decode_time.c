@@ -458,7 +458,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	} else {
 		/* expect non-DST */
 		if (newtime.tm_isdst == 1) {
-			//rval |= DT_DSTJUMP; /* sudden change */
+			rval |= DT_DSTJUMP; /* sudden change */
 			ok = false;
 		}
 	}
