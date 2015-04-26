@@ -437,6 +437,14 @@ get_bit_live(void)
 			buffer[20] = 1;
 		}
 	}
+	/* try to get a proper b0 and b20 value if they derail */
+	if (bitpos == 0 && bit.t * 2 <= bit.bit20) {
+		state &= ~GETBIT_ONE;
+		buffer[0] = 0;
+	} else if (bitpos == 20 && bit.t >= bit.bit0 * 2) {
+		state |= GETBIT_ONE;
+		buffer[20] = 1;
+	}
 	if (init_bit == 1)
 		init_bit--;
 	else if ((state & (GETBIT_RND | GETBIT_XMIT |
