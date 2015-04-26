@@ -434,7 +434,7 @@ get_bit_live(void)
 		/* force bit 20 to be 1 to recover from too low b20 value */
 		if (bitpos == 20) {
 			state |= GETBIT_ONE;
-			buffer[bitpos] = 1;
+			buffer[20] = 1;
 		}
 	}
 	if (init_bit == 1)
