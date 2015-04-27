@@ -439,25 +439,25 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		}
 	}
 	/* check if DST is within expected date range */
-	if ((newtime.tm_mon > (int)summermonth && newtime.tm_mon < (int)wintermonth) ||
-	    (newtime.tm_mon == (int)summermonth && newtime.tm_mday >
-	     (int)(lastday(newtime) - 6)) ||
-	    (newtime.tm_mon == (int)summermonth && newtime.tm_mday >
-	     (int)(lastday(newtime) - 7) && newtime.tm_wday == 7 &&
-	     get_utchour(newtime) >= 1) ||
-	    (newtime.tm_mon == (int)wintermonth && newtime.tm_mday <
-	     (int)(lastday(newtime) - 6)) ||
-	    (newtime.tm_mon == (int)wintermonth && newtime.tm_mday >
-	     (int)(lastday(newtime) - 7) && newtime.tm_wday == 7 &&
-	     get_utchour(newtime) < 1)) {
+	if ((time->tm_mon > (int)summermonth && time->tm_mon < (int)wintermonth) ||
+	    (time->tm_mon == (int)summermonth && time->tm_mday >
+	     (int)(lastday(*time) - 6)) ||
+	    (time->tm_mon == (int)summermonth && time->tm_mday >
+	     (int)(lastday(*time) - 7) && time->tm_wday == 7 &&
+	     get_utchour(*time) >= 1) ||
+	    (time->tm_mon == (int)wintermonth && time->tm_mday <
+	     (int)(lastday(*time) - 6)) ||
+	    (time->tm_mon == (int)wintermonth && time->tm_mday >
+	     (int)(lastday(*time) - 7) && time->tm_wday == 7 &&
+	     get_utchour(*time) < 1)) {
 		/* expect DST */
-		if (newtime.tm_isdst == 0) {
+		if (time->tm_isdst == 0) {
 			rval |= DT_DSTJUMP; /* sudden change */
 			ok = false;
 		}
 	} else {
 		/* expect non-DST */
-		if (newtime.tm_isdst == 1) {
+		if (time->tm_isdst == 1) {
 			rval |= DT_DSTJUMP; /* sudden change */
 			ok = false;
 		}
