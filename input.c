@@ -310,7 +310,7 @@ get_bit_live(void)
 	/*
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
-	a = 1000000000 - 1000000000 * (int64_t)exp2(-2e7 / bit.realfreq);
+	a = 1000000000 - (int64_t)(1000000000 * exp2(-2e7 / bit.realfreq));
 	bit.tlow = -1;
 	bit.tlast0 = -1;
 
@@ -346,8 +346,8 @@ get_bit_live(void)
 		if (bit.t > bit.realfreq * 2500000) {
 			bit.realfreq += ((int64_t)
 			    (bit.t * 2500000 - bit.realfreq) / 20);
-			a = 1000000000 - 1000000000 *
-			     (int64_t)exp2(-2e7 / bit.realfreq);
+			a = 1000000000 - (int64_t)(1000000000 *
+			     exp2(-2e7 / bit.realfreq));
 			if (bit.tlow * 100 / bit.t < 1) {
 				state |= GETBIT_RECV;
 				outch = 'r';
@@ -386,8 +386,8 @@ get_bit_live(void)
 				else
 					bit.realfreq += ((int64_t)(bit.t *
 					    1000000 - bit.realfreq) / 20);
-				a = 1000000000 - 1000000000 *
-				    (int64_t)exp2(-2e7 / bit.realfreq);
+				a = 1000000000 - (int64_t)(1000000000 *
+				    exp2(-2e7 / bit.realfreq));
 			}
 
 			if (newminute) {
