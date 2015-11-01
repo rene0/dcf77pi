@@ -55,9 +55,9 @@ void
 display_time(uint32_t dt, struct tm time)
 {
 	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
-	    time.tm_isdst == 1 ? "summer" : "winter", time.tm_year, time.tm_mon,
-	    time.tm_mday, get_weekday((uint8_t)time.tm_wday), time.tm_hour,
-	    time.tm_min);
+	    time.tm_isdst == 1 ? "summer" : time.tm_isdst == 0 ? "winter" :
+	    "?     ", time.tm_year, time.tm_mon, time.tm_mday,
+	    get_weekday((uint8_t)time.tm_wday), time.tm_hour, time.tm_min);
 	if ((dt & DT_LONG) == DT_LONG)
 		printf("Minute too long\n");
 	if ((dt & DT_SHORT) == DT_SHORT)
