@@ -48,6 +48,8 @@ setclock(struct tm time)
 
 	tzset(); /* does not help for TZ=UTC */
 
+	if (time.tm_isdst == -1)
+		return -1;
 	it = isotime(time);
 	epochtime = mktime(&it);
 	if (epochtime == -1)
