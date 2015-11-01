@@ -438,18 +438,17 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			ok = false;
 		}
 	}
+#if 0
 	/* check if DST is within expected date range */
 	if ((time->tm_mon > (int)summermonth && time->tm_mon < (int)wintermonth) ||
 	    (time->tm_mon == (int)summermonth && time->tm_mday >
 	     (int)(lastday(*time) - 6)) ||
 	    (time->tm_mon == (int)summermonth && time->tm_mday >
-	     (int)(lastday(*time) - 7) && time->tm_wday == 7 &&
-	     get_utchour(*time) >= 1) ||
+	     (int)(lastday(*time) - 7) && time->tm_wday == 7 && utchour >= 1) ||
 	    (time->tm_mon == (int)wintermonth && time->tm_mday <
 	     (int)(lastday(*time) - 6)) ||
 	    (time->tm_mon == (int)wintermonth && time->tm_mday >
-	     (int)(lastday(*time) - 7) && time->tm_wday == 7 &&
-	     get_utchour(*time) < 1)) {
+	     (int)(lastday(*time) - 7) && time->tm_wday == 7 && utchour < 1)) {
 		/* expect DST */
 		if (time->tm_isdst == 0) {
 			rval |= DT_DSTJUMP; /* sudden change */
@@ -462,6 +461,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			ok = false;
 		}
 	}
+#endif
 	newtime.tm_gmtoff = (newtime.tm_isdst == 1) ? 7200 : 3600;
 
 	if (olderr && ok)
