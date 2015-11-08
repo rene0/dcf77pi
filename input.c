@@ -296,13 +296,9 @@ get_bit_live(void)
 	char outch;
 	bool newminute;
 	uint8_t p, stv = 1;
-	struct timespec slp;
 #if !defined(MACOS)
-	struct timespec tp0, tp1;
 #endif
-	uint32_t sec2;
 	int64_t a, y = 1000000000;
-	int64_t twait;
 	static int init_bit = 2;
 	bool is_eom = (state & GETBIT_EOM) == GETBIT_EOM;
 
@@ -327,7 +323,6 @@ get_bit_live(void)
 		bit.bit0 = bit.realfreq / 10;
 		bit.bit20 = bit.realfreq / 5;
 	}
-	sec2 = 1000000000 / (hw.freq * hw.freq);
 	/*
 	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
 	 */
@@ -337,7 +332,6 @@ get_bit_live(void)
 
 	for (bit.t = 0; ; bit.t++) {
 #if !defined(MACOS)
-		(void)clock_gettime(CLOCK_MONOTONIC, &tp0);
 #endif
 		p = get_pulse();
 		if (p == 2) {
@@ -425,16 +419,8 @@ get_bit_live(void)
 			}
 			break; /* start of new second */
 		}
-		twait = (int64_t)(sec2 * bit.realfreq / 1000000);
 #if !defined(MACOS)
-		(void)clock_gettime(CLOCK_MONOTONIC, &tp1);
-		twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1000000000 -
-		   (tp1.tv_nsec - tp0.tv_nsec);
 #endif
-		slp.tv_sec = twait / 1000000000;
-		slp.tv_nsec = twait % 1000000000;
-		while (twait > 0 && nanosleep(&slp, &slp))
-			;
 	}
 
 	if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
