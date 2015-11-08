@@ -54,7 +54,6 @@ SUCH DAMAGE.
 #elif defined(__APPLE__) && (defined(__OSX__) || defined(__MACH__))
 #  warning MacOS, GPIO support available but no port for Rapberry Pi
 #  define NOLIVE 1
-#  define MACOS 1
 #elif defined(__CYGWIN__)
 #  warning Cygwin, GPIO support not yet implemented
 #  define NOLIVE 1
@@ -296,8 +295,6 @@ get_bit_live(void)
 	char outch;
 	bool newminute;
 	uint8_t p, stv = 1;
-#if !defined(MACOS)
-#endif
 	int64_t a, y = 1000000000;
 	static int init_bit = 2;
 	bool is_eom = (state & GETBIT_EOM) == GETBIT_EOM;
@@ -331,8 +328,6 @@ get_bit_live(void)
 	bit.tlast0 = -1;
 
 	for (bit.t = 0; ; bit.t++) {
-#if !defined(MACOS)
-#endif
 		p = get_pulse();
 		if (p == 2) {
 			state |= GETBIT_IO;
@@ -419,8 +414,6 @@ get_bit_live(void)
 			}
 			break; /* start of new second */
 		}
-#if !defined(MACOS)
-#endif
 	}
 
 	if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
