@@ -119,6 +119,7 @@ set_mode_live(void)
 		cleanup();
 		return -1;
 	}
+	bit.signal = malloc(hw.freq / 2);
 #if defined(__FreeBSD__)
 	hw.iodev = (uint8_t)strtol(get_config_value("iodev"), NULL, 10);
 	TRYWRITE(hw.iodev, "/dev/gpioc%hhu");
@@ -304,7 +305,6 @@ get_bit_live(void)
 		bit.realfreq = hw.freq * 1000000;
 		bit.bit0 = bit.realfreq / 10;
 		bit.bit20 = bit.realfreq / 5;
-		bit.signal = malloc(hw.freq / 2);
 	}
 	sec2 = 1000000000 / (hw.freq * hw.freq);
 	/*
