@@ -30,6 +30,7 @@ SUCH DAMAGE.
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,6 +38,7 @@ SUCH DAMAGE.
 #include <unistd.h>
 
 #include <sys/param.h>
+#include <sys/time.h>
 
 #if defined(__FreeBSD__)
 #  if __FreeBSD_version >= 900022
@@ -72,6 +74,7 @@ static struct hardware hw;
 static struct bitinfo bit;
 static uint32_t acc_minlen;
 static uint16_t cutoff;
+static uint8_t pulse;
 
 int
 set_mode_file(const char * const infilename)
@@ -94,6 +97,33 @@ do { \
 	} \
 } while (0)
 
+void
+obtain_pulse(/*@unused@*/ int sig)
+{
+	pulse = 2;
+#if !defined(NOLIVE)
+	uint8_t tmpch;
+	int count = 0;
+#if defined(__FreeBSD__)
+	struct gpio_req req;
+
+	req.gp_pin = hw.pin;
+	count = ioctl(fd, GPIOGET, &req);
+	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? (uint8_t)1 : (uint8_t)0;
+	if (count < 0)
+#elif defined(__linux__)
+	count = read(fd, &tmpch, sizeof(tmpch));
+	tmpch -= '0';
+	if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || count != sizeof(tmpch))
+#endif
+		pulse = 2; /* hardware or virtual FS failure? */
+	else if (hw.active_high)
+		pulse = tmpch;
+	else
+		pulse = 1 - tmpch;
+#endif
+}
+
 int
 set_mode_live(void)
 {
@@ -106,6 +136,8 @@ set_mode_live(void)
 #if defined(__FreeBSD__)
 	struct gpio_pin pin;
 #endif
+	struct itimerval itv;
+	struct sigaction sigact;
 	char buf[64];
 	int res;
 
@@ -180,6 +212,17 @@ set_mode_live(void)
 		return errno;
 	}
 #endif
+	/* set up the signal handler */
+	sigact.sa_handler = obtain_pulse;
+	(void)sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+	sigaction(SIGALRM, &sigact, (struct sigaction *)NULL);
+	/* set up the timer */
+	itv.it_interval.tv_sec = 0;
+	itv.it_interval.tv_usec = hw.freq * 1000;
+	memcpy(&itv.it_value, &itv.it_interval, sizeof(struct timeval));
+	(void)setitimer(ITIMER_REAL, &itv, NULL);
+
 	return 0;
 #endif
 }
@@ -206,29 +249,7 @@ cleanup(void)
 uint8_t
 get_pulse(void)
 {
-	uint8_t tmpch = 2;
-#if !defined(NOLIVE)
-	int count = 0;
-#if defined(__FreeBSD__)
-	struct gpio_req req;
-
-	req.gp_pin = hw.pin;
-	count = ioctl(fd, GPIOGET, &req);
-	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? (uint8_t)1 : (uint8_t)0;
-	if (count < 0)
-#elif defined(__linux__)
-	count = read(fd, &tmpch, sizeof(tmpch));
-	tmpch -= '0';
-	if (lseek(fd, 0, SEEK_SET) == (off_t)-1)
-		return (uint8_t)2; /* rewind to prevent EBUSY/no read failed */
-	if (count != sizeof(tmpch))
-#endif
-		return (uint8_t)2; /* hardware failure? */
-
-	if (!hw.active_high)
-		tmpch = 1 - tmpch;
-#endif
-	return tmpch;
+	return pulse;
 }
 
 /*
