@@ -276,7 +276,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	if (prev_toolong)
 		increase = (int16_t)((acc_minlen - old_acc_minlen) / 60000);
 	else
-		increase = (int16_t)acc_minlen / 60000;
+		increase = (int16_t)(acc_minlen / 60000);
 	if (acc_minlen >= 60000)
 		acc_minlen_partial %= 60000;
 	/* Account for complete minutes with a short acc_minlen: */
