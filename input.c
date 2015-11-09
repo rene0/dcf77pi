@@ -501,7 +501,7 @@ get_bit_file(void)
 	 * old log files not storing acc_minlen values or to increase time
 	 * when mainloop() splits too long minutes
 	 */
-	bit.realfreq = 1000 * 1000000;
+	bit.realfreq = 1000000000;
 
 	while (!valid) {
 		inch = getc(datafile);
