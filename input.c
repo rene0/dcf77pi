@@ -219,7 +219,7 @@ set_mode_live(void)
 	sigaction(SIGALRM, &sigact, (struct sigaction *)NULL);
 	/* set up the timer */
 	itv.it_interval.tv_sec = 0;
-	itv.it_interval.tv_usec = hw.freq * 1000;
+	itv.it_interval.tv_usec = 1000000 / hw.freq;
 	memcpy(&itv.it_value, &itv.it_interval, sizeof(struct timeval));
 	(void)setitimer(ITIMER_REAL, &itv, NULL);
 
