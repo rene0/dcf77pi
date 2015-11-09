@@ -294,7 +294,7 @@ get_bit_live(void)
 {
 	char outch;
 	bool newminute;
-	uint8_t p, stv = 1;
+	uint8_t stv = 1;
 	int64_t a, y = 1000000000;
 	static int init_bit = 2;
 	bool is_eom = (state & GETBIT_EOM) == GETBIT_EOM;
@@ -328,8 +328,7 @@ get_bit_live(void)
 	bit.tlast0 = -1;
 
 	for (bit.t = 0; ; bit.t++) {
-		p = get_pulse();
-		if (p == 2) {
+		if (pulse == 2) {
 			state |= GETBIT_IO;
 			outch = '*';
 			goto report;
@@ -338,12 +337,12 @@ get_bit_live(void)
 			if ((bit.t & 7) == 0)
 				bit.signal[bit.t / 8] = 0;
 				/* clear data from previous second */
-			bit.signal[bit.t / 8] |= p << (uint8_t)(bit.t & 7);
+			bit.signal[bit.t / 8] |= pulse << (uint8_t)(bit.t & 7);
 		}
 
 		if (y >= 0 && y < a / 2)
 			bit.tlast0 = (int32_t)bit.t;
-		y += a * (p * 1000000000 - y) / 1000000000;
+		y += a * (pulse * 1000000000 - y) / 1000000000;
 
 		/*
 		 * Prevent algorithm collapse during thunderstorms
