@@ -429,13 +429,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		 */
 		if ((((announce & ANN_CHDST) == ANN_CHDST) && time->tm_min == 0) ||
 		    (olderr && ok) ||
-		    ((rval & DT_DSTERR) == 0 && time->tm_isdst == -1)) {
+		    ((rval & DT_DSTERR) == 0 && time->tm_isdst == -1))
 			newtime.tm_isdst = (int)buffer[17]; /* expected change */
-			if (((announce & ANN_CHDST) == ANN_CHDST) && time->tm_min == 0) {
-				announce &= ~ANN_CHDST;
-				rval |= DT_CHDST;
-			}
-		} else {
+		else {
 			if ((rval & DT_DSTERR) == 0)
 				rval |= DT_DSTJUMP; /* sudden change, ignore */
 			ok = false;
@@ -453,16 +449,23 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	      (int)(lastday(*time)) - time->tm_mday < 7 &&
 		(utchour == 23 /* previous day */ || utchour == 0))) {
 		/* expect DST */
-		if (time->tm_isdst == 0) {
+		if (newtime.tm_isdst == 0 && (announce & ANN_CHDST) == 0 &&
+		    utchour < 24) {
 			rval |= DT_DSTJUMP; /* sudden change */
 			ok = false;
 		}
 	} else {
 		/* expect non-DST */
-		if (time->tm_isdst == 1) {
+		if (newtime.tm_isdst == 1 && (announce & ANN_CHDST) == 0 &&
+		    utchour < 24) {
 			rval |= DT_DSTJUMP; /* sudden change */
 			ok = false;
 		}
+	}
+	/* done with DST */
+	if (((announce & ANN_CHDST) == ANN_CHDST) && time->tm_min == 0) {
+		announce &= ~ANN_CHDST;
+		rval |= DT_CHDST;
 	}
 	newtime.tm_gmtoff = 3600 * (newtime.tm_isdst + 1);
 
@@ -479,6 +482,8 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			time->tm_year = newtime.tm_year;
 			time->tm_wday = newtime.tm_wday;
 		}
+	}
+	if ((rval & DT_DSTJUMP) == 0) {
 		time->tm_isdst = newtime.tm_isdst;
 		time->tm_gmtoff = newtime.tm_gmtoff;
 	}
