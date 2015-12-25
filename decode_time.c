@@ -441,17 +441,17 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			ok = false;
 		}
 	}
-#if 0
 	/* check if DST is within expected date range */
 	if ((time->tm_mon > (int)summermonth && time->tm_mon < (int)wintermonth) ||
-	    (time->tm_mon == (int)summermonth && time->tm_mday >
-	     (int)(lastday(*time) - 6)) ||
-	    (time->tm_mon == (int)summermonth && time->tm_mday >
-	     (int)(lastday(*time) - 7) && time->tm_wday == 7 && utchour >= 1) ||
-	    (time->tm_mon == (int)wintermonth && time->tm_mday <
-	     (int)(lastday(*time) - 6)) ||
-	    (time->tm_mon == (int)wintermonth && time->tm_mday >
-	     (int)(lastday(*time) - 7) && time->tm_wday == 7 && utchour < 1)) {
+	    (time->tm_mon == (int)summermonth && time->tm_wday < 7 &&
+	      (int)(lastday(*time)) - time->tm_mday < 7) ||
+	    (time->tm_mon == (int)summermonth && time->tm_wday == 7 &&
+	      (int)(lastday(*time)) - time->tm_mday < 7 && utchour > 0) ||
+	    (time->tm_mon == (int)wintermonth && time->tm_wday < 7 &&
+	      (int)(lastday(*time)) - time->tm_mday >= 7) ||
+	    (time->tm_mon == (int)wintermonth && time->tm_wday == 7 &&
+	      (int)(lastday(*time)) - time->tm_mday < 7 &&
+		(utchour == 23 /* previous day */ || utchour == 0))) {
 		/* expect DST */
 		if (time->tm_isdst == 0) {
 			rval |= DT_DSTJUMP; /* sudden change */
@@ -464,7 +464,6 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			ok = false;
 		}
 	}
-#endif
 	newtime.tm_gmtoff = 3600 * (newtime.tm_isdst + 1);
 
 	if (olderr && ok)
