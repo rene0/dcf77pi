@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2013-2015 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -244,6 +244,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	static bool olderr, prev_toolong;
 
 	memset(&newtime, 0, sizeof(newtime));
+	/* Initially, set time offset to unknown */
+	if (init_min == 2)
+		time->tm_isdst = -1;
 	newtime.tm_isdst = time->tm_isdst; /* save DST value */
 
 	if (minlen < 59)
@@ -288,9 +291,6 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	prev_toolong = (minlen == 0xff);
 	old_acc_minlen = acc_minlen - (acc_minlen % 60000);
 
-	/* Initially, set time offset to unknown */
-	if (init_min == 2)
-		time->tm_isdst = -1;
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
 		for (i = increase; increase > 0 && i > 0; i--)
@@ -429,42 +429,44 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		 */
 		if ((((announce & ANN_CHDST) == ANN_CHDST) && time->tm_min == 0) ||
 		    (olderr && ok) ||
-		    ((rval & DT_DSTERR) == 0 && time->tm_isdst == -1)) {
+		    ((rval & DT_DSTERR) == 0 && time->tm_isdst == -1))
 			newtime.tm_isdst = (int)buffer[17]; /* expected change */
-			if (((announce & ANN_CHDST) == ANN_CHDST) && time->tm_min == 0) {
-				announce &= ~ANN_CHDST;
-				rval |= DT_CHDST;
-			}
-		} else {
+		else {
 			if ((rval & DT_DSTERR) == 0)
 				rval |= DT_DSTJUMP; /* sudden change, ignore */
 			ok = false;
 		}
 	}
-#if 0
 	/* check if DST is within expected date range */
 	if ((time->tm_mon > (int)summermonth && time->tm_mon < (int)wintermonth) ||
-	    (time->tm_mon == (int)summermonth && time->tm_mday >
-	     (int)(lastday(*time) - 6)) ||
-	    (time->tm_mon == (int)summermonth && time->tm_mday >
-	     (int)(lastday(*time) - 7) && time->tm_wday == 7 && utchour >= 1) ||
-	    (time->tm_mon == (int)wintermonth && time->tm_mday <
-	     (int)(lastday(*time) - 6)) ||
-	    (time->tm_mon == (int)wintermonth && time->tm_mday >
-	     (int)(lastday(*time) - 7) && time->tm_wday == 7 && utchour < 1)) {
+	    (time->tm_mon == (int)summermonth && time->tm_wday < 7 &&
+	      (int)(lastday(*time)) - time->tm_mday < 7) ||
+	    (time->tm_mon == (int)summermonth && time->tm_wday == 7 &&
+	      (int)(lastday(*time)) - time->tm_mday < 7 && utchour > 0) ||
+	    (time->tm_mon == (int)wintermonth && time->tm_wday < 7 &&
+	      (int)(lastday(*time)) - time->tm_mday >= 7) ||
+	    (time->tm_mon == (int)wintermonth && time->tm_wday == 7 &&
+	      (int)(lastday(*time)) - time->tm_mday < 7 &&
+		(utchour == 23 /* previous day */ || utchour == 0))) {
 		/* expect DST */
-		if (time->tm_isdst == 0) {
+		if (newtime.tm_isdst == 0 && (announce & ANN_CHDST) == 0 &&
+		    utchour < 24) {
 			rval |= DT_DSTJUMP; /* sudden change */
 			ok = false;
 		}
 	} else {
 		/* expect non-DST */
-		if (time->tm_isdst == 1) {
+		if (newtime.tm_isdst == 1 && (announce & ANN_CHDST) == 0 &&
+		    utchour < 24) {
 			rval |= DT_DSTJUMP; /* sudden change */
 			ok = false;
 		}
 	}
-#endif
+	/* done with DST */
+	if (((announce & ANN_CHDST) == ANN_CHDST) && time->tm_min == 0) {
+		announce &= ~ANN_CHDST;
+		rval |= DT_CHDST;
+	}
 	newtime.tm_gmtoff = 3600 * (newtime.tm_isdst + 1);
 
 	if (olderr && ok)
@@ -481,10 +483,11 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			time->tm_wday = newtime.tm_wday;
 		}
 	}
-	if (ok) {
+	if ((rval & DT_DSTJUMP) == 0) {
 		time->tm_isdst = newtime.tm_isdst;
 		time->tm_gmtoff = newtime.tm_gmtoff;
-	} else
+	}
+	if (!ok)
 		olderr = true;
 
 	return rval | announce;
