@@ -482,10 +482,10 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			time->tm_year = newtime.tm_year;
 			time->tm_wday = newtime.tm_wday;
 		}
-	}
-	if ((rval & DT_DSTJUMP) == 0) {
-		time->tm_isdst = newtime.tm_isdst;
-		time->tm_gmtoff = newtime.tm_gmtoff;
+		if ((rval & DT_DSTJUMP) == 0) {
+			time->tm_isdst = newtime.tm_isdst;
+			time->tm_gmtoff = newtime.tm_gmtoff;
+		}
 	}
 	if (!ok)
 		olderr = true;
