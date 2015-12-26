@@ -447,7 +447,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	      (int)(lastday(*time)) - time->tm_mday >= 7) ||
 	    (time->tm_mon == (int)wintermonth && time->tm_wday == 7 &&
 	      (int)(lastday(*time)) - time->tm_mday < 7 &&
-		(utchour == 23 /* previous day */ || utchour == 0))) {
+		(utchour >= 22 /* previous day */ || utchour == 0))) {
 		/* expect DST */
 		if (newtime.tm_isdst == 0 && (announce & ANN_CHDST) == 0 &&
 		    utchour < 24) {
