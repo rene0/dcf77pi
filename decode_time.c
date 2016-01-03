@@ -73,14 +73,19 @@ init_time(void)
 }
 
 static bool
-is_leapsecmonth(uint8_t month)
+is_leapsecmonth(struct tm time)
 {
 	uint8_t i;
 
-	if (month == 0)
-		month = 12;
+	/*
+	 * Local time is 1 or 2 hours ahead of UTC, which is what the
+	 * configuration file uses, so adjust for that.
+	 */
+	time.tm_mon--;
+	if (time.tm_mon == 0)
+		time.tm_mon = 12;
 	for (i = 0; i < num_leapsecmonths; i++)
-		if (leapsecmonths[i] == month)
+		if (leapsecmonths[i] == time.tm_mon)
 			return true;
 	return false;
 }
@@ -374,9 +379,10 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	/*
 	 * h==23, last day of month (UTC) or h==0, first day of next month (UTC)
 	 * according to IERS Bulletin C
+	 * flag still set at 00:00 UTC, prevent DT_LEAPERR
 	 */
 	if (buffer[19] == 1 && ok) {
-		if (time->tm_mday == 1 && is_leapsecmonth((uint8_t)(time->tm_mon - 1)) &&
+		if (time->tm_mday == 1 && is_leapsecmonth(*time) &&
 		    ((time->tm_min > 0 && utchour == 23) ||
 		    (time->tm_min == 0 && utchour == 0)))
 			announce |= ANN_LEAP;
