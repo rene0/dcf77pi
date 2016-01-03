@@ -126,7 +126,7 @@ century_offset(uint8_t year, uint8_t month, uint8_t day, uint8_t weekday)
 	d = dayinleapyear[month - 1] + day;
 	if (d < 60) { /* at or before 02-28 (day 59) */
 		nw = (59 - d) / 7;
-		nd = (uint8_t)((wd == 1 ? 0 : 8) - wd);
+		nd = (uint8_t)(wd == 1 ? 0 : (8 - wd));
 		tmp = d + (nw * 7) + nd;
 	} else { /* after 02-28 (day 59) */
 		if ((year % 4) > 0)
