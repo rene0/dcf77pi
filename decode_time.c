@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2015 René Ladan. All rights reserved.
+Copyright (c) 2013-2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -73,14 +73,19 @@ init_time(void)
 }
 
 static bool
-is_leapsecmonth(uint8_t month)
+is_leapsecmonth(struct tm time)
 {
 	uint8_t i;
 
-	if (month == 0)
-		month = 12;
+	/*
+	 * Local time is 1 or 2 hours ahead of UTC, which is what the
+	 * configuration file uses, so adjust for that.
+	 */
+	time.tm_mon--;
+	if (time.tm_mon == 0)
+		time.tm_mon = 12;
 	for (i = 0; i < num_leapsecmonths; i++)
-		if (leapsecmonths[i] == month)
+		if (leapsecmonths[i] == time.tm_mon)
 			return true;
 	return false;
 }
@@ -108,8 +113,8 @@ getbcd(const uint8_t * const buffer, uint8_t start, uint8_t stop)
 }
 
 /* based on: xx00-02-28 is a Monday if and only if xx00 is a leap year */
-static int8_t
-century_offset(uint8_t year, uint8_t month, uint8_t day, uint8_t weekday)
+int8_t
+century_offset(struct tm time)
 {
 	uint8_t nw, nd;
 	uint8_t tmp; /* resulting day of year, 02-28 if xx00 is leap */
@@ -117,19 +122,20 @@ century_offset(uint8_t year, uint8_t month, uint8_t day, uint8_t weekday)
 	uint16_t d;
 
 	/* substract year days from weekday, including normal leap years */
-	wd = (int8_t)((weekday - year - year / 4 - (((year % 4) > 0) ? 1 : 0)) % 7);
+	wd = (int8_t)((time.tm_wday - time.tm_year - time.tm_year / 4 -
+	    (((time.tm_year % 4) > 0) ? 1 : 0)) % 7);
 	if (wd < 1)
 		wd += 7;
 
 	/* weekday 1 is a Monday, assume this year is a leap year */
 	/* if leap, we should reach Monday xx00-02-28 */
-	d = dayinleapyear[month - 1] + day;
+	d = dayinleapyear[time.tm_mon - 1] + time.tm_mday;
 	if (d < 60) { /* at or before 02-28 (day 59) */
 		nw = (59 - d) / 7;
-		nd = (uint8_t)((wd == 1 ? 0 : 8) - wd);
+		nd = (uint8_t)(wd == 1 ? 0 : (8 - wd));
 		tmp = d + (nw * 7) + nd;
 	} else { /* after 02-28 (day 59) */
-		if ((year % 4) > 0)
+		if ((time.tm_year % 4) > 0)
 			d--; /* no 02-29 for obvious non-leap years */
 		nw = (d - 59) / 7;
 		nd = (uint8_t)(wd - 1);
@@ -154,7 +160,7 @@ isleap(struct tm time)
 	    time.tm_year % 400 == 0;
 }
 
-static uint8_t
+uint8_t
 lastday(struct tm time)
 {
 	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 ||
@@ -350,8 +356,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			rval |= DT_WDAYJUMP;
 		if (init_min == 0 && time->tm_mon != newtime.tm_mon)
 			rval |= DT_MONTHJUMP;
-		centofs = century_offset((uint8_t)newtime.tm_year, (uint8_t)newtime.tm_mon,
-		    (uint8_t)newtime.tm_mday, (uint8_t)newtime.tm_wday);
+		centofs = century_offset(newtime);
 		if (centofs == -1) {
 			rval |= DT_DATE;
 			p3 = false;
@@ -374,9 +379,10 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	/*
 	 * h==23, last day of month (UTC) or h==0, first day of next month (UTC)
 	 * according to IERS Bulletin C
+	 * flag still set at 00:00 UTC, prevent DT_LEAPERR
 	 */
 	if (buffer[19] == 1 && ok) {
-		if (time->tm_mday == 1 && is_leapsecmonth((uint8_t)(time->tm_mon - 1)) &&
+		if (time->tm_mday == 1 && is_leapsecmonth(*time) &&
 		    ((time->tm_min > 0 && utchour == 23) ||
 		    (time->tm_min == 0 && utchour == 0)))
 			announce |= ANN_LEAP;
@@ -447,7 +453,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	      (int)(lastday(*time)) - time->tm_mday >= 7) ||
 	    (time->tm_mon == (int)wintermonth && time->tm_wday == 7 &&
 	      (int)(lastday(*time)) - time->tm_mday < 7 &&
-		(utchour == 23 /* previous day */ || utchour == 0))) {
+		(utchour >= 22 /* previous day */ || utchour == 0))) {
 		/* expect DST */
 		if (newtime.tm_isdst == 0 && (announce & ANN_CHDST) == 0 &&
 		    utchour < 24) {
@@ -482,10 +488,10 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			time->tm_year = newtime.tm_year;
 			time->tm_wday = newtime.tm_wday;
 		}
-	}
-	if ((rval & DT_DSTJUMP) == 0) {
-		time->tm_isdst = newtime.tm_isdst;
-		time->tm_gmtoff = newtime.tm_gmtoff;
+		if ((rval & DT_DSTJUMP) == 0) {
+			time->tm_isdst = newtime.tm_isdst;
+			time->tm_gmtoff = newtime.tm_gmtoff;
+		}
 	}
 	if (!ok)
 		olderr = true;
@@ -507,7 +513,7 @@ get_utchour(struct tm time)
 }
 
 struct tm
-dcftime(struct tm isotime)
+get_dcftime(struct tm isotime)
 {
 	struct tm dt;
 
@@ -525,7 +531,7 @@ dcftime(struct tm isotime)
 }
 
 struct tm
-isotime(struct tm dcftime)
+get_isotime(struct tm dcftime)
 {
 	struct tm it;
 

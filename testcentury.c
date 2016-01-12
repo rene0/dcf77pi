@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2016 René Ladan. All rights reserved.
+Copyright (c) 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -23,40 +23,32 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include "setclock.h"
-
 #include "decode_time.h"
-#include "input.h"
+#include <stdio.h>
 
-#include <string.h>
-#include <sys/time.h>
-
-bool
-setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit)
+int
+main(int argc, char *argv[])
 {
-	return init_min == 0 && ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
-	    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0);
-}
-
-int8_t
-setclock(struct tm time)
-{
-	time_t epochtime;
-	struct tm it;
-	struct timeval tv;
-	struct timezone tz;
-
-	tzset(); /* does not help for TZ=UTC */
-
-	if (time.tm_isdst == -1)
-		return -1;
-	it = get_isotime(time);
-	epochtime = mktime(&it);
-	if (epochtime == -1)
-		return -1;
-	tv.tv_sec = epochtime;
-	tv.tv_usec = 50000; /* adjust for bit reception algorithm */
-	tz.tz_minuteswest = -60;
-	tz.tz_dsttime = it.tm_isdst;
-	return (settimeofday(&tv, &tz) == -1) ? (int8_t)-2 : (int8_t)0;
+	 /* start with 2000-01-01 = Saturday (matches `ncal 2000`) */
+	uint8_t century, lday, co;
+	struct tm time;
+	time.tm_wday = 6; /* Saturday */
+	/* check for every date if it matches */
+	for (century = 0; century <  4; century++)
+		for (time.tm_year = 0; time.tm_year < 100; time.tm_year++)
+			for (time.tm_mon = 1; time.tm_mon < 13; time.tm_mon++) {
+				time.tm_year += 2000 + century * 100;
+				lday = lastday(time);
+				time.tm_year -= 2000 + century * 100;
+				for (time.tm_mday = 1; time.tm_mday <= lday; time.tm_mday++) {
+					co = century_offset(time);
+					if (co != century)
+						printf("%d-%d-%d,%d : %d should be %d\n", time.tm_year, time.tm_mon, time.tm_mday, time.tm_wday, co, century);
+					time.tm_wday++;
+					if (time.tm_wday == 8)
+						time.tm_wday = 1;
+				}
+			}
+	printf("done\n");
+	return 0;
 }

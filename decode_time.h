@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2013-2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -106,7 +106,7 @@ void init_time(void);
 void add_minute(struct tm * const time, bool checkflag);
 
 /**
- * Subtract one minute from the curretn time. Daylight saving time transitions
+ * Subtract one minute from the current time. Daylight saving time transitions
  * and leap years are handled. Note that the year will fall back to
  * BASEYEAR + 399 when it reaches BASEYEAR - 1.
  *
@@ -114,6 +114,24 @@ void add_minute(struct tm * const time, bool checkflag);
  * @param checkflag If set, check ANN_CHDST flag.
  */
 void substract_minute(struct tm * const time, bool checkflag);
+
+/**
+ * Calculates the last day of the month of the current time.
+ *
+ * @param time The current time.
+ * @return The last day of the month of the given time.
+ */
+uint8_t lastday(struct tm time);
+
+/**
+ * Calculates the century offset of the current time.
+ *
+ * The result should be multiplied by 100 and then be added to BASEYEAR.
+ *
+ * @param time The current time.
+ * @return The century offset (0 to 3 or -1 if an error happened).
+ */
+int8_t century_offset(struct tm time);
 
 /**
  * Decodes the current time from the internal bit buffer.
@@ -154,21 +172,13 @@ uint8_t get_utchour(struct tm time);
  */
 const char * const get_weekday(uint8_t wday);
 
-/*
- * Functions for the accumulated minute length. This counter keeps the
- * estimated wall clock time in milliseconds since startup. This way short
- * minutes are accumulated into one minute.
- * It should be reset to 0 when a minute with the correct length is received.
- * For other minutes, 60,000 should be substracted.
- */
-
 /**
  * Convert the given time in ISO format to DCF77 format.
  *
  * @param isotime The time in ISO format to convert
  * @return The time in DCF77 format, with the tm_zone field left to NULL.
  */
-struct tm dcftime(struct tm isotime);
+struct tm get_dcftime(struct tm isotime);
 
 /**
  * Convert the given time in DCF77 format to ISO format.
@@ -176,6 +186,6 @@ struct tm dcftime(struct tm isotime);
  * @param dcftime The time in DCF77 format to convert
  * @return The time in ISO format, with the tm_zone field left to NULL.
  */
-struct tm isotime(struct tm dcftime);
+struct tm get_isotime(struct tm dcftime);
 
 #endif

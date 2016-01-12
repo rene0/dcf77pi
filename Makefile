@@ -25,7 +25,7 @@ decode_alarm.o: decode_alarm.h
 	$(CC) -fpic $(CFLAGS) -c decode_alarm.c -o $@
 config.o: config.h
 	$(CC) -fpic $(CFLAGS) -c config.c -o $@
-setclock.o: setclock.h
+setclock.o: setclock.h decode_time.h
 	$(CC) -fpic $(CFLAGS) -c setclock.c -o $@
 mainloop.o: mainloop.h
 	$(CC) -fpic $(CFLAGS) -c mainloop.c -o $@
@@ -47,6 +47,10 @@ dcf77pi-analyze: dcf77pi-analyze.o libdcf77.so
 readpin.o: config.h input.h
 readpin: readpin.o libdcf77.so
 	$(CC) -o $@ readpin.o libdcf77.so
+
+testcentury.o: decode_time.h
+testcentury: testcentury.o libdcf77.so
+	$(CC) -o $@ testcentury.o libdcf77.so
 
 doxygen:
 	$(DOXYGEN)
