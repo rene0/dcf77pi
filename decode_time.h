@@ -106,7 +106,7 @@ void init_time(void);
 void add_minute(struct tm * const time, bool checkflag);
 
 /**
- * Subtract one minute from the curretn time. Daylight saving time transitions
+ * Subtract one minute from the current time. Daylight saving time transitions
  * and leap years are handled. Note that the year will fall back to
  * BASEYEAR + 399 when it reaches BASEYEAR - 1.
  *
