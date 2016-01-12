@@ -48,6 +48,10 @@ readpin.o: config.h input.h
 readpin: readpin.o libdcf77.so
 	$(CC) -o $@ readpin.o libdcf77.so
 
+testcentury.o: decode_time.h
+testcentury: testcentury.o libdcf77.so
+	$(CC) -o $@ testcentury.o libdcf77.so
+
 doxygen:
 	$(DOXYGEN)
 
