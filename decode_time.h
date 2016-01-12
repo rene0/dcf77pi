@@ -172,14 +172,6 @@ uint8_t get_utchour(struct tm time);
  */
 const char * const get_weekday(uint8_t wday);
 
-/*
- * Functions for the accumulated minute length. This counter keeps the
- * estimated wall clock time in milliseconds since startup. This way short
- * minutes are accumulated into one minute.
- * It should be reset to 0 when a minute with the correct length is received.
- * For other minutes, 60,000 should be substracted.
- */
-
 /**
  * Convert the given time in ISO format to DCF77 format.
  *
