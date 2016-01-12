@@ -513,7 +513,7 @@ get_utchour(struct tm time)
 }
 
 struct tm
-dcftime(struct tm isotime)
+get_dcftime(struct tm isotime)
 {
 	struct tm dt;
 
@@ -531,7 +531,7 @@ dcftime(struct tm isotime)
 }
 
 struct tm
-isotime(struct tm dcftime)
+get_isotime(struct tm dcftime)
 {
 	struct tm it;
 

@@ -50,7 +50,7 @@ setclock(struct tm time)
 
 	if (time.tm_isdst == -1)
 		return -1;
-	it = isotime(time);
+	it = get_isotime(time);
 	epochtime = mktime(&it);
 	if (epochtime == -1)
 		return -1;

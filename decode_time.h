@@ -168,7 +168,7 @@ const char * const get_weekday(uint8_t wday);
  * @param isotime The time in ISO format to convert
  * @return The time in DCF77 format, with the tm_zone field left to NULL.
  */
-struct tm dcftime(struct tm isotime);
+struct tm get_dcftime(struct tm isotime);
 
 /**
  * Convert the given time in DCF77 format to ISO format.
@@ -176,6 +176,6 @@ struct tm dcftime(struct tm isotime);
  * @param dcftime The time in DCF77 format to convert
  * @return The time in ISO format, with the tm_zone field left to NULL.
  */
-struct tm isotime(struct tm dcftime);
+struct tm get_isotime(struct tm dcftime);
 
 #endif
