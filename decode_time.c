@@ -113,7 +113,7 @@ getbcd(const uint8_t * const buffer, uint8_t start, uint8_t stop)
 }
 
 /* based on: xx00-02-28 is a Monday if and only if xx00 is a leap year */
-static int8_t
+int8_t
 century_offset(struct tm time)
 {
 	uint8_t nw, nd;
@@ -160,7 +160,7 @@ isleap(struct tm time)
 	    time.tm_year % 400 == 0;
 }
 
-static uint8_t
+uint8_t
 lastday(struct tm time)
 {
 	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 ||
