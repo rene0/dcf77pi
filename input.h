@@ -65,7 +65,7 @@ struct hardware {
 	/* GPIO device number (FreeBSD only) */
 	uint8_t iodev;
 	/* pin number to read from */
-	uint8_t pin;
+	uint16_t pin;
 	/** pin value is high (1) or low (0) for active signal */
 	bool active_high;
 };

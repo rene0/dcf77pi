@@ -110,7 +110,7 @@ set_mode_live(void)
 	int res;
 
 	/* fill hardware structure and initialize hardware */
-	hw.pin = (uint8_t)strtol(get_config_value("pin"), NULL, 10);
+	hw.pin = (uint16_t)strtol(get_config_value("pin"), NULL, 10);
 	hw.active_high = (bool)strtol(get_config_value("activehigh"), NULL, 10);
 	hw.freq = (uint32_t)strtol(get_config_value("freq"), NULL, 10);
 	if (hw.freq < 10 || hw.freq > 155000 || (hw.freq & 1) == 1) {
