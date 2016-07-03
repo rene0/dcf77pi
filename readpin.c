@@ -46,9 +46,6 @@ main(int argc, char **argv)
 {
 	int min, res;
 	bool verbose = true;
-	uint64_t i;
-	uint8_t j;
-	uint16_t bit;
 	struct sigaction sigact;
 
 	if ((argc == 2) && strncmp(argv[1], "-q", strlen(argv[1])) == 0)
@@ -78,6 +75,7 @@ main(int argc, char **argv)
 
 	for (;;) {
 		const struct bitinfo *bi;
+		uint16_t bit;
 
 		bit = get_bit_live();
 		bi = get_bitinfo();
@@ -85,15 +83,15 @@ main(int argc, char **argv)
 			if (bi->freq_reset)
 				printf("!");
 			/* display first bi->t pulses */
-			for (i = 0; i < bi->t / 8; i++)
-				for (j = 0; j < 8; j++)
+			for (uint64_t i = 0; i < bi->t / 8; i++)
+				for (uint8_t j = 0; j < 8; j++)
 					printf("%c", (bi->signal[i] & (1 << j)) > 0 ?
 					    '+' : '-');
 			/*
 			 * display pulses in the last partially filled item
 			 * bi->t is 0-based, hence the <= comparison
 			 */
-			for (j = 0; j <= (bi->t & 7); j++)
+			for (uint8_t j = 0; j <= (bi->t & 7); j++)
 				printf("%c", (bi->signal[bi->t / 8] & (1 << j)) > 0 ?
 				    '+' : '-');
 			printf("\n");
