@@ -27,11 +27,13 @@ SUCH DAMAGE.
 #include "input.h"
 
 #include <inttypes.h> /* for PRIiXX */
+#include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
+#include <time.h>
 
 static void
 do_cleanup(/*@unused@*/ int sig)
@@ -45,8 +47,9 @@ int
 main(int argc, char **argv)
 {
 	int min, res;
-	bool verbose = true;
 	struct sigaction sigact;
+	const struct hardware *hw;
+	bool raw = false, verbose = true;
 
 	if ((argc == 2) && strncmp(argv[1], "-q", strlen(argv[1])) == 0)
 		verbose = false;
@@ -65,6 +68,7 @@ main(int argc, char **argv)
 		cleanup();
 		return res;
 	}
+	hw = get_hardware_parameters();
 
 	sigact.sa_handler = do_cleanup;
 	sigemptyset(&sigact.sa_mask);
@@ -74,6 +78,17 @@ main(int argc, char **argv)
 	min = -1;
 
 	for (;;) {
+		if (raw) {
+			struct timespec slp;
+			slp.tv_sec = 1.0 / hw->freq;
+			slp.tv_nsec = 1e9 / hw->freq;
+			printf("%i", get_pulse());
+			fflush(stdout);
+			while (nanosleep(&slp, &slp))
+				;
+			continue;
+		}
+
 		const struct bitinfo *bi;
 		uint16_t bit;
 
