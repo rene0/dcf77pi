@@ -46,16 +46,23 @@ do_cleanup(/*@unused@*/ int sig)
 int
 main(int argc, char **argv)
 {
-	int min, res;
 	struct sigaction sigact;
 	const struct hardware *hw;
+	int ch, min, res;
 	bool raw = false, verbose = true;
 
-	if ((argc == 2) && strncmp(argv[1], "-q", strlen(argv[1])) == 0)
-		verbose = false;
-	else if (argc != 1) {
-		printf("usage: %s [-q]\n", argv[0]);
-		return EX_USAGE;
+	while ((ch = getopt(argc, argv, "qr")) != -1) {
+		switch (ch) {
+		case 'q' :
+			verbose = false;
+			break;
+		case 'r' :
+			raw = true;
+			break;
+		default:
+			printf("usage: %s [-qr]\n", argv[0]);
+			return EX_USAGE;
+		}
 	}
 
 	res = read_config_file(ETCDIR"/config.txt");
