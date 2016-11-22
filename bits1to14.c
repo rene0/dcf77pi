@@ -52,10 +52,17 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 			tpstat = (bit & GETBIT_ONE) << 1;
 		if (bitpos == 8) {
 			tpstat |= bit & GETBIT_ONE;
-			if (tpstat == 0)
+			switch (tpstat) {
+			case 0:
 				tptype = TP_WEATHER;
-			else if (tpstat == 3)
+				break;
+			case 3:
 				tptype = TP_ALARM;
+				break;
+			default:
+				tptype = TP_UNKNOWN;
+				break;
+			}
 		}
 		break;
 	case 1:
