@@ -44,8 +44,7 @@ main(int argc, char *argv[])
 					co = century_offset(time);
 					if (co != century)
 						printf("%d-%d-%d,%d : %d should be %d\n", time.tm_year, time.tm_mon, time.tm_mday, time.tm_wday, co, century);
-					time.tm_wday++;
-					if (time.tm_wday == 8)
+					if (++time.tm_wday == 8)
 						time.tm_wday = 1;
 				}
 			}

@@ -80,8 +80,7 @@ is_leapsecmonth(struct tm time)
 	 * Local time is 1 or 2 hours ahead of UTC, which is what the
 	 * configuration file uses, so adjust for that.
 	 */
-	time.tm_mon--;
-	if (time.tm_mon == 0)
+	if (--time.tm_mon == 0)
 		time.tm_mon = 12;
 	for (i = 0; i < num_leapsecmonths; i++)
 		if (leapsecmonths[i] == time.tm_mon)
