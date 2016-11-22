@@ -34,8 +34,12 @@ SUCH DAMAGE.
  * With permission from Mr. Karl Wenzelewski of DIN
  */
 struct alm {
-	struct { uint8_t r1, r2, r3, r4; } region[2];
-	struct { uint8_t ps, pl; } parity[2];
+	struct {
+		uint8_t r1, r2, r3, r4;
+	} region[2];
+	struct {
+		uint8_t ps, pl;
+	} parity[2];
 };
 
 /**
