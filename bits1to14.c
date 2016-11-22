@@ -51,7 +51,7 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 		if (bitpos == 1)
 			tpstat = (bit & GETBIT_ONE) << 1;
 		if (bitpos == 8) {
-			tpstat |= bit & GETBIT_ONE;
+			tpstat |= (bit & GETBIT_ONE);
 			switch (tpstat) {
 			case 0:
 				tptype = TP_WEATHER;
