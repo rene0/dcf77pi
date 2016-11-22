@@ -40,10 +40,14 @@ main(int argc, char *argv[])
 				time.tm_year += 2000 + century * 100;
 				lday = lastday(time);
 				time.tm_year -= 2000 + century * 100;
-				for (time.tm_mday = 1; time.tm_mday <= lday; time.tm_mday++) {
+				for (time.tm_mday = 1; time.tm_mday <= lday;
+				    time.tm_mday++) {
 					co = century_offset(time);
 					if (co != century)
-						printf("%d-%d-%d,%d : %d should be %d\n", time.tm_year, time.tm_mon, time.tm_mday, time.tm_wday, co, century);
+						printf("%d-%d-%d,%d : %d should be %d\n",
+						    time.tm_year, time.tm_mon,
+						    time.tm_mday, time.tm_wday,
+						    co, century);
 					if (++time.tm_wday == 8)
 						time.tm_wday = 1;
 				}
