@@ -116,24 +116,6 @@ void add_minute(struct tm * const time, bool checkflag);
 void substract_minute(struct tm * const time, bool checkflag);
 
 /**
- * Calculates the last day of the month of the current time.
- *
- * @param time The current time.
- * @return The last day of the month of the given time.
- */
-uint8_t lastday(struct tm time);
-
-/**
- * Calculates the century offset of the current time.
- *
- * The result should be multiplied by 100 and then be added to BASEYEAR.
- *
- * @param time The current time.
- * @return The century offset (0 to 3 or -1 if an error happened).
- */
-int8_t century_offset(struct tm time);
-
-/**
  * Decodes the current time from the internal bit buffer.
  *
  * The current time is first increased using add_minute(), and only if the
@@ -155,14 +137,6 @@ int8_t century_offset(struct tm time);
  */
 uint32_t decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
     const uint8_t * const buffer, struct tm * const time);
-
-/**
- * Calculates the hour in UTC from the given time.
- *
- * @param time The time to calculate the hour in UTC from.
- * @return The hour value in UTC.
- */
-uint8_t get_utchour(struct tm time);
 
 /**
  * Return a textual representation of the given day-of-week.

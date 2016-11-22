@@ -11,15 +11,15 @@ DOXYGEN?=doxygen
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin
 
 hdrlib = input.h decode_time.h decode_alarm.h config.h setclock.h mainloop.h \
-	bits1to14.h
+	bits1to14.h calendar.h
 srclib = input.c decode_time.c decode_alarm.c config.c setclock.c mainloop.c \
-	bits1to14.c
+	bits1to14.c calendar.c
 objlib = input.o decode_time.o decode_alarm.o config.o setclock.o mainloop.o \
-	bits1to14.o
+	bits1to14.o calendar.o
 
 input.o: input.h config.h
 	$(CC) -fpic $(CFLAGS) -c input.c -o $@
-decode_time.o: decode_time.h config.h
+decode_time.o: decode_time.h config.h calendar.h
 	$(CC) -fpic $(CFLAGS) -c decode_time.c -o $@
 decode_alarm.o: decode_alarm.h
 	$(CC) -fpic $(CFLAGS) -c decode_alarm.c -o $@
@@ -31,16 +31,19 @@ mainloop.o: mainloop.h
 	$(CC) -fpic $(CFLAGS) -c mainloop.c -o $@
 bits1to14.o: bits1to14.h
 	$(CC) -fpic $(CFLAGS) -c bits1to14.c -o $@
+calendar.o: calendar.h
+	$(CC) -fpic $(CFLAGS) -c calendar.c -o $@
 
 libdcf77.so: $(objlib) $(hdrlib)
 	$(CC) -shared -o $@ $(objlib) -lm -lrt
 
-dcf77pi.o: bits1to14.h config.h decode_alarm.h decode_time.h input.h mainloop.h
+dcf77pi.o: bits1to14.h config.h decode_alarm.h decode_time.h input.h mainloop.h \
+	calendar.h
 dcf77pi: dcf77pi.o libdcf77.so
 	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so
 
 dcf77pi-analyze.o: bits1to14.h config.h decode_alarm.h decode_time.h input.h \
-	mainloop.h
+	mainloop.h calendar.h
 dcf77pi-analyze: dcf77pi-analyze.o libdcf77.so
 	$(CC) -o $@ dcf77pi-analyze.o libdcf77.so
 
@@ -48,7 +51,7 @@ readpin.o: config.h input.h
 readpin: readpin.o libdcf77.so
 	$(CC) -o $@ readpin.o libdcf77.so
 
-testcentury.o: decode_time.h
+testcentury.o: calendar.h
 testcentury: testcentury.o libdcf77.so
 	$(CC) -o $@ testcentury.o libdcf77.so
 

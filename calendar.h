@@ -23,32 +23,49 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include "calendar.h"
-#include <stdio.h>
+#ifndef DCF77PI_CALENDAR_H
+#define DCF77PI_CALENDAR_H
 
-int
-main(int argc, char *argv[])
-{
-	 /* start with 2000-01-01 = Saturday (matches `ncal 2000`) */
-	uint8_t century, lday, co;
-	struct tm time;
-	time.tm_wday = 6; /* Saturday */
-	/* check for every date if it matches */
-	for (century = 0; century <  4; century++)
-		for (time.tm_year = 0; time.tm_year < 100; time.tm_year++)
-			for (time.tm_mon = 1; time.tm_mon < 13; time.tm_mon++) {
-				time.tm_year += 2000 + century * 100;
-				lday = lastday(time);
-				time.tm_year -= 2000 + century * 100;
-				for (time.tm_mday = 1; time.tm_mday <= lday; time.tm_mday++) {
-					co = century_offset(time);
-					if (co != century)
-						printf("%d-%d-%d,%d : %d should be %d\n", time.tm_year, time.tm_mon, time.tm_mday, time.tm_wday, co, century);
-					time.tm_wday++;
-					if (time.tm_wday == 8)
-						time.tm_wday = 1;
-				}
-			}
-	printf("done\n");
-	return 0;
-}
+#include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
+
+/**
+ * An array containing the day numbers of each month in a leap year.
+ */
+extern const uint16_t dayinleapyear[12];
+
+/**
+ * Determines if the year of the current time is a leap year.
+ * @param time The current time.
+ * @return The year of the current time is a leap year.
+ */
+bool isleap(struct tm time);
+
+/**
+ * Calculates the last day of the month of the current time.
+ *
+ * @param time The current time.
+ * @return The last day of the month of the given time.
+ */
+uint8_t lastday(struct tm time);
+
+/**
+ * Calculates the century offset of the current time.
+ *
+ * The result should be multiplied by 100 and then be added to BASEYEAR.
+ *
+ * @param time The current time.
+ * @return The century offset (0 to 3 or -1 if an error happened).
+ */
+int8_t century_offset(struct tm time);
+
+/**
+ * Calculates the hour in UTC from the given time.
+ *
+ * @param time The time to calculate the hour in UTC from.
+ * @return The hour value in UTC.
+ */
+uint8_t get_utchour(struct tm time);
+
+#endif
