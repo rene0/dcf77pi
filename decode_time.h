@@ -30,9 +30,6 @@ SUCH DAMAGE.
 #include <stdint.h>
 #include <time.h>
 
-/** update every 400 years, now at 2400-01-01 */
-#define BASEYEAR	2000
-
 /** daylight saving time error, bit 17 = bit 18 */
 #define DT_DSTERR	(uint32_t)(1 << 0)
 /** minute value/parity error */
@@ -96,26 +93,6 @@ SUCH DAMAGE.
  *   These values indicate in which months a leap second is allowed.
  */
 void init_time(void);
-
-/**
- * Add one minute to the current time. Daylight saving time transitions and
- * leap years are handled. Note that the year will fall back to BASEYEAR when
- * it reaches BASEYEAR + 400.
- *
- * @param time The current time to be increased with one minute.
- * @param checkflag If set, check ANN_CHDST flag.
- */
-void add_minute(struct tm * const time, bool checkflag);
-
-/**
- * Subtract one minute from the current time. Daylight saving time transitions
- * and leap years are handled. Note that the year will fall back to
- * BASEYEAR + 399 when it reaches BASEYEAR - 1.
- *
- * @param time The current time to be decreased with one minute.
- * @param checkflag If set, check ANN_CHDST flag.
- */
-void substract_minute(struct tm * const time, bool checkflag);
 
 /**
  * Decodes the current time from the internal bit buffer.

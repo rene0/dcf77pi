@@ -110,71 +110,6 @@ getbcd(const uint8_t * const buffer, uint8_t start, uint8_t stop)
 	return val;
 }
 
-void
-add_minute(struct tm * const time, bool checkflag)
-{
-	/* time->tm_isdst indicates the old situation */
-	if (++time->tm_min == 60) {
-		/* DST flag transmitted until 00:59:16 UTC */
-		if ((((announce & ANN_CHDST) == ANN_CHDST) || !checkflag) &&
-		    get_utchour(*time) == 0 && time->tm_wday == 7 &&
-		    time->tm_mday > (int)(lastday(*time) - 7)) {
-			if (time->tm_isdst == 1 && time->tm_mon == (int)wintermonth)
-				time->tm_hour--; /* will become non-DST */
-			if (time->tm_isdst == 0 && time->tm_mon == (int)summermonth)
-				time->tm_hour++; /* will become DST */
-		}
-		time->tm_min = 0;
-		if (++time->tm_hour == 24) {
-			time->tm_hour = 0;
-			if (++time->tm_wday == 8)
-				time->tm_wday = 1;
-			time->tm_mday++;
-			if (time->tm_mday > (int)lastday(*time)) {
-				time->tm_mday = 1;
-				if (++time->tm_mon == 13) {
-					time->tm_mon = 1;
-					if (++time->tm_year == BASEYEAR + 400)
-						time->tm_year = BASEYEAR;
-						/* bump! */
-				}
-			}
-		}
-	}
-}
-
-void
-substract_minute(struct tm * const time, bool checkflag)
-{
-	if (--time->tm_min == -1) {
-		/* DST flag transmitted until 00:59:16 UTC */
-		if ((((announce & ANN_CHDST) == ANN_CHDST) || !checkflag) &&
-		    get_utchour(*time) == 1 && time->tm_wday == 7 &&
-		    time->tm_mday > (int)(lastday(*time) - 7)) {
-			/* logic is backwards here */
-			if (time->tm_isdst == 1 && time->tm_mon == (int)wintermonth)
-				time->tm_hour++; /* will become DST */
-			if (time->tm_isdst == 0 && time->tm_mon == (int)summermonth)
-				time->tm_hour--; /* will become non-DST */
-		}
-		time->tm_min = 59;
-		if (--time->tm_hour == -1) {
-			time->tm_hour = 23;
-			if (--time->tm_wday == 0)
-				time->tm_wday = 7;
-			if (--time->tm_mday == 0) {
-				if (--time->tm_mon == 0) {
-					time->tm_mon = 12;
-					if (--time->tm_year == BASEYEAR - 1)
-						time->tm_year = BASEYEAR + 399;
-						/* bump! */
-				}
-				time->tm_mday = (int)lastday(*time);
-			}
-		}
-	}
-}
-
 uint32_t
 decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
     const uint8_t * const buffer, struct tm * const time)
@@ -239,9 +174,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
 		for (i = increase; increase > 0 && i > 0; i--)
-			add_minute(time, true);
+			add_minute(time);
 		for (i = increase; increase < 0 && i < 0; i++)
-			substract_minute(time, false);
+			substract_minute(time);
 	}
 
 	p1 = getpar(buffer, 21, 28);

@@ -30,6 +30,9 @@ SUCH DAMAGE.
 #include <stdint.h>
 #include <time.h>
 
+/** update every 400 years, now at 2400-01-01 */
+#define BASEYEAR	2000
+
 /**
  * An array containing the day numbers of each month in a leap year.
  */
@@ -67,5 +70,21 @@ int8_t century_offset(struct tm time);
  * @return The hour value in UTC.
  */
 uint8_t get_utchour(struct tm time);
+
+/**
+ * Adds one minute to the current time. Leap years are handled. Note that the
+ * year will fall back to BASEYEAR when it reaches BASEYEAR + 400.
+ *
+ * @param time The current time to be increased with one minute.
+ */
+void add_minute(struct tm * const time);
+
+/**
+ * Substracts one minute to the current time. Leap years are handled. Note that
+ * the year will fall back to BASEYEAR + 399 when it reaches BASEYEAR - 1.
+ *
+ * @param time The current time to be decreased with one minute.
+ */
+void substract_minute(struct tm * const time);
 
 #endif

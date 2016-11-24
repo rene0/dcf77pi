@@ -99,3 +99,47 @@ get_utchour(struct tm time)
 		utchour += 24;
 	return (uint8_t)utchour;
 }
+
+void
+add_minute(struct tm * const time)
+{
+	if (++time->tm_min == 60) {
+		time->tm_min = 0;
+		if (++time->tm_hour == 24) {
+			time->tm_hour = 0;
+			if (++time->tm_wday == 8)
+				time->tm_wday = 1;
+			if (++time->tm_mday > (int)lastday(*time)) {
+				time->tm_mday = 1;
+				if (++time->tm_mon == 13) {
+					time->tm_mon = 1;
+					if (++time->tm_year == BASEYEAR + 400)
+						time->tm_year = BASEYEAR;
+						/* bump! */
+				}
+			}
+		}
+	}
+}
+
+void
+substract_minute(struct tm * const time)
+{
+	if (--time->tm_min == -1) {
+		time->tm_min = 59;
+		if (--time->tm_hour == -1) {
+			time->tm_hour = 23;
+			if (--time->tm_wday == 0)
+				time->tm_wday = 7;
+			if (--time->tm_mday == 0) {
+				if (--time->tm_mon == 0) {
+					time->tm_mon = 12;
+					if (--time->tm_year == BASEYEAR - 1)
+						time->tm_year = BASEYEAR + 399;
+						/* bump! */
+				}
+				time->tm_mday = (int)lastday(*time);
+			}
+		}
+	}
+}
