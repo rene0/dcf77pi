@@ -41,9 +41,10 @@ SUCH DAMAGE.
 #define DT_HOUR		(uint32_t)(1 << 2)
 /** date value/parity error */
 #define DT_DATE		(uint32_t)(1 << 3)
-/** bit 0 must always be 0 :
-  * http://www.eecis.udel.edu/~mills/ntp/dcf77.html
-  */
+/**
+ * bit 0 must always be 0 :
+ * http://www.eecis.udel.edu/~mills/ntp/dcf77.html
+ */
 #define DT_B0		(uint32_t)(1 << 4)
 /** bit 20 is 0 */
 #define DT_B20		(uint32_t)(1 << 5)
@@ -69,9 +70,10 @@ SUCH DAMAGE.
 #define DT_MONTHJUMP	(uint32_t)(1 << 15)
 /** unexpected year value change */
 #define DT_YEARJUMP	(uint32_t)(1 << 16)
-/** leap second should always be 0 if present :
-  * http://www.ptb.de/cms/en/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
-  */
+/**
+ * leap second should always be 0 if present :
+ * http://www.ptb.de/cms/en/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
+ */
 #define DT_LEAPONE	(uint32_t)(1 << 17)
 /** transmitter call bit (15) set */
 #define DT_XMIT		(uint32_t)(1 << 18)
