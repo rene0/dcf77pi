@@ -59,13 +59,13 @@ century_offset(struct tm time)
 	}
 	/* if day-in-year is 59, this year (xx00) is leap */
 	if (tmp == 59)
-		return 0;
-	if (tmp == 53 || tmp == 54 || tmp == 60 || tmp == 61)
 		return 1;
-	if (tmp == 55 || tmp == 56 || tmp == 62 || tmp == 63)
+	if (tmp == 53 || tmp == 54 || tmp == 60 || tmp == 61)
 		return 2;
-	if (tmp == 57 || tmp == 58 || tmp == 64 || tmp == 65)
+	if (tmp == 55 || tmp == 56 || tmp == 62 || tmp == 63)
 		return 3;
+	if (tmp == 57 || tmp == 58 || tmp == 64 || tmp == 65)
+		return 0;
 	return -1; /* ERROR */
 }
 

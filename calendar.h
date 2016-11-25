@@ -30,8 +30,8 @@ SUCH DAMAGE.
 #include <stdint.h>
 #include <time.h>
 
-/** update every 400 years, now at 2400-01-01 */
-#define BASEYEAR	2000
+/** update every 400 years, now at 2300-01-01 */
+#define BASEYEAR	1900
 
 /**
  * An array containing the day numbers of each month in a leap year.
