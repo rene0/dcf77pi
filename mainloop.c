@@ -91,7 +91,7 @@ mainloop(char *logfilename,
 		if ((bit & eGB_EOM) == eGB_EOM)
 			minlen = bitpos + 1;
 			/* handle the missing bit due to the minute marker */
-		if ((bit & eGB_tooLong) == eGB_tooLong) {
+		if ((bit & eGB_too_long) == eGB_too_long) {
 			minlen = 0xff;
 			/*
 			 * leave acc_minlen alone,
@@ -102,7 +102,7 @@ mainloop(char *logfilename,
 		if (display_new_second != NULL)
 			display_new_second();
 
-		if ((bit & (eGB_EOM | eGB_tooLong)) != 0) {
+		if ((bit & (eGB_EOM | eGB_too_long)) != 0) {
 			display_minute(minlen);
 			dt = decode_time(init_min, minlen, get_acc_minlen(),
 			    get_buffer(), &curtime);

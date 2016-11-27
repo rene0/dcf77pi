@@ -118,7 +118,7 @@ main(int argc, char **argv)
 				    '+' : '-');
 			printf("\n");
 		}
-		if ((bit & eGB_tooLong) == eGB_tooLong)
+		if ((bit & eGB_too_long) == eGB_too_long)
 			min++;
 		printf("%x (%"PRIi32" %"PRIi32" %"PRIi32" %"PRIi64" %"PRIi64
 		    " %"PRIi64") %i:%u\n", bit, bi->tlow, bi->tlast0, bi->t,

@@ -31,57 +31,57 @@ SUCH DAMAGE.
 
 enum eDT {
 /** daylight saving time error, bit 17 = bit 18 */
-	eDT_DSTError = 1 << 0,
+	eDT_DST_error = 1 << 0,
 /** minute value/parity error */
-	eDT_Minute = 1 << 1,
+	eDT_minute = 1 << 1,
 /** hour value/parity error */
-	eDT_Hour = 1 << 2,
+	eDT_hour = 1 << 2,
 /** date value/parity error */
-	eDT_Date = 1 << 3,
+	eDT_date = 1 << 3,
 /**
  * bit 0 must always be 0 :
  * http://www.eecis.udel.edu/~mills/ntp/dcf77.html
  */
-	eDT_Bit0 = 1 << 4,
+	eDT_bit0 = 1 << 4,
 /** bit 20 is 0 */
-	eDT_Bit20 = 1 << 5,
+	eDT_bit20 = 1 << 5,
 /** too short minute */
-	eDT_Short = 1 << 6,
+	eDT_short = 1 << 6,
 /** too long minute */
-	eDT_Long = 1 << 7,
+	eDT_long = 1 << 7,
 /** unexpected daylight saving time change */
-	eDT_DSTJump = 1 << 8,
+	eDT_DST_jump = 1 << 8,
 /** unexpected daylight saving time change announcement */
-	eDT_ChDSTError = 1 << 9,
+	eDT_ch_DST_error = 1 << 9,
 /** unexpected leap second announcement */
-	eDT_LeapSecondError = 1 << 10,
+	eDT_leapsecond_error = 1 << 10,
 /** unexpected minute value change */
-	eDT_MinuteJump = 1 << 11,
+	eDT_minute_jump = 1 << 11,
 /** unexpected hour value change */
-	eDT_HourJump = 1 << 12,
+	eDT_hour_jump = 1 << 12,
 /** unexpected day value change */
-	eDT_MonthDayJump = 1 << 13,
+	eDT_monthday_jump = 1 << 13,
 /** unexpected day-of-week value change */
-	eDT_WeekDayJump = 1 << 14,
+	eDT_weekday_jump = 1 << 14,
 /** unexpected month value change */
-	eDT_MonthJump = 1 << 15,
+	eDT_month_jump = 1 << 15,
 /** unexpected year value change */
-	eDT_YearJump = 1 << 16,
+	eDT_year_jump = 1 << 16,
 /**
  * leap second should always be 0 if present :
  * http://www.ptb.de/cms/en/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
  */
-	eDT_LeapSecondOne = 1 << 17,
+	eDT_leapsecond_one = 1 << 17,
 /** transmitter call bit (15) set */
-	eDT_Transmit = 1 << 18,
+	eDT_transmit = 1 << 18,
 /** daylight saving time just changed */
-	eDT_ChDST = 1 << 19,
+	eDT_ch_DST = 1 << 19,
 /** leap second just processed */
-	eDT_LeapSecond = 1 << 20,
+	eDT_leapsecond = 1 << 20,
 /** daylight saving time change announced */
-	eDT_AnnounceChDST = 1 << 21,
+	eDT_announce_ch_DST = 1 << 21,
 /** leap second announced */
-	eDT_AnnounceLeapSecond = 1 << 22,
+	eDT_announce_leapsecond = 1 << 22,
 };
 
 /**

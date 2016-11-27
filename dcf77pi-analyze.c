@@ -42,7 +42,7 @@ display_bit(uint16_t state, uint8_t bitpos)
 		printf(" ");
 	if ((state & eGB_receive) == eGB_receive)
 		printf("r");
-	else if ((state & eGB_xmit) == eGB_xmit)
+	else if ((state & eGB_transmit) == eGB_transmit)
 		printf("x");
 	else if ((state & eGB_random) == eGB_random)
 		printf("#");
@@ -59,53 +59,53 @@ display_time(uint32_t dt, struct tm time)
 	    time.tm_isdst == 1 ? "summer" : time.tm_isdst == 0 ? "winter" :
 	    "?     ", time.tm_year, time.tm_mon, time.tm_mday,
 	    weekday[time.tm_wday], time.tm_hour, time.tm_min);
-	if ((dt & eDT_Long) == eDT_Long)
+	if ((dt & eDT_long) == eDT_long)
 		printf("Minute too long\n");
-	if ((dt & eDT_Short) == eDT_Short)
+	if ((dt & eDT_short) == eDT_short)
 		printf("Minute too short\n");
-	if ((dt & eDT_DSTError) == eDT_DSTError)
+	if ((dt & eDT_DST_error) == eDT_DST_error)
 		printf("Time offset error\n");
-	if ((dt & eDT_DSTJump) == eDT_DSTJump)
+	if ((dt & eDT_DST_jump) == eDT_DST_jump)
 		printf("Time offset jump (ignored)\n");
-	if ((dt & eDT_Minute) == eDT_Minute)
+	if ((dt & eDT_minute) == eDT_minute)
 		printf("Minute parity/value error\n");
-	if ((dt & eDT_MinuteJump) == eDT_MinuteJump)
+	if ((dt & eDT_minute_jump) == eDT_minute_jump)
 		printf("Minute value jump\n");
-	if ((dt & eDT_Hour) == eDT_Hour)
+	if ((dt & eDT_hour) == eDT_hour)
 		printf("Hour parity/value error\n");
-	if ((dt & eDT_HourJump) == eDT_HourJump)
+	if ((dt & eDT_hour_jump) == eDT_hour_jump)
 		printf("Hour value jump\n");
-	if ((dt & eDT_Date) == eDT_Date)
+	if ((dt & eDT_date) == eDT_date)
 		printf("Date parity/value error\n");
-	if ((dt & eDT_WeekDayJump) == eDT_WeekDayJump)
+	if ((dt & eDT_weekday_jump) == eDT_weekday_jump)
 		printf("Day-of-week value jump\n");
-	if ((dt & eDT_MonthDayJump) == eDT_MonthDayJump)
+	if ((dt & eDT_monthday_jump) == eDT_monthday_jump)
 		printf("Day-of-month value jump\n");
-	if ((dt & eDT_MonthJump) == eDT_MonthJump)
+	if ((dt & eDT_month_jump) == eDT_month_jump)
 		printf("Month value jump\n");
-	if ((dt & eDT_YearJump) == eDT_YearJump)
+	if ((dt & eDT_year_jump) == eDT_year_jump)
 		printf("Year value jump\n");
-	if ((dt & eDT_Bit0) == eDT_Bit0)
+	if ((dt & eDT_bit0) == eDT_bit0)
 		printf("Minute marker error\n");
-	if ((dt & eDT_Bit20) == eDT_Bit20)
+	if ((dt & eDT_bit20) == eDT_bit20)
 		printf("Date/time start marker error\n");
-	if ((dt & eDT_Transmit) == eDT_Transmit)
+	if ((dt & eDT_transmit) == eDT_transmit)
 		printf("Transmitter call bit set\n");
-	if ((dt & eDT_AnnounceChDST) == eDT_AnnounceChDST)
+	if ((dt & eDT_announce_ch_DST) == eDT_announce_ch_DST)
 		printf("Time offset change announced\n");
-	if ((dt & eDT_AnnounceLeapSecond) == eDT_AnnounceLeapSecond)
+	if ((dt & eDT_announce_leapsecond) == eDT_announce_leapsecond)
 		printf("Leap second announced\n");
-	if ((dt & eDT_ChDST) == eDT_ChDST)
+	if ((dt & eDT_ch_DST) == eDT_ch_DST)
 		printf("Time offset changed\n");
-	if ((dt & eDT_LeapSecond) == eDT_LeapSecond) {
+	if ((dt & eDT_leapsecond) == eDT_leapsecond) {
 		printf("Leap second processed");
-		if ((dt & eDT_LeapSecondOne) == eDT_LeapSecondOne)
+		if ((dt & eDT_leapsecond_one) == eDT_leapsecond_one)
 			printf(", value is 1 instead of 0");
 		printf("\n");
 	}
-	if ((dt & eDT_ChDSTError) == eDT_ChDSTError)
+	if ((dt & eDT_ch_DST_error) == eDT_ch_DST_error)
 		printf("Spurious time offset change announcement\n");
-	if ((dt & eDT_LeapSecondError) == eDT_LeapSecondError)
+	if ((dt & eDT_leapsecond_error) == eDT_leapsecond_error)
 		printf("Spurious leap second announcement\n");
 	printf("\n");
 }

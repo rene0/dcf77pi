@@ -126,7 +126,7 @@ display_bit(uint16_t state, uint8_t bitpos)
 		mvwprintw(input_win, 3, 58, "read     ");
 	if (state & eGB_receive)
 		mvwprintw(input_win, 3, 68, "receive ");
-	else if (state & eGB_xmit)
+	else if (state & eGB_transmit)
 		mvwprintw(input_win, 3, 68, "transmit");
 	else if (state & eGB_random)
 		mvwprintw(input_win, 3, 68, "random  ");
@@ -160,13 +160,13 @@ display_time(uint32_t dt, struct tm time)
 	uint16_t cutoff;
 
 	/* color bits depending on the results */
-	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, (dt & eDT_Bit0) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, (dt & eDT_DSTError) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, (dt & eDT_Bit20) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, (dt & eDT_Minute) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, (dt & eDT_Hour) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, (dt & eDT_Date) ? 1 : 2, NULL);
-	if (dt & eDT_LeapSecondOne)
+	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, (dt & eDT_bit0) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, (dt & eDT_DST_error) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, (dt & eDT_bit20) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, (dt & eDT_minute) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, (dt & eDT_hour) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, (dt & eDT_date) ? 1 : 2, NULL);
+	if (dt & eDT_leapsecond_one)
 		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
 
 	/* display date and time */
@@ -184,43 +184,43 @@ display_time(uint32_t dt, struct tm time)
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 
 	/* color date/time string and cutoff value depending on the results */
-	if (dt & eDT_DSTJump)
+	if (dt & eDT_DST_jump)
 		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
-	if (dt & eDT_YearJump)
+	if (dt & eDT_year_jump)
 		mvwchgat(decode_win, 1, 7, 4, A_BOLD, 3, NULL);
-	if (dt & eDT_MonthJump)
+	if (dt & eDT_month_jump)
 		mvwchgat(decode_win, 1, 12, 2, A_BOLD, 3, NULL);
-	if (dt & eDT_MonthDayJump)
+	if (dt & eDT_monthday_jump)
 		mvwchgat(decode_win, 1, 15, 2, A_BOLD, 3, NULL);
-	if (dt & eDT_WeekDayJump)
+	if (dt & eDT_weekday_jump)
 		mvwchgat(decode_win, 1, 18, 3, A_BOLD, 3, NULL);
-	if (dt & eDT_HourJump)
+	if (dt & eDT_hour_jump)
 		mvwchgat(decode_win, 1, 22, 2, A_BOLD, 3, NULL);
-	if (dt & eDT_MinuteJump)
+	if (dt & eDT_minute_jump)
 		mvwchgat(decode_win, 1, 25, 2, A_BOLD, 3, NULL);
 	if (cutoff == 0xffff)
 		mvwchgat(decode_win, 1, 40, 1, A_BOLD, 3, NULL);
 
 	/* flip lights depending on the results */
-	if ((dt & eDT_Transmit) == 0)
+	if ((dt & eDT_transmit) == 0)
 		mvwchgat(decode_win, 1, 50, 6, A_NORMAL, 8, NULL);
-	if ((dt & eDT_AnnounceChDST) == 0)
+	if ((dt & eDT_announce_ch_DST) == 0)
 		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 8, NULL);
-	if (dt & eDT_ChDST)
+	if (dt & eDT_ch_DST)
 		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 2, NULL);
-	else if (dt & eDT_ChDSTError)
+	else if (dt & eDT_ch_DST_error)
 		mvwchgat(decode_win, 1, 57, 3, A_BOLD, 3, NULL);
-	if ((dt & eDT_AnnounceLeapSecond) == 0)
+	if ((dt & eDT_announce_leapsecond) == 0)
 		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 8, NULL);
-	if (dt & eDT_LeapSecond)
+	if (dt & eDT_leapsecond)
 		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 2, NULL);
-	else if (dt & eDT_LeapSecondError)
+	else if (dt & eDT_leapsecond_error)
 		mvwchgat(decode_win, 1, 61, 4, A_BOLD, 3, NULL);
-	if (dt & eDT_Long) {
+	if (dt & eDT_long) {
 		mvwprintw(decode_win, 1, 67, "long ");
 		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 1, NULL);
 	}
-	else if (dt & eDT_Short) {
+	else if (dt & eDT_short) {
 		mvwprintw(decode_win, 1, 67, "short");
 		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 1, NULL);
 	}

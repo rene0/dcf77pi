@@ -39,11 +39,11 @@ enum eGB {
 /** bit value could not be determined */
 	eGB_read = 1 << 3,
 /** bit buffer would overflow */
-	eGB_tooLong = 1 << 4,
+	eGB_too_long = 1 << 4,
 /** I/O error while reading bit from hardware */
 	eGB_IO = 1 << 5,
 /** transmitter error, all positive pulses */
-	eGB_xmit = 1 << 6,
+	eGB_transmit = 1 << 6,
 /** receiver error, all negative pulses */
 	eGB_receive = 1 << 7,
 /** random radio error, positive and negative pulses but no proper signal */
@@ -51,7 +51,7 @@ enum eGB {
 /** this bit should be skipped (i.e. not displayed) */
 	eGB_skip = 1 << 9,
 /** next bit should be skipped (i.e. not added to bitpos) */
-	eGB_skipNext = 1 << 10,
+	eGB_skip_next = 1 << 10,
 };
 
 /**

@@ -236,14 +236,14 @@ get_pulse(void)
 }
 
 /*
- * Clear the cutoff value and the previous flags, except eGB_tooLong to be
+ * Clear the cutoff value and the previous flags, except eGB_too_long to be
  * able to determine if this flag can be cleared again.
  */
 static void
 set_new_state(void)
 {
 	cutoff = 0xffff;
-	state = ((state & eGB_tooLong) == eGB_tooLong) ? eGB_tooLong : (uint16_t)0;
+	state = ((state & eGB_too_long) == eGB_too_long) ? eGB_too_long : 0;
 }
 
 static void
@@ -355,7 +355,7 @@ get_bit_live(void)
 				state |= eGB_receive;
 				outch = 'r';
 			} else if (bit.tlow * 100 / bit.t >= 99) {
-				state |= eGB_xmit;
+				state |= eGB_transmit;
 				outch = 'x';
 			} else {
 				state |= eGB_random;
@@ -442,8 +442,8 @@ get_bit_live(void)
 	}
 	if (init_bit == 1)
 		init_bit--;
-	else if ((state & (eGB_random | eGB_xmit |
-	    eGB_receive | eGB_EOM | eGB_tooLong)) == 0) {
+	else if ((state & (eGB_random | eGB_transmit |
+	    eGB_receive | eGB_EOM | eGB_too_long)) == 0) {
 		if (bitpos == 0 && buffer[0] == 0 && (state & eGB_read) == 0)
 			bit.bit0 += ((int64_t)
 			    (bit.tlow * 1000000 - bit.bit0) / 2);
@@ -473,7 +473,7 @@ report:
 	if (inch == EOF) \
 		state |= eGB_EOD; \
 	if (inch == (int)'a' || inch == (int)'c') \
-		state |= eGB_skipNext; \
+		state |= eGB_skip_next; \
 	if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) { \
 		if (ungetc(inch, datafile) == EOF) /* EOF remains, IO error */\
 			state |= eGB_EOD; \
@@ -481,7 +481,7 @@ report:
 
 #define READVALUE(COND) \
 do { \
-	state &= ~eGB_skipNext; \
+	state &= ~eGB_skip_next; \
 	state |= eGB_skip; \
 	valid = true; \
 	bit.t = 0; \
@@ -529,7 +529,7 @@ get_bit_file(void)
 			 */
 			break;
 		case 'x':
-			state |= eGB_xmit;
+			state |= eGB_transmit;
 			valid = true;
 			bit.t = 2500;
 			break;
@@ -600,13 +600,13 @@ uint16_t
 next_bit(void)
 {
 	bitpos = ((state & eGB_EOM) == eGB_EOM) ? 0 :
-	    ((state & eGB_skipNext) == eGB_skipNext) ? bitpos : bitpos + 1;
+	    ((state & eGB_skip_next) == eGB_skip_next) ? bitpos : bitpos + 1;
 	if (bitpos == buflen) {
-		state |= eGB_tooLong;
+		state |= eGB_too_long;
 		bitpos = 0;
 		return state;
 	}
-	state &= ~eGB_tooLong; /* fits again */
+	state &= ~eGB_too_long; /* fits again */
 	return state;
 }
 

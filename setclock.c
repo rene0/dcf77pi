@@ -35,7 +35,7 @@ SUCH DAMAGE.
 bool
 setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit)
 {
-	return init_min == 0 && ((dt & ~(eDT_Transmit | eDT_ChDST | eDT_LeapSecond)) == 0) &&
+	return init_min == 0 && ((dt & ~(eDT_transmit | eDT_ch_DST | eDT_leapsecond)) == 0) &&
 	    ((bit & ~(eGB_one | eGB_EOM)) == 0);
 }
 
