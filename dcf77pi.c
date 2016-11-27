@@ -35,7 +35,7 @@ SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#define MAXBUF 255
+const uint8_t maxbuf = 255;
 
 static WINDOW *input_win;
 static WINDOW *decode_win;
@@ -44,7 +44,7 @@ WINDOW *main_win;
 
 static int8_t old_bitpos = -1; /* timer for statusbar inactive */
 static int8_t input_mode;      /* normal input (statusbar) or string input */
-static char keybuf[MAXBUF];    /* accumulator for string input */
+static char keybuf[maxbuf];    /* accumulator for string input */
 
 static void
 statusbar(int8_t bitpos, const char * const fmt, ...)
@@ -327,7 +327,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 				wclrtoeol(main_win);
 			}
 			wnoutrefresh(main_win);
-		} else if (input_count == MAXBUF - 1 ||
+		} else if (input_count == maxbuf - 1 ||
 		    (inkey == KEY_ENTER || inkey == '\r' || inkey == '\n')) {
 			/* terminate to prevent overflow */
 			keybuf[input_count] = '\0';
