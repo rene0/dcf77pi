@@ -37,15 +37,6 @@ static uint8_t wintermonth;
 static uint8_t leapsecmonths[12];
 static uint8_t num_leapsecmonths;
 
-static const char * const weekday[8] =
-    {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-
-const char * const
-get_weekday(uint8_t wday)
-{
-	return weekday[wday & 7];
-}
-
 void
 init_time(void)
 {

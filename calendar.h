@@ -42,6 +42,12 @@ extern const uint16_t base_year;
 extern const uint16_t dayinleapyear[12];
 
 /**
+ * Textual representation of the day of week, with Monday = 1,
+ * Sunday = 7, and 0 = "???".
+ */
+extern const char * const weekday[8];
+
+/**
  * Determines if the year of the current time is a leap year.
  * @param time The current time.
  * @return The year of the current time is a leap year.

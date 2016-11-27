@@ -118,12 +118,4 @@ void init_time(void);
 uint32_t decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
     const uint8_t * const buffer, struct tm * const time);
 
-/**
- * Return a textual representation of the given day-of-week.
- *
- * @param wday The day of week (1 = Monday, 7 = Sunday)
- * @return The textual representation of wday ("Mon" .. "Sun")
- */
-const char * const get_weekday(uint8_t wday);
-
 #endif

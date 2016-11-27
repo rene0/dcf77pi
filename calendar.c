@@ -32,6 +32,9 @@ const uint16_t base_year = 1900;
 const uint16_t dayinleapyear[12] =
     {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
 
+const char * const weekday[8] =
+    {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+
 /* based on: xx00-02-28 is a Monday if and only if xx00 is a leap year */
 int8_t
 century_offset(struct tm time)
