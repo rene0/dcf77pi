@@ -62,8 +62,11 @@ SUCH DAMAGE.
 #  error Unsupported operating system, please send a patch to the author
 #endif
 
+/** maximum number of bits in a minute */
+const uint8_t buflen = 60;
+
 static uint8_t bitpos;         /* second */
-static uint8_t buffer[BUFLEN]; /* wrap after BUFLEN positions */
+static uint8_t buffer[buflen]; /* wrap after buflen positions */
 static uint16_t state;         /* any errors, or high bit */
 /*@null@*/ static FILE *datafile;         /* input file (recorded data) */
 /*@null@*/ static FILE *logfile;          /* auto-appended in live mode */
@@ -233,14 +236,14 @@ get_pulse(void)
 }
 
 /*
- * Clear the cutoff value and the previous flags, except GETBIT_TOOLONG to be
+ * Clear the cutoff value and the previous flags, except eGB_tooLong to be
  * able to determine if this flag can be cleared again.
  */
 static void
 set_new_state(void)
 {
 	cutoff = 0xffff;
-	state = ((state & GETBIT_TOOLONG) == GETBIT_TOOLONG) ? GETBIT_TOOLONG : (uint16_t)0;
+	state = ((state & eGB_tooLong) == eGB_tooLong) ? eGB_tooLong : (uint16_t)0;
 }
 
 static void
@@ -283,7 +286,7 @@ get_bit_live(void)
 	int64_t a, y = 1000000000;
 	int64_t twait;
 	static int init_bit = 2;
-	bool is_eom = (state & GETBIT_EOM) == GETBIT_EOM;
+	bool is_eom = (state & eGB_EOM) == eGB_EOM;
 
 	bit.freq_reset = false;
 	bit.bitlen_reset = false;
@@ -297,7 +300,7 @@ get_bit_live(void)
 	 * secified as half the value and the whole value of the lengths of
 	 * bit 0 and bit 20 respectively.
 	 *
-	 *  ~A > 3/2 * realfreq: value |= GETBIT_EOM
+	 *  ~A > 3/2 * realfreq: value |= eGB_EOM
 	 *  ~A > 5/2 * realfreq: timeout
 	 */
 
@@ -320,7 +323,7 @@ get_bit_live(void)
 #endif
 		p = get_pulse();
 		if (p == 2) {
-			state |= GETBIT_IO;
+			state |= eGB_IO;
 			outch = '*';
 			goto report;
 		}
@@ -349,13 +352,13 @@ get_bit_live(void)
 			a = 1000000000 - (int64_t)(1000000000 *
 			     exp2(-2e7 / bit.realfreq));
 			if (bit.tlow * 100 / bit.t < 1) {
-				state |= GETBIT_RECV;
+				state |= eGB_receive;
 				outch = 'r';
 			} else if (bit.tlow * 100 / bit.t >= 99) {
-				state |= GETBIT_XMIT;
+				state |= eGB_xmit;
 				outch = 'x';
 			} else {
-				state |= GETBIT_RND;
+				state |= eGB_random;
 				outch = '#';
 			}
 			goto report; /* timeout */
@@ -397,10 +400,10 @@ get_bit_live(void)
 				 * something is wrong.
 				 */
 				if (is_eom) {
-					state &= ~GETBIT_EOM;
+					state &= ~eGB_EOM;
 					reset_frequency();
 				} else
-					state |= GETBIT_EOM;
+					state |= eGB_EOM;
 			}
 			break; /* start of new second */
 		}
@@ -424,24 +427,24 @@ get_bit_live(void)
 	} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
 	    (bit.bit0 + bit.bit20) * bit.t) {
 		/* one bit, ~200 ms active signal */
-		state |= GETBIT_ONE;
+		state |= eGB_one;
 		outch = '1';
 		buffer[bitpos] = 1;
 	} else {
 		/* bad radio signal, retain old value */
-		state |= GETBIT_READ;
+		state |= eGB_read;
 		outch = '_';
 		/* force bit 20 to be 1 to recover from too low b20 value */
 		if (bitpos == 20) {
-			state |= GETBIT_ONE;
+			state |= eGB_one;
 			buffer[20] = 1;
 		}
 	}
 	if (init_bit == 1)
 		init_bit--;
-	else if ((state & (GETBIT_RND | GETBIT_XMIT |
-	    GETBIT_RECV | GETBIT_EOM | GETBIT_TOOLONG)) == 0) {
-		if (bitpos == 0 && buffer[0] == 0 && (state & GETBIT_READ) == 0)
+	else if ((state & (eGB_random | eGB_xmit |
+	    eGB_receive | eGB_EOM | eGB_tooLong)) == 0) {
+		if (bitpos == 0 && buffer[0] == 0 && (state & eGB_read) == 0)
 			bit.bit0 += ((int64_t)
 			    (bit.tlow * 1000000 - bit.bit0) / 2);
 		if (bitpos == 20 && buffer[20] == 1)
@@ -455,11 +458,11 @@ report:
 	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
-		if ((state & GETBIT_EOM) == GETBIT_EOM)
+		if ((state & eGB_EOM) == eGB_EOM)
 			fprintf(logfile, "a%uc%6.4f\n", acc_minlen,
 			    (double)((bit.t * 1e6) / bit.realfreq));
 	}
-	if ((state & GETBIT_EOM) == GETBIT_EOM)
+	if ((state & eGB_EOM) == eGB_EOM)
 		cutoff = (uint16_t)(bit.t * 1000000 / (bit.realfreq / 10000));
 	return state;
 }
@@ -468,22 +471,22 @@ report:
 	oldinch = inch; \
 	inch = getc(datafile); \
 	if (inch == EOF) \
-		state |= GETBIT_EOD; \
+		state |= eGB_EOD; \
 	if (inch == (int)'a' || inch == (int)'c') \
-		state |= GETBIT_SKIPNEXT; \
+		state |= eGB_skipNext; \
 	if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) { \
 		if (ungetc(inch, datafile) == EOF) /* EOF remains, IO error */\
-			state |= GETBIT_EOD; \
+			state |= eGB_EOD; \
 	}
 
 #define READVALUE(COND) \
 do { \
-	state &= ~GETBIT_SKIPNEXT; \
-	state |= GETBIT_SKIP; \
+	state &= ~eGB_skipNext; \
+	state |= eGB_skip; \
 	valid = true; \
 	bit.t = 0; \
 	if (COND) \
-		state |= GETBIT_EOD; \
+		state |= eGB_EOD; \
 } while (0)
 
 uint16_t
@@ -507,13 +510,13 @@ get_bit_file(void)
 		inch = getc(datafile);
 		switch (inch) {
 		case EOF:
-			state |= GETBIT_EOD;
+			state |= eGB_EOD;
 			return state;
 		case '0':
 		case '1':
 			buffer[bitpos] = (uint8_t)(inch - (int)'0');
 			if (inch == (int)'1')
-				state |= GETBIT_ONE;
+				state |= eGB_one;
 			valid = true;
 			bit.t = 1000;
 			break;
@@ -526,40 +529,40 @@ get_bit_file(void)
 			 */
 			break;
 		case 'x':
-			state |= GETBIT_XMIT;
+			state |= eGB_xmit;
 			valid = true;
 			bit.t = 2500;
 			break;
 		case 'r':
-			state |= GETBIT_RECV;
+			state |= eGB_receive;
 			valid = true;
 			bit.t = 2500;
 			break;
 		case '#':
-			state |= GETBIT_RND;
+			state |= eGB_random;
 			valid = true;
 			bit.t = 2500;
 			break;
 		case '*':
-			state |= GETBIT_IO;
+			state |= eGB_IO;
 			valid = true;
 			bit.t = 0;
 			break;
 		case '_':
 			/* retain old value in buffer[bitpos] */
-			state |= GETBIT_READ;
+			state |= eGB_read;
 			valid = true;
 			bit.t = 1000;
 			break;
 		case 'a':
 			/* acc_minlen */
 			READVALUE(fscanf(datafile, "%10u", &acc_minlen) != 1);
-			read_acc_minlen = (state & GETBIT_EOD) == 0;
+			read_acc_minlen = (state & eGB_EOD) == 0;
 			break;
 		case 'c':
 			/* cutoff for newminute */
 			READVALUE(fscanf(datafile, "%6c", co) != 1);
-			if (((state & GETBIT_EOD) != GETBIT_EOD) &&
+			if (((state & eGB_EOD) != eGB_EOD) &&
 			    (co[1] == '.'))
 				cutoff = (co[0] - '0') * 10000 +
 				    (uint16_t)strtol(co + 2, (char **)NULL, 10);
@@ -570,7 +573,7 @@ get_bit_file(void)
 	}
 	/* Only allow \r , \n , \r\n , and \n\r as single EOM markers */
 	TRYCHAR else {
-		state |= GETBIT_EOM;
+		state |= eGB_EOM;
 		if (!read_acc_minlen)
 			bit.t += 1000;
 		else
@@ -596,14 +599,14 @@ is_space_bit(uint8_t bitpos)
 uint16_t
 next_bit(void)
 {
-	bitpos = ((state & GETBIT_EOM) == GETBIT_EOM) ? 0 :
-	    ((state & GETBIT_SKIPNEXT) == GETBIT_SKIPNEXT) ? bitpos : bitpos + 1;
-	if (bitpos == BUFLEN) {
-		state |= GETBIT_TOOLONG;
+	bitpos = ((state & eGB_EOM) == eGB_EOM) ? 0 :
+	    ((state & eGB_skipNext) == eGB_skipNext) ? bitpos : bitpos + 1;
+	if (bitpos == buflen) {
+		state |= eGB_tooLong;
 		bitpos = 0;
 		return state;
 	}
-	state &= ~GETBIT_TOOLONG; /* fits again */
+	state &= ~eGB_tooLong; /* fits again */
 	return state;
 }
 

@@ -118,12 +118,12 @@ main(int argc, char **argv)
 				    '+' : '-');
 			printf("\n");
 		}
-		if ((bit & GETBIT_TOOLONG) == GETBIT_TOOLONG)
+		if ((bit & eGB_tooLong) == eGB_tooLong)
 			min++;
 		printf("%x (%"PRIi32" %"PRIi32" %"PRIi32" %"PRIi64" %"PRIi64
 		    " %"PRIi64") %i:%u\n", bit, bi->tlow, bi->tlast0, bi->t,
 		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
-		if ((bit & GETBIT_EOM) == GETBIT_EOM)
+		if ((bit & eGB_EOM) == eGB_EOM)
 			min++;
 		bit = next_bit();
 	}

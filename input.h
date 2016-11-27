@@ -26,35 +26,33 @@ SUCH DAMAGE.
 #ifndef DCF77PI_INPUT_H
 #define DCF77PI_INPUT_H
 
-/** maximum number of bits in a minute */
-#define BUFLEN 60
-
-/** this bit has value 1 */
-#define GETBIT_ONE	(uint16_t)(1 << 0)
-/** end-of-minute bit */
-#define GETBIT_EOM	(uint16_t)(1 << 1)
-/** end of data, either end-of-file or user quit */
-#define GETBIT_EOD	(uint16_t)(1 << 2)
-/** bit value could not be determined */
-#define GETBIT_READ	(uint16_t)(1 << 3)
-/** bit buffer would overflow */
-#define GETBIT_TOOLONG	(uint16_t)(1 << 4)
-/** I/O error while reading bit from hardware */
-#define GETBIT_IO	(uint16_t)(1 << 5)
-/** transmitter error, all positive pulses */
-#define GETBIT_XMIT	(uint16_t)(1 << 6)
-/** receiver error, all negative pulses */
-#define GETBIT_RECV	(uint16_t)(1 << 7)
-/** random radio error, both positive and negative pulses but no proper
-  * signal */
-#define GETBIT_RND	(uint16_t)(1 << 8)
-/** this bit should be skipped (i.e. not displayed) */
-#define GETBIT_SKIP	(uint16_t)(1 << 9)
-/** next bit should be skipped (i.e. not added to bitpos) */
-#define GETBIT_SKIPNEXT	(uint16_t)(1 << 10)
-
 #include <stdbool.h>
-#include <stdint.h> /* *intX_t */
+#include <stdint.h>
+
+enum eGB {
+/** this bit has value 1 */
+	eGB_one = 1 << 0,
+/** end-of-minute bit */
+	eGB_EOM = 1 << 1,
+/** end of data, either end-of-file or user quit */
+	eGB_EOD = 1 << 2,
+/** bit value could not be determined */
+	eGB_read = 1 << 3,
+/** bit buffer would overflow */
+	eGB_tooLong = 1 << 4,
+/** I/O error while reading bit from hardware */
+	eGB_IO = 1 << 5,
+/** transmitter error, all positive pulses */
+	eGB_xmit = 1 << 6,
+/** receiver error, all negative pulses */
+	eGB_receive = 1 << 7,
+/** random radio error, positive and negative pulses but no proper signal */
+	eGB_random = 1 << 8,
+/** this bit should be skipped (i.e. not displayed) */
+	eGB_skip = 1 << 9,
+/** next bit should be skipped (i.e. not added to bitpos) */
+	eGB_skipNext = 1 << 10,
+};
 
 /**
  * Hardware parameters:
@@ -142,7 +140,7 @@ uint8_t get_pulse(void);
 /**
  * Retrieve one bit from the log file.
  *
- * @return The current bit from the log file, a mask of GETBIT_* values.
+ * @return The current bit from the log file, a mask of eGB_* values.
  */
 uint16_t get_bit_file(void);
 
@@ -150,14 +148,14 @@ uint16_t get_bit_file(void);
  * Retrieve one live bit from the hardware. This function determines several
  * values which can be retrieved using get_bitinfo().
  *
- * @return The currently received bit, a mask of GETBIT_* values.
+ * @return The currently received bit, a mask of eGB_* values.
  */
 uint16_t get_bit_live(void);
 
 /**
  * Prepare for the next bit: update the bit position or wrap it around.
  *
- * @return The current bit state mask, ORed with GETBIT_TOOLONG if the bit
+ * @return The current bit state mask, ORed with eGB_tooLong if the bit
  *   buffer just became full.
  */
 uint16_t next_bit(void);

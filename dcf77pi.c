@@ -112,24 +112,24 @@ display_bit(uint16_t state, uint8_t bitpos)
 		mvwchgat(input_win, 3, 36, 21, A_NORMAL, 7, NULL);
 
 	wattron(input_win, COLOR_PAIR(2));
-	if (state & GETBIT_EOM)
+	if (state & eGB_EOM)
 		mvwprintw(input_win, 3, 58, "minute   ");
-	else if (state == 0 || state == GETBIT_ONE)
+	else if (state == 0 || state == eGB_one)
 		mvwprintw(input_win, 3, 58, "OK       ");
 	else
 		mvwprintw(input_win, 3, 58, "         ");
 	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
-	if (state & GETBIT_READ)
+	if (state & eGB_read)
 		mvwprintw(input_win, 3, 58, "read     ");
-	if (state & GETBIT_RECV)
+	if (state & eGB_receive)
 		mvwprintw(input_win, 3, 68, "receive ");
-	else if (state & GETBIT_XMIT)
+	else if (state & eGB_xmit)
 		mvwprintw(input_win, 3, 68, "transmit");
-	else if (state & GETBIT_RND)
+	else if (state & eGB_random)
 		mvwprintw(input_win, 3, 68, "random  ");
-	else if (state & GETBIT_IO)
+	else if (state & eGB_IO)
 		mvwprintw(input_win, 3, 68, "IO      ");
 	else {
 		wattron(input_win, COLOR_PAIR(2));
@@ -143,7 +143,7 @@ display_bit(uint16_t state, uint8_t bitpos)
 			xpos++;
 
 	mvwprintw(input_win, 0, xpos, "%u", get_buffer()[bitpos]);
-	if (state & GETBIT_READ)
+	if (state & eGB_read)
 		mvwchgat(input_win, 0, xpos, 1, A_BOLD, 3, NULL);
 	wnoutrefresh(input_win);
 
@@ -287,7 +287,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 	if (input_mode == 0 && inkey != ERR) {
 		switch (inkey) {
 		case 'Q':
-			*bit |= GETBIT_EOD; /* quit main loop */
+			*bit |= eGB_EOD; /* quit main loop */
 			break;
 		case 'L':
 			inkey = ERR; /* prevent key repeat */
@@ -387,14 +387,14 @@ post_process_input(char **logfilename, bool * const change_logfile,
 				    close_logfile() != 0) {
 					statusbar(bitpos,
 					    "Error closing old log file");
-					*bit |= GETBIT_EOD; /* error */
+					*bit |= eGB_EOD; /* error */
 				}
 				if (strlen(*logfilename) > 0) {
 					int res = append_logfile(*logfilename);
 					if (res != 0) {
 						statusbar(bitpos,
 						    strerror(res));
-						*bit |= GETBIT_EOD; /* error */
+						*bit |= eGB_EOD; /* error */
 					}
 				}
 			}
@@ -448,12 +448,12 @@ show_mainloop_result(uint16_t * const bit, uint8_t bitpos)
 	switch (get_mainloop_result()) {
 	case -1:
 		statusbar(bitpos, "mktime() failed!");
-		*bit |= GETBIT_EOD; /* error */
+		*bit |= eGB_EOD; /* error */
 		break;
 	case -2:
 		statusbar(bitpos, "settimeofday(): %s",
 		    strerror(errno));
-		*bit |= GETBIT_EOD; /* error */
+		*bit |= eGB_EOD; /* error */
 		break;
 	case -3:
 		statusbar(bitpos, "Too early to set the time");

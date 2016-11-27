@@ -42,7 +42,7 @@ SUCH DAMAGE.
  * @param display_bit The callback to display the currently received bit (either
  *   live or from a log file).
  * @param display_long_minute The callback to indicate that this minute is too
- *   long (GETBIT_TOOLONG is set).
+ *   long (eGB_tooLong is set).
  * @param display_minute The callback to display information about the current
  *   minute.
  * @param display_new_second The optional callback for additional actions after

@@ -42,17 +42,17 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 	case 0:
 		/* copy third party data */
 		if (bitpos > 1 && bitpos < 8)
-			tpbuf[bitpos - 2] = bit & GETBIT_ONE;
+			tpbuf[bitpos - 2] = bit & eGB_one;
 			/* 2..7 -> 0..5 */
 		if (bitpos > 8 && bitpos < 15)
-			tpbuf[bitpos - 3] = bit & GETBIT_ONE;
+			tpbuf[bitpos - 3] = bit & eGB_one;
 			/* 9..14 -> 6..11 */
 
 		/* copy third party type */
 		if (bitpos == 1)
-			tpstat = (bit & GETBIT_ONE) << 1;
+			tpstat = (bit & eGB_one) << 1;
 		if (bitpos == 8) {
-			tpstat |= (bit & GETBIT_ONE);
+			tpstat |= (bit & eGB_one);
 			switch (tpstat) {
 			case 0:
 				tptype = eTP_weather;
@@ -69,13 +69,13 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 	case 1:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 11] = bit & GETBIT_ONE;
+			tpbuf[bitpos + 11] = bit & eGB_one;
 			/* 1..14 -> 12..25 */
 		break;
 	case 2:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 25] = bit & GETBIT_ONE;
+			tpbuf[bitpos + 25] = bit & eGB_one;
 			/* 1..14 -> 26..39 */
 		break;
 	}

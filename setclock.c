@@ -35,7 +35,7 @@ bool
 setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit)
 {
 	return init_min == 0 && ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
-	    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0);
+	    ((bit & ~(eGB_one | eGB_EOM)) == 0);
 }
 
 int8_t

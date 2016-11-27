@@ -39,13 +39,13 @@ display_bit(uint16_t state, uint8_t bitpos)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
-	if ((state & GETBIT_RECV) == GETBIT_RECV)
+	if ((state & eGB_receive) == eGB_receive)
 		printf("r");
-	else if ((state & GETBIT_XMIT) == GETBIT_XMIT)
+	else if ((state & eGB_xmit) == eGB_xmit)
 		printf("x");
-	else if ((state & GETBIT_RND) == GETBIT_RND)
+	else if ((state & eGB_random) == eGB_random)
 		printf("#");
-	else if ((state & GETBIT_READ) == GETBIT_READ)
+	else if ((state & eGB_read) == eGB_read)
 		printf("_");
 	else
 		printf("%u", get_buffer()[bitpos]);

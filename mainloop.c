@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 René Ladan. All rights reserved.
+Copyright (c) 2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -73,7 +73,7 @@ mainloop(char *logfilename,
 		if (process_input != NULL) {
 			process_input(&bit, bitpos, logfilename, &settime,
 			    &change_logfile);
-			if ((bit & GETBIT_EOD) == GETBIT_EOD)
+			if ((bit & eGB_EOD) == eGB_EOD)
 				break;
 		}
 
@@ -81,17 +81,17 @@ mainloop(char *logfilename,
 		if (post_process_input != NULL)
 			post_process_input(&logfilename, &change_logfile, &bit,
 			    bitpos);
-		if ((bit & GETBIT_SKIP) == 0 && (bit & GETBIT_EOD) == 0)
+		if ((bit & eGB_skip) == 0 && (bit & eGB_EOD) == 0)
 			display_bit(bit, bitpos);
 
 		if (init_min < 2)
 			fill_thirdparty_buffer((uint8_t)curtime.tm_min, bitpos, bit);
 
 		bit = next_bit();
-		if ((bit & GETBIT_EOM) == GETBIT_EOM)
+		if ((bit & eGB_EOM) == eGB_EOM)
 			minlen = bitpos + 1;
 			/* handle the missing bit due to the minute marker */
-		if ((bit & GETBIT_TOOLONG) == GETBIT_TOOLONG) {
+		if ((bit & eGB_tooLong) == eGB_tooLong) {
 			minlen = 0xff;
 			/*
 			 * leave acc_minlen alone,
@@ -102,7 +102,7 @@ mainloop(char *logfilename,
 		if (display_new_second != NULL)
 			display_new_second();
 
-		if ((bit & (GETBIT_EOM | GETBIT_TOOLONG)) != 0) {
+		if ((bit & (eGB_EOM | eGB_tooLong)) != 0) {
 			display_minute(minlen);
 			dt = decode_time(init_min, minlen, get_acc_minlen(),
 			    get_buffer(), &curtime);
@@ -134,7 +134,7 @@ mainloop(char *logfilename,
 					mainloop_result = -3;
 			}
 
-			if ((bit & GETBIT_EOM) == GETBIT_EOM)
+			if ((bit & eGB_EOM) == eGB_EOM)
 				reset_acc_minlen();
 			if (init_min > 0)
 				init_min--;
@@ -146,7 +146,7 @@ mainloop(char *logfilename,
 			have_result = false;
 		}
 
-		if ((bit & GETBIT_EOD) == GETBIT_EOD)
+		if ((bit & eGB_EOD) == eGB_EOD)
 			break;
 	}
 
