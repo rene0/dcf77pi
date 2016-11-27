@@ -26,7 +26,6 @@ SUCH DAMAGE.
 #ifndef DCF77PI_DECODE_TIME_H
 #define DCF77PI_DECODE_TIME_H
 
-#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
