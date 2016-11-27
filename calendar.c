@@ -86,11 +86,11 @@ isleap(struct tm time)
 uint8_t
 lastday(struct tm time)
 {
+	if (time.tm_mon == 2)
+		return (uint8_t)(28 + (isleap(time) ? 1 : 0));
 	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 ||
 	    time.tm_mon == 11)
 		return 30;
-	if (time.tm_mon == 2)
-		return (uint8_t)(28 + (isleap(time) ? 1 : 0));
 	return 31;
 }
 
