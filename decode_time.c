@@ -370,39 +370,3 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 
 	return rval | announce;
 }
-
-struct tm
-get_dcftime(struct tm isotime)
-{
-	struct tm dt;
-
-	memcpy((void *)&dt, (const void*)&isotime, sizeof(isotime));
-	/* keep original tm_sec */
-	dt.tm_mon++;
-	dt.tm_year += 1900;
-	if (dt.tm_wday == 0)
-		dt.tm_wday = 7;
-	dt.tm_yday = (int)(dayinleapyear[isotime.tm_mon] + dt.tm_mday -
-	    ((isotime.tm_mon > 1 && !isleap(dt)) ? 1 : 0));
-	dt.tm_zone = NULL;
-
-	return dt;
-}
-
-struct tm
-get_isotime(struct tm dcftime)
-{
-	struct tm it;
-
-	memcpy((void *)&it, (const void *)&dcftime, sizeof(dcftime));
-	it.tm_sec = 0;
-	it.tm_mon--;
-	it.tm_year -= 1900;
-	if (it.tm_wday == 7)
-		it.tm_wday = 0;
-	it.tm_yday = (int)(dayinleapyear[it.tm_mon] + it.tm_mday -
-	    ((it.tm_mon > 1 && !isleap(dcftime)) ? 1 : 0));
-	it.tm_zone = NULL;
-
-	return it;
-}

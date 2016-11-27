@@ -25,6 +25,7 @@ SUCH DAMAGE.
 
 #include "setclock.h"
 
+#include "calendar.h"
 #include "decode_time.h"
 #include "input.h"
 
@@ -51,6 +52,7 @@ setclock(struct tm time)
 	if (time.tm_isdst == -1)
 		return -1;
 	it = get_isotime(time);
+	it.tm_sec = 0;
 	epochtime = mktime(&it);
 	if (epochtime == -1)
 		return -1;

@@ -25,6 +25,8 @@ SUCH DAMAGE.
 
 #include "calendar.h"
 
+#include <string.h>
+
 const uint16_t base_year = 1900;
 
 const uint16_t dayinleapyear[12] =
@@ -144,4 +146,40 @@ substract_minute(struct tm * const time)
 			}
 		}
 	}
+}
+
+struct tm
+get_dcftime(struct tm isotime)
+{
+	struct tm dt;
+
+	memcpy((void *)&dt, (const void*)&isotime, sizeof(isotime));
+	dt.tm_mon++;
+	dt.tm_year += 1900;
+	if (dt.tm_wday == 0)
+		dt.tm_wday = 7;
+	dt.tm_yday = (int)dayinleapyear[isotime.tm_mon] + dt.tm_mday;
+	if (dt.tm_mon > 2 && !isleap(dt))
+		dt.tm_yday--;
+	dt.tm_zone = NULL;
+
+	return dt;
+}
+
+struct tm
+get_isotime(struct tm dcftime)
+{
+	struct tm it;
+
+	memcpy((void *)&it, (const void *)&dcftime, sizeof(dcftime));
+	it.tm_mon--;
+	it.tm_year -= 1900;
+	if (it.tm_wday == 7)
+		it.tm_wday = 0;
+	it.tm_yday = (int)dayinleapyear[it.tm_mon] + it.tm_mday;
+	if (dcftime.tm_mon > 2 && !isleap(dcftime))
+		it.tm_yday--;
+	it.tm_zone = NULL;
+
+	return it;
 }
