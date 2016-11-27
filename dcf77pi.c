@@ -35,12 +35,12 @@ SUCH DAMAGE.
 
 #include <ncurses.h>
 
-const uint8_t maxbuf = 255;
+static const uint8_t maxbuf = 255;
 
 static WINDOW *input_win;
 static WINDOW *decode_win;
 static WINDOW *tp_win;
-WINDOW *main_win;
+static WINDOW *main_win;
 
 static int8_t old_bitpos = -1; /* timer for statusbar inactive */
 static int8_t input_mode;      /* normal input (statusbar) or string input */

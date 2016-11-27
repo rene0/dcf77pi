@@ -63,7 +63,7 @@ SUCH DAMAGE.
 #endif
 
 /** maximum number of bits in a minute */
-const uint8_t buflen = 60;
+static const uint8_t buflen = 60;
 
 static uint8_t bitpos;         /* second */
 static uint8_t buffer[buflen]; /* wrap after buflen positions */

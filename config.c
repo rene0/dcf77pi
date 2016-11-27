@@ -38,9 +38,9 @@ static const char *key[] = {
 
 #define NUM_KEYS (sizeof(key) / sizeof(key[0]))
 
-const uint8_t max_key_len = 20;
-const uint8_t max_val_len = 255;
-const uint16_t max_len = (max_key_len + 3 + max_val_len + 2); /* "k = v\n\0" */
+static const uint8_t max_key_len = 20;
+static const uint8_t max_val_len = 255;
+static const uint16_t max_len = (max_key_len + 3 + max_val_len + 2); /* "k = v\n\0" */
 
 static char *value[NUM_KEYS];
 
