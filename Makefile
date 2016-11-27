@@ -25,11 +25,11 @@ decode_alarm.o: decode_alarm.h
 	$(CC) -fpic $(CFLAGS) -c decode_alarm.c -o $@
 config.o: config.h
 	$(CC) -fpic $(CFLAGS) -c config.c -o $@
-setclock.o: setclock.h decode_time.h
+setclock.o: setclock.h decode_time.h input.h
 	$(CC) -fpic $(CFLAGS) -c setclock.c -o $@
-mainloop.o: mainloop.h
+mainloop.o: mainloop.h input.h bits1to14.h
 	$(CC) -fpic $(CFLAGS) -c mainloop.c -o $@
-bits1to14.o: bits1to14.h
+bits1to14.o: bits1to14.h input.h
 	$(CC) -fpic $(CFLAGS) -c bits1to14.c -o $@
 calendar.o: calendar.h
 	$(CC) -fpic $(CFLAGS) -c calendar.c -o $@

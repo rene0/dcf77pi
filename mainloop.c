@@ -111,14 +111,14 @@ mainloop(char *logfilename,
 				tpbuf = get_thirdparty_buffer();
 				display_thirdparty_buffer(tpbuf);
 				switch (get_thirdparty_type()) {
-				case TP_ALARM:
+				case eTP_alarm:
 					decode_alarm(tpbuf, &civwarn);
 					display_alarm(civwarn);
 					break;
-				case TP_UNKNOWN:
+				case eTP_unknown:
 					display_unknown();
 					break;
-				case TP_WEATHER:
+				case eTP_weather:
 					display_weather();
 					break;
 				}

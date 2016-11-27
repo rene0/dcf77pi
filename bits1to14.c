@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 René Ladan. All rights reserved.
+Copyright (c) 2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,8 +29,9 @@ SUCH DAMAGE.
 
 #include <string.h>
 
-static uint8_t tpbuf[TPBUFLEN];
-static enum TPTYPE tptype = TP_UNKNOWN;
+const uint8_t tpBufLen = 40;
+static uint8_t tpbuf[tpBufLen];
+static enum eTP tptype = eTP_unknown;
 
 void
 fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
@@ -54,13 +55,13 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 			tpstat |= (bit & GETBIT_ONE);
 			switch (tpstat) {
 			case 0:
-				tptype = TP_WEATHER;
+				tptype = eTP_weather;
 				break;
 			case 3:
-				tptype = TP_ALARM;
+				tptype = eTP_alarm;
 				break;
 			default:
-				tptype = TP_UNKNOWN;
+				tptype = eTP_unknown;
 				break;
 			}
 		}
@@ -86,7 +87,7 @@ get_thirdparty_buffer(void)
 	return tpbuf;
 }
 
-enum TPTYPE
+enum eTP
 get_thirdparty_type(void)
 {
 	return tptype;

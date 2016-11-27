@@ -234,7 +234,7 @@ display_thirdparty_buffer(const uint8_t *buf)
 {
 	uint8_t i;
 
-	for (i = 0; i < TPBUFLEN; i++)
+	for (i = 0; i < tpBufLen; i++)
 		mvwprintw(tp_win, 0, i + 22, "%u", buf[i]);
 	wclrtoeol(tp_win);
 	wrefresh(tp_win);

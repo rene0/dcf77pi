@@ -26,20 +26,20 @@ SUCH DAMAGE.
 #ifndef DCF77PI_BITS1TO14_H
 #define DCF77PI_BITS1TO14_H
 
+#include <stdint.h>
+
 /** Length of the third-party buffer in bits */
-#define TPBUFLEN 40
+extern const uint8_t tpBufLen;
 
 /** Indicates the type of the third party contents. */
-enum TPTYPE {
+enum eTP {
 	/** unknown content */
-	TP_UNKNOWN,
+	eTP_unknown,
 	/** Meteotime weather (encrypted) */
-	TP_WEATHER,
+	eTP_weather,
 	/** German civil warning (unused) */
-	TP_ALARM
+	eTP_alarm,
 };
-
-#include <stdint.h>
 
 /**
  * Add the current bit value to the third party buffer.
@@ -62,6 +62,6 @@ const uint8_t * const get_thirdparty_buffer(void);
  *
  * @return The third party status.
  */
-enum TPTYPE get_thirdparty_type(void);
+enum eTP get_thirdparty_type(void);
 
 #endif

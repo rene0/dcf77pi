@@ -158,7 +158,7 @@ display_thirdparty_buffer(const uint8_t * const tpbuf)
 	uint8_t i;
 
 	printf("Third party buffer: ");
-	for (i = 0; i < TPBUFLEN; i++)
+	for (i = 0; i < tpBufLen; i++)
 		printf("%u", tpbuf[i]);
 	printf("\n");
 }
