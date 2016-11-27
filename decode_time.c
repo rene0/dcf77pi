@@ -234,9 +234,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			p3 = false;
 		} else {
 			if (init_min == 0 && time->tm_year !=
-			    (int)(BASEYEAR + 100 * centofs + newtime.tm_year))
+			    (int)(base_year + 100 * centofs + newtime.tm_year))
 				rval |= eDT_YearJump;
-			newtime.tm_year += BASEYEAR + 100 * centofs;
+			newtime.tm_year += base_year + 100 * centofs;
 			if (newtime.tm_mday > (int)lastday(newtime)) {
 				rval |= eDT_Date;
 				p3 = false;

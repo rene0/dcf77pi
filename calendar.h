@@ -30,8 +30,11 @@ SUCH DAMAGE.
 #include <stdint.h>
 #include <time.h>
 
-/** update every 400 years, now at 2300-01-01 */
-#define BASEYEAR	1900
+/**
+ * The base year for {@link century_offset}.
+ * Update every 400 years, now at 2300-01-01
+ */
+extern const uint16_t base_year;
 
 /**
  * An array containing the day numbers of each month in a leap year.
@@ -56,7 +59,7 @@ uint8_t lastday(struct tm time);
 /**
  * Calculates the century offset of the current time.
  *
- * The result should be multiplied by 100 and then be added to BASEYEAR.
+ * The result should be multiplied by 100 and then be added to {@link base_year}.
  *
  * @param time The current time.
  * @return The century offset (0 to 3 or -1 if an error happened).
@@ -73,7 +76,8 @@ uint8_t get_utchour(struct tm time);
 
 /**
  * Adds one minute to the current time. Leap years are handled. Note that the
- * year will fall back to BASEYEAR when it reaches BASEYEAR + 400.
+ * year will fall back to {@link base_year} when it reaches
+ * {@link base_year} + 400.
  *
  * @param time The current time to be increased with one minute.
  */
@@ -81,7 +85,8 @@ void add_minute(struct tm * const time);
 
 /**
  * Substracts one minute to the current time. Leap years are handled. Note that
- * the year will fall back to BASEYEAR + 399 when it reaches BASEYEAR - 1.
+ * the year will fall back to {@link base_year} + 399 when it reaches
+ * {@link base_year} - 1.
  *
  * @param time The current time to be decreased with one minute.
  */
