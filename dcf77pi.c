@@ -159,12 +159,12 @@ display_time(uint32_t dt, struct tm time)
 	uint16_t cutoff;
 
 	/* color bits depending on the results */
-	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, dt & DT_B0 ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt & DT_DSTERR ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, dt & DT_B20 ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, dt & DT_MIN ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, dt & DT_HOUR ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, dt & DT_DATE ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, (dt & DT_B0) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, (dt & DT_DSTERR) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, (dt & DT_B20) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, (dt & DT_MIN) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, (dt & DT_HOUR) ? 1 : 2, NULL);
+	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, (dt & DT_DATE) ? 1 : 2, NULL);
 	if (dt & DT_LEAPONE)
 		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
 

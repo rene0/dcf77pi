@@ -50,7 +50,6 @@ void
 init_time(void)
 {
 	char *freeptr, *lsm, *mon;
-	uint8_t i, m;
 
 	summermonth = (uint8_t)strtol(get_config_value("summermonth"), NULL, 10);
 	if (summermonth < 1 || summermonth > 12)
@@ -61,8 +60,8 @@ init_time(void)
 
 	freeptr = lsm = strdup(get_config_value("leapsecmonths"));
 	num_leapsecmonths = 0;
-	for (i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
-		m = (uint8_t)strtol(mon, NULL, 10);
+	for (uint8_t i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
+		uint8_t m = (uint8_t)strtol(mon, NULL, 10);
 		if (m >= 1 && m <= 12) {
 			leapsecmonths[i] = m;
 			num_leapsecmonths++;
@@ -116,9 +115,8 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 {
 	struct tm newtime;
 	uint32_t rval = 0;
-	int16_t increase, i;
+	int16_t increase;
 	uint8_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, utchour;
-	int8_t centofs;
 	bool generr, p1, p2, p3, ok;
 	static uint32_t acc_minlen_partial, old_acc_minlen;
 	static bool olderr, prev_toolong;
@@ -173,9 +171,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
-		for (i = increase; increase > 0 && i > 0; i--)
+		for (int16_t i = increase; increase > 0 && i > 0; i--)
 			add_minute(time);
-		for (i = increase; increase < 0 && i < 0; i++)
+		for (int16_t i = increase; increase < 0 && i < 0; i++)
 			substract_minute(time);
 	}
 
@@ -230,7 +228,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			rval |= DT_WDAYJUMP;
 		if (init_min == 0 && time->tm_mon != newtime.tm_mon)
 			rval |= DT_MONTHJUMP;
-		centofs = century_offset(newtime);
+		int8_t centofs = century_offset(newtime);
 		if (centofs == -1) {
 			rval |= DT_DATE;
 			p3 = false;

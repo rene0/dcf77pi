@@ -90,7 +90,7 @@ get_region_name(struct alm alarm)
 			res = strcat(res, ", ");
 		res = strcat(res, reg1m);
 	}
-	if ((r & 4) == 1) {
+	if ((r & 4) == 4) {
 		if (((r & 1) == 1) || ((r & 2) == 2))
 			res = strcat(res, ", ");
 		res = strcat(res, reg1s);

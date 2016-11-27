@@ -559,7 +559,7 @@ get_bit_file(void)
 		case 'c':
 			/* cutoff for newminute */
 			READVALUE(fscanf(datafile, "%6c", co) != 1);
-			if (!((state & GETBIT_EOD) == GETBIT_EOM) &
+			if (((state & GETBIT_EOD) != GETBIT_EOD) &&
 			    (co[1] == '.'))
 				cutoff = (co[0] - '0') * 10000 +
 				    (uint16_t)strtol(co + 2, (char **)NULL, 10);
