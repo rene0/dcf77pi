@@ -26,6 +26,7 @@ SUCH DAMAGE.
 #include "config.h"
 
 #include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,9 +38,9 @@ static const char *key[] = {
 
 #define NUM_KEYS (sizeof(key) / sizeof(key[0]))
 
-#define MAX_KEYLEN 20
-#define MAX_VALLEN 255
-#define MAX_LEN (MAX_KEYLEN + 3 + MAX_VALLEN + 2) /* "k = v\n\0" */
+const uint8_t max_key_len = 20;
+const uint8_t max_val_len = 255;
+const uint16_t max_len = (max_key_len + 3 + max_val_len + 2); /* "k = v\n\0" */
 
 static char *value[NUM_KEYS];
 
@@ -83,7 +84,7 @@ read_config_file(const char * const filename)
 	char *line, *freeptr;
 
 	k = v = NULL;
-	line = malloc(MAX_LEN);
+	line = malloc(max_len);
 	if (line == NULL) {
 		perror("malloc(configfile)");
 		return errno;
@@ -100,7 +101,7 @@ read_config_file(const char * const filename)
 	}
 
 	while (feof(configfile) == 0) {
-		if (fgets(line, MAX_LEN, configfile) == NULL) {
+		if (fgets(line, max_len, configfile) == NULL) {
 			if (feof(configfile) != 0)
 				break;
 			printf("read_config_file: error reading file\n");
@@ -115,8 +116,8 @@ read_config_file(const char * const filename)
 		i = (int)strlen(k);
 		k = strip(k);
 		v = strip(v);
-		if (i > MAX_KEYLEN + 1 || strlen(k) == 0 ||
-		    strlen(k) > MAX_KEYLEN) {
+		if (i > max_key_len + 1 || strlen(k) == 0 ||
+		    strlen(k) > max_key_len) {
 			printf("read_config_file: item with bad key length\n");
 			END_CONFIG(-1);
 		}
@@ -126,7 +127,7 @@ read_config_file(const char * const filename)
 			    k);
 			continue;
 		}
-		if (strlen(v) > MAX_VALLEN) {
+		if (strlen(v) > max_val_len) {
 			printf("read_config_file: item with too long value\n");
 			END_CONFIG(-1);
 		}
