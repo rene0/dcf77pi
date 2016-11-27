@@ -1,5 +1,5 @@
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
-	uninstall-doxygen lint
+	uninstall-doxygen lint splint
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
@@ -97,10 +97,10 @@ uninstall-doxygen:
 splint:
 	splint -D__CYGWIN__ +posixlib \
 		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
-		dcf77pi.c || true
+		dcf77pi.c testcentury.c || true
 	splint -D__linux__ +posixlib \
 		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
-		dcf77pi.c || true
+		dcf77pi.c testcentury.c || true
 	splint -D__FreeBSD__ -D__FreeBSD_version=900022 +posixlib \
 		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
-		dcf77pi.c || true
+		dcf77pi.c testcentury.c || true
