@@ -39,9 +39,8 @@ void
 decode_alarm(const uint8_t * const civbuf, struct alm * const alarm)
 {
 	/* Partial information only, no parity checks */
-	uint8_t i;
 
-	for (i = 0; i < 2; i++) {
+	for (uint8_t i = 0; i < 2; i++) {
 		alarm->region[i].r1 = civbuf[6 * i] +
 		    2 * civbuf[1 + 6 * i] +
 		    4 * civbuf[3 + 6 * i];
@@ -70,7 +69,6 @@ decode_alarm(const uint8_t * const civbuf, struct alm * const alarm)
 get_region_name(struct alm alarm)
 {
 	/*@null@*/char *res;
-	uint8_t r;
 	bool need_comma;
 
 	/* Partial information only */
@@ -85,18 +83,17 @@ get_region_name(struct alm alarm)
 		return res;
 
 	need_comma = false;
-	r = alarm.region[0].r1;
-	if ((r & 1) == 1) {
+	if ((alarm.region[0].r1 & 1) == 1) {
 		res = strcat(res, reg1n);
 		need_comma = true;
 	}
-	if ((r & 2) == 2) {
+	if ((alarm.region[0].r1 & 2) == 2) {
 		if (need_comma)
 			res = strcat(res, ", ");
 		res = strcat(res, reg1m);
 		need_comma = true;
 	}
-	if ((r & 4) == 4) {
+	if ((alarm.region[0].r1 & 4) == 4) {
 		if (need_comma)
 			res = strcat(res, ", ");
 		res = strcat(res, reg1s);
