@@ -27,6 +27,7 @@ SUCH DAMAGE.
 
 #include "bits1to14.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -70,6 +71,7 @@ get_region_name(struct alm alarm)
 {
 	/*@null@*/char *res;
 	uint8_t r;
+	bool need_comma;
 
 	/* Partial information only */
 
@@ -82,16 +84,20 @@ get_region_name(struct alm alarm)
 	if (res == NULL)
 		return res;
 
+	need_comma = false;
 	r = alarm.region[0].r1;
-	if ((r & 1) == 1)
+	if ((r & 1) == 1) {
 		res = strcat(res, reg1n);
+		need_comma = true;
+	}
 	if ((r & 2) == 2) {
-		if ((r & 1) == 1)
+		if (need_comma)
 			res = strcat(res, ", ");
 		res = strcat(res, reg1m);
+		need_comma = true;
 	}
 	if ((r & 4) == 4) {
-		if (((r & 1) == 1) || ((r & 2) == 2))
+		if (need_comma)
 			res = strcat(res, ", ");
 		res = strcat(res, reg1s);
 	}
