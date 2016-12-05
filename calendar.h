@@ -52,7 +52,7 @@ extern const char * const weekday[8];
  * @param time The current time.
  * @return The year of the current time is a leap year.
  */
-bool isleap(struct tm time);
+bool isleapyear(struct tm time);
 
 /**
  * Calculates the last day of the month of the current time.

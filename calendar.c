@@ -77,7 +77,7 @@ century_offset(struct tm time)
 }
 
 bool
-isleap(struct tm time)
+isleapyear(struct tm time)
 {
 	return (time.tm_year % 4 == 0 && time.tm_year % 100 != 0) ||
 	    time.tm_year % 400 == 0;
@@ -87,7 +87,7 @@ uint8_t
 lastday(struct tm time)
 {
 	if (time.tm_mon == 2)
-		return (uint8_t)(28 + (isleap(time) ? 1 : 0));
+		return (uint8_t)(28 + (isleapyear(time) ? 1 : 0));
 	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 ||
 	    time.tm_mon == 11)
 		return 30;
@@ -162,7 +162,7 @@ get_dcftime(struct tm isotime)
 	if (dt.tm_wday == 0)
 		dt.tm_wday = 7;
 	dt.tm_yday = (int)dayinleapyear[isotime.tm_mon] + dt.tm_mday;
-	if (dt.tm_mon > 2 && !isleap(dt))
+	if (dt.tm_mon > 2 && !isleapyear(dt))
 		dt.tm_yday--;
 	dt.tm_zone = NULL;
 
@@ -180,7 +180,7 @@ get_isotime(struct tm dcftime)
 	if (it.tm_wday == 7)
 		it.tm_wday = 0;
 	it.tm_yday = (int)dayinleapyear[it.tm_mon] + it.tm_mday;
-	if (dcftime.tm_mon > 2 && !isleap(dcftime))
+	if (dcftime.tm_mon > 2 && !isleapyear(dcftime))
 		it.tm_yday--;
 	it.tm_zone = NULL;
 
