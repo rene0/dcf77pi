@@ -164,9 +164,9 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
 		for (int16_t i = increase; increase > 0 && i > 0; i--)
-			add_minute(time);
+			add_minute(time, summermonth, wintermonth);
 		for (int16_t i = increase; increase < 0 && i < 0; i++)
-			substract_minute(time);
+			substract_minute(time, summermonth, wintermonth);
 	}
 
 	p1 = getpar(buffer, 21, 28);

@@ -81,22 +81,34 @@ int8_t century_offset(struct tm time);
 uint8_t get_utchour(struct tm time);
 
 /**
- * Adds one minute to the current time. Leap years are handled. Note that the
+ * Adds one minute to the current time. Note that the
  * year will fall back to {@link base_year} when it reaches
  * {@link base_year} + 400.
  *
+ * Leap years and switches to and from daylight saving time are taken into
+ * account. The latter can be disabled by setting summermonth
+ * respectively wintermonth to 0.
+ *
  * @param time The current time to be increased with one minute.
+ * @param summermonth The month that DST begins in.
+ * @param wintermonth The month that DST ends in.
  */
-void add_minute(struct tm * const time);
+void add_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermonth);
 
 /**
- * Substracts one minute to the current time. Leap years are handled. Note that
+ * Substracts one minute to the current time. Note that
  * the year will fall back to {@link base_year} + 399 when it reaches
  * {@link base_year} - 1.
  *
+ * Leap years and switches to and from daylight saving time are taken into
+ * account. The latter can be disabled by setting summermonth
+ * respectively wintermonth to 0.
+ *
  * @param time The current time to be decreased with one minute.
+ * @param summermonth The month that DST begins in.
+ * @param wintermonth The month that DST ends in.
  */
-void substract_minute(struct tm * const time);
+void substract_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermonth);
 
 /**
  * Convert the given time in ISO format to DCF77 format.
