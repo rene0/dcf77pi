@@ -210,8 +210,10 @@ cleanup(void)
 uint8_t
 get_pulse(void)
 {
-	uint8_t tmpch = 2;
-#if !defined(NOLIVE)
+	uint8_t tmpch;
+#if defined(NOLIVE)
+	tmpch = 2;
+#else
 	int count = 0;
 #if defined(__FreeBSD__)
 	struct gpio_req req;
