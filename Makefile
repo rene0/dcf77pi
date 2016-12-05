@@ -119,7 +119,7 @@ splint:
 cppcheck:
 	cppcheck -DETCDIR=\"$(ETCDIR)\" -D__CYGWIN__ \
 		--enable=all --inconclusive  --language=c --std=c11 . || true
-	cppcheck -DETCDIR=\"$(ETCDIR)\" -D__linux__
+	cppcheck -DETCDIR=\"$(ETCDIR)\" -D__linux__ \
 		--enable=all --inconclusive --language=c --std=c11 . || true
 	cppcheck -DETCDIR=\"$(ETCDIR)\" -D__FreeBSD__ \
 		-D__FreeBSD_version=900022 \
