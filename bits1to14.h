@@ -38,7 +38,7 @@ enum eTP {
 	/** Meteotime weather (encrypted) */
 	eTP_weather,
 	/** German civil warning (unused) */
-	eTP_alarm,
+	eTP_alarm
 };
 
 /**

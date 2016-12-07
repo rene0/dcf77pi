@@ -51,7 +51,7 @@ enum eGB {
 /** this bit should be skipped (i.e. not displayed) */
 	eGB_skip = 1 << 9,
 /** next bit should be skipped (i.e. not added to bitpos) */
-	eGB_skip_next = 1 << 10,
+	eGB_skip_next = 1 << 10
 };
 
 /**
