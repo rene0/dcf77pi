@@ -27,6 +27,7 @@ SUCH DAMAGE.
 #define DCF77PI_MAINLOOP_H
 
 #include "decode_alarm.h"
+#include "decode_time.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -68,7 +69,7 @@ void mainloop(/*@null@*/char *logfilename,
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
-    void (*display_time)(uint32_t, struct tm),
+    void (*display_time)(const struct DT_result * const, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
     /*@null@*/void (*show_mainloop_result)(uint16_t * const, uint8_t),
     /*@null@*/void (*process_input)(uint16_t * const, uint8_t, const char * const,

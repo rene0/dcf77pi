@@ -155,18 +155,22 @@ display_bit(uint16_t state, uint8_t bitpos)
 }
 
 void
-display_time(uint32_t dt, struct tm time)
+display_time(const struct DT_result *dt, struct tm time)
 {
 	uint16_t cutoff;
 
 	/* color bits depending on the results */
-	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, (dt & eDT_bit0) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, (dt & eDT_DST_error) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, (dt & eDT_bit20) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, (dt & eDT_minute) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, (dt & eDT_hour) ? 1 : 2, NULL);
-	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, (dt & eDT_date) ? 1 : 2, NULL);
-	if (dt & eDT_leapsecond_one)
+	mvwchgat(decode_win, 0, 4, 1, A_NORMAL,  dt->bit0_ok ? 2 : 1, NULL);
+	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt->dst_status == eDST_error ?
+	    1 : 2, NULL);
+	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, dt->bit20_ok ? 2 : 1, NULL);
+	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, dt->minute_status ==
+	    eval_parity ? 1 : dt->minute_status == eval_bcd ? 4 : 2, NULL);
+	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, dt->hour_status ==
+	    eval_parity ? 1 : dt->hour_status == eval_bcd ? 4 : 2, NULL);
+	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, dt->mday_status ==
+	    eval_parity ? 1 : dt->mday_status == eval_bcd ? 4 : 2, NULL);
+	if (dt->leapsecond_status == els_one)
 		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
 
 	/* display date and time */
@@ -184,47 +188,45 @@ display_time(uint32_t dt, struct tm time)
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 
 	/* color date/time string and cutoff value depending on the results */
-	if (dt & eDT_DST_jump)
+	if (dt->dst_status == eDST_jump)
 		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
-	if (dt & eDT_year_jump)
+	if (dt->year_status == eval_jump)
 		mvwchgat(decode_win, 1, 7, 4, A_BOLD, 3, NULL);
-	if (dt & eDT_month_jump)
+	if (dt->month_status == eval_jump)
 		mvwchgat(decode_win, 1, 12, 2, A_BOLD, 3, NULL);
-	if (dt & eDT_monthday_jump)
+	if (dt->mday_status == eval_jump)
 		mvwchgat(decode_win, 1, 15, 2, A_BOLD, 3, NULL);
-	if (dt & eDT_weekday_jump)
+	if (dt->wday_status == eval_jump)
 		mvwchgat(decode_win, 1, 18, 3, A_BOLD, 3, NULL);
-	if (dt & eDT_hour_jump)
+	if (dt->hour_status == eval_jump)
 		mvwchgat(decode_win, 1, 22, 2, A_BOLD, 3, NULL);
-	if (dt & eDT_minute_jump)
+	if (dt->minute_status == eval_jump)
 		mvwchgat(decode_win, 1, 25, 2, A_BOLD, 3, NULL);
 	if (cutoff == 0xffff)
 		mvwchgat(decode_win, 1, 40, 1, A_BOLD, 3, NULL);
 
 	/* flip lights depending on the results */
-	if ((dt & eDT_transmit) == 0)
+	if (!dt->transmit_call)
 		mvwchgat(decode_win, 1, 50, 6, A_NORMAL, 8, NULL);
-	if ((dt & eDT_announce_ch_DST) == 0)
+	if (dt->dst_announce == eann_none)
 		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 8, NULL);
-	if (dt & eDT_ch_DST)
+	else if (dt->dst_status == eDST_done)
 		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 2, NULL);
-	else if (dt & eDT_ch_DST_error)
+	else if (dt->dst_announce == eann_error)
 		mvwchgat(decode_win, 1, 57, 3, A_BOLD, 3, NULL);
-	if ((dt & eDT_announce_leapsecond) == 0)
+	if (dt->leap_announce == eann_none)
 		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 8, NULL);
-	if (dt & eDT_leapsecond)
+	else if (dt->leapsecond_status == els_done)
 		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 2, NULL);
-	else if (dt & eDT_leapsecond_error)
+	else if (dt->leap_announce == eann_error)
 		mvwchgat(decode_win, 1, 61, 4, A_BOLD, 3, NULL);
-	if (dt & eDT_long) {
+	if (dt->minute_length == emin_long) {
 		mvwprintw(decode_win, 1, 67, "long ");
 		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 1, NULL);
-	}
-	else if (dt & eDT_short) {
+	} else if (dt->minute_length == emin_short) {
 		mvwprintw(decode_win, 1, 67, "short");
 		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 1, NULL);
-	}
-	else
+	} else
 		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 8, NULL);
 
 	wrefresh(decode_win);

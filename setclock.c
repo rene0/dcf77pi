@@ -33,9 +33,16 @@ SUCH DAMAGE.
 #include <sys/time.h>
 
 bool
-setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit)
+setclock_ok(uint8_t init_min, const struct DT_result *dt, uint16_t bit)
 {
-	return init_min == 0 && ((dt & ~(eDT_transmit | eDT_ch_DST | eDT_leapsecond)) == 0) &&
+	return init_min == 0 && dt->bit0_ok && dt->bit20_ok &&
+	    dt->minute_length == emin_ok && dt->minute_status == eval_ok &&
+	    dt->hour_status == eval_ok && dt->mday_status == eval_ok &&
+	    dt->wday_status == eval_ok && dt->month_status == eval_ok &&
+	    dt->year_status == eval_ok && dt->dst_announce != eann_error &&
+	    (dt->dst_status == eDST_ok || dt->dst_status == eDST_done) &&
+	    dt->leap_announce != eann_error &&
+	    dt->leapsecond_status != els_one &&
 	    ((bit & ~(eGB_one | eGB_EOM)) == 0);
 }
 

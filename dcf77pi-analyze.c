@@ -53,60 +53,70 @@ display_bit(uint16_t state, uint8_t bitpos)
 }
 
 void
-display_time(uint32_t dt, struct tm time)
+display_time(const struct DT_result *dt, struct tm time)
 {
 	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
 	    time.tm_isdst == 1 ? "summer" : time.tm_isdst == 0 ? "winter" :
 	    "?     ", time.tm_year, time.tm_mon, time.tm_mday,
 	    weekday[time.tm_wday], time.tm_hour, time.tm_min);
-	if ((dt & eDT_long) == eDT_long)
+	if (dt->minute_length == emin_long)
 		printf("Minute too long\n");
-	if ((dt & eDT_short) == eDT_short)
+	else if (dt->minute_length == emin_short)
 		printf("Minute too short\n");
-	if ((dt & eDT_DST_error) == eDT_DST_error)
+	if (dt->dst_status == eDST_error)
 		printf("Time offset error\n");
-	if ((dt & eDT_DST_jump) == eDT_DST_jump)
+	else if (dt->dst_status == eDST_jump)
 		printf("Time offset jump (ignored)\n");
-	if ((dt & eDT_minute) == eDT_minute)
-		printf("Minute parity/value error\n");
-	if ((dt & eDT_minute_jump) == eDT_minute_jump)
-		printf("Minute value jump\n");
-	if ((dt & eDT_hour) == eDT_hour)
-		printf("Hour parity/value error\n");
-	if ((dt & eDT_hour_jump) == eDT_hour_jump)
-		printf("Hour value jump\n");
-	if ((dt & eDT_date) == eDT_date)
-		printf("Date parity/value error\n");
-	if ((dt & eDT_weekday_jump) == eDT_weekday_jump)
-		printf("Day-of-week value jump\n");
-	if ((dt & eDT_monthday_jump) == eDT_monthday_jump)
-		printf("Day-of-month value jump\n");
-	if ((dt & eDT_month_jump) == eDT_month_jump)
-		printf("Month value jump\n");
-	if ((dt & eDT_year_jump) == eDT_year_jump)
-		printf("Year value jump\n");
-	if ((dt & eDT_bit0) == eDT_bit0)
-		printf("Minute marker error\n");
-	if ((dt & eDT_bit20) == eDT_bit20)
-		printf("Date/time start marker error\n");
-	if ((dt & eDT_transmit) == eDT_transmit)
-		printf("Transmitter call bit set\n");
-	if ((dt & eDT_announce_ch_DST) == eDT_announce_ch_DST)
-		printf("Time offset change announced\n");
-	if ((dt & eDT_announce_leapsecond) == eDT_announce_leapsecond)
-		printf("Leap second announced\n");
-	if ((dt & eDT_ch_DST) == eDT_ch_DST)
+	else if (dt->dst_status == eDST_done)
 		printf("Time offset changed\n");
-	if ((dt & eDT_leapsecond) == eDT_leapsecond) {
-		printf("Leap second processed");
-		if ((dt & eDT_leapsecond_one) == eDT_leapsecond_one)
-			printf(", value is 1 instead of 0");
-		printf("\n");
-	}
-	if ((dt & eDT_ch_DST_error) == eDT_ch_DST_error)
+	if (dt->minute_status == eval_parity)
+		printf("Minute parity error\n");
+	else if (dt->minute_status == eval_bcd)
+		printf("Minute value error\n");
+	else if (dt->minute_status == eval_jump)
+		printf("Minute value jump\n");
+	if (dt->hour_status == eval_parity)
+		printf("Hour parity error\n");
+	else if (dt->hour_status == eval_bcd)
+		printf("Hour value error\n");
+	else if (dt->hour_status == eval_jump)
+		printf("Hour value jump\n");
+	if (dt->mday_status == eval_parity)
+		printf("Date parity error\n");
+	else if (dt->wday_status == eval_bcd)
+		printf("Day-of-week value error\n");
+	else if (dt->wday_status == eval_jump)
+		printf("Day-of-week value jump\n");
+	else if (dt->mday_status == eval_bcd)
+		printf("Day-of-month value error\n");
+	else if (dt->mday_status == eval_jump)
+		printf("Day-of-month value jump\n");
+	else if (dt->month_status == eval_bcd)
+		printf("Month value error\n");
+	else if (dt->month_status == eval_jump)
+		printf("Month value jump\n");
+	else if (dt->year_status == eval_bcd)
+		printf("Year value error\n");
+	else if (dt->year_status == eval_jump)
+		printf("Year value jump\n");
+	if (!dt->bit0_ok)
+		printf("Minute marker error\n");
+	if (!dt->bit20_ok)
+		printf("Date/time start marker error\n");
+	if (dt->transmit_call)
+		printf("Transmitter call bit set\n");
+	if (dt->dst_announce == eann_ok)
+		printf("Time offset change announced\n");
+	else if (dt->dst_announce == eann_error)
 		printf("Spurious time offset change announcement\n");
-	if ((dt & eDT_leapsecond_error) == eDT_leapsecond_error)
+	if (dt->leap_announce == eann_ok)
+		printf("Leap second announced\n");
+	else if (dt->leap_announce == eann_error)
 		printf("Spurious leap second announcement\n");
+	if (dt->leapsecond_status == els_done)
+		printf("Leap second processed\n");
+	else if (dt->leapsecond_status == els_one)
+		printf("Leap second processed with value 1 instead of 0\n");
 	printf("\n");
 }
 

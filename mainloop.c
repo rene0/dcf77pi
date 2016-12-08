@@ -44,7 +44,7 @@ mainloop(char *logfilename,
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
-    void (*display_time)(uint32_t, struct tm),
+    void (*display_time)(const struct DT_result * const, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
     void (*show_mainloop_result)(uint16_t * const, uint8_t),
     void (*process_input)(uint16_t * const, uint8_t, const char * const,
@@ -53,7 +53,7 @@ mainloop(char *logfilename,
 	uint8_t))
 {
 	uint16_t bit;
-	uint32_t dt = 0;
+	const struct DT_result *dt;
 	uint8_t minlen = 0;
 	uint8_t bitpos = 0;
 	uint8_t init_min = 2;

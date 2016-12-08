@@ -26,62 +26,94 @@ SUCH DAMAGE.
 #ifndef DCF77PI_DECODE_TIME_H
 #define DCF77PI_DECODE_TIME_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
-enum eDT {
-/** daylight saving time error, bit 17 = bit 18 */
-	eDT_DST_error = 1 << 0,
-/** minute value/parity error */
-	eDT_minute = 1 << 1,
-/** hour value/parity error */
-	eDT_hour = 1 << 2,
-/** date value/parity error */
-	eDT_date = 1 << 3,
-/**
- * bit 0 must always be 0 :
- * http://www.eecis.udel.edu/~mills/ntp/dcf77.html
- */
-	eDT_bit0 = 1 << 4,
-/** bit 20 is 0 */
-	eDT_bit20 = 1 << 5,
-/** too short minute */
-	eDT_short = 1 << 6,
-/** too long minute */
-	eDT_long = 1 << 7,
-/** unexpected daylight saving time change */
-	eDT_DST_jump = 1 << 8,
-/** unexpected daylight saving time change announcement */
-	eDT_ch_DST_error = 1 << 9,
-/** unexpected leap second announcement */
-	eDT_leapsecond_error = 1 << 10,
-/** unexpected minute value change */
-	eDT_minute_jump = 1 << 11,
-/** unexpected hour value change */
-	eDT_hour_jump = 1 << 12,
-/** unexpected day value change */
-	eDT_monthday_jump = 1 << 13,
-/** unexpected day-of-week value change */
-	eDT_weekday_jump = 1 << 14,
-/** unexpected month value change */
-	eDT_month_jump = 1 << 15,
-/** unexpected year value change */
-	eDT_year_jump = 1 << 16,
-/**
- * leap second should always be 0 if present :
- * http://www.ptb.de/cms/en/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
- */
-	eDT_leapsecond_one = 1 << 17,
-/** transmitter call bit (15) set */
-	eDT_transmit = 1 << 18,
-/** daylight saving time just changed */
-	eDT_ch_DST = 1 << 19,
-/** leap second just processed */
-	eDT_leapsecond = 1 << 20,
-/** daylight saving time change announced */
-	eDT_announce_ch_DST = 1 << 21,
-/** leap second announced */
-	eDT_announce_leapsecond = 1 << 22,
+enum eDT_length {
+	/** minute length ok */
+	emin_ok,
+	/** minute too short */
+	emin_short,
+	/** minute too long */
+	emin_long
+};
+
+enum eDT_tval {
+	/** value ok */
+	eval_ok,
+	/** bcd error */
+	eval_bcd,
+	/** parity error */
+	eval_parity,
+	/** value ok but jumped */
+	eval_jump
+};
+
+enum eDT_announce {
+	/** no announcement */
+	eann_none,
+	/** unexpected announcement */
+	eann_error,
+	/** announcement ok */
+	eann_ok
+};
+
+enum eDT_DST {
+	/** daylight saving time ok */
+	eDST_ok,
+	/** daylight saving time error, bit 17 = bit 18 */
+	eDST_error,
+	/** unexpected daylight saving time change */
+	eDST_jump,
+	/** daylight saving time just changed */
+	eDST_done
+};
+
+enum eDT_leapsecond {
+	/** no leap second */
+	els_none,
+	/**
+	 * leap second should always be 0 if present :
+	 * http://www.ptb.de/cms/en/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
+	 */
+	els_one,
+	/** leap second just processed */
+	els_done
+};
+
+struct DT_result {
+	/**
+	 * bit 0 must always be 0 :
+	 * http://www.eecis.udel.edu/~mills/ntp/dcf77.html
+	 */
+	bool bit0_ok;
+	/** transmitter call bit (15) set */
+	bool transmit_call;
+	/** bit 20 must always be 1 */
+	bool bit20_ok;
+	/** minute length ok ? */
+	enum eDT_length minute_length;
+	/** minute value ok ? */
+	enum eDT_tval minute_status;
+	/** hour value ok ? */
+	enum eDT_tval hour_status;
+	/** day value ok ? */
+	enum eDT_tval mday_status;
+	/** weekday value ok ? */
+	enum eDT_tval wday_status;
+	/** month value ok ? */
+	enum eDT_tval month_status;
+	/** year value ok ? */
+	enum eDT_tval year_status;
+	/** DST ok ? */
+	enum eDT_DST dst_status;
+	/** leap second ok ? */
+	enum eDT_leapsecond leapsecond_status;
+	/** DST announcement ok ? */
+	enum eDT_announce dst_announce;
+	/** leap second announcement ok ? */
+	enum eDT_announce leap_announce;
 };
 
 /**
@@ -111,10 +143,8 @@ void init_time(void);
  *   milliseconds.
  * @param buffer The bit buffer.
  * @param time The current time, to be updated.
- * @return The state of this minute, the combination of the various DT_* and
- *   ANN_* values that are applicable.
  */
-uint32_t decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
+const struct DT_result * const decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
     const uint8_t * const buffer, struct tm * const time);
 
 #endif

@@ -32,11 +32,11 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-static uint32_t announce; /* save DST change and leap second announcements */
 static uint8_t summermonth;
 static uint8_t wintermonth;
 static uint8_t leapsecmonths[12];
 static uint8_t num_leapsecmonths;
+static struct DT_result dt_res;
 
 void
 init_time(void)
@@ -101,12 +101,11 @@ getbcd(const uint8_t * const buffer, uint8_t start, uint8_t stop)
 	return val;
 }
 
-uint32_t
+const struct DT_result * const
 decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
     const uint8_t * const buffer, struct tm * const time)
 {
 	struct tm newtime;
-	uint32_t rval = 0;
 	int16_t increase;
 	uint8_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, utchour;
 	bool generr, p1, p2, p3, ok;
@@ -115,27 +114,33 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 
 	memset(&newtime, 0, sizeof(newtime));
 	/* Initially, set time offset to unknown */
-	if (init_min == 2)
+	if (init_min == 2) {
 		time->tm_isdst = -1;
+		dt_res.dst_announce = eann_none;
+		dt_res.leap_announce = eann_none;
+	}
 	newtime.tm_isdst = time->tm_isdst; /* save DST value */
 
 	if (minlen < 59)
-		rval |= eDT_short;
-	if (minlen > 60)
-		rval |= eDT_long;
+		dt_res.minute_length = emin_short;
+	else if (minlen > 60)
+		dt_res.minute_length = emin_long;
+	else
+		dt_res.minute_length = emin_ok;
 
-	if (buffer[0] == 1)
-		rval |= eDT_bit0;
-	if (buffer[20] == 0)
-		rval |= eDT_bit20;
+	dt_res.bit0_ok = buffer[0] == 0;
+	dt_res.bit20_ok = buffer[20] == 1;
 
 	if (buffer[17] == buffer[18])
-		rval |= eDT_DST_error;
+		dt_res.dst_status = eDST_error;
+	else
+		dt_res.dst_status = eDST_ok;
 
-	generr = (rval != 0); /* do not decode if set */
+	/* do not decode if set */
+	generr = (dt_res.minute_length != emin_ok) | !dt_res.bit0_ok |
+	    !dt_res.bit20_ok | (dt_res.dst_status != eDST_ok);
 
-	if (buffer[15] == 1)
-		rval |= eDT_transmit;
+	dt_res.transmit_call = buffer[15] == 1;
 
 	/* See if there are any partial / split minutes to be combined: */
 	if (acc_minlen <= 59000) {
@@ -172,27 +177,33 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	p1 = getpar(buffer, 21, 28);
 	tmp0 = getbcd(buffer, 21, 24);
 	tmp1 = getbcd(buffer, 25, 27);
-	if (!p1 || tmp0 > 9 || tmp1 > 5) {
-		rval |= eDT_minute;
+	if (!p1)
+		dt_res.minute_status = eval_parity;
+	else if (tmp0 > 9 || tmp1 > 5) {
+		dt_res.minute_status = eval_bcd;
 		p1 = false;
-	}
+	} else
+		dt_res.minute_status = eval_ok;
 	if ((init_min == 2 || increase != 0) && p1 && !generr) {
 		newtime.tm_min = (int)(tmp0 + 10 * tmp1);
 		if (init_min == 0 && time->tm_min != newtime.tm_min)
-			rval |= eDT_minute_jump;
+			dt_res.minute_status = eval_jump;
 	}
 
 	p2 = getpar(buffer, 29, 35);
 	tmp0 = getbcd(buffer, 29, 32);
 	tmp1 = getbcd(buffer, 33, 34);
-	if (!p2 || tmp0 > 9 || tmp1 > 2 || tmp0 + 10 * tmp1 > 23) {
-		rval |= eDT_hour;
+	if (!p2)
+		dt_res.hour_status = eval_parity;
+	else if (tmp0 > 9 || tmp1 > 2 || tmp0 + 10 * tmp1 > 23) {
+		dt_res.hour_status = eval_bcd;
 		p2 = false;
-	}
+	} else
+		dt_res.hour_status = eval_ok;
 	if ((init_min == 2 || increase != 0) && p2 && !generr) {
 		newtime.tm_hour = (int)(tmp0 + 10 * tmp1);
 		if (init_min == 0 && time->tm_hour != newtime.tm_hour)
-			rval |= eDT_hour_jump;
+			dt_res.hour_status = eval_jump;
 	}
 
 	p3 = getpar(buffer, 36, 58);
@@ -202,12 +213,34 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	tmp3 = getbcd(buffer, 45, 48);
 	tmp4 = getbcd(buffer, 50, 53);
 	tmp5 = getbcd(buffer, 54, 57);
-	if (!p3 || tmp0 > 9 || tmp0 + 10 * tmp1 == 0 ||
-	    tmp0 + 10 * tmp1 > 31 || tmp2 == 0 || tmp3 > 9 ||
-	    tmp3 + 10 * buffer[49] == 0 || tmp3 + 10 * buffer[49] > 12 ||
-	    tmp4 > 9 || tmp5 > 9) {
-		rval |= eDT_date;
-		p3 = false;
+	if (!p3) {
+		dt_res.mday_status = eval_parity;
+		dt_res.wday_status = eval_parity;
+		dt_res.month_status = eval_parity;
+		dt_res.year_status = eval_parity;
+	} else {
+		if (tmp0 > 9 || tmp0 + 10 * tmp1 == 0 ||
+		    tmp0 + 10 * tmp1 > 31) {
+			dt_res.mday_status = eval_bcd;
+			p3 = false;
+		} else
+			dt_res.mday_status = eval_ok;
+		if (tmp2 == 0) {
+			dt_res.wday_status = eval_bcd;
+			p3 = false;
+		} else
+			dt_res.wday_status = eval_ok;
+		if (tmp3 > 9 || tmp3 + 10 * buffer[49] == 0 ||
+		    tmp3 + 10 * buffer[49] > 12) {
+			dt_res.month_status = eval_bcd;
+			p3 = false;
+		} else
+			dt_res.month_status = eval_ok;
+		if (tmp4 > 9 || tmp5 > 9) {
+			dt_res.year_status = eval_bcd;
+			p3 = false;
+		} else
+			dt_res.year_status = eval_ok;
 	}
 	if ((init_min == 2 || increase != 0) && p3 && !generr) {
 		newtime.tm_mday = (int)(tmp0 + 10 * tmp1);
@@ -215,22 +248,22 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		newtime.tm_year = (int)(tmp4 + 10 * tmp5);
 		newtime.tm_wday = (int)tmp2;
 		if (init_min == 0 && time->tm_mday != newtime.tm_mday)
-			rval |= eDT_monthday_jump;
+			dt_res.mday_status = eval_jump;
 		if (init_min == 0 && time->tm_wday != newtime.tm_wday)
-			rval |= eDT_weekday_jump;
+			dt_res.wday_status = eval_jump;
 		if (init_min == 0 && time->tm_mon != newtime.tm_mon)
-			rval |= eDT_month_jump;
+			dt_res.month_status = eval_jump;
 		int8_t centofs = century_offset(newtime);
 		if (centofs == -1) {
-			rval |= eDT_date;
+			dt_res.year_status = eval_bcd;
 			p3 = false;
 		} else {
 			if (init_min == 0 && time->tm_year !=
 			    (int)(base_year + 100 * centofs + newtime.tm_year))
-				rval |= eDT_year_jump;
+				dt_res.year_status = eval_jump;
 			newtime.tm_year += base_year + 100 * centofs;
 			if (newtime.tm_mday > (int)lastday(newtime)) {
-				rval |= eDT_date;
+				dt_res.mday_status = eval_bcd;
 				p3 = false;
 			}
 		}
@@ -243,34 +276,32 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	/*
 	 * h==23, last day of month (UTC) or h==0, first day of next month (UTC)
 	 * according to IERS Bulletin C
-	 * flag still set at 00:00 UTC, prevent eDT_leapsecond_error
+	 * flag still set at 00:00 UTC, prevent leapsecond announcement error
 	 */
 	if (buffer[19] == 1 && ok) {
 		if (time->tm_mday == 1 && is_leapsecmonth(*time) &&
 		    ((time->tm_min > 0 && utchour == 23) ||
 		    (time->tm_min == 0 && utchour == 0)))
-			announce |= eDT_announce_leapsecond;
-		else {
-			announce &= ~eDT_announce_leapsecond;
-			rval |= eDT_leapsecond_error;
-		}
+			dt_res.leap_announce = eann_ok;
+		else
+			dt_res.leap_announce = eann_error;
 	}
 
 	/* process possible leap second, always reset announcement at hh:00 */
-	if (((announce & eDT_announce_leapsecond) == eDT_announce_leapsecond) && time->tm_min == 0) {
-		announce &= ~eDT_announce_leapsecond;
-		rval |= eDT_leapsecond;
+	if (dt_res.leap_announce == eann_ok && time->tm_min == 0) {
+		dt_res.leap_announce = eann_none;
+		dt_res.leapsecond_status = els_done;
 		if (minlen == 59) {
 			/* leap second processed, but missing */
-			rval |= eDT_short;
+			dt_res.minute_length = emin_short;
 			ok = false;
 			generr = true;
 		} else if (minlen == 60 && buffer[59] == 1)
-			rval |= eDT_leapsecond_one;
+			dt_res.leapsecond_status = els_one;
 	}
-	if ((minlen == 60) && ((rval & eDT_leapsecond) == 0)) {
+	if (minlen == 60 && dt_res.leapsecond_status == els_none) {
 		/* leap second not processed, so bad minute */
-		rval |= eDT_long;
+		dt_res.minute_length = emin_long;
 		ok = false;
 		generr = true;
 	}
@@ -283,10 +314,10 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		    time->tm_mon == (int)wintermonth)) && ((time->tm_min > 0 &&
 		    utchour == 0) || (time->tm_min == 0 &&
 		    utchour == 1 + buffer[17] - buffer[18])))
-			announce |= eDT_announce_ch_DST; /* time zone just changed */
+			dt_res.dst_announce = eann_ok; /* time zone just changed */
 		else {
-			announce &= ~eDT_announce_ch_DST;
-			rval |= eDT_ch_DST_error;
+			dt_res.dst_announce = eann_none;
+			dt_res.dst_status = eDST_error;
 		}
 	}
 
@@ -297,13 +328,13 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		 *   startup is problematic)
 		 * initial state (otherwise DST would never be valid)
 		 */
-		if ((((announce & eDT_announce_ch_DST) == eDT_announce_ch_DST) && time->tm_min == 0) ||
+		if ((dt_res.dst_announce == eann_ok && time->tm_min == 0) ||
 		    (olderr && ok) ||
-		    ((rval & eDT_DST_error) == 0 && time->tm_isdst == -1))
+		    (dt_res.dst_status == eDST_ok && time->tm_isdst == -1))
 			newtime.tm_isdst = (int)buffer[17]; /* expected change */
 		else {
-			if ((rval & eDT_DST_error) == 0)
-				rval |= eDT_DST_jump; /* sudden change, ignore */
+			if (dt_res.dst_status != eDST_error)
+				dt_res.dst_status = eDST_jump; /* sudden change, ignore */
 			ok = false;
 		}
 	}
@@ -319,23 +350,23 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	      (int)(lastday(*time)) - time->tm_mday < 7 &&
 		(utchour >= 22 /* previous day */ || utchour == 0))) {
 		/* expect DST */
-		if (newtime.tm_isdst == 0 && (announce & eDT_announce_ch_DST) == 0 &&
+		if (newtime.tm_isdst == 0 && dt_res.dst_announce != eann_ok &&
 		    utchour < 24) {
-			rval |= eDT_DST_jump; /* sudden change */
+			dt_res.dst_status = eDST_jump; /* sudden change */
 			ok = false;
 		}
 	} else {
 		/* expect non-DST */
-		if (newtime.tm_isdst == 1 && (announce & eDT_announce_ch_DST) == 0 &&
+		if (newtime.tm_isdst == 1 && dt_res.dst_announce != eann_ok &&
 		    utchour < 24) {
-			rval |= eDT_DST_jump; /* sudden change */
+			dt_res.dst_status = eDST_jump; /* sudden change */
 			ok = false;
 		}
 	}
 	/* done with DST */
-	if (((announce & eDT_announce_ch_DST) == eDT_announce_ch_DST) && time->tm_min == 0) {
-		announce &= ~eDT_announce_ch_DST;
-		rval |= eDT_ch_DST;
+	if (dt_res.dst_announce == eann_ok && time->tm_min == 0) {
+		dt_res.dst_announce = eann_none;
+		dt_res.dst_status = eDST_done;
 	}
 	newtime.tm_gmtoff = 3600 * (newtime.tm_isdst + 1);
 
@@ -352,7 +383,7 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			time->tm_year = newtime.tm_year;
 			time->tm_wday = newtime.tm_wday;
 		}
-		if ((rval & eDT_DST_jump) == 0) {
+		if (dt_res.dst_status != eDST_jump) {
 			time->tm_isdst = newtime.tm_isdst;
 			time->tm_gmtoff = newtime.tm_gmtoff;
 		}
@@ -360,5 +391,5 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	if (!ok)
 		olderr = true;
 
-	return rval | announce;
+	return &dt_res;
 }

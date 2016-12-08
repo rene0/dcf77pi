@@ -26,6 +26,8 @@ SUCH DAMAGE.
 #ifndef DCF77PI_SETCLOCK_H
 #define DCF77PI_SETCLOCK_H
 
+#include "decode_time.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
@@ -38,7 +40,7 @@ SUCH DAMAGE.
  * @param bit The current bit information
  * @return Whether it is OK to set the system clock
  */
-bool setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit);
+bool setclock_ok(uint8_t init_min, const struct DT_result *dt, uint16_t bit);
 
 /**
  * Set the system clock according to the given time. Note that this does *not*
