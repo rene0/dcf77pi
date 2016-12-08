@@ -306,8 +306,10 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 		generr = true;
 	}
 
-	/* h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
-	 * last Sunday of month (reference?) */
+	/*
+	 * h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
+	 * last Sunday of month (reference?)
+	 */
 	if (buffer[16] == 1 && ok) {
 		if ((time->tm_wday == 7 && time->tm_mday > (int)(lastday(*time) - 7) &&
 		    (time->tm_mon == (int)summermonth ||
@@ -322,11 +324,12 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	}
 
 	if ((int)buffer[17] != time->tm_isdst || (int)buffer[18] == time->tm_isdst) {
-		/* Time offset change is OK if:
-		 * announced and time is Sunday, lastday, 01:00 UTC
-		 * there was an error but not any more (needed if decoding at
+		/*
+		 * Time offset change is OK if:
+		 * - announced and time is Sunday, lastday, 01:00 UTC
+		 * - there was an error but not any more (needed if decoding at
 		 *   startup is problematic)
-		 * initial state (otherwise DST would never be valid)
+		 * - initial state (otherwise DST would never be valid)
 		 */
 		if ((dt_res.dst_announce == eann_ok && time->tm_min == 0) ||
 		    (olderr && ok) ||
