@@ -83,19 +83,19 @@ display_time(const struct DT_result *dt, struct tm time)
 		printf("Hour value jump\n");
 	if (dt->mday_status == eval_parity)
 		printf("Date parity error\n");
-	else if (dt->wday_status == eval_bcd)
+	if (dt->wday_status == eval_bcd)
 		printf("Day-of-week value error\n");
 	else if (dt->wday_status == eval_jump)
 		printf("Day-of-week value jump\n");
-	else if (dt->mday_status == eval_bcd)
+	if (dt->mday_status == eval_bcd)
 		printf("Day-of-month value error\n");
 	else if (dt->mday_status == eval_jump)
 		printf("Day-of-month value jump\n");
-	else if (dt->month_status == eval_bcd)
+	if (dt->month_status == eval_bcd)
 		printf("Month value error\n");
 	else if (dt->month_status == eval_jump)
 		printf("Month value jump\n");
-	else if (dt->year_status == eval_bcd)
+	if (dt->year_status == eval_bcd)
 		printf("Year value error\n");
 	else if (dt->year_status == eval_jump)
 		printf("Year value jump\n");
