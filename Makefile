@@ -8,7 +8,7 @@ INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
 DOXYGEN?=doxygen
 
-all: libdcf77.so dcf77pi dcf77pi-analyze readpin
+all: libdcf77.so dcf77pi dcf77pi-analyze readpin testcentury
 
 hdrlib = input.h decode_time.h decode_alarm.h config.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
@@ -105,6 +105,7 @@ lint:
 		-Dlint -DETCDIR=\"$(ETCDIR)\" $(srclib) \
 		dcf77pi-analyze.c readpin.c dcf77pi.c testcentury.c || true
 
+#XXX no development since 2007-07-12, broken with clang 3.9
 splint:
 	splint -D__CYGWIN__ +posixlib \
 		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
@@ -124,3 +125,6 @@ cppcheck:
 	cppcheck -DETCDIR=\"$(ETCDIR)\" -D__FreeBSD__ \
 		-D__FreeBSD_version=900022 \
 		--enable=all --inconclusive --language=c --std=c11 . || true
+
+iwyu:
+	make CC=include-what-you-use all
