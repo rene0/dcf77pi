@@ -64,10 +64,12 @@ doxygen:
 	$(DOXYGEN)
 
 clean:
-	rm dcf77pi dcf77pi.o
-	rm dcf77pi-analyze dcf77pi-analyze.o
-	rm readpin readpin.o
-	rm libdcf77.so $(objlib)
+	rm -f dcf77pi
+	rm -f dcf77pi-analyze
+	rm -f readpin
+	rm -f testcentury
+	rm -f $(objbin)
+	rm -f libdcf77.so $(objlib)
 
 install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
