@@ -6,6 +6,9 @@ ETCDIR?=etc/dcf77pi
 CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
+LINT_ARGS?=-aabcehrsxS -Dbool=int -Dlint -DETCDIR=\"$(ETCDIR)\"
+CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c11 \
+	-DETCDIR=\"$(ETCDIR)\"
 DOXYGEN?=doxygen
 
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin testcentury
@@ -14,8 +17,10 @@ hdrlib = input.h decode_time.h decode_alarm.h config.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
 srclib = input.c decode_time.c decode_alarm.c config.c setclock.c mainloop.c \
 	bits1to14.c calendar.c
+srcbin=dcf77pi-analyze.c readpin.c dcf77pi.c testcentury.c
 objlib = input.o decode_time.o decode_alarm.o config.o setclock.o mainloop.o \
 	bits1to14.o calendar.o
+objbin=dcf77pi.o dcf77pi-analyze.o readpin.o testcentury.o
 
 input.o: input.h config.h
 	$(CC) -fpic $(CFLAGS) -c input.c -o $@
@@ -95,15 +100,10 @@ uninstall-doxygen:
 	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
 lint:
-	lint -aabcehrsxS -Dbool=int -D__CYGWIN__ -Dlint -DETCDIR=\"$(ETCDIR)\" \
-		$(srclib) dcf77pi-analyze.c readpin.c dcf77pi.c \
-		testcentury.c || true
-	lint -aabcehrsxS -Dbool=int -D__linux__ -Dlint -DETCDIR=\"$(ETCDIR)\" \
-		$(srclib) dcf77pi-analyze.c readpin.c dcf77pi.c \
-		testcentury.c || true
-	lint -aabcehrsxS -Dbool=int -D__FreeBSD__ -D__FreeBSD_version=900022 \
-		-Dlint -DETCDIR=\"$(ETCDIR)\" $(srclib) \
-		dcf77pi-analyze.c readpin.c dcf77pi.c testcentury.c || true
+	lint -D__CYGWIN__ $(LINT_ARGS) $(srclib) $(srcbin) || true
+	lint -D__linux__ $(LINT_ARGS) $(srclib) $(srcbin) || true
+	lint -D__FreeBSD__ -D__FreeBSD_version=900022 \
+		$(LINT_ARGS) $(srclib) $(srcbin) || true
 
 #XXX no development since 2007-07-12, broken with clang 3.9
 splint:
@@ -118,13 +118,10 @@ splint:
 		dcf77pi.c testcentury.c || true
 
 cppcheck:
-	cppcheck -DETCDIR=\"$(ETCDIR)\" -D__CYGWIN__ \
-		--enable=all --inconclusive  --language=c --std=c11 . || true
-	cppcheck -DETCDIR=\"$(ETCDIR)\" -D__linux__ \
-		--enable=all --inconclusive --language=c --std=c11 . || true
-	cppcheck -DETCDIR=\"$(ETCDIR)\" -D__FreeBSD__ \
-		-D__FreeBSD_version=900022 \
-		--enable=all --inconclusive --language=c --std=c11 . || true
+	cppcheck -D__CYGWIN__ $(CPPCHECK_ARGS) . || true
+	cppcheck -D__linux__ $(CPP_CHECK_ARGS) . || true
+	cppcheck -D__FreeBSD__ -D__FreeBSD_version=900022 \
+		$(CPPCHECK_ARGS) . || true
 
 iwyu:
 	make CC=include-what-you-use all
