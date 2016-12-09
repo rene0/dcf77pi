@@ -7,6 +7,7 @@ CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
 LINT_ARGS?=-aabcehrsxS -Dbool=int -Dlint -DETCDIR=\"$(ETCDIR)\"
+SPLINT_ARGS?=+posixlib -DETCDIR=\"$(ETCDIR)\"
 CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 	-DETCDIR=\"$(ETCDIR)\"
 
@@ -108,15 +109,10 @@ lint:
 
 #XXX no development since 2007-07-12, broken with clang 3.9
 splint:
-	splint -D__CYGWIN__ +posixlib \
-		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
-		dcf77pi.c testcentury.c || true
-	splint -D__linux__ +posixlib \
-		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
-		dcf77pi.c testcentury.c || true
-	splint -D__FreeBSD__ -D__FreeBSD_version=900022 +posixlib \
-		-DETCDIR=\"$(ETCDIR)\" $(srclib) dcf77pi-analyze.c readpin.c \
-		dcf77pi.c testcentury.c || true
+	splint -D__CYGWIN__ $(SPLINT_ARGS) $(srclib) $(srcbin) || true
+	splint -D__linux__ $(SPLINT_ARGS) $(srclib) $(srcbin) || true
+	splint -D__FreeBSD__ -D__FreeBSD_version=900022 \
+		$(SPLINT_ARGS) $(srclib) $(srcbin) || true
 
 cppcheck:
 	cppcheck -D__CYGWIN__ $(CPPCHECK_ARGS) . || true
