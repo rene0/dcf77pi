@@ -9,7 +9,6 @@ INSTALL_PROGRAM?=$(INSTALL)
 LINT_ARGS?=-aabcehrsxS -Dbool=int -Dlint -DETCDIR=\"$(ETCDIR)\"
 CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c11 \
 	-DETCDIR=\"$(ETCDIR)\"
-DOXYGEN?=doxygen
 
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin testcentury
 
@@ -61,7 +60,7 @@ testcentury: testcentury.o libdcf77.so
 	$(CC) -o $@ testcentury.o libdcf77.so
 
 doxygen:
-	$(DOXYGEN)
+	doxygen
 
 clean:
 	rm -f dcf77pi
