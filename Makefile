@@ -126,4 +126,4 @@ cppcheck:
 		$(CPPCHECK_ARGS) . || true
 
 iwyu:
-	make CC=include-what-you-use all
+	$(MAKE) -k CC=include-what-you-use $(objlib) $(objbin) || true
