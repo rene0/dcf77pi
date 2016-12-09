@@ -28,7 +28,7 @@ SUCH DAMAGE.
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
+struct tm;
 
 enum eDT_length {
 	/** minute length ok */

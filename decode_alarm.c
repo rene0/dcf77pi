@@ -25,8 +25,6 @@ SUCH DAMAGE.
 
 #include "decode_alarm.h"
 
-#include "bits1to14.h"
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>

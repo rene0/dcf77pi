@@ -1,5 +1,5 @@
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
-	uninstall-doxygen lint splint cppcheck
+	uninstall-doxygen lint splint cppcheck iwyu
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi

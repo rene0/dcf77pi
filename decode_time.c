@@ -29,8 +29,10 @@ SUCH DAMAGE.
 #include "config.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 static uint8_t summermonth;
 static uint8_t wintermonth;

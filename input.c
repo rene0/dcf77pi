@@ -35,11 +35,11 @@ SUCH DAMAGE.
 #include <time.h>
 #include <unistd.h>
 
-#include <sys/param.h>
-
 #if defined(__FreeBSD__)
+#  include <sys/param.h>
 #  if __FreeBSD_version >= 900022
 #    include <sys/gpio.h>
+#    include <sys/ioctl.h>
 #  else
 #    define NOLIVE 1
 #  endif

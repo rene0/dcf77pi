@@ -26,11 +26,13 @@ SUCH DAMAGE.
 #include "mainloop.h"
 
 #include "bits1to14.h"
+#include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
 #include "setclock.h"
 
 #include <string.h>
+#include <time.h>
 
 static int8_t mainloop_result;
 

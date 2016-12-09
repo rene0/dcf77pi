@@ -30,6 +30,7 @@ SUCH DAMAGE.
 #include "input.h"
 
 #include <string.h>
+#include <time.h>
 #include <sys/time.h>
 
 bool

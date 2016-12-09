@@ -26,14 +26,14 @@ SUCH DAMAGE.
 #include "config.h"
 #include "input.h"
 
-#include <inttypes.h> /* for PRIiXX */
-#include <unistd.h>
+#include <inttypes.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sysexits.h>
 #include <time.h>
+#include <unistd.h>
 
 static void
 do_cleanup(/*@unused@*/ int sig)

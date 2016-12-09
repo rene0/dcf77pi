@@ -26,14 +26,17 @@ SUCH DAMAGE.
 #include "bits1to14.h"
 #include "calendar.h"
 #include "config.h"
+#include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
 #include "mainloop.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
+#include <time.h>
 
 void
 display_bit(uint16_t state, uint8_t bitpos)

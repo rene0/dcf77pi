@@ -24,7 +24,10 @@ SUCH DAMAGE.
 */
 
 #include "calendar.h"
+
+#include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 int
 main(int argc, char *argv[])

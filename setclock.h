@@ -26,11 +26,10 @@ SUCH DAMAGE.
 #ifndef DCF77PI_SETCLOCK_H
 #define DCF77PI_SETCLOCK_H
 
-#include "decode_time.h"
-
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
+struct DT_result;
+struct tm;
 
 /**
  * Check if it is OK to set the system clock.

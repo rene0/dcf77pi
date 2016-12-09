@@ -26,12 +26,11 @@ SUCH DAMAGE.
 #ifndef DCF77PI_MAINLOOP_H
 #define DCF77PI_MAINLOOP_H
 
-#include "decode_alarm.h"
-#include "decode_time.h"
-
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
+struct DT_result;
+struct alm;
+struct tm;
 
 /**
  * Provide a ready-to-use mainloop function for the main program. Both dcf77pi

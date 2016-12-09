@@ -26,15 +26,20 @@ SUCH DAMAGE.
 #include "bits1to14.h"
 #include "calendar.h"
 #include "config.h"
+#include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
 #include "mainloop.h"
 
+#include <curses.h>
 #include <errno.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <ncurses.h>
+#include <time.h>
 
 static const uint8_t maxbuf = 255;
 
