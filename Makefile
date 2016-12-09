@@ -12,12 +12,12 @@ CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c11 \
 
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin testcentury
 
-hdrlib = input.h decode_time.h decode_alarm.h config.h setclock.h mainloop.h \
+hdrlib=input.h decode_time.h decode_alarm.h config.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
-srclib = input.c decode_time.c decode_alarm.c config.c setclock.c mainloop.c \
+srclib=input.c decode_time.c decode_alarm.c config.c setclock.c mainloop.c \
 	bits1to14.c calendar.c
 srcbin=dcf77pi-analyze.c readpin.c dcf77pi.c testcentury.c
-objlib = input.o decode_time.o decode_alarm.o config.o setclock.o mainloop.o \
+objlib=input.o decode_time.o decode_alarm.o config.o setclock.o mainloop.o \
 	bits1to14.o calendar.o
 objbin=dcf77pi.o dcf77pi-analyze.o readpin.o testcentury.o
 
