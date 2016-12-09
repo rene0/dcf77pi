@@ -7,7 +7,7 @@ CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
 LINT_ARGS?=-aabcehrsxS -Dbool=int -Dlint -DETCDIR=\"$(ETCDIR)\"
-CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c11 \
+CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 	-DETCDIR=\"$(ETCDIR)\"
 
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin testcentury
