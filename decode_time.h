@@ -146,7 +146,7 @@ void init_time(void);
  * @return A structure containing the results of all the checks performed on
  *   the calculated time.
  */
-const struct DT_result * const decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
-    const uint8_t * const buffer, struct tm * const time);
+const struct DT_result * const decode_time(uint8_t init_min, uint8_t minlen,
+    uint32_t acc_minlen, const uint8_t * const buffer, struct tm * const time);
 
 #endif

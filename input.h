@@ -93,8 +93,8 @@ struct bitinfo {
 	/** realfreq was reset to {@link hardware.freq} (normally because of
 	  * reception errors or fluctuations in CPU usage) */
 	bool freq_reset;
-	/** the raw received radio signal, {@link hardware.freq} / 2 items, with
-	  * each item holding 8 bits */
+	/** the raw received radio signal, {@link hardware.freq} / 2 items,
+	  * with each item holding 8 bits */
 	uint8_t *signal;
 };
 
@@ -175,8 +175,8 @@ uint8_t get_bitpos(void);
 const uint8_t * const get_buffer(void);
 
 /**
- * Determine if there should be a space between the last bit and the current bit
- * when displaying the bit buffer.
+ * Determine if there should be a space between the last bit and the current
+ * bit when displaying the bit buffer.
  *
  * @param bitpos The current bit position.
  */

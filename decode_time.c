@@ -339,7 +339,8 @@ decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 			newtime.tm_isdst = (int)buffer[17]; /* expected change */
 		else {
 			if (dt_res.dst_status != eDST_error)
-				dt_res.dst_status = eDST_jump; /* sudden change, ignore */
+				dt_res.dst_status = eDST_jump;
+				/* sudden change, ignore */
 			ok = false;
 		}
 	}

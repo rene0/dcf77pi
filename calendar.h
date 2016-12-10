@@ -43,7 +43,7 @@ extern const uint16_t dayinleapyear[12];
 
 /**
  * Textual representation of the day of week, with Monday = 1,
- * Sunday = 7, and 0 = "???".
+ * Sunday = 7, and an unknown day being 0.
  */
 extern const char * const weekday[8];
 
@@ -65,7 +65,8 @@ uint8_t lastday(struct tm time);
 /**
  * Calculates the century offset of the current time.
  *
- * The result should be multiplied by 100 and then be added to {@link base_year}.
+ * The result should be multiplied by 100 and then be added to
+ * {@link base_year}.
  *
  * @param time The current time.
  * @return The century offset (0 to 3 or -1 if an error happened).
@@ -93,7 +94,8 @@ uint8_t get_utchour(struct tm time);
  * @param summermonth The month that DST begins in.
  * @param wintermonth The month that DST ends in.
  */
-void add_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermonth);
+void add_minute(struct tm * const time, uint8_t summermonth,
+    uint8_t wintermonth);
 
 /**
  * Substracts one minute to the current time. Note that
@@ -108,7 +110,8 @@ void add_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermonth
  * @param summermonth The month that DST begins in.
  * @param wintermonth The month that DST ends in.
  */
-void substract_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermonth);
+void substract_minute(struct tm * const time, uint8_t summermonth,
+    uint8_t wintermonth);
 
 /**
  * Convert the given time in ISO format to DCF77 format.

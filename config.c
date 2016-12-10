@@ -40,7 +40,8 @@ static const char *key[] = {
 
 static const uint8_t max_key_len = 20;
 static const uint8_t max_val_len = 255;
-static const uint16_t max_len = (max_key_len + 3 + max_val_len + 2); /* "k = v\n\0" */
+static const uint16_t max_len = (max_key_len + 3 + max_val_len + 2);
+    /* "k = v\n\0" */
 
 static char *value[NUM_KEYS];
 
@@ -62,8 +63,8 @@ strip(char *s)
 
 	while (s[0] == ' ' || s[0] == '\n' || s[0] == '\r' || s[0] == '\t')
 		s++;
-	for (i = (int)(strlen(s) - 1); s[i] == ' ' || s[i] == '\n' || s[i] == '\r' ||
-	    s[i] == '\t'; i--)
+	for (i = (int)(strlen(s) - 1); s[i] == ' ' || s[i] == '\n' ||
+	    s[i] == '\r' || s[i] == '\t'; i--)
 		s[i] = '\0';
 	return s;
 }

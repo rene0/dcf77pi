@@ -36,11 +36,11 @@ struct tm;
  * Provide a ready-to-use mainloop function for the main program. Both dcf77pi
  * and dcf77pi-analyze use it.
  *
- * @param logfilename The name of the log file to write the live data to or NULL
- *   if not in live mode.
+ * @param logfilename The name of the log file to write the live data to or
+ *   NULL if not in live mode.
  * @param get_bit The callback to obtain a bit (either live or from a log file).
- * @param display_bit The callback to display the currently received bit (either
- *   live or from a log file).
+ * @param display_bit The callback to display the currently received bit
+ *   (either live or from a log file).
  * @param display_long_minute The callback to indicate that this minute is too
  *   long (eGB_too_long is set).
  * @param display_minute The callback to display information about the current
@@ -71,9 +71,10 @@ void mainloop(/*@null@*/char *logfilename,
     void (*display_time)(const struct DT_result * const, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
     /*@null@*/void (*show_mainloop_result)(uint16_t * const, uint8_t),
-    /*@null@*/void (*process_input)(uint16_t * const, uint8_t, const char * const,
-	bool * const, bool * const),
-    /*@null@*/void (*post_process_input)(char **, bool * const, uint16_t * const, uint8_t));
+    /*@null@*/void (*process_input)(uint16_t * const, uint8_t,
+	const char * const, bool * const, bool * const),
+    /*@null@*/void (*post_process_input)(char **, bool * const,
+	uint16_t * const, uint8_t));
 
 /**
  * Get the result value set by {@link mainloop}.
