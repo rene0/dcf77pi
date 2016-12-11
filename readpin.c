@@ -98,7 +98,6 @@ main(int argc, char **argv)
 			continue;
 		}
 
-
 		bit = get_bit_live();
 		bi = get_bitinfo();
 		if (verbose) {

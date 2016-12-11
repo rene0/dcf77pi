@@ -60,7 +60,7 @@ mainloop(char *logfilename,
 	uint8_t init_min = 2;
 	struct tm curtime;
 	struct alm civwarn;
-	const uint8_t * tpbuf;
+	const uint8_t *tpbuf;
 	bool settime = false;
 	bool change_logfile = false;
 	bool have_result = false;
@@ -86,7 +86,8 @@ mainloop(char *logfilename,
 			display_bit(bit, bitpos);
 
 		if (init_min < 2)
-			fill_thirdparty_buffer((uint8_t)curtime.tm_min, bitpos, bit);
+			fill_thirdparty_buffer((uint8_t)curtime.tm_min, bitpos,
+			    bit);
 
 		bit = next_bit();
 		if (bit->marker == emark_minute)
@@ -124,7 +125,6 @@ mainloop(char *logfilename,
 					break;
 				}
 			}
-
 			display_time(dt, curtime);
 
 			if (settime) {
@@ -134,24 +134,20 @@ mainloop(char *logfilename,
 				else
 					mainloop_result = -3;
 			}
-
 			if (bit->marker == emark_minute ||
 			    bit->marker == emark_late)
 				reset_acc_minlen();
 			if (init_min > 0)
 				init_min--;
 		}
-
 		if (have_result) {
 			if (show_mainloop_result != NULL)
 				show_mainloop_result(bit, bitpos);
 			have_result = false;
 		}
-
 		if (bit->done)
 			break;
 	}
-
 	cleanup();
 }
 
