@@ -50,6 +50,7 @@ main(int argc, char **argv)
 	const struct hardware *hw;
 	int ch, min, res;
 	bool raw = false, verbose = true;
+	const struct bitinfo *bi;
 	const struct GB_result *bit;
 
 	while ((ch = getopt(argc, argv, "qr")) != -1) {
@@ -97,7 +98,6 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		const struct bitinfo *bi;
 
 		bit = get_bit_live();
 		bi = get_bitinfo();
