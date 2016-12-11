@@ -6,7 +6,7 @@ ETCDIR?=etc/dcf77pi
 CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
-LINT_ARGS?=-aabcehrsxS -Dbool=int -Dlint -DETCDIR=\"$(ETCDIR)\"
+LINT_ARGS?=-aabcehrsxS -Dlint -DETCDIR=\"$(ETCDIR)\"
 SPLINT_ARGS?=+posixlib -DETCDIR=\"$(ETCDIR)\"
 CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 	-DETCDIR=\"$(ETCDIR)\"
@@ -116,7 +116,7 @@ splint:
 
 cppcheck:
 	cppcheck -D__CYGWIN__ $(CPPCHECK_ARGS) . || true
-	cppcheck -D__linux__ $(CPP_CHECK_ARGS) . || true
+	cppcheck -D__linux__ $(CPPCHECK_ARGS) . || true
 	cppcheck -D__FreeBSD__ -D__FreeBSD_version=900022 \
 		$(CPPCHECK_ARGS) . || true
 
