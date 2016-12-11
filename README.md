@@ -63,13 +63,13 @@ Currently supporrted platforms:
 On Linux, you will have to install an (n)curses package development using your
 package manager to get the required header files and the .so library file.
 For example:
-{{{
+```sh
 % sudo apt-get install ncurses-devel
-}}}
+```
 
 To build and install the program into /usr/bin , the library into /usr/lib and
 the configuration file into /usr/etc/dcf77pi :
-{{{
+```sh
 % make PREFIX=/usr
 % sudo make install PREFIX=/usr
-}}}
+```
