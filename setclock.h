@@ -29,6 +29,7 @@ SUCH DAMAGE.
 #include <stdbool.h>
 #include <stdint.h>
 struct DT_result;
+struct GB_result;
 struct tm;
 
 /**
@@ -39,7 +40,8 @@ struct tm;
  * @param bit The current bit information
  * @return Whether it is OK to set the system clock
  */
-bool setclock_ok(uint8_t init_min, const struct DT_result *dt, uint16_t bit);
+bool setclock_ok(uint8_t init_min, const struct DT_result * const dt,
+    const struct GB_result * const bit);
 
 /**
  * Set the system clock according to the given time. Note that this does *not*

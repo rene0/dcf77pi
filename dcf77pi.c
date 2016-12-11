@@ -98,7 +98,7 @@ curses_cleanup(const char * const reason)
 }
 
 void
-display_bit(uint16_t state, uint8_t bitpos)
+display_bit(const struct GB_result * const bit, uint8_t bitpos)
 {
 	uint8_t xpos, bp;
 	const struct bitinfo *bitinf;
@@ -118,24 +118,25 @@ display_bit(uint16_t state, uint8_t bitpos)
 		mvwchgat(input_win, 3, 36, 21, A_NORMAL, 7, NULL);
 
 	wattron(input_win, COLOR_PAIR(2));
-	if (state & eGB_EOM)
+	if (bit->marker == emark_minute)
 		mvwprintw(input_win, 3, 58, "minute   ");
-	else if (state == 0 || state == eGB_one)
+	else if (!bit->bad_io && bit->bitval != ebv_none &&
+	    bit->marker == emark_none && bit->hwstat == ehw_ok)
 		mvwprintw(input_win, 3, 58, "OK       ");
 	else
 		mvwprintw(input_win, 3, 58, "         ");
 	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
-	if (state & eGB_read)
+	if (bit->bitval == ebv_none)
 		mvwprintw(input_win, 3, 58, "read     ");
-	if (state & eGB_receive)
+	if (bit->hwstat == ehw_receive)
 		mvwprintw(input_win, 3, 68, "receive ");
-	else if (state & eGB_transmit)
+	else if (bit->hwstat == ehw_transmit)
 		mvwprintw(input_win, 3, 68, "transmit");
-	else if (state & eGB_random)
+	else if (bit->hwstat == ehw_random)
 		mvwprintw(input_win, 3, 68, "random  ");
-	else if (state & eGB_IO)
+	else if (bit->bad_io)
 		mvwprintw(input_win, 3, 68, "IO      ");
 	else {
 		wattron(input_win, COLOR_PAIR(2));
@@ -149,7 +150,7 @@ display_bit(uint16_t state, uint8_t bitpos)
 			xpos++;
 
 	mvwprintw(input_win, 0, xpos, "%u", get_buffer()[bitpos]);
-	if (state & eGB_read)
+	if (bit->bitval == ebv_none)
 		mvwchgat(input_win, 0, xpos, 1, A_BOLD, 3, NULL);
 	wnoutrefresh(input_win);
 
@@ -283,7 +284,7 @@ display_weather(void)
 }
 
 static void
-process_input(uint16_t * const bit, uint8_t bitpos,
+process_input(struct GB_result * const bit, uint8_t bitpos,
     const char * const logfilename, bool * const settime,
     bool * const change_logfile)
 {
@@ -295,7 +296,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 	if (input_mode == 0 && inkey != ERR) {
 		switch (inkey) {
 		case 'Q':
-			*bit |= eGB_EOD; /* quit main loop */
+			bit->done = true; /* quit main loop */
 			break;
 		case 'L':
 			inkey = ERR; /* prevent key repeat */
@@ -361,7 +362,7 @@ process_input(uint16_t * const bit, uint8_t bitpos,
 
 static void
 post_process_input(char **logfilename, bool * const change_logfile,
-    uint16_t * const bit, uint8_t bitpos)
+    struct GB_result * const bit, uint8_t bitpos)
 {
 	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 2) % 60 ||
 	    (old_bitpos == 57 && bitpos == 0))) {
@@ -395,14 +396,14 @@ post_process_input(char **logfilename, bool * const change_logfile,
 				    close_logfile() != 0) {
 					statusbar(bitpos,
 					    "Error closing old log file");
-					*bit |= eGB_EOD; /* error */
+					bit->done = true; /* error */
 				}
 				if (strlen(*logfilename) > 0) {
 					int res = append_logfile(*logfilename);
 					if (res != 0) {
 						statusbar(bitpos,
 						    strerror(res));
-						*bit |= eGB_EOD; /* error */
+						bit->done = true; /* error */
 					}
 				}
 			}
@@ -451,17 +452,17 @@ display_minute(uint8_t minlen)
 }
 
 static void
-show_mainloop_result(uint16_t * const bit, uint8_t bitpos)
+show_mainloop_result(struct GB_result * const bit, uint8_t bitpos)
 {
 	switch (get_mainloop_result()) {
 	case -1:
 		statusbar(bitpos, "mktime() failed!");
-		*bit |= eGB_EOD; /* error */
+		bit->done = true; /* error */
 		break;
 	case -2:
 		statusbar(bitpos, "settimeofday(): %s",
 		    strerror(errno));
-		*bit |= eGB_EOD; /* error */
+		bit->done = true; /* error */
 		break;
 	case -3:
 		statusbar(bitpos, "Too early to set the time");

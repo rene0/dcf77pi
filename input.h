@@ -29,29 +29,59 @@ SUCH DAMAGE.
 #include <stdbool.h>
 #include <stdint.h>
 
-enum eGB {
-/** this bit has value 1 */
-	eGB_one = 1 << 0,
-/** end-of-minute bit */
-	eGB_EOM = 1 << 1,
-/** end of data, either end-of-file or user quit */
-	eGB_EOD = 1 << 2,
-/** bit value could not be determined */
-	eGB_read = 1 << 3,
-/** bit buffer would overflow */
-	eGB_too_long = 1 << 4,
-/** I/O error while reading bit from hardware */
-	eGB_IO = 1 << 5,
-/** transmitter error, all positive pulses */
-	eGB_transmit = 1 << 6,
-/** receiver error, all negative pulses */
-	eGB_receive = 1 << 7,
-/** random radio error, positive and negative pulses but no proper signal */
-	eGB_random = 1 << 8,
-/** this bit should be skipped (i.e. not displayed) */
-	eGB_skip = 1 << 9,
-/** next bit should be skipped (i.e. not added to bitpos) */
-	eGB_skip_next = 1 << 10
+enum eGB_bitvalue {
+	/** this bit has value 0 */
+	ebv_0,
+	/** this bit has value 1 */
+	ebv_1,
+	/** bit value could not be determined */
+	ebv_none
+};
+
+enum eGB_marker {
+	/** normal bit */
+	emark_none,
+	/** end-of-minute marker */
+	emark_minute,
+	/** bit buffer would overflow */
+	emark_toolong,
+	/** late end-of-minute marker, split bits? */
+	emark_late
+};
+
+enum eGB_HW {
+	/** no reception error */
+	ehw_ok,
+	/** transmitter error, all positive pulses */
+	ehw_transmit,
+	/** receiver error, all negative pulses */
+	ehw_receive,
+	/** random error, positive and negative pulses but no proper signal */
+	ehw_random
+};
+
+enum eGB_skip {
+	/** do not skip */
+	eskip_none,
+	/** this bit should be skipped (i.e. not displayed) */
+	eskip_this,
+	/** next bit should be skipped (i.e. not added to bitpos) */
+	eskip_next
+};
+
+struct GB_result {
+	/** I/O error while reading bit from hardware */
+	bool bad_io;
+	/** end of data, either end-of-file or user quit */
+	bool done;
+	/** the value of the currently received bit */
+	enum eGB_bitvalue bitval;
+	/** any (missing) minute marker, if applicable */
+	enum eGB_marker marker;
+	/** hardware reception status */
+	enum eGB_HW hwstat;
+	/** skip state for reading log files */
+	enum eGB_skip skip;
 };
 
 /**
@@ -142,23 +172,23 @@ uint8_t get_pulse(void);
  *
  * @return The current bit from the log file, a mask of eGB_* values.
  */
-uint16_t get_bit_file(void);
+const struct GB_result * const get_bit_file(void);
 
 /**
  * Retrieve one live bit from the hardware. This function determines several
  * values which can be retrieved using get_bitinfo().
  *
- * @return The currently received bit, a mask of eGB_* values.
+ * @return The currently received bit and its full status.
  */
-uint16_t get_bit_live(void);
+const struct GB_result * const get_bit_live(void);
 
 /**
  * Prepare for the next bit: update the bit position or wrap it around.
  *
- * @return The current bit state mask, ORed with eGB_tooLong if the bit
- *   buffer just became full.
+ * @return The current bit state structure, with the marker field adjusted
+ *   to indicate state of the bit buffer and the minute end.
  */
-uint16_t next_bit(void);
+const struct GB_result * const next_bit(void);
 
 /**
  * Retrieve the current bit position.

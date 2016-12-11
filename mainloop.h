@@ -29,6 +29,7 @@ SUCH DAMAGE.
 #include <stdbool.h>
 #include <stdint.h>
 struct DT_result;
+struct GB_result;
 struct alm;
 struct tm;
 
@@ -60,8 +61,8 @@ struct tm;
  *   interactive user input.
  */
 void mainloop(/*@null@*/char *logfilename,
-    uint16_t (*get_bit)(void),
-    void (*display_bit)(uint16_t, uint8_t),
+    const struct GB_result * const (*get_bit)(void),
+    void (*display_bit)(const struct GB_result * const, uint8_t),
     void (*display_long_minute)(void),
     void (*display_minute)(uint8_t),
     /*@null@*/void (*display_new_second)(void),
@@ -70,11 +71,12 @@ void mainloop(/*@null@*/char *logfilename,
     void (*display_weather)(void),
     void (*display_time)(const struct DT_result * const, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
-    /*@null@*/void (*show_mainloop_result)(uint16_t * const, uint8_t),
-    /*@null@*/void (*process_input)(uint16_t * const, uint8_t,
+    /*@null@*/void (*show_mainloop_result)(struct GB_result * const,
+	uint8_t),
+    /*@null@*/void (*process_input)(struct GB_result * const, uint8_t,
 	const char * const, bool * const, bool * const),
     /*@null@*/void (*post_process_input)(char **, bool * const,
-	uint16_t * const, uint8_t));
+	struct GB_result * const, uint8_t));
 
 /**
  * Get the result value set by {@link mainloop}.

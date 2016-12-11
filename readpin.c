@@ -50,6 +50,7 @@ main(int argc, char **argv)
 	const struct hardware *hw;
 	int ch, min, res;
 	bool raw = false, verbose = true;
+	const struct GB_result *bit;
 
 	while ((ch = getopt(argc, argv, "qr")) != -1) {
 		switch (ch) {
@@ -97,7 +98,6 @@ main(int argc, char **argv)
 		}
 
 		const struct bitinfo *bi;
-		uint16_t bit;
 
 		bit = get_bit_live();
 		bi = get_bitinfo();
@@ -120,12 +120,12 @@ main(int argc, char **argv)
 				    '+' : '-');
 			printf("\n");
 		}
-		if ((bit & eGB_too_long) == eGB_too_long)
+		if (bit->marker == emark_toolong || bit->marker == emark_late)
 			min++;
-		printf("%x (%"PRIi32" %"PRIi32" %"PRIi32" %"PRIi64" %"PRIi64
-		    " %"PRIi64") %i:%u\n", bit, bi->tlow, bi->tlast0, bi->t,
+		printf("(%"PRIi32" %"PRIi32" %"PRIi32" %"PRIi64" %"PRIi64
+		    " %"PRIi64") %i:%u\n", bi->tlow, bi->tlast0, bi->t,
 		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
-		if ((bit & eGB_EOM) == eGB_EOM)
+		if (bit->marker == emark_minute)
 			min++;
 		bit = next_bit();
 	}

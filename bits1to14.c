@@ -32,7 +32,8 @@ static uint8_t tpbuf[tpBufLen];
 static enum eTP tptype = eTP_unknown;
 
 void
-fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
+fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos,
+    const struct GB_result * const bit)
 {
 	static uint8_t tpstat;
 
@@ -40,17 +41,18 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 	case 0:
 		/* copy third party data */
 		if (bitpos > 1 && bitpos < 8)
-			tpbuf[bitpos - 2] = bit & eGB_one;
+			tpbuf[bitpos - 2] = bit->bitval == ebv_1 ? 1 : 0;
 			/* 2..7 -> 0..5 */
 		if (bitpos > 8 && bitpos < 15)
-			tpbuf[bitpos - 3] = bit & eGB_one;
+			tpbuf[bitpos - 3] = bit->bitval == ebv_1 ? 1 : 0;
 			/* 9..14 -> 6..11 */
 
 		/* copy third party type */
 		if (bitpos == 1)
-			tpstat = (bit & eGB_one) << 1;
+			tpstat = bit->bitval == ebv_1 ? 2 : 0;
 		if (bitpos == 8) {
-			tpstat |= (bit & eGB_one);
+			if (bit->bitval == ebv_1)
+				tpstat++;
 			switch (tpstat) {
 			case 0:
 				tptype = eTP_weather;
@@ -67,13 +69,13 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 	case 1:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 11] = bit & eGB_one;
+			tpbuf[bitpos + 11] = bit->bitval == ebv_1 ? 1 : 0;
 			/* 1..14 -> 12..25 */
 		break;
 	case 2:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 25] = bit & eGB_one;
+			tpbuf[bitpos + 25] = bit->bitval == ebv_1 ? 1 : 0;
 			/* 1..14 -> 26..39 */
 		break;
 	}

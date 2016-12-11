@@ -39,17 +39,17 @@ SUCH DAMAGE.
 #include <time.h>
 
 void
-display_bit(uint16_t state, uint8_t bitpos)
+display_bit(const struct GB_result * const bit, uint8_t bitpos)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
-	if ((state & eGB_receive) == eGB_receive)
+	if (bit->hwstat == ehw_receive)
 		printf("r");
-	else if ((state & eGB_transmit) == eGB_transmit)
+	else if (bit->hwstat == ehw_transmit)
 		printf("x");
-	else if ((state & eGB_random) == eGB_random)
+	else if (bit->hwstat == ehw_random)
 		printf("#");
-	else if ((state & eGB_read) == eGB_read)
+	else if (bit->bitval == ebv_none)
 		printf("_");
 	else
 		printf("%u", get_buffer()[bitpos]);
