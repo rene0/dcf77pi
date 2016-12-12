@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 René Ladan. All rights reserved.
+Copyright (c) 2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -26,40 +26,41 @@ SUCH DAMAGE.
 #include "mainloop.h"
 
 #include "bits1to14.h"
+#include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
 #include "setclock.h"
 
 #include <string.h>
+#include <time.h>
 
 static int8_t mainloop_result;
 
 void
 mainloop(char *logfilename,
-    uint16_t (*get_bit)(void),
-    void (*display_bit)(uint16_t, uint8_t),
+    const struct GB_result * const (*get_bit)(void),
+    void (*display_bit)(const struct GB_result * const, uint8_t),
     void (*display_long_minute)(void),
     void (*display_minute)(uint8_t),
     void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
-    void (*display_time)(uint32_t, struct tm),
+    void (*display_time)(const struct DT_result * const, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
-    void (*show_mainloop_result)(uint16_t * const, uint8_t),
-    void (*process_input)(uint16_t * const, uint8_t, const char * const,
-	bool * const, bool * const),
-    void (*post_process_input)(char **, bool * const, uint16_t * const,
+    void (*show_mainloop_result)(struct GB_result * const, uint8_t),
+    void (*process_input)(struct GB_result * const, uint8_t,
+	const char * const, bool * const, bool * const),
+    void (*post_process_input)(char **, bool * const, struct GB_result * const,
 	uint8_t))
 {
-	uint16_t bit;
-	uint32_t dt = 0;
+	const struct DT_result *dt;
 	uint8_t minlen = 0;
 	uint8_t bitpos = 0;
 	uint8_t init_min = 2;
 	struct tm curtime;
 	struct alm civwarn;
-	const uint8_t * tpbuf;
+	const uint8_t *tpbuf;
 	bool settime = false;
 	bool change_logfile = false;
 	bool have_result = false;
@@ -68,30 +69,31 @@ mainloop(char *logfilename,
 	(void)memset(&curtime, 0, sizeof(curtime));
 
 	for (;;) {
-		bit = get_bit();
+		const struct GB_result *bit = get_bit();
 
 		if (process_input != NULL) {
-			process_input(&bit, bitpos, logfilename, &settime,
+			process_input(bit, bitpos, logfilename, &settime,
 			    &change_logfile);
-			if ((bit & GETBIT_EOD) == GETBIT_EOD)
+			if (bit->done)
 				break;
 		}
 
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
-			post_process_input(&logfilename, &change_logfile, &bit,
+			post_process_input(&logfilename, &change_logfile, bit,
 			    bitpos);
-		if ((bit & GETBIT_SKIP) == 0 && (bit & GETBIT_EOD) == 0)
+		if (bit->skip == eskip_none && !bit->done)
 			display_bit(bit, bitpos);
 
 		if (init_min < 2)
-			fill_thirdparty_buffer((uint8_t)curtime.tm_min, bitpos, bit);
+			fill_thirdparty_buffer((uint8_t)curtime.tm_min, bitpos,
+			    bit);
 
 		bit = next_bit();
-		if ((bit & GETBIT_EOM) == GETBIT_EOM)
+		if (bit->marker == emark_minute)
 			minlen = bitpos + 1;
 			/* handle the missing bit due to the minute marker */
-		if ((bit & GETBIT_TOOLONG) == GETBIT_TOOLONG) {
+		if (bit->marker == emark_toolong || bit->marker == emark_late) {
 			minlen = 0xff;
 			/*
 			 * leave acc_minlen alone,
@@ -102,7 +104,7 @@ mainloop(char *logfilename,
 		if (display_new_second != NULL)
 			display_new_second();
 
-		if ((bit & (GETBIT_EOM | GETBIT_TOOLONG)) != 0) {
+		if (bit->marker == emark_minute || bit->marker == emark_late) {
 			display_minute(minlen);
 			dt = decode_time(init_min, minlen, get_acc_minlen(),
 			    get_buffer(), &curtime);
@@ -111,19 +113,18 @@ mainloop(char *logfilename,
 				tpbuf = get_thirdparty_buffer();
 				display_thirdparty_buffer(tpbuf);
 				switch (get_thirdparty_type()) {
-				case TP_ALARM:
+				case eTP_alarm:
 					decode_alarm(tpbuf, &civwarn);
 					display_alarm(civwarn);
 					break;
-				case TP_UNKNOWN:
+				case eTP_unknown:
 					display_unknown();
 					break;
-				case TP_WEATHER:
+				case eTP_weather:
 					display_weather();
 					break;
 				}
 			}
-
 			display_time(dt, curtime);
 
 			if (settime) {
@@ -133,23 +134,20 @@ mainloop(char *logfilename,
 				else
 					mainloop_result = -3;
 			}
-
-			if ((bit & GETBIT_EOM) == GETBIT_EOM)
+			if (bit->marker == emark_minute ||
+			    bit->marker == emark_late)
 				reset_acc_minlen();
 			if (init_min > 0)
 				init_min--;
 		}
-
 		if (have_result) {
 			if (show_mainloop_result != NULL)
-				show_mainloop_result(&bit, bitpos);
+				show_mainloop_result(bit, bitpos);
 			have_result = false;
 		}
-
-		if ((bit & GETBIT_EOD) == GETBIT_EOD)
+		if (bit->done)
 			break;
 	}
-
 	cleanup();
 }
 

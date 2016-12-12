@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 René Ladan. All rights reserved.
+Copyright (c) 2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -26,23 +26,24 @@ SUCH DAMAGE.
 #ifndef DCF77PI_MAINLOOP_H
 #define DCF77PI_MAINLOOP_H
 
-#include "decode_alarm.h"
-
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
+struct DT_result;
+struct GB_result;
+struct alm;
+struct tm;
 
 /**
  * Provide a ready-to-use mainloop function for the main program. Both dcf77pi
  * and dcf77pi-analyze use it.
  *
- * @param logfilename The name of the log file to write the live data to or NULL
- *   if not in live mode.
+ * @param logfilename The name of the log file to write the live data to or
+ *   NULL if not in live mode.
  * @param get_bit The callback to obtain a bit (either live or from a log file).
- * @param display_bit The callback to display the currently received bit (either
- *   live or from a log file).
+ * @param display_bit The callback to display the currently received bit
+ *   (either live or from a log file).
  * @param display_long_minute The callback to indicate that this minute is too
- *   long (GETBIT_TOOLONG is set).
+ *   long (eGB_too_long is set).
  * @param display_minute The callback to display information about the current
  *   minute.
  * @param display_new_second The optional callback for additional actions after
@@ -60,20 +61,22 @@ SUCH DAMAGE.
  *   interactive user input.
  */
 void mainloop(/*@null@*/char *logfilename,
-    uint16_t (*get_bit)(void),
-    void (*display_bit)(uint16_t, uint8_t),
+    const struct GB_result * const (*get_bit)(void),
+    void (*display_bit)(const struct GB_result * const, uint8_t),
     void (*display_long_minute)(void),
     void (*display_minute)(uint8_t),
     /*@null@*/void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
-    void (*display_time)(uint32_t, struct tm),
+    void (*display_time)(const struct DT_result * const, struct tm),
     void (*display_thirdparty_buffer)(const uint8_t * const),
-    /*@null@*/void (*show_mainloop_result)(uint16_t * const, uint8_t),
-    /*@null@*/void (*process_input)(uint16_t * const, uint8_t, const char * const,
-	bool * const, bool * const),
-    /*@null@*/void (*post_process_input)(char **, bool * const, uint16_t * const, uint8_t));
+    /*@null@*/void (*show_mainloop_result)(struct GB_result * const,
+	uint8_t),
+    /*@null@*/void (*process_input)(struct GB_result * const, uint8_t,
+	const char * const, bool * const, bool * const),
+    /*@null@*/void (*post_process_input)(char **, bool * const,
+	struct GB_result * const, uint8_t));
 
 /**
  * Get the result value set by {@link mainloop}.

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 René Ladan. All rights reserved.
+Copyright (c) 2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -27,13 +27,13 @@ SUCH DAMAGE.
 
 #include "input.h"
 
-#include <string.h>
-
-static uint8_t tpbuf[TPBUFLEN];
-static enum TPTYPE tptype = TP_UNKNOWN;
+const uint8_t tpBufLen = 40;
+static uint8_t tpbuf[tpBufLen];
+static enum eTP tptype = eTP_unknown;
 
 void
-fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
+fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos,
+    const struct GB_result * const bit)
 {
 	static uint8_t tpstat;
 
@@ -41,33 +41,41 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos, uint16_t bit)
 	case 0:
 		/* copy third party data */
 		if (bitpos > 1 && bitpos < 8)
-			tpbuf[bitpos - 2] = bit & GETBIT_ONE;
+			tpbuf[bitpos - 2] = bit->bitval == ebv_1 ? 1 : 0;
 			/* 2..7 -> 0..5 */
 		if (bitpos > 8 && bitpos < 15)
-			tpbuf[bitpos - 3] = bit & GETBIT_ONE;
+			tpbuf[bitpos - 3] = bit->bitval == ebv_1 ? 1 : 0;
 			/* 9..14 -> 6..11 */
 
 		/* copy third party type */
 		if (bitpos == 1)
-			tpstat = (bit & GETBIT_ONE) << 1;
+			tpstat = bit->bitval == ebv_1 ? 2 : 0;
 		if (bitpos == 8) {
-			tpstat |= bit & GETBIT_ONE;
-			if (tpstat == 0)
-				tptype = TP_WEATHER;
-			else if (tpstat == 3)
-				tptype = TP_ALARM;
+			if (bit->bitval == ebv_1)
+				tpstat++;
+			switch (tpstat) {
+			case 0:
+				tptype = eTP_weather;
+				break;
+			case 3:
+				tptype = eTP_alarm;
+				break;
+			default:
+				tptype = eTP_unknown;
+				break;
+			}
 		}
 		break;
 	case 1:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 11] = bit & GETBIT_ONE;
+			tpbuf[bitpos + 11] = bit->bitval == ebv_1 ? 1 : 0;
 			/* 1..14 -> 12..25 */
 		break;
 	case 2:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 25] = bit & GETBIT_ONE;
+			tpbuf[bitpos + 25] = bit->bitval == ebv_1 ? 1 : 0;
 			/* 1..14 -> 26..39 */
 		break;
 	}
@@ -79,7 +87,7 @@ get_thirdparty_buffer(void)
 	return tpbuf;
 }
 
-enum TPTYPE
+enum eTP
 get_thirdparty_type(void)
 {
 	return tptype;

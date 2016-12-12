@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -28,7 +28,9 @@ SUCH DAMAGE.
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
+struct DT_result;
+struct GB_result;
+struct tm;
 
 /**
  * Check if it is OK to set the system clock.
@@ -38,7 +40,8 @@ SUCH DAMAGE.
  * @param bit The current bit information
  * @return Whether it is OK to set the system clock
  */
-bool setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit);
+bool setclock_ok(uint8_t init_min, const struct DT_result * const dt,
+    const struct GB_result * const bit);
 
 /**
  * Set the system clock according to the given time. Note that this does *not*

@@ -20,10 +20,11 @@ The software comes with three binaries and a library:
   files in /dev), you might need to run this program as root or with sudo.
 * dcf77pi-analyze filename : Decode from filename instead of the GPIO pins.
   Output is generated in report mode.
-* readpin [-q] : Program to test reading from the GPIO pins and decode the
+* readpin [-qr] : Program to test reading from the GPIO pins and decode the
   resulting bit. Send a SIGINT (Ctrl-C) to stop the program. Optional parameters
   are:
   * -q do not show the raw input, default is to show it.
+  * -r raw mode, bypass the normal bit reception routine, default is to use it.
 * libdcf77.so: The shared library containing common routines for reading bits
   (either from a log file or the GPIO pins) and to decode the date, time and
   third party buffer. Both dcf77pi and dcf77pi-analyze use this library. Header
@@ -62,9 +63,13 @@ Currently supporrted platforms:
 On Linux, you will have to install an (n)curses package development using your
 package manager to get the required header files and the .so library file.
 For example:
+```sh
 % sudo apt-get install ncurses-devel
+```
 
 To build and install the program into /usr/bin , the library into /usr/lib and
 the configuration file into /usr/etc/dcf77pi :
+```sh
 % make PREFIX=/usr
 % sudo make install PREFIX=/usr
+```

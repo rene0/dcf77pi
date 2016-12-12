@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -25,17 +25,28 @@ SUCH DAMAGE.
 
 #include "setclock.h"
 
+#include "calendar.h"
 #include "decode_time.h"
 #include "input.h"
 
-#include <string.h>
+#include <time.h>
 #include <sys/time.h>
 
 bool
-setclock_ok(uint8_t init_min, uint32_t dt, uint16_t bit)
+setclock_ok(uint8_t init_min, const struct DT_result * const dt,
+    const struct GB_result * const bit)
 {
-	return init_min == 0 && ((dt & ~(DT_XMIT | DT_CHDST | DT_LEAP)) == 0) &&
-	    ((bit & ~(GETBIT_ONE | GETBIT_EOM)) == 0);
+	return init_min == 0 &&
+	    dt->bit0_ok && dt->bit20_ok && dt->minute_length == emin_ok &&
+	    dt->minute_status == eval_ok && dt->hour_status == eval_ok &&
+	    dt->mday_status == eval_ok && dt->wday_status == eval_ok &&
+	    dt->month_status == eval_ok && dt->year_status == eval_ok &&
+	    dt->dst_announce != eann_error &&
+	    (dt->dst_status == eDST_ok || dt->dst_status == eDST_done) &&
+	    dt->leap_announce != eann_error &&
+	    dt->leapsecond_status != els_one &&
+	    !bit->bad_io && bit->bitval != ebv_none && bit->hwstat == ehw_ok &&
+	    (bit->marker == emark_none || bit->marker == emark_minute);
 }
 
 int8_t
@@ -51,6 +62,7 @@ setclock(struct tm time)
 	if (time.tm_isdst == -1)
 		return -1;
 	it = get_isotime(time);
+	it.tm_sec = 0;
 	epochtime = mktime(&it);
 	if (epochtime == -1)
 		return -1;

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -26,12 +26,14 @@ SUCH DAMAGE.
 #include "config.h"
 #include "input.h"
 
-#include <inttypes.h> /* for PRIiXX */
+#include <inttypes.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sysexits.h>
+#include <time.h>
+#include <unistd.h>
 
 static void
 do_cleanup(/*@unused@*/ int sig)
@@ -44,18 +46,25 @@ do_cleanup(/*@unused@*/ int sig)
 int
 main(int argc, char **argv)
 {
-	int min, res;
-	bool verbose = true;
-	uint64_t i;
-	uint8_t j;
-	uint16_t bit;
 	struct sigaction sigact;
+	const struct hardware *hw;
+	int ch, min, res;
+	bool raw = false, verbose = true;
+	const struct bitinfo *bi;
+	const struct GB_result *bit;
 
-	if ((argc == 2) && strncmp(argv[1], "-q", strlen(argv[1])) == 0)
-		verbose = false;
-	else if (argc != 1) {
-		printf("usage: %s [-q]\n", argv[0]);
-		return EX_USAGE;
+	while ((ch = getopt(argc, argv, "qr")) != -1) {
+		switch (ch) {
+		case 'q' :
+			verbose = false;
+			break;
+		case 'r' :
+			raw = true;
+			break;
+		default:
+			printf("usage: %s [-qr]\n", argv[0]);
+			return EX_USAGE;
+		}
 	}
 
 	res = read_config_file(ETCDIR"/config.txt");
@@ -68,6 +77,7 @@ main(int argc, char **argv)
 		cleanup();
 		return res;
 	}
+	hw = get_hardware_parameters();
 
 	sigact.sa_handler = do_cleanup;
 	sigemptyset(&sigact.sa_mask);
@@ -77,7 +87,16 @@ main(int argc, char **argv)
 	min = -1;
 
 	for (;;) {
-		const struct bitinfo *bi;
+		if (raw) {
+			struct timespec slp;
+			slp.tv_sec = 1.0 / hw->freq;
+			slp.tv_nsec = 1e9 / hw->freq;
+			printf("%i", get_pulse());
+			fflush(stdout);
+			while (nanosleep(&slp, &slp))
+				;
+			continue;
+		}
 
 		bit = get_bit_live();
 		bi = get_bitinfo();
@@ -85,25 +104,27 @@ main(int argc, char **argv)
 			if (bi->freq_reset)
 				printf("!");
 			/* display first bi->t pulses */
-			for (i = 0; i < bi->t / 8; i++)
-				for (j = 0; j < 8; j++)
-					printf("%c", (bi->signal[i] & (1 << j)) > 0 ?
+			for (uint64_t i = 0; i < bi->t / 8; i++)
+				for (uint8_t j = 0; j < 8; j++)
+					printf("%c",
+					    (bi->signal[i] & (1 << j)) > 0 ?
 					    '+' : '-');
 			/*
 			 * display pulses in the last partially filled item
 			 * bi->t is 0-based, hence the <= comparison
 			 */
-			for (j = 0; j <= (bi->t & 7); j++)
-				printf("%c", (bi->signal[bi->t / 8] & (1 << j)) > 0 ?
+			for (uint8_t j = 0; j <= (bi->t & 7); j++)
+				printf("%c",
+				    (bi->signal[bi->t / 8] & (1 << j)) > 0 ?
 				    '+' : '-');
 			printf("\n");
 		}
-		if ((bit & GETBIT_TOOLONG) == GETBIT_TOOLONG)
+		if (bit->marker == emark_toolong || bit->marker == emark_late)
 			min++;
-		printf("%x (%"PRIi32" %"PRIi32" %"PRIi32" %"PRIi64" %"PRIi64
-		    " %"PRIi64") %i:%u\n", bit, bi->tlow, bi->tlast0, bi->t,
+		printf("(%"PRIi32" %"PRIi32" %"PRIi32" %"PRIi64" %"PRIi64
+		    " %"PRIi64") %i:%u\n", bi->tlow, bi->tlast0, bi->t,
 		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
-		if ((bit & GETBIT_EOM) == GETBIT_EOM)
+		if (bit->marker == emark_minute)
 			min++;
 		bit = next_bit();
 	}

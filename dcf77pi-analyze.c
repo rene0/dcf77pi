@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -24,88 +24,102 @@ SUCH DAMAGE.
 */
 
 #include "bits1to14.h"
+#include "calendar.h"
 #include "config.h"
+#include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
 #include "mainloop.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
+#include <time.h>
 
 void
-display_bit(uint16_t state, uint8_t bitpos)
+display_bit(const struct GB_result * const bit, uint8_t bitpos)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
-	if ((state & GETBIT_RECV) == GETBIT_RECV)
+	if (bit->hwstat == ehw_receive)
 		printf("r");
-	else if ((state & GETBIT_XMIT) == GETBIT_XMIT)
+	else if (bit->hwstat == ehw_transmit)
 		printf("x");
-	else if ((state & GETBIT_RND) == GETBIT_RND)
+	else if (bit->hwstat == ehw_random)
 		printf("#");
-	else if ((state & GETBIT_READ) == GETBIT_READ)
+	else if (bit->bitval == ebv_none)
 		printf("_");
 	else
 		printf("%u", get_buffer()[bitpos]);
 }
 
 void
-display_time(uint32_t dt, struct tm time)
+display_time(const struct DT_result *dt, struct tm time)
 {
 	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
 	    time.tm_isdst == 1 ? "summer" : time.tm_isdst == 0 ? "winter" :
 	    "?     ", time.tm_year, time.tm_mon, time.tm_mday,
-	    get_weekday((uint8_t)time.tm_wday), time.tm_hour, time.tm_min);
-	if ((dt & DT_LONG) == DT_LONG)
+	    weekday[time.tm_wday], time.tm_hour, time.tm_min);
+	if (dt->minute_length == emin_long)
 		printf("Minute too long\n");
-	if ((dt & DT_SHORT) == DT_SHORT)
+	else if (dt->minute_length == emin_short)
 		printf("Minute too short\n");
-	if ((dt & DT_DSTERR) == DT_DSTERR)
+	if (dt->dst_status == eDST_error)
 		printf("Time offset error\n");
-	if ((dt & DT_DSTJUMP) == DT_DSTJUMP)
+	else if (dt->dst_status == eDST_jump)
 		printf("Time offset jump (ignored)\n");
-	if ((dt & DT_MIN) == DT_MIN)
-		printf("Minute parity/value error\n");
-	if ((dt & DT_MINJUMP) == DT_MINJUMP)
-		printf("Minute value jump\n");
-	if ((dt & DT_HOUR) == DT_HOUR)
-		printf("Hour parity/value error\n");
-	if ((dt & DT_HOURJUMP) == DT_HOURJUMP)
-		printf("Hour value jump\n");
-	if ((dt & DT_DATE) == DT_DATE)
-		printf("Date parity/value error\n");
-	if ((dt & DT_WDAYJUMP) == DT_WDAYJUMP)
-		printf("Day-of-week value jump\n");
-	if ((dt & DT_MDAYJUMP) == DT_MDAYJUMP)
-		printf("Day-of-month value jump\n");
-	if ((dt & DT_MONTHJUMP) == DT_MONTHJUMP)
-		printf("Month value jump\n");
-	if ((dt & DT_YEARJUMP) == DT_YEARJUMP)
-		printf("Year value jump\n");
-	if ((dt & DT_B0) == DT_B0)
-		printf("Minute marker error\n");
-	if ((dt & DT_B20) == DT_B20)
-		printf("Date/time start marker error\n");
-	if ((dt & DT_XMIT) == DT_XMIT)
-		printf("Transmitter call bit set\n");
-	if ((dt & ANN_CHDST) == ANN_CHDST)
-		printf("Time offset change announced\n");
-	if ((dt & ANN_LEAP) == ANN_LEAP)
-		printf("Leap second announced\n");
-	if ((dt & DT_CHDST) == DT_CHDST)
+	else if (dt->dst_status == eDST_done)
 		printf("Time offset changed\n");
-	if ((dt & DT_LEAP) == DT_LEAP) {
-		printf("Leap second processed");
-		if ((dt & DT_LEAPONE) == DT_LEAPONE)
-			printf(", value is 1 instead of 0");
-		printf("\n");
-	}
-	if ((dt & DT_CHDSTERR) == DT_CHDSTERR)
+	if (dt->minute_status == eval_parity)
+		printf("Minute parity error\n");
+	else if (dt->minute_status == eval_bcd)
+		printf("Minute value error\n");
+	else if (dt->minute_status == eval_jump)
+		printf("Minute value jump\n");
+	if (dt->hour_status == eval_parity)
+		printf("Hour parity error\n");
+	else if (dt->hour_status == eval_bcd)
+		printf("Hour value error\n");
+	else if (dt->hour_status == eval_jump)
+		printf("Hour value jump\n");
+	if (dt->mday_status == eval_parity)
+		printf("Date parity error\n");
+	if (dt->wday_status == eval_bcd)
+		printf("Day-of-week value error\n");
+	else if (dt->wday_status == eval_jump)
+		printf("Day-of-week value jump\n");
+	if (dt->mday_status == eval_bcd)
+		printf("Day-of-month value error\n");
+	else if (dt->mday_status == eval_jump)
+		printf("Day-of-month value jump\n");
+	if (dt->month_status == eval_bcd)
+		printf("Month value error\n");
+	else if (dt->month_status == eval_jump)
+		printf("Month value jump\n");
+	if (dt->year_status == eval_bcd)
+		printf("Year value error\n");
+	else if (dt->year_status == eval_jump)
+		printf("Year value jump\n");
+	if (!dt->bit0_ok)
+		printf("Minute marker error\n");
+	if (!dt->bit20_ok)
+		printf("Date/time start marker error\n");
+	if (dt->transmit_call)
+		printf("Transmitter call bit set\n");
+	if (dt->dst_announce == eann_ok)
+		printf("Time offset change announced\n");
+	else if (dt->dst_announce == eann_error)
 		printf("Spurious time offset change announcement\n");
-	if ((dt & DT_LEAPERR) == DT_LEAPERR)
+	if (dt->leap_announce == eann_ok)
+		printf("Leap second announced\n");
+	else if (dt->leap_announce == eann_error)
 		printf("Spurious leap second announcement\n");
+	if (dt->leapsecond_status == els_done)
+		printf("Leap second processed\n");
+	else if (dt->leapsecond_status == els_one)
+		printf("Leap second processed with value 1 instead of 0\n");
 	printf("\n");
 }
 
@@ -158,7 +172,7 @@ display_thirdparty_buffer(const uint8_t * const tpbuf)
 	uint8_t i;
 
 	printf("Third party buffer: ");
-	for (i = 0; i < TPBUFLEN; i++)
+	for (i = 0; i < tpBufLen; i++)
 		printf("%u", tpbuf[i]);
 	printf("\n");
 }

@@ -26,35 +26,63 @@ SUCH DAMAGE.
 #ifndef DCF77PI_INPUT_H
 #define DCF77PI_INPUT_H
 
-/** maximum number of bits in a minute */
-#define BUFLEN 60
-
-/** this bit has value 1 */
-#define GETBIT_ONE	(uint16_t)(1 << 0)
-/** end-of-minute bit */
-#define GETBIT_EOM	(uint16_t)(1 << 1)
-/** end of data, either end-of-file or user quit */
-#define GETBIT_EOD	(uint16_t)(1 << 2)
-/** bit value could not be determined */
-#define GETBIT_READ	(uint16_t)(1 << 3)
-/** bit buffer would overflow */
-#define GETBIT_TOOLONG	(uint16_t)(1 << 4)
-/** I/O error while reading bit from hardware */
-#define GETBIT_IO	(uint16_t)(1 << 5)
-/** transmitter error, all positive pulses */
-#define GETBIT_XMIT	(uint16_t)(1 << 6)
-/** receiver error, all negative pulses */
-#define GETBIT_RECV	(uint16_t)(1 << 7)
-/** random radio error, both positive and negative pulses but no proper
-  * signal */
-#define GETBIT_RND	(uint16_t)(1 << 8)
-/** this bit should be skipped (i.e. not displayed) */
-#define GETBIT_SKIP	(uint16_t)(1 << 9)
-/** next bit should be skipped (i.e. not added to bitpos) */
-#define GETBIT_SKIPNEXT	(uint16_t)(1 << 10)
-
 #include <stdbool.h>
-#include <stdint.h> /* *intX_t */
+#include <stdint.h>
+
+enum eGB_bitvalue {
+	/** this bit has value 0 */
+	ebv_0,
+	/** this bit has value 1 */
+	ebv_1,
+	/** bit value could not be determined */
+	ebv_none
+};
+
+enum eGB_marker {
+	/** normal bit */
+	emark_none,
+	/** end-of-minute marker */
+	emark_minute,
+	/** bit buffer would overflow */
+	emark_toolong,
+	/** late end-of-minute marker, split bits? */
+	emark_late
+};
+
+enum eGB_HW {
+	/** no reception error */
+	ehw_ok,
+	/** transmitter error, all positive pulses */
+	ehw_transmit,
+	/** receiver error, all negative pulses */
+	ehw_receive,
+	/** random error, positive and negative pulses but no proper signal */
+	ehw_random
+};
+
+enum eGB_skip {
+	/** do not skip */
+	eskip_none,
+	/** this bit should be skipped (i.e. not displayed) */
+	eskip_this,
+	/** next bit should be skipped (i.e. not added to bitpos) */
+	eskip_next
+};
+
+struct GB_result {
+	/** I/O error while reading bit from hardware */
+	bool bad_io;
+	/** end of data, either end-of-file or user quit */
+	bool done;
+	/** the value of the currently received bit */
+	enum eGB_bitvalue bitval;
+	/** any (missing) minute marker, if applicable */
+	enum eGB_marker marker;
+	/** hardware reception status */
+	enum eGB_HW hwstat;
+	/** skip state for reading log files */
+	enum eGB_skip skip;
+};
 
 /**
  * Hardware parameters:
@@ -62,9 +90,9 @@ SUCH DAMAGE.
 struct hardware {
 	/** sample frequency in Hz */
 	uint32_t freq;
-	/* GPIO device number (FreeBSD only) */
+	/** GPIO device number (FreeBSD only) */
 	uint8_t iodev;
-	/* pin number to read from */
+	/** pin number to read from */
 	uint16_t pin;
 	/** pin value is high (1) or low (0) for active signal */
 	bool active_high;
@@ -95,8 +123,8 @@ struct bitinfo {
 	/** realfreq was reset to {@link hardware.freq} (normally because of
 	  * reception errors or fluctuations in CPU usage) */
 	bool freq_reset;
-	/** the raw received radio signal, {@link hardware.freq} / 2 items, with
-	  * each item holding 8 bits */
+	/** the raw received radio signal, {@link hardware.freq} / 2 items,
+	  * with each item holding 8 bits */
 	uint8_t *signal;
 };
 
@@ -142,25 +170,25 @@ uint8_t get_pulse(void);
 /**
  * Retrieve one bit from the log file.
  *
- * @return The current bit from the log file, a mask of GETBIT_* values.
+ * @return The current bit from the log file, a mask of eGB_* values.
  */
-uint16_t get_bit_file(void);
+const struct GB_result * const get_bit_file(void);
 
 /**
  * Retrieve one live bit from the hardware. This function determines several
  * values which can be retrieved using get_bitinfo().
  *
- * @return The currently received bit, a mask of GETBIT_* values.
+ * @return The currently received bit and its full status.
  */
-uint16_t get_bit_live(void);
+const struct GB_result * const get_bit_live(void);
 
 /**
  * Prepare for the next bit: update the bit position or wrap it around.
  *
- * @return The current bit state mask, ORed with GETBIT_TOOLONG if the bit
- *   buffer just became full.
+ * @return The current bit state structure, with the marker field adjusted
+ *   to indicate state of the bit buffer and the minute end.
  */
-uint16_t next_bit(void);
+const struct GB_result * const next_bit(void);
 
 /**
  * Retrieve the current bit position.
@@ -177,8 +205,8 @@ uint8_t get_bitpos(void);
 const uint8_t * const get_buffer(void);
 
 /**
- * Determine if there should be a space between the last bit and the current bit
- * when displaying the bit buffer.
+ * Determine if there should be a space between the last bit and the current
+ * bit when displaying the bit buffer.
  *
  * @param bitpos The current bit position.
  */

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -25,8 +25,7 @@ SUCH DAMAGE.
 
 #include "decode_alarm.h"
 
-#include "bits1to14.h"
-
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -38,9 +37,8 @@ void
 decode_alarm(const uint8_t * const civbuf, struct alm * const alarm)
 {
 	/* Partial information only, no parity checks */
-	uint8_t i;
 
-	for (i = 0; i < 2; i++) {
+	for (uint8_t i = 0; i < 2; i++) {
 		alarm->region[i].r1 = civbuf[6 * i] +
 		    2 * civbuf[1 + 6 * i] +
 		    4 * civbuf[3 + 6 * i];
@@ -69,7 +67,7 @@ decode_alarm(const uint8_t * const civbuf, struct alm * const alarm)
 get_region_name(struct alm alarm)
 {
 	/*@null@*/char *res;
-	uint8_t r;
+	bool need_comma;
 
 	/* Partial information only */
 
@@ -82,16 +80,19 @@ get_region_name(struct alm alarm)
 	if (res == NULL)
 		return res;
 
-	r = alarm.region[0].r1;
-	if ((r & 1) == 1)
+	need_comma = false;
+	if ((alarm.region[0].r1 & 1) == 1) {
 		res = strcat(res, reg1n);
-	if ((r & 2) == 2) {
-		if ((r & 1) == 1)
+		need_comma = true;
+	}
+	if ((alarm.region[0].r1 & 2) == 2) {
+		if (need_comma)
 			res = strcat(res, ", ");
 		res = strcat(res, reg1m);
+		need_comma = true;
 	}
-	if ((r & 4) == 1) {
-		if (((r & 1) == 1) || ((r & 2) == 2))
+	if ((alarm.region[0].r1 & 4) == 4) {
+		if (need_comma)
 			res = strcat(res, ", ");
 		res = strcat(res, reg1s);
 	}
