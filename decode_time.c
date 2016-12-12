@@ -34,8 +34,7 @@ SUCH DAMAGE.
 #include <string.h>
 #include <time.h>
 
-static uint8_t summermonth;
-static uint8_t wintermonth;
+static uint8_t summermonth, wintermonth;
 static uint8_t leapsecmonths[12];
 static uint8_t num_leapsecmonths;
 static struct DT_result dt_res;
