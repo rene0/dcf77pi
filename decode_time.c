@@ -281,7 +281,7 @@ calculate_date_time(uint8_t init_min, uint8_t errflags, int16_t increase,
 			}
 		}
 	}
-	return (errflags << 3) | (!p3 << 2) | (!p2 << 1) | !p1;
+	return (errflags << 3) | ((!p3) << 2) | ((!p2) << 1) | (!p1);
 }
 
 static void
