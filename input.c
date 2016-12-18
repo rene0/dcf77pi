@@ -306,10 +306,10 @@ get_bit_live(void)
 	 * One period is either 1000 ms or 2000 ms long (normal or padding for
 	 * last). The active part is either 100 ms ('0') or 200 ms ('1') long.
 	 * The maximum allowed values as percentage of the second length are
-	 * secified as half the value and the whole value of the lengths of
+	 * specified as half the value and the whole value of the lengths of
 	 * bit 0 and bit 20 respectively.
 	 *
-	 *  ~A > 3/2 * realfreq: value |= eGB_EOM
+	 *  ~A > 3/2 * realfreq: end-of-minute
 	 *  ~A > 5/2 * realfreq: timeout
 	 */
 

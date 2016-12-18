@@ -161,7 +161,7 @@ void cleanup(void);
 /**
  * Retrieve one pulse from the hardware.
  *
- * @return: 0 or 1 depending on the pin value and {@link hardware.active_high},
+ * @return 0 or 1 depending on the pin value and {@link hardware.active_high},
  *   or 2 if obtaining the pulse failed.
  */
 int get_pulse(void);
@@ -169,7 +169,7 @@ int get_pulse(void);
 /**
  * Retrieve one bit from the log file.
  *
- * @return The current bit from the log file, a mask of eGB_* values.
+ * @return The current bit from the log file and its associated state.
  */
 const struct GB_result * const get_bit_file(void);
 
