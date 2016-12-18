@@ -436,7 +436,8 @@ decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
 
 	errflags = check_time_sanity(minlen, buffer) ? 0 : 1;
 
-	handle_special_bits(buffer);
+	if (errflags == 0)
+		handle_special_bits(buffer);
 
 	increase = increase_old_time(init_min, minlen, acc_minlen, time);
 
