@@ -163,10 +163,9 @@ increase_old_time(unsigned init_min, unsigned minlen, unsigned acc_minlen,
 
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
-		int i;
-		for (i = increase; increase > 0 && i > 0; i--)
+		for (int i = increase; increase > 0 && i > 0; i--)
 			add_minute(time, summermonth, wintermonth);
-		for (i = increase; increase < 0 && i < 0; i++)
+		for (int i = increase; increase < 0 && i < 0; i++)
 			substract_minute(time, summermonth, wintermonth);
 	}
 	return increase;

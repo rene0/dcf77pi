@@ -288,7 +288,6 @@ process_input(struct GB_result * const bit, unsigned bitpos,
     bool * const change_logfile)
 {
 	int inkey;
-	char dispbuf[80];
 	static unsigned input_count, input_xpos;
 
 	inkey = getch();
@@ -320,6 +319,8 @@ process_input(struct GB_result * const bit, unsigned bitpos,
 	}
 
 	while (input_mode == 1 && inkey != ERR) {
+		char dispbuf[80];
+
 		if (input_count > 0 &&
 		    (inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127)) {
 			input_count--;

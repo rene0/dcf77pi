@@ -49,8 +49,6 @@ main(int argc, char **argv)
 	const struct hardware *hw;
 	int ch, min, res;
 	bool raw = false, verbose = true;
-	const struct bitinfo *bi;
-	const struct GB_result *bit;
 
 	while ((ch = getopt(argc, argv, "qr")) != -1) {
 		switch (ch) {
@@ -86,6 +84,9 @@ main(int argc, char **argv)
 	min = -1;
 
 	for (;;) {
+		const struct bitinfo *bi;
+		const struct GB_result *bit;
+
 		if (raw) {
 			struct timespec slp;
 			slp.tv_sec = 1.0 / hw->freq;

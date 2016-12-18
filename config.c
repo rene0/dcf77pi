@@ -47,9 +47,7 @@ static char *value[NUM_KEYS];
 static int
 getpos(const char * const kw)
 {
-	int i;
-
-	for (i = 0; i < (int)NUM_KEYS; i++)
+	for (int i = 0; i < (int)NUM_KEYS; i++)
 		if (strcmp(key[i], kw) == 0)
 			return i;
 	return -1;
@@ -58,11 +56,9 @@ getpos(const char * const kw)
 static char * const
 strip(char *s)
 {
-	int i;
-
 	while (s[0] == ' ' || s[0] == '\n' || s[0] == '\r' || s[0] == '\t')
 		s++;
-	for (i = (int)(strlen(s) - 1); s[i] == ' ' || s[i] == '\n' ||
+	for (int i = (int)(strlen(s) - 1); s[i] == ' ' || s[i] == '\n' ||
 	    s[i] == '\r' || s[i] == '\t'; i--)
 		s[i] = '\0';
 	return s;
@@ -78,7 +74,6 @@ do { \
 int
 read_config_file(const char * const filename)
 {
-	int i;
 	FILE *configfile;
 	char *k, *v;
 	char *line, *freeptr;
@@ -90,7 +85,7 @@ read_config_file(const char * const filename)
 		return errno;
 	}
 	freeptr = line;
-	for (i = 0; i < (int)NUM_KEYS; i++)
+	for (int i = 0; i < (int)NUM_KEYS; i++)
 		value[i] = NULL;
 
 	configfile = fopen(filename, "r");
@@ -101,6 +96,8 @@ read_config_file(const char * const filename)
 	}
 
 	while (feof(configfile) == 0) {
+		int i;
+
 		if (fgets(line, max_len, configfile) == NULL) {
 			if (feof(configfile) != 0)
 				break;
@@ -136,7 +133,7 @@ read_config_file(const char * const filename)
 			    " '%s'\n", k);
 		value[i] = strdup(v);
 	}
-	for (i = 0; i < (int)NUM_KEYS; i++)
+	for (int i = 0; i < (int)NUM_KEYS; i++)
 		if (value[i] == NULL) {
 			printf("read_config_file: missing value for key '%s'\n",
 			    key[i]);

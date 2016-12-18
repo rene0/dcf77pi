@@ -54,13 +54,10 @@ mainloop(char *logfilename,
     void (*post_process_input)(char **, bool * const, struct GB_result * const,
 	unsigned))
 {
-	const struct DT_result *dt;
 	unsigned minlen = 0;
 	unsigned bitpos = 0;
 	unsigned init_min = 2;
 	struct tm curtime;
-	struct alm civwarn;
-	const unsigned *tpbuf;
 	bool settime = false;
 	bool change_logfile = false;
 	bool have_result = false;
@@ -69,8 +66,10 @@ mainloop(char *logfilename,
 	(void)memset(&curtime, 0, sizeof(curtime));
 
 	for (;;) {
-		const struct GB_result *bit = get_bit();
+		const struct DT_result *dt;
+		struct GB_result *bit;
 
+		bit = get_bit();
 		if (process_input != NULL) {
 			process_input(bit, bitpos, logfilename, &settime,
 			    &change_logfile);
@@ -110,12 +109,18 @@ mainloop(char *logfilename,
 			    get_buffer(), &curtime);
 
 			if (curtime.tm_min % 3 == 0 && init_min == 0) {
+				const unsigned *tpbuf;
+
 				tpbuf = get_thirdparty_buffer();
 				display_thirdparty_buffer(tpbuf);
 				switch (get_thirdparty_type()) {
 				case eTP_alarm:
-					decode_alarm(tpbuf, &civwarn);
-					display_alarm(civwarn);
+					{
+						struct alm civwarn;
+
+						decode_alarm(tpbuf, &civwarn);
+						display_alarm(civwarn);
+					}
 					break;
 				case eTP_unknown:
 					display_unknown();

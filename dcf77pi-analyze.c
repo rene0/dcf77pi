@@ -125,10 +125,8 @@ display_time(const struct DT_result *dt, struct tm time)
 void
 display_alarm(struct alm alarm)
 {
-	unsigned i;
-
 	printf("German civil warning for: %s\n", get_region_name(alarm));
-	for (i = 0; i < 2; i++)
+	for (unsigned i = 0; i < 2; i++)
 		printf("%u Regions: %x %x %x %x parities %x %x\n", i,
 		    alarm.region[i].r1, alarm.region[i].r2, alarm.region[i].r3,
 		    alarm.region[i].r4, alarm.parity[i].ps, alarm.parity[i].pl);
@@ -168,10 +166,8 @@ display_minute(unsigned minlen)
 void
 display_thirdparty_buffer(const unsigned * const tpbuf)
 {
-	unsigned i;
-
 	printf("Third party buffer: ");
-	for (i = 0; i < tpBufLen; i++)
+	for (unsigned i = 0; i < tpBufLen; i++)
 		printf("%u", tpbuf[i]);
 	printf("\n");
 }
