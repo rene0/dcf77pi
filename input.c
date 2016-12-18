@@ -243,7 +243,7 @@ get_pulse(void)
 static void
 set_new_state(void)
 {
-	cutoff = 0xffff;
+	cutoff = -1;
 	gb_res.bad_io = false;
 	gb_res.bitval = ebv_none;
 	if (gb_res.marker != emark_toolong && gb_res.marker != emark_late)

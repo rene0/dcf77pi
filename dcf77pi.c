@@ -185,7 +185,7 @@ display_time(const struct DT_result *dt, struct tm time)
 	    weekday[time.tm_wday], time.tm_hour, time.tm_min);
 	/* display minute cutoff value */
 	cutoff = get_cutoff();
-	if (cutoff == 0xffff)
+	if (cutoff == -1)
 		mvwprintw(decode_win, 1, 40, "?     ");
 	else
 		mvwprintw(decode_win, 1, 40, "%6.4f", cutoff / 1e4);
@@ -207,7 +207,7 @@ display_time(const struct DT_result *dt, struct tm time)
 		mvwchgat(decode_win, 1, 22, 2, A_BOLD, 3, NULL);
 	if (dt->minute_status == eval_jump)
 		mvwchgat(decode_win, 1, 25, 2, A_BOLD, 3, NULL);
-	if (cutoff == 0xffff)
+	if (cutoff == -1)
 		mvwchgat(decode_win, 1, 40, 1, A_BOLD, 3, NULL);
 
 	/* flip lights depending on the results */

@@ -157,7 +157,7 @@ display_minute(unsigned minlen)
 
 	cutoff = get_cutoff();
 	printf(" (%u) %u ", get_acc_minlen(), minlen);
-	if (cutoff == 0xffff)
+	if (cutoff == -1)
 		printf("?\n");
 	else
 		printf("%6.4f\n", cutoff / 1e4);
