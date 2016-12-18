@@ -26,11 +26,10 @@ SUCH DAMAGE.
 #ifndef DCF77PI_BITS1TO14_H
 #define DCF77PI_BITS1TO14_H
 
-#include <stdint.h>
 struct GB_result;
 
 /** Length of the third-party buffer in bits */
-extern const uint8_t tpBufLen;
+extern const unsigned tpBufLen;
 
 /** Indicates the type of the third party contents. */
 enum eTP {
@@ -49,7 +48,7 @@ enum eTP {
  * @param bitpos The current bit position.
  * @param bit The current bit information.
  */
-void fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos,
+void fill_thirdparty_buffer(unsigned minute, unsigned bitpos,
     const struct GB_result * const bit);
 
 /**
@@ -57,7 +56,7 @@ void fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos,
  *
  * @return The third party buffer.
  */
-const uint8_t * const get_thirdparty_buffer(void);
+const unsigned * const get_thirdparty_buffer(void);
 
 /**
  * Retrieve the type of the third party contents.

@@ -27,15 +27,15 @@ SUCH DAMAGE.
 
 #include "input.h"
 
-const uint8_t tpBufLen = 40;
-static uint8_t tpbuf[tpBufLen];
+const unsigned tpBufLen = 40;
+static unsigned tpbuf[tpBufLen];
 static enum eTP tptype = eTP_unknown;
 
 void
-fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos,
+fill_thirdparty_buffer(unsigned minute, unsigned bitpos,
     const struct GB_result * const bit)
 {
-	static uint8_t tpstat;
+	static unsigned tpstat;
 
 	switch (minute % 3) {
 	case 0:
@@ -81,7 +81,7 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos,
 	}
 }
 
-const uint8_t * const
+const unsigned * const
 get_thirdparty_buffer(void)
 {
 	return tpbuf;

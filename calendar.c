@@ -27,26 +27,24 @@ SUCH DAMAGE.
 
 #include <string.h>
 
-const uint16_t base_year = 1900;
+const int base_year = 1900;
 
-const uint16_t dayinleapyear[12] =
+const int dayinleapyear[12] =
     {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
 
 const char * const weekday[8] =
     {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
 /* based on: xx00-02-28 is a Monday if and only if xx00 is a leap year */
-int8_t
+int
 century_offset(struct tm time)
 {
-	uint8_t nw, nd;
-	uint8_t tmp; /* resulting day of year, 02-28 if xx00 is leap */
-	int8_t wd;
-	uint16_t d;
+	int d, nw, nd, wd;
+	int tmp; /* resulting day of year, 02-28 if xx00 is leap */
 
 	/* substract year days from weekday, including normal leap years */
-	wd = (int8_t)((time.tm_wday - time.tm_year - time.tm_year / 4 -
-	    (((time.tm_year % 4) > 0) ? 1 : 0)) % 7);
+	wd = (time.tm_wday - time.tm_year - time.tm_year / 4 -
+	    (((time.tm_year % 4) > 0) ? 1 : 0)) % 7;
 	if (wd < 1)
 		wd += 7;
 
@@ -55,13 +53,13 @@ century_offset(struct tm time)
 	d = dayinleapyear[time.tm_mon - 1] + time.tm_mday;
 	if (d < 60) { /* at or before 02-28 (day 59) */
 		nw = (59 - d) / 7;
-		nd = (uint8_t)(wd == 1 ? 0 : (8 - wd));
+		nd = wd == 1 ? 0 : (8 - wd);
 		tmp = d + (nw * 7) + nd;
 	} else { /* after 02-28 (day 59) */
 		if ((time.tm_year % 4) > 0)
 			d--; /* no 02-29 for obvious non-leap years */
 		nw = (d - 59) / 7;
-		nd = (uint8_t)(wd - 1);
+		nd = wd - 1;
 		tmp = d - (nw * 7) - nd;
 	}
 	/* if day-in-year is 59, this year (xx00) is leap */
@@ -83,32 +81,32 @@ isleapyear(struct tm time)
 	    time.tm_year % 400 == 0;
 }
 
-uint8_t
+int
 lastday(struct tm time)
 {
 	if (time.tm_mon == 2)
-		return (uint8_t)(28 + (isleapyear(time) ? 1 : 0));
+		return 28 + (isleapyear(time) ? 1 : 0);
 	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 ||
 	    time.tm_mon == 11)
 		return 30;
 	return 31;
 }
 
-uint8_t
+int
 get_utchour(struct tm time)
 {
-	int8_t utchour;
+	int utchour;
 
 	if (time.tm_isdst == -1)
 		return 24;
-	utchour = (int8_t)(time.tm_hour - 1 - time.tm_isdst);
+	utchour = time.tm_hour - 1 - time.tm_isdst;
 	if (utchour < 0)
 		utchour += 24;
-	return (uint8_t)utchour;
+	return utchour;
 }
 
 void
-add_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermonth)
+add_minute(struct tm * const time, int summermonth, int wintermonth)
 {
 	if (++time->tm_min == 60) {
 		time->tm_min = 0;
@@ -123,7 +121,7 @@ add_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermonth)
 			time->tm_hour = 0;
 			if (++time->tm_wday == 8)
 				time->tm_wday = 1;
-			if (++time->tm_mday > (int)lastday(*time)) {
+			if (++time->tm_mday > lastday(*time)) {
 				time->tm_mday = 1;
 				if (++time->tm_mon == 13) {
 					time->tm_mon = 1;
@@ -137,7 +135,7 @@ add_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermonth)
 }
 
 void
-substract_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermonth)
+substract_minute(struct tm * const time, int summermonth, int wintermonth)
 {
 	if (--time->tm_min == -1) {
 		time->tm_min = 59;
@@ -160,7 +158,7 @@ substract_minute(struct tm * const time, uint8_t summermonth, uint8_t wintermont
 						time->tm_year = base_year + 399;
 						/* bump! */
 				}
-				time->tm_mday = (int)lastday(*time);
+				time->tm_mday = lastday(*time);
 			}
 		}
 	}
@@ -176,7 +174,7 @@ get_dcftime(struct tm isotime)
 	dt.tm_year += 1900;
 	if (dt.tm_wday == 0)
 		dt.tm_wday = 7;
-	dt.tm_yday = (int)dayinleapyear[isotime.tm_mon] + dt.tm_mday;
+	dt.tm_yday = dayinleapyear[isotime.tm_mon] + dt.tm_mday;
 	if (dt.tm_mon > 2 && !isleapyear(dt))
 		dt.tm_yday--;
 	dt.tm_zone = NULL;
@@ -194,7 +192,7 @@ get_isotime(struct tm dcftime)
 	it.tm_year -= 1900;
 	if (it.tm_wday == 7)
 		it.tm_wday = 0;
-	it.tm_yday = (int)dayinleapyear[it.tm_mon] + it.tm_mday;
+	it.tm_yday = dayinleapyear[it.tm_mon] + it.tm_mday;
 	if (dcftime.tm_mon > 2 && !isleapyear(dcftime))
 		it.tm_yday--;
 	it.tm_zone = NULL;

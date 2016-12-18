@@ -27,19 +27,18 @@ SUCH DAMAGE.
 #define DCF77PI_CALENDAR_H
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <time.h>
 
 /**
  * The base year for {@link century_offset}.
  * Update every 400 years, now at 2300-01-01
  */
-extern const uint16_t base_year;
+extern const int base_year;
 
 /**
  * An array containing the day numbers of each month in a leap year.
  */
-extern const uint16_t dayinleapyear[12];
+extern const int dayinleapyear[12];
 
 /**
  * Textual representation of the day of week, with Monday = 1,
@@ -60,7 +59,7 @@ bool isleapyear(struct tm time);
  * @param time The current time.
  * @return The last day of the month of the given time.
  */
-uint8_t lastday(struct tm time);
+int lastday(struct tm time);
 
 /**
  * Calculates the century offset of the current time.
@@ -71,7 +70,7 @@ uint8_t lastday(struct tm time);
  * @param time The current time.
  * @return The century offset (0 to 3 or -1 if an error happened).
  */
-int8_t century_offset(struct tm time);
+int century_offset(struct tm time);
 
 /**
  * Calculates the hour in UTC from the given time.
@@ -79,7 +78,7 @@ int8_t century_offset(struct tm time);
  * @param time The time to calculate the hour in UTC from.
  * @return The hour value in UTC.
  */
-uint8_t get_utchour(struct tm time);
+int get_utchour(struct tm time);
 
 /**
  * Adds one minute to the current time. Note that the
@@ -94,8 +93,7 @@ uint8_t get_utchour(struct tm time);
  * @param summermonth The month that DST begins in.
  * @param wintermonth The month that DST ends in.
  */
-void add_minute(struct tm * const time, uint8_t summermonth,
-    uint8_t wintermonth);
+void add_minute(struct tm * const time, int summermonth, int wintermonth);
 
 /**
  * Substracts one minute to the current time. Note that
@@ -110,8 +108,7 @@ void add_minute(struct tm * const time, uint8_t summermonth,
  * @param summermonth The month that DST begins in.
  * @param wintermonth The month that DST ends in.
  */
-void substract_minute(struct tm * const time, uint8_t summermonth,
-    uint8_t wintermonth);
+void substract_minute(struct tm * const time, int summermonth, int wintermonth);
 
 /**
  * Convert the given time in ISO format to DCF77 format.

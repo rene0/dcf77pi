@@ -29,14 +29,13 @@ SUCH DAMAGE.
 #include "config.h"
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-static uint8_t summermonth, wintermonth;
-static uint8_t leapsecmonths[12];
-static uint8_t num_leapsecmonths;
+static int summermonth, wintermonth;
+static int leapsecmonths[12];
+static int num_leapsecmonths;
 static struct DT_result dt_res;
 
 void
@@ -44,17 +43,17 @@ init_time(void)
 {
 	char *freeptr, *lsm, *mon;
 
-	summermonth = (uint8_t)strtol(get_config_value("summermonth"), NULL, 10);
+	summermonth = (int)strtol(get_config_value("summermonth"), NULL, 10);
 	if (summermonth < 1 || summermonth > 12)
 		summermonth = 0;
-	wintermonth = (uint8_t)strtol(get_config_value("wintermonth"), NULL, 10);
+	wintermonth = (int)strtol(get_config_value("wintermonth"), NULL, 10);
 	if (wintermonth < 1 || wintermonth > 12)
 		wintermonth = 0;
 
 	freeptr = lsm = strdup(get_config_value("leapsecmonths"));
 	num_leapsecmonths = 0;
-	for (uint8_t i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
-		uint8_t m = (uint8_t)strtol(mon, NULL, 10);
+	for (int i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
+		int m = (int)strtol(mon, NULL, 10);
 		if (m >= 1 && m <= 12) {
 			leapsecmonths[i] = m;
 			num_leapsecmonths++;
@@ -66,36 +65,34 @@ init_time(void)
 static bool
 is_leapsecmonth(struct tm time)
 {
-	uint8_t i;
-
 	/*
 	 * Local time is 1 or 2 hours ahead of UTC, which is what the
 	 * configuration file uses, so adjust for that.
 	 */
 	if (--time.tm_mon == 0)
 		time.tm_mon = 12;
-	for (i = 0; i < num_leapsecmonths; i++)
+	for (int i = 0; i < num_leapsecmonths; i++)
 		if (leapsecmonths[i] == time.tm_mon)
 			return true;
 	return false;
 }
 
 static bool
-getpar(const uint8_t * const buffer, uint8_t start, uint8_t stop)
+getpar(const int * const buffer, unsigned start, unsigned stop)
 {
-	uint8_t i, par = 0;
+	int par = 0;
 
-	for (i = start; i <= stop; i++)
+	for (unsigned i = start; i <= stop; i++)
 		par += buffer[i];
 	return (par & 1) == 0;
 }
 
-static uint8_t
-getbcd(const uint8_t * const buffer, uint8_t start, uint8_t stop)
+static int
+getbcd(const int * const buffer, unsigned start, unsigned stop)
 {
-	uint8_t i, mul = 1, val = 0;
+	int mul = 1, val = 0;
 
-	for (i = start; i <= stop; i++) {
+	for (unsigned i = start; i <= stop; i++) {
 		val += mul * buffer[i];
 		mul *= 2;
 	}
@@ -103,7 +100,7 @@ getbcd(const uint8_t * const buffer, uint8_t start, uint8_t stop)
 }
 
 static bool
-check_time_sanity(uint8_t minlen, const uint8_t * const buffer)
+check_time_sanity(unsigned minlen, const int * const buffer)
 {
 	if (minlen < 59)
 		dt_res.minute_length = emin_short;
@@ -126,19 +123,19 @@ check_time_sanity(uint8_t minlen, const uint8_t * const buffer)
 }
 
 static void
-handle_special_bits(const uint8_t * const buffer)
+handle_special_bits(const int * const buffer)
 {
 	dt_res.transmit_call = buffer[15] == 1;
 }
 
-static int16_t
-increase_old_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
+static int
+increase_old_time(unsigned init_min, unsigned minlen, unsigned acc_minlen,
     struct tm * const time)
 {
-	static uint32_t acc_minlen_partial, old_acc_minlen;
+	static unsigned acc_minlen_partial, old_acc_minlen;
 	static bool prev_toolong;
 
-	int16_t increase;
+	int increase;
 
 	/* See if there are any partial / split minutes to be combined: */
 	if (acc_minlen <= 59000) {
@@ -150,9 +147,9 @@ increase_old_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	}
 	/* Calculate number of minutes to increase time with: */
 	if (prev_toolong)
-		increase = (int16_t)((acc_minlen - old_acc_minlen) / 60000);
+		increase = (acc_minlen - old_acc_minlen) / 60000;
 	else
-		increase = (int16_t)(acc_minlen / 60000);
+		increase = acc_minlen / 60000;
 	if (acc_minlen >= 60000)
 		acc_minlen_partial %= 60000;
 	/* Account for complete minutes with a short acc_minlen: */
@@ -175,12 +172,12 @@ increase_old_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
 	return increase;
 }
 
-static uint8_t
-calculate_date_time(uint8_t init_min, uint8_t errflags, int16_t increase,
-    const uint8_t * const buffer, const struct tm time,
+static unsigned
+calculate_date_time(unsigned init_min, unsigned errflags, int increase,
+    const int * const buffer, const struct tm time,
     struct tm * const newtime)
 {
-	uint8_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
+	int tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
 	bool p1, p2, p3;
 
 	p1 = getpar(buffer, 21, 28);
@@ -194,7 +191,7 @@ calculate_date_time(uint8_t init_min, uint8_t errflags, int16_t increase,
 	} else
 		dt_res.minute_status = eval_ok;
 	if ((init_min == 2 || increase != 0) && p1 && errflags == 0) {
-		newtime->tm_min = (int)(tmp0 + 10 * tmp1);
+		newtime->tm_min = tmp0 + 10 * tmp1;
 		if (init_min == 0 && time.tm_min != newtime->tm_min)
 			dt_res.minute_status = eval_jump;
 	}
@@ -210,7 +207,7 @@ calculate_date_time(uint8_t init_min, uint8_t errflags, int16_t increase,
 	} else
 		dt_res.hour_status = eval_ok;
 	if ((init_min == 2 || increase != 0) && p2 && errflags == 0) {
-		newtime->tm_hour = (int)(tmp0 + 10 * tmp1);
+		newtime->tm_hour = tmp0 + 10 * tmp1;
 		if (init_min == 0 && time.tm_hour != newtime->tm_hour)
 			dt_res.hour_status = eval_jump;
 	}
@@ -252,28 +249,28 @@ calculate_date_time(uint8_t init_min, uint8_t errflags, int16_t increase,
 			dt_res.year_status = eval_ok;
 	}
 	if ((init_min == 2 || increase != 0) && p3 && errflags == 0) {
-		int8_t centofs;
+		int centofs;
 
-		newtime->tm_mday = (int)(tmp0 + 10 * tmp1);
+		newtime->tm_mday = tmp0 + 10 * tmp1;
 		if (init_min == 0 && time.tm_mday != newtime->tm_mday)
 			dt_res.mday_status = eval_jump;
-		newtime->tm_wday = (int)tmp2;
+		newtime->tm_wday = tmp2;
 		if (init_min == 0 && time.tm_wday != newtime->tm_wday)
 			dt_res.wday_status = eval_jump;
-		newtime->tm_mon = (int)(tmp3 + 10 * buffer[49]);
+		newtime->tm_mon = tmp3 + 10 * buffer[49];
 		if (init_min == 0 && time.tm_mon != newtime->tm_mon)
 			dt_res.month_status = eval_jump;
-		newtime->tm_year = (int)(tmp4 + 10 * tmp5);
+		newtime->tm_year = tmp4 + 10 * tmp5;
 		centofs = century_offset(*newtime);
 		if (centofs == -1) {
 			dt_res.year_status = eval_bcd;
 			p3 = false;
 		} else {
 			if (init_min == 0 && time.tm_year !=
-			    (int)(base_year + 100 * centofs + newtime->tm_year))
+			    base_year + 100 * centofs + newtime->tm_year)
 				dt_res.year_status = eval_jump;
 			newtime->tm_year += base_year + 100 * centofs;
-			if (newtime->tm_mday > (int)lastday(*newtime)) {
+			if (newtime->tm_mday > lastday(*newtime)) {
 				dt_res.mday_status = eval_bcd;
 				p3 = false;
 			}
@@ -283,7 +280,7 @@ calculate_date_time(uint8_t init_min, uint8_t errflags, int16_t increase,
 }
 
 static void
-stamp_date_time(uint8_t errflags, const struct tm newtime,
+stamp_date_time(unsigned errflags, const struct tm newtime,
     struct tm * const time)
 {
 	if ((errflags & 0x0f) == 0) {
@@ -304,9 +301,9 @@ stamp_date_time(uint8_t errflags, const struct tm newtime,
 	}
 }
 
-static uint8_t
-handle_leap_second(uint8_t errflags, uint8_t minlen, uint8_t utchour,
-    const uint8_t * const buffer, const struct tm time)
+static unsigned
+handle_leap_second(unsigned errflags, unsigned minlen, unsigned utchour,
+    const int * const buffer, const struct tm time)
 {
 	/*
 	 * h==23, last day of month (UTC) or h==0, first day of next month (UTC)
@@ -341,9 +338,9 @@ handle_leap_second(uint8_t errflags, uint8_t minlen, uint8_t utchour,
 	return errflags;
 }
 
-static uint8_t
-handle_dst(uint8_t errflags, bool olderr, uint8_t utchour,
-    const uint8_t * const buffer, const struct tm time,
+static unsigned
+handle_dst(unsigned errflags, bool olderr, unsigned utchour,
+    const int * const buffer, const struct tm time,
     struct tm * const newtime)
 {
 	/*
@@ -351,9 +348,9 @@ handle_dst(uint8_t errflags, bool olderr, uint8_t utchour,
 	 * last Sunday of month (reference?)
 	 */
 	if (buffer[16] == 1 && errflags == 0) {
-		if ((time.tm_wday == 7 && time.tm_mday > (int)(lastday(time) - 7) &&
-		    (time.tm_mon == (int)summermonth ||
-		    time.tm_mon == (int)wintermonth)) && ((time.tm_min > 0 &&
+		if ((time.tm_wday == 7 && time.tm_mday > lastday(time) - 7 &&
+		    (time.tm_mon == summermonth ||
+		    time.tm_mon == wintermonth)) && ((time.tm_min > 0 &&
 		    utchour == 0) || (time.tm_min == 0 &&
 		    utchour == 1 + buffer[17] - buffer[18])))
 			dt_res.dst_announce = eann_ok; /* time zone just changed */
@@ -363,7 +360,7 @@ handle_dst(uint8_t errflags, bool olderr, uint8_t utchour,
 		}
 	}
 
-	if ((int)buffer[17] != time.tm_isdst || (int)buffer[18] == time.tm_isdst) {
+	if (buffer[17] != time.tm_isdst || buffer[18] == time.tm_isdst) {
 		/*
 		 * Time offset change is OK if:
 		 * - announced and time is Sunday, lastday, 01:00 UTC
@@ -374,7 +371,7 @@ handle_dst(uint8_t errflags, bool olderr, uint8_t utchour,
 		if ((dt_res.dst_announce == eann_ok && time.tm_min == 0) ||
 		    (olderr && errflags == 0) ||
 		    (dt_res.dst_status == eDST_ok && time.tm_isdst == -1))
-			newtime->tm_isdst = (int)buffer[17]; /* expected change */
+			newtime->tm_isdst = buffer[17]; /* expected change */
 		else {
 			//XXX klopt deze if?
 			if (dt_res.dst_status != eDST_error)
@@ -384,15 +381,15 @@ handle_dst(uint8_t errflags, bool olderr, uint8_t utchour,
 		}
 	}
 	/* check if DST is within expected date range */
-	if ((time.tm_mon > (int)summermonth && time.tm_mon < (int)wintermonth) ||
-	    (time.tm_mon == (int)summermonth && time.tm_wday < 7 &&
-	      (int)(lastday(time)) - time.tm_mday < 7) ||
-	    (time.tm_mon == (int)summermonth && time.tm_wday == 7 &&
-	      (int)(lastday(time)) - time.tm_mday < 7 && utchour > 0) ||
-	    (time.tm_mon == (int)wintermonth && time.tm_wday < 7 &&
-	      (int)(lastday(time)) - time.tm_mday >= 7) ||
-	    (time.tm_mon == (int)wintermonth && time.tm_wday == 7 &&
-	      (int)(lastday(time)) - time.tm_mday < 7 &&
+	if ((time.tm_mon > summermonth && time.tm_mon < wintermonth) ||
+	    (time.tm_mon == summermonth && time.tm_wday < 7 &&
+	      lastday(time) - time.tm_mday < 7) ||
+	    (time.tm_mon == summermonth && time.tm_wday == 7 &&
+	      lastday(time) - time.tm_mday < 7 && utchour > 0) ||
+	    (time.tm_mon == wintermonth && time.tm_wday < 7 &&
+	      lastday(time) - time.tm_mday >= 7) ||
+	    (time.tm_mon == wintermonth && time.tm_wday == 7 &&
+	      lastday(time) - time.tm_mday < 7 &&
 		(utchour >= 22 /* previous day */ || utchour == 0))) {
 		/* expect DST */
 		if (newtime->tm_isdst == 0 && dt_res.dst_announce != eann_ok &&
@@ -420,14 +417,14 @@ handle_dst(uint8_t errflags, bool olderr, uint8_t utchour,
 }
 
 const struct DT_result * const
-decode_time(uint8_t init_min, uint8_t minlen, uint32_t acc_minlen,
-    const uint8_t * const buffer, struct tm * const time)
+decode_time(unsigned init_min, unsigned minlen, unsigned acc_minlen,
+    const int * const buffer, struct tm * const time)
 {
 	static bool olderr;
 
-	uint8_t utchour;
-	uint8_t errflags;
-	int16_t increase;
+	unsigned utchour;
+	unsigned errflags;
+	int increase;
 	struct tm newtime;
 
 	memset(&newtime, 0, sizeof(newtime));

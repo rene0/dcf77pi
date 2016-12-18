@@ -26,7 +26,6 @@ SUCH DAMAGE.
 #include "config.h"
 #include "input.h"
 
-#include <inttypes.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -104,8 +103,8 @@ main(int argc, char **argv)
 			if (bi->freq_reset)
 				printf("!");
 			/* display first bi->t pulses */
-			for (uint64_t i = 0; i < bi->t / 8; i++)
-				for (uint8_t j = 0; j < 8; j++)
+			for (unsigned long long i = 0; i < bi->t / 8; i++)
+				for (unsigned j = 0; j < 8; j++)
 					printf("%c",
 					    (bi->signal[i] & (1 << j)) > 0 ?
 					    '+' : '-');
@@ -113,7 +112,7 @@ main(int argc, char **argv)
 			 * display pulses in the last partially filled item
 			 * bi->t is 0-based, hence the <= comparison
 			 */
-			for (uint8_t j = 0; j <= (bi->t & 7); j++)
+			for (unsigned j = 0; j <= (bi->t & 7); j++)
 				printf("%c",
 				    (bi->signal[bi->t / 8] & (1 << j)) > 0 ?
 				    '+' : '-');
@@ -121,8 +120,8 @@ main(int argc, char **argv)
 		}
 		if (bit->marker == emark_toolong || bit->marker == emark_late)
 			min++;
-		printf("(%"PRIi32" %"PRIi32" %"PRIi32" %"PRIi64" %"PRIi64
-		    " %"PRIi64") %i:%u\n", bi->tlow, bi->tlast0, bi->t,
+		printf("%i %i %u %llu %llu %llu %i:%u\n",
+		    bi->tlow, bi->tlast0, bi->t,
 		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
 		if (bit->marker == emark_minute)
 			min++;

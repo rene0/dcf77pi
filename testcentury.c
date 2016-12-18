@@ -25,7 +25,6 @@ SUCH DAMAGE.
 
 #include "calendar.h"
 
-#include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -33,7 +32,7 @@ int
 main(int argc, char *argv[])
 {
 	 /* start with 1900-01-01 = Monday (matches `ncal 1900`) */
-	uint8_t century, lday, co;
+	int century, lday, co;
 	struct tm time;
 	time.tm_wday = 1; /* Monday */
 	/* check for every date if it matches */

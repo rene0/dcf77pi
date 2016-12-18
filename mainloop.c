@@ -34,33 +34,33 @@ SUCH DAMAGE.
 #include <string.h>
 #include <time.h>
 
-static int8_t mainloop_result;
+static int mainloop_result;
 
 void
 mainloop(char *logfilename,
     const struct GB_result * const (*get_bit)(void),
-    void (*display_bit)(const struct GB_result * const, uint8_t),
+    void (*display_bit)(const struct GB_result * const, unsigned),
     void (*display_long_minute)(void),
-    void (*display_minute)(uint8_t),
+    void (*display_minute)(unsigned),
     void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(const struct DT_result * const, struct tm),
-    void (*display_thirdparty_buffer)(const uint8_t * const),
-    void (*show_mainloop_result)(struct GB_result * const, uint8_t),
-    void (*process_input)(struct GB_result * const, uint8_t,
+    void (*display_thirdparty_buffer)(const unsigned * const),
+    void (*show_mainloop_result)(struct GB_result * const, unsigned),
+    void (*process_input)(struct GB_result * const, unsigned,
 	const char * const, bool * const, bool * const),
     void (*post_process_input)(char **, bool * const, struct GB_result * const,
-	uint8_t))
+	unsigned))
 {
 	const struct DT_result *dt;
-	uint8_t minlen = 0;
-	uint8_t bitpos = 0;
-	uint8_t init_min = 2;
+	unsigned minlen = 0;
+	unsigned bitpos = 0;
+	unsigned init_min = 2;
 	struct tm curtime;
 	struct alm civwarn;
-	const uint8_t *tpbuf;
+	const unsigned *tpbuf;
 	bool settime = false;
 	bool change_logfile = false;
 	bool have_result = false;
@@ -86,7 +86,7 @@ mainloop(char *logfilename,
 			display_bit(bit, bitpos);
 
 		if (init_min < 2)
-			fill_thirdparty_buffer((uint8_t)curtime.tm_min, bitpos,
+			fill_thirdparty_buffer(curtime.tm_min, bitpos,
 			    bit);
 
 		bit = next_bit();
@@ -151,7 +151,7 @@ mainloop(char *logfilename,
 	cleanup();
 }
 
-int8_t
+int
 get_mainloop_result(void)
 {
 	return mainloop_result;

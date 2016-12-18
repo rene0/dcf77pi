@@ -33,7 +33,7 @@ SUCH DAMAGE.
 #include <sys/time.h>
 
 bool
-setclock_ok(uint8_t init_min, const struct DT_result * const dt,
+setclock_ok(unsigned init_min, const struct DT_result * const dt,
     const struct GB_result * const bit)
 {
 	return init_min == 0 &&
@@ -49,7 +49,7 @@ setclock_ok(uint8_t init_min, const struct DT_result * const dt,
 	    (bit->marker == emark_none || bit->marker == emark_minute);
 }
 
-int8_t
+int
 setclock(struct tm time)
 {
 	time_t epochtime;
@@ -70,5 +70,5 @@ setclock(struct tm time)
 	tv.tv_usec = 50000; /* adjust for bit reception algorithm */
 	tz.tz_minuteswest = -60;
 	tz.tz_dsttime = it.tm_isdst;
-	return (settimeofday(&tv, &tz) == -1) ? (int8_t)-2 : (int8_t)0;
+	return (settimeofday(&tv, &tz) == -1) ? -2 : 0;
 }

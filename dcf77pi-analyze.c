@@ -31,7 +31,6 @@ SUCH DAMAGE.
 #include "input.h"
 #include "mainloop.h"
 
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,7 +38,7 @@ SUCH DAMAGE.
 #include <time.h>
 
 void
-display_bit(const struct GB_result * const bit, uint8_t bitpos)
+display_bit(const struct GB_result * const bit, unsigned bitpos)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
@@ -126,7 +125,7 @@ display_time(const struct DT_result *dt, struct tm time)
 void
 display_alarm(struct alm alarm)
 {
-	uint8_t i;
+	unsigned i;
 
 	printf("German civil warning for: %s\n", get_region_name(alarm));
 	for (i = 0; i < 2; i++)
@@ -154,12 +153,12 @@ display_long_minute(void)
 }
 
 void
-display_minute(uint8_t minlen)
+display_minute(unsigned minlen)
 {
-	uint32_t cutoff;
+	int cutoff;
 
 	cutoff = get_cutoff();
-	printf(" (%lu) %u ", (unsigned long)get_acc_minlen(), minlen);
+	printf(" (%u) %u ", get_acc_minlen(), minlen);
 	if (cutoff == 0xffff)
 		printf("?\n");
 	else
@@ -167,9 +166,9 @@ display_minute(uint8_t minlen)
 }
 
 void
-display_thirdparty_buffer(const uint8_t * const tpbuf)
+display_thirdparty_buffer(const unsigned * const tpbuf)
 {
-	uint8_t i;
+	unsigned i;
 
 	printf("Third party buffer: ");
 	for (i = 0; i < tpBufLen; i++)

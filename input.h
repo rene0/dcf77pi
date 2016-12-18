@@ -27,7 +27,6 @@ SUCH DAMAGE.
 #define DCF77PI_INPUT_H
 
 #include <stdbool.h>
-#include <stdint.h>
 
 enum eGB_bitvalue {
 	/** this bit has value 0 */
@@ -89,11 +88,11 @@ struct GB_result {
  */
 struct hardware {
 	/** sample frequency in Hz */
-	uint32_t freq;
+	unsigned freq;
 	/** GPIO device number (FreeBSD only) */
-	uint8_t iodev;
+	unsigned iodev;
 	/** pin number to read from */
-	uint16_t pin;
+	unsigned pin;
 	/** pin value is high (1) or low (0) for active signal */
 	bool active_high;
 };
@@ -103,20 +102,20 @@ struct hardware {
  */
 struct bitinfo {
 	/** time in samples when the signal went low again, -1 initially */
-	int32_t tlow;
+	int tlow;
 	/** time in samples when the signal was last measured as 0,
 	  * -1 initially */
-	int32_t tlast0;
+	int tlast0;
 	/** length of this bit in samples */
-	uint32_t t;
+	unsigned t;
 	/** the average length of a bit in samples */
-	uint64_t realfreq;
+	unsigned long long realfreq;
 	/** the average length of the high part of bit 0 (a 0 bit) in
 	  * samples */
-	uint64_t bit0;
+	unsigned long long bit0;
 	/** the average length of the high part of bit 20 (a 1 bit) in
 	  * samples */
-	uint64_t bit20;
+	unsigned long long bit20;
 	/** bit0 and bit20 were reset to their initial values (normally because
 	  * of reception errors or fluctuations in CPU usage) */
 	bool bitlen_reset;
@@ -125,7 +124,7 @@ struct bitinfo {
 	bool freq_reset;
 	/** the raw received radio signal, {@link hardware.freq} / 2 items,
 	  * with each item holding 8 bits */
-	uint8_t *signal;
+	unsigned char *signal;
 };
 
 /**
@@ -165,7 +164,7 @@ void cleanup(void);
  * @return: 0 or 1 depending on the pin value and {@link hardware.active_high},
  *   or 2 if obtaining the pulse failed.
  */
-uint8_t get_pulse(void);
+int get_pulse(void);
 
 /**
  * Retrieve one bit from the log file.
@@ -195,14 +194,14 @@ const struct GB_result * const next_bit(void);
  *
  * @return The current bit position (0..60).
  */
-uint8_t get_bitpos(void);
+unsigned get_bitpos(void);
 
 /**
  * Retrieve the current bit buffer.
  *
  * @return The bit buffer, an array of 0 and 1 values.
  */
-const uint8_t * const get_buffer(void);
+const int * const get_buffer(void);
 
 /**
  * Determine if there should be a space between the last bit and the current
@@ -210,7 +209,7 @@ const uint8_t * const get_buffer(void);
  *
  * @param bitpos The current bit position.
  */
-bool is_space_bit(uint8_t bitpos);
+bool is_space_bit(unsigned bitpos);
 
 /**
  * Open the log file and append a "new log" marker to it.
@@ -239,7 +238,7 @@ const struct bitinfo * const get_bitinfo(void);
  *
  * @return The accumulated minute length in milliseconds.
  */
-uint32_t get_acc_minlen(void);
+unsigned get_acc_minlen(void);
 
 /**
  * Reset the accumulated minute length.
@@ -251,6 +250,6 @@ void reset_acc_minlen(void);
  *
  * @return The cutoff value (multiplied by 10,000)
  */
-uint16_t get_cutoff(void);
+int get_cutoff(void);
 
 #endif

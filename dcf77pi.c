@@ -36,24 +36,23 @@ SUCH DAMAGE.
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-static const uint8_t maxbuf = 255;
+static const unsigned maxbuf = 255;
 
 static WINDOW *input_win;
 static WINDOW *decode_win;
 static WINDOW *tp_win;
 static WINDOW *main_win;
 
-static int8_t old_bitpos = -1; /* timer for statusbar inactive */
-static int8_t input_mode;      /* normal input (statusbar) or string input */
+static int old_bitpos = -1; /* timer for statusbar inactive */
+static int input_mode;      /* normal input (statusbar) or string input */
 static char keybuf[maxbuf];    /* accumulator for string input */
 
 static void
-statusbar(int8_t bitpos, const char * const fmt, ...)
+statusbar(int bitpos, const char * const fmt, ...)
 {
 	va_list ap;
 
@@ -98,9 +97,9 @@ curses_cleanup(const char * const reason)
 }
 
 void
-display_bit(const struct GB_result * const bit, uint8_t bitpos)
+display_bit(const struct GB_result * const bit, unsigned bitpos)
 {
-	uint8_t xpos, bp;
+	unsigned xpos, bp;
 	const struct bitinfo *bitinf;
 
 	bitinf = get_bitinfo();
@@ -163,7 +162,7 @@ display_bit(const struct GB_result * const bit, uint8_t bitpos)
 void
 display_time(const struct DT_result *dt, struct tm time)
 {
-	uint16_t cutoff;
+	int cutoff;
 
 	/* color bits depending on the results */
 	mvwchgat(decode_win, 0, 4, 1, A_NORMAL,  dt->bit0_ok ? 2 : 1, NULL);
@@ -239,9 +238,9 @@ display_time(const struct DT_result *dt, struct tm time)
 }
 
 void
-display_thirdparty_buffer(const uint8_t *buf)
+display_thirdparty_buffer(const unsigned *buf)
 {
-	uint8_t i;
+	unsigned i;
 
 	for (i = 0; i < tpBufLen; i++)
 		mvwprintw(tp_win, 0, i + 22, "%u", buf[i]);
@@ -284,13 +283,13 @@ display_weather(void)
 }
 
 static void
-process_input(struct GB_result * const bit, uint8_t bitpos,
+process_input(struct GB_result * const bit, unsigned bitpos,
     const char * const logfilename, bool * const settime,
     bool * const change_logfile)
 {
 	int inkey;
 	char dispbuf[80];
-	static uint8_t input_count, input_xpos;
+	static unsigned input_count, input_xpos;
 
 	inkey = getch();
 	if (input_mode == 0 && inkey != ERR) {
@@ -362,7 +361,7 @@ process_input(struct GB_result * const bit, uint8_t bitpos,
 
 static void
 post_process_input(char **logfilename, bool * const change_logfile,
-    struct GB_result * const bit, uint8_t bitpos)
+    struct GB_result * const bit, unsigned bitpos)
 {
 	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 2) % 60 ||
 	    (old_bitpos == 57 && bitpos == 0))) {
@@ -434,9 +433,9 @@ display_long_minute(void)
 }
 
 void
-display_minute(uint8_t minlen)
+display_minute(unsigned minlen)
 {
-	uint8_t bp, xpos;
+	unsigned bp, xpos;
 
 	/* display bits of previous minute */
 	for (xpos = 4, bp = 0; bp < minlen; bp++, xpos++) {
@@ -452,7 +451,7 @@ display_minute(uint8_t minlen)
 }
 
 static void
-show_mainloop_result(struct GB_result * const bit, uint8_t bitpos)
+show_mainloop_result(struct GB_result * const bit, unsigned bitpos)
 {
 	switch (get_mainloop_result()) {
 	case -1:
