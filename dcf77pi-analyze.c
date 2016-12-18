@@ -38,7 +38,7 @@ SUCH DAMAGE.
 #include <time.h>
 
 void
-display_bit(const struct GB_result * const bit, unsigned bitpos)
+display_bit(const struct GB_result * const bit, int bitpos)
 {
 	if (is_space_bit(bitpos))
 		printf(" ");
@@ -151,12 +151,12 @@ display_long_minute(void)
 }
 
 void
-display_minute(unsigned minlen)
+display_minute(int minlen)
 {
 	int cutoff;
 
 	cutoff = get_cutoff();
-	printf(" (%u) %u ", get_acc_minlen(), minlen);
+	printf(" (%u) %i ", get_acc_minlen(), minlen);
 	if (cutoff == -1)
 		printf("?\n");
 	else

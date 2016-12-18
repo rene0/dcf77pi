@@ -194,7 +194,7 @@ const struct GB_result * const next_bit(void);
  *
  * @return The current bit position (0..60).
  */
-unsigned get_bitpos(void);
+int get_bitpos(void);
 
 /**
  * Retrieve the current bit buffer.
@@ -209,7 +209,7 @@ const int * const get_buffer(void);
  *
  * @param bitpos The current bit position.
  */
-bool is_space_bit(unsigned bitpos);
+bool is_space_bit(int bitpos);
 
 /**
  * Open the log file and append a "new log" marker to it.

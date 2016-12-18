@@ -97,9 +97,9 @@ curses_cleanup(const char * const reason)
 }
 
 void
-display_bit(const struct GB_result * const bit, unsigned bitpos)
+display_bit(const struct GB_result * const bit, int bitpos)
 {
-	unsigned xpos, bp;
+	int bp, xpos;
 	const struct bitinfo *bitinf;
 
 	bitinf = get_bitinfo();
@@ -283,12 +283,14 @@ display_weather(void)
 }
 
 static void
-process_input(struct GB_result * const bit, unsigned bitpos,
+process_input(struct GB_result * const bit, int bitpos,
     const char * const logfilename, bool * const settime,
     bool * const change_logfile)
 {
+	static unsigned input_count;
+	static int input_xpos;
+
 	int inkey;
-	static unsigned input_count, input_xpos;
 
 	inkey = getch();
 	if (input_mode == 0 && inkey != ERR) {
@@ -362,7 +364,7 @@ process_input(struct GB_result * const bit, unsigned bitpos,
 
 static void
 post_process_input(char **logfilename, bool * const change_logfile,
-    struct GB_result * const bit, unsigned bitpos)
+    struct GB_result * const bit, int bitpos)
 {
 	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 2) % 60 ||
 	    (old_bitpos == 57 && bitpos == 0))) {
@@ -434,9 +436,9 @@ display_long_minute(void)
 }
 
 void
-display_minute(unsigned minlen)
+display_minute(int minlen)
 {
-	unsigned bp, xpos;
+	int bp, xpos;
 
 	/* display bits of previous minute */
 	for (xpos = 4, bp = 0; bp < minlen; bp++, xpos++) {
@@ -452,7 +454,7 @@ display_minute(unsigned minlen)
 }
 
 static void
-show_mainloop_result(struct GB_result * const bit, unsigned bitpos)
+show_mainloop_result(struct GB_result * const bit, int bitpos)
 {
 	switch (get_mainloop_result()) {
 	case -1:

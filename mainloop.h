@@ -61,9 +61,9 @@ struct tm;
  */
 void mainloop(/*@null@*/char *logfilename,
     const struct GB_result * const (*get_bit)(void),
-    void (*display_bit)(const struct GB_result * const, unsigned),
+    void (*display_bit)(const struct GB_result * const, int),
     void (*display_long_minute)(void),
-    void (*display_minute)(unsigned),
+    void (*display_minute)(int),
     /*@null@*/void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
@@ -71,11 +71,11 @@ void mainloop(/*@null@*/char *logfilename,
     void (*display_time)(const struct DT_result * const, struct tm),
     void (*display_thirdparty_buffer)(const unsigned * const),
     /*@null@*/void (*show_mainloop_result)(struct GB_result * const,
-	unsigned),
-    /*@null@*/void (*process_input)(struct GB_result * const, unsigned,
+	int),
+    /*@null@*/void (*process_input)(struct GB_result * const, int,
 	const char * const, bool * const, bool * const),
     /*@null@*/void (*post_process_input)(char **, bool * const,
-	struct GB_result * const, unsigned));
+	struct GB_result * const, int));
 
 /**
  * Get the result value set by {@link mainloop}.

@@ -39,23 +39,23 @@ static int mainloop_result;
 void
 mainloop(char *logfilename,
     const struct GB_result * const (*get_bit)(void),
-    void (*display_bit)(const struct GB_result * const, unsigned),
+    void (*display_bit)(const struct GB_result * const, int),
     void (*display_long_minute)(void),
-    void (*display_minute)(unsigned),
+    void (*display_minute)(int),
     void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(const struct DT_result * const, struct tm),
     void (*display_thirdparty_buffer)(const unsigned * const),
-    void (*show_mainloop_result)(struct GB_result * const, unsigned),
-    void (*process_input)(struct GB_result * const, unsigned,
+    void (*show_mainloop_result)(struct GB_result * const, int),
+    void (*process_input)(struct GB_result * const, int,
 	const char * const, bool * const, bool * const),
     void (*post_process_input)(char **, bool * const, struct GB_result * const,
-	unsigned))
+	int))
 {
-	unsigned minlen = 0;
-	unsigned bitpos = 0;
+	int minlen = 0;
+	int bitpos = 0;
 	unsigned init_min = 2;
 	struct tm curtime;
 	bool settime = false;
@@ -92,7 +92,7 @@ mainloop(char *logfilename,
 			minlen = bitpos + 1;
 			/* handle the missing bit due to the minute marker */
 		if (bit->marker == emark_toolong || bit->marker == emark_late) {
-			minlen = 0xff;
+			minlen = -1;
 			/*
 			 * leave acc_minlen alone,
 			 * any minute marker already processed

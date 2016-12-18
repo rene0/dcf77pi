@@ -62,9 +62,9 @@ SUCH DAMAGE.
 #endif
 
 /** maximum number of bits in a minute */
-static const unsigned buflen = 60;
+static const int buflen = 60;
 
-static unsigned bitpos;         /* second */
+static int bitpos;         /* second */
 static int buffer[buflen]; /* wrap after buflen positions */
 /*@null@*/ static FILE *datafile;         /* input file (recorded data) */
 /*@null@*/ static FILE *logfile;          /* auto-appended in live mode */
@@ -606,7 +606,7 @@ get_bit_file(void)
 }
 
 bool
-is_space_bit(unsigned bitpos)
+is_space_bit(int bitpos)
 {
 	return (bitpos == 1 || bitpos == 15 || bitpos == 16 || bitpos == 19 ||
 	    bitpos == 20 || bitpos == 21 || bitpos == 28 || bitpos == 29 ||
@@ -633,7 +633,7 @@ next_bit(void)
 	return &gb_res;
 }
 
-unsigned
+int
 get_bitpos(void)
 {
 	return bitpos;

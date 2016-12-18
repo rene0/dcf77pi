@@ -48,7 +48,7 @@ enum eTP {
  * @param bitpos The current bit position.
  * @param bit The current bit information.
  */
-void fill_thirdparty_buffer(unsigned minute, unsigned bitpos,
+void fill_thirdparty_buffer(int minute, int bitpos,
     const struct GB_result * const bit);
 
 /**

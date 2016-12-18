@@ -100,7 +100,7 @@ getbcd(const int * const buffer, unsigned start, unsigned stop)
 }
 
 static bool
-check_time_sanity(unsigned minlen, const int * const buffer)
+check_time_sanity(int minlen, const int * const buffer)
 {
 	if (minlen < 59)
 		dt_res.minute_length = emin_short;
@@ -129,7 +129,7 @@ handle_special_bits(const int * const buffer)
 }
 
 static int
-increase_old_time(unsigned init_min, unsigned minlen, unsigned acc_minlen,
+increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
     struct tm * const time)
 {
 	static unsigned acc_minlen_partial, old_acc_minlen;
@@ -158,7 +158,7 @@ increase_old_time(unsigned init_min, unsigned minlen, unsigned acc_minlen,
 		acc_minlen_partial %= 60000;
 	}
 
-	prev_toolong = (minlen == 0xff);
+	prev_toolong = (minlen == -1);
 	old_acc_minlen = acc_minlen - (acc_minlen % 60000);
 
 	/* There is no previous time on the very first (partial) minute: */
@@ -300,7 +300,7 @@ stamp_date_time(unsigned errflags, const struct tm newtime,
 }
 
 static unsigned
-handle_leap_second(unsigned errflags, unsigned minlen, unsigned utchour,
+handle_leap_second(unsigned errflags, int minlen, unsigned utchour,
     const int * const buffer, const struct tm time)
 {
 	/*
@@ -415,7 +415,7 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 }
 
 const struct DT_result * const
-decode_time(unsigned init_min, unsigned minlen, unsigned acc_minlen,
+decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
     const int * const buffer, struct tm * const time)
 {
 	static bool olderr;

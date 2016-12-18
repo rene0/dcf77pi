@@ -32,7 +32,7 @@ static unsigned tpbuf[tpBufLen];
 static enum eTP tptype = eTP_unknown;
 
 void
-fill_thirdparty_buffer(unsigned minute, unsigned bitpos,
+fill_thirdparty_buffer(int minute, int bitpos,
     const struct GB_result * const bit)
 {
 	static unsigned tpstat;
