@@ -27,7 +27,7 @@ SUCH DAMAGE.
 
 #include "input.h"
 
-const unsigned tpBufLen = 40;
+const int tpBufLen = 40;
 static unsigned tpbuf[tpBufLen];
 static enum eTP tptype = eTP_unknown;
 

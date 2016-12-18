@@ -240,9 +240,7 @@ display_time(const struct DT_result *dt, struct tm time)
 void
 display_thirdparty_buffer(const unsigned *buf)
 {
-	unsigned i;
-
-	for (i = 0; i < tpBufLen; i++)
+	for (int i = 0; i < tpBufLen; i++)
 		mvwprintw(tp_win, 0, i + 22, "%u", buf[i]);
 	wclrtoeol(tp_win);
 	wrefresh(tp_win);

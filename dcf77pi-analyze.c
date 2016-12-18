@@ -167,7 +167,7 @@ void
 display_thirdparty_buffer(const unsigned * const tpbuf)
 {
 	printf("Third party buffer: ");
-	for (unsigned i = 0; i < tpBufLen; i++)
+	for (int i = 0; i < tpBufLen; i++)
 		printf("%u", tpbuf[i]);
 	printf("\n");
 }
