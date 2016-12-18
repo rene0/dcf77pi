@@ -34,20 +34,19 @@ static const char *key[] = {
 	"pin", "iodev", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
-
-#define NUM_KEYS (sizeof(key) / sizeof(key[0]))
+static const int num_keys = 8;
 
 static const unsigned max_key_len = 20;
 static const unsigned max_val_len = 255;
 static const unsigned max_len = (max_key_len + 3 + max_val_len + 2);
     /* "k = v\n\0" */
 
-static char *value[NUM_KEYS];
+static char *value[num_keys];
 
 static int
 getpos(const char * const kw)
 {
-	for (int i = 0; i < (int)NUM_KEYS; i++)
+	for (int i = 0; i < num_keys; i++)
 		if (strcmp(key[i], kw) == 0)
 			return i;
 	return -1;
@@ -85,7 +84,7 @@ read_config_file(const char * const filename)
 		return errno;
 	}
 	freeptr = line;
-	for (int i = 0; i < (int)NUM_KEYS; i++)
+	for (int i = 0; i < num_keys; i++)
 		value[i] = NULL;
 
 	configfile = fopen(filename, "r");
@@ -133,7 +132,7 @@ read_config_file(const char * const filename)
 			    " '%s'\n", k);
 		value[i] = strdup(v);
 	}
-	for (int i = 0; i < (int)NUM_KEYS; i++)
+	for (int i = 0; i < num_keys; i++)
 		if (value[i] == NULL) {
 			printf("read_config_file: missing value for key '%s'\n",
 			    key[i]);
