@@ -76,7 +76,7 @@ int century_offset(struct tm time);
  * Calculates the hour in UTC from the given time.
  *
  * @param time The time to calculate the hour in UTC from.
- * @return The hour value in UTC.
+ * @return The hour value in UTC, or 24 in case of an error.
  */
 int get_utchour(struct tm time);
 
