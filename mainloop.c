@@ -85,8 +85,7 @@ mainloop(char *logfilename,
 			display_bit(bit, bitpos);
 
 		if (init_min < 2)
-			fill_thirdparty_buffer(curtime.tm_min, bitpos,
-			    bit);
+			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
 
 		bit = next_bit();
 		if (bit->marker == emark_minute)

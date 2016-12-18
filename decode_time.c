@@ -173,8 +173,7 @@ increase_old_time(unsigned init_min, unsigned minlen, unsigned acc_minlen,
 
 static unsigned
 calculate_date_time(unsigned init_min, unsigned errflags, int increase,
-    const int * const buffer, const struct tm time,
-    struct tm * const newtime)
+    const int * const buffer, const struct tm time, struct tm * const newtime)
 {
 	int tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
 	bool p1, p2, p3;
@@ -448,7 +447,8 @@ decode_time(unsigned init_min, unsigned minlen, unsigned acc_minlen,
 
 	errflags = handle_leap_second(errflags, minlen, utchour, buffer, *time);
 
-	errflags = handle_dst(errflags, olderr, utchour, buffer, *time, &newtime);
+	errflags = handle_dst(errflags, olderr, utchour, buffer, *time,
+	    &newtime);
 
 	stamp_date_time(errflags, newtime, time);
 
