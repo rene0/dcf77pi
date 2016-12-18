@@ -326,7 +326,7 @@ get_bit_live(void)
 	bit.tlow = -1;
 	bit.tlast0 = -1;
 
-	for (bit.t = 0; ; bit.t++) {
+	for (bit.t = 0; bit.t != 0xFFFFFFFF; bit.t++) {
 #if !defined(MACOS)
 		(void)clock_gettime(CLOCK_MONOTONIC, &tp0);
 #endif
