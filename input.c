@@ -283,7 +283,7 @@ const struct GB_result * const
 get_bit_live(void)
 {
 	char outch;
-	bool newminute;
+	bool newminute = false;
 	unsigned stv = 1;
 	int p;
 	struct timespec slp;
