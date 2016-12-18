@@ -66,7 +66,6 @@ mainloop(char *logfilename,
 	(void)memset(&curtime, 0, sizeof(curtime));
 
 	for (;;) {
-		const struct DT_result *dt;
 		struct GB_result *bit;
 
 		bit = get_bit();
@@ -103,6 +102,8 @@ mainloop(char *logfilename,
 			display_new_second();
 
 		if (bit->marker == emark_minute || bit->marker == emark_late) {
+			const struct DT_result *dt;
+
 			display_minute(minlen);
 			dt = decode_time(init_min, minlen, get_acc_minlen(),
 			    get_buffer(), &curtime);
