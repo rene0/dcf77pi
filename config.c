@@ -30,11 +30,11 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-static const char *key[] = {
+static const int num_keys = 8;
+static const char * const key[num_keys] = {
 	"pin", "iodev", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
-static const int num_keys = 8;
 
 static const unsigned max_key_len = 20;
 static const unsigned max_val_len = 255;
