@@ -391,7 +391,7 @@ post_process_input(struct ML_result in_ml, int bitpos)
 			old_logfilename = strdup(mlr.logfilename);
 			free(mlr.logfilename);
 			mlr.logfilename = strdup(keybuf);
-			if (!strcmp(mlr.logfilename, ".")) {
+			if (strcmp(mlr.logfilename, ".") == 0) {
 				free(mlr.logfilename);
 				mlr.logfilename = strdup(old_logfilename);
 			}
