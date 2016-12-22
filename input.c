@@ -64,10 +64,10 @@ SUCH DAMAGE.
 /** maximum number of bits in a minute */
 static const int buflen = 60;
 
-static int bitpos;         /* second */
-static int buffer[buflen]; /* wrap after buflen positions */
-/*@null@*/ static FILE *logfile;          /* auto-appended in live mode */
-static int fd;                 /* gpio file */
+static int bitpos;               /* second */
+static int buffer[buflen];       /* wrap after buflen positions */
+/*@null@*/ static FILE *logfile; /* auto-appended in live mode */
+static int fd;                   /* gpio file */
 static struct hardware hw;
 static struct bitinfo bit;
 static unsigned acc_minlen;
