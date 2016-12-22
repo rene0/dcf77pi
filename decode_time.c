@@ -78,7 +78,7 @@ is_leapsecmonth(struct tm time)
 }
 
 static bool
-getpar(const int * const buffer, unsigned start, unsigned stop)
+getpar(const int buffer[], unsigned start, unsigned stop)
 {
 	int par = 0;
 
@@ -88,7 +88,7 @@ getpar(const int * const buffer, unsigned start, unsigned stop)
 }
 
 static int
-getbcd(const int * const buffer, unsigned start, unsigned stop)
+getbcd(const int buffer[], unsigned start, unsigned stop)
 {
 	int mul = 1, val = 0;
 
@@ -100,7 +100,7 @@ getbcd(const int * const buffer, unsigned start, unsigned stop)
 }
 
 static bool
-check_time_sanity(int minlen, const int * const buffer)
+check_time_sanity(int minlen, const int buffer[])
 {
 	if (minlen < 59)
 		dt_res.minute_length = emin_short;
@@ -123,7 +123,7 @@ check_time_sanity(int minlen, const int * const buffer)
 }
 
 static void
-handle_special_bits(const int * const buffer)
+handle_special_bits(const int buffer[])
 {
 	dt_res.transmit_call = buffer[15] == 1;
 }
@@ -173,7 +173,7 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 
 static unsigned
 calculate_date_time(unsigned init_min, unsigned errflags, int increase,
-    const int * const buffer, const struct tm time, struct tm * const newtime)
+    const int buffer[], struct tm time, struct tm * const newtime)
 {
 	int tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
 	bool p1, p2, p3;
@@ -278,8 +278,7 @@ calculate_date_time(unsigned init_min, unsigned errflags, int increase,
 }
 
 static void
-stamp_date_time(unsigned errflags, const struct tm newtime,
-    struct tm * const time)
+stamp_date_time(unsigned errflags, struct tm newtime, struct tm * const time)
 {
 	if ((errflags & 0x0f) == 0) {
 		if ((errflags & 1) == 0)
@@ -301,7 +300,7 @@ stamp_date_time(unsigned errflags, const struct tm newtime,
 
 static unsigned
 handle_leap_second(unsigned errflags, int minlen, unsigned utchour,
-    const int * const buffer, const struct tm time)
+    const int buffer[], struct tm time)
 {
 	/*
 	 * h==23, last day of month (UTC) or h==0, first day of next month (UTC)
@@ -338,8 +337,7 @@ handle_leap_second(unsigned errflags, int minlen, unsigned utchour,
 
 static unsigned
 handle_dst(unsigned errflags, bool olderr, unsigned utchour,
-    const int * const buffer, const struct tm time,
-    struct tm * const newtime)
+    const int buffer[], struct tm time, struct tm * const newtime)
 {
 	/*
 	 * h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
@@ -416,7 +414,7 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 
 struct DT_result
 decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
-    const int * const buffer, struct tm * const time)
+    const int buffer[], struct tm * const time)
 {
 	static bool olderr;
 

@@ -238,7 +238,7 @@ display_time(struct DT_result dt, struct tm time)
 }
 
 void
-display_thirdparty_buffer(const unsigned *buf)
+display_thirdparty_buffer(const unsigned buf[])
 {
 	for (int i = 0; i < tpBufLen; i++)
 		mvwprintw(tp_win, 0, i + 22, "%u", buf[i]);

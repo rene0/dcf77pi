@@ -76,7 +76,7 @@ void mainloop(/*@null@*/char *logfilename,
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(struct DT_result, struct tm),
-    void (*display_thirdparty_buffer)(const unsigned * const),
+    void (*display_thirdparty_buffer)(const unsigned[]),
     /*@null@*/struct ML_result (*show_mainloop_result)(struct ML_result, int),
     /*@null@*/struct ML_result (*process_input)(struct ML_result, int),
     /*@null@*/struct ML_result (*post_process_input)(struct ML_result, int));

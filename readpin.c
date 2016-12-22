@@ -43,7 +43,7 @@ do_cleanup(/*@unused@*/ int sig)
 }
 
 int
-main(int argc, char **argv)
+main(int argc, char *argv[])
 {
 	struct sigaction sigact;
 	struct hardware hw;

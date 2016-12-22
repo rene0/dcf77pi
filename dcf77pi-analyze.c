@@ -164,7 +164,7 @@ display_minute(int minlen)
 }
 
 void
-display_thirdparty_buffer(const unsigned * const tpbuf)
+display_thirdparty_buffer(const unsigned tpbuf[])
 {
 	printf("Third party buffer: ");
 	for (int i = 0; i < tpBufLen; i++)
