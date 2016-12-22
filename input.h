@@ -150,7 +150,7 @@ int set_mode_live(void);
  *
  * @return The hardware parameters.
  */
-const struct hardware * const get_hardware_parameters(void);
+struct hardware get_hardware_parameters(void);
 
 /**
  * Clean up when: close the device or input logfile, and output log file if
@@ -171,7 +171,7 @@ int get_pulse(void);
  *
  * @return The current bit from the log file and its associated state.
  */
-const struct GB_result * const get_bit_file(void);
+struct GB_result get_bit_file(void);
 
 /**
  * Retrieve one live bit from the hardware. This function determines several
@@ -179,7 +179,7 @@ const struct GB_result * const get_bit_file(void);
  *
  * @return The currently received bit and its full status.
  */
-const struct GB_result * const get_bit_live(void);
+struct GB_result get_bit_live(void);
 
 /**
  * Prepare for the next bit: update the bit position or wrap it around.
@@ -187,7 +187,7 @@ const struct GB_result * const get_bit_live(void);
  * @return The current bit state structure, with the marker field adjusted
  *   to indicate state of the bit buffer and the minute end.
  */
-const struct GB_result * const next_bit(void);
+struct GB_result next_bit(void);
 
 /**
  * Retrieve the current bit position.
@@ -231,7 +231,7 @@ int close_logfile(void);
  *
  * @return The bit information as described for {@link bitinfo}.
  */
-const struct bitinfo * const get_bitinfo(void);
+struct bitinfo get_bitinfo(void);
 
 /**
  * Retrieve the accumulated minute length in milliseconds.

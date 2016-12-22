@@ -414,7 +414,7 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 	return errflags;
 }
 
-const struct DT_result * const
+struct DT_result
 decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
     const int * const buffer, struct tm * const time)
 {
@@ -458,5 +458,5 @@ decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
 	if (errflags != 0)
 		olderr = true;
 
-	return &dt_res;
+	return dt_res;
 }

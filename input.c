@@ -279,7 +279,7 @@ reset_bitlen(void)
  * for this come from Udo Klein, with permission.
  * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
  */
-const struct GB_result * const
+struct GB_result
 get_bit_live(void)
 {
 	char outch;
@@ -482,7 +482,7 @@ report:
 	}
 	if (gb_res.marker == emark_minute || gb_res.marker == emark_late)
 		cutoff = bit.t * 1000000 / (bit.realfreq / 10000);
-	return &gb_res;
+	return gb_res;
 }
 
 #define TRYCHAR \
@@ -506,7 +506,7 @@ do { \
 		gb_res.done = true; \
 } while (0)
 
-const struct GB_result * const
+struct GB_result
 get_bit_file(void)
 {
 	int oldinch, inch;
@@ -528,7 +528,7 @@ get_bit_file(void)
 		switch (inch) {
 		case EOF:
 			gb_res.done = true;
-			return &gb_res;
+			return gb_res;
 		case '0':
 		case '1':
 			buffer[bitpos] = inch - (int)'0';
@@ -602,7 +602,7 @@ get_bit_file(void)
 	if (!read_acc_minlen)
 		acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 
-	return &gb_res;
+	return gb_res;
 }
 
 bool
@@ -614,7 +614,7 @@ is_space_bit(int bitpos)
 	    bitpos == 50 || bitpos == 58 || bitpos == 59 || bitpos == 60);
 }
 
-const struct GB_result * const
+struct GB_result
 next_bit(void)
 {
 	if (gb_res.marker == emark_minute || gb_res.marker == emark_late)
@@ -624,13 +624,13 @@ next_bit(void)
 	if (bitpos == buflen) {
 		gb_res.marker = emark_toolong;
 		bitpos = 0;
-		return &gb_res;
+		return gb_res;
 	}
 	if (gb_res.marker == emark_toolong)
 		gb_res.marker = emark_none; /* fits again */
 	else if (gb_res.marker == emark_late)
 		gb_res.marker = emark_minute; /* cannot happen? */
-	return &gb_res;
+	return gb_res;
 }
 
 int
@@ -645,10 +645,10 @@ get_buffer(void)
 	return buffer;
 }
 
-const struct hardware * const
+struct hardware
 get_hardware_parameters(void)
 {
-	return &hw;
+	return hw;
 }
 
 int
@@ -670,10 +670,10 @@ close_logfile(void)
 	return (f == EOF) ? errno : 0;
 }
 
-const struct bitinfo * const
+struct bitinfo
 get_bitinfo(void)
 {
-	return &bit;
+	return bit;
 }
 
 unsigned

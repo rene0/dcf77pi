@@ -46,7 +46,7 @@ int
 main(int argc, char **argv)
 {
 	struct sigaction sigact;
-	const struct hardware *hw;
+	struct hardware hw;
 	int ch, min, res;
 	bool raw = false, verbose = true;
 
@@ -84,13 +84,13 @@ main(int argc, char **argv)
 	min = -1;
 
 	for (;;) {
-		const struct bitinfo *bi;
-		const struct GB_result *bit;
+		struct bitinfo bi;
+		struct GB_result bit;
 
 		if (raw) {
 			struct timespec slp;
-			slp.tv_sec = 1.0 / hw->freq;
-			slp.tv_nsec = 1e9 / hw->freq;
+			slp.tv_sec = 1.0 / hw.freq;
+			slp.tv_nsec = 1e9 / hw.freq;
 			printf("%i", get_pulse());
 			fflush(stdout);
 			while (nanosleep(&slp, &slp))
@@ -101,30 +101,30 @@ main(int argc, char **argv)
 		bit = get_bit_live();
 		bi = get_bitinfo();
 		if (verbose) {
-			if (bi->freq_reset)
+			if (bi.freq_reset)
 				printf("!");
 			/* display first bi->t pulses */
-			for (unsigned long long i = 0; i < bi->t / 8; i++)
+			for (unsigned long long i = 0; i < bi.t / 8; i++)
 				for (unsigned j = 0; j < 8; j++)
 					printf("%c",
-					    (bi->signal[i] & (1 << j)) > 0 ?
+					    (bi.signal[i] & (1 << j)) > 0 ?
 					    '+' : '-');
 			/*
 			 * display pulses in the last partially filled item
-			 * bi->t is 0-based, hence the <= comparison
+			 * bi.t is 0-based, hence the <= comparison
 			 */
-			for (unsigned j = 0; j <= (bi->t & 7); j++)
+			for (unsigned j = 0; j <= (bi.t & 7); j++)
 				printf("%c",
-				    (bi->signal[bi->t / 8] & (1 << j)) > 0 ?
+				    (bi.signal[bi.t / 8] & (1 << j)) > 0 ?
 				    '+' : '-');
 			printf("\n");
 		}
-		if (bit->marker == emark_toolong || bit->marker == emark_late)
+		if (bit.marker == emark_toolong || bit.marker == emark_late)
 			min++;
 		printf("%i %i %u %llu %llu %llu %i:%u\n",
-		    bi->tlow, bi->tlast0, bi->t,
-		    bi->bit0, bi->bit20, bi->realfreq, min, get_bitpos());
-		if (bit->marker == emark_minute)
+		    bi.tlow, bi.tlast0, bi.t, bi.bit0, bi.bit20, bi.realfreq,
+		    min, get_bitpos());
+		if (bit.marker == emark_minute)
 			min++;
 		bit = next_bit();
 	}

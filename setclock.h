@@ -39,8 +39,7 @@ struct tm;
  * @param bit The current bit information
  * @return Whether it is OK to set the system clock
  */
-bool setclock_ok(unsigned init_min, const struct DT_result * const dt,
-    const struct GB_result * const bit);
+bool setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit);
 
 /**
  * Set the system clock according to the given time. Note that this does *not*
