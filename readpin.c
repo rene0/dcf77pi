@@ -121,7 +121,7 @@ main(int argc, char **argv)
 		}
 		if (bit.marker == emark_toolong || bit.marker == emark_late)
 			min++;
-		printf("%i %i %u %llu %llu %llu %i:%u\n",
+		printf("%i %i %u %llu %llu %llu %i:%i\n",
 		    bi.tlow, bi.tlast0, bi.t, bi.bit0, bi.bit20, bi.realfreq,
 		    min, get_bitpos());
 		if (bit.marker == emark_minute)
