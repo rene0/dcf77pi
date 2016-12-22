@@ -66,7 +66,6 @@ static const int buflen = 60;
 
 static int bitpos;         /* second */
 static int buffer[buflen]; /* wrap after buflen positions */
-/*@null@*/ static FILE *datafile;         /* input file (recorded data) */
 /*@null@*/ static FILE *logfile;          /* auto-appended in live mode */
 static int fd;                 /* gpio file */
 static struct hardware hw;
@@ -74,15 +73,22 @@ static struct bitinfo bit;
 static unsigned acc_minlen;
 static int cutoff;
 static struct GB_result gb_res;
+static unsigned filemode = 0; /* 0 = no file, 1 = input, 2 = output */
 
 int
 set_mode_file(const char * const infilename)
 {
-	datafile = fopen(infilename, "r");
-	if (datafile == NULL) {
-		perror("fopen (datafile)");
+	if (filemode == 1) {
+		fprintf(stderr, "Already initialized to live mode.\n");
+		cleanup();
+		return -1;
+	}
+	logfile = fopen(infilename, "r");
+	if (logfile == NULL) {
+		perror("fopen (logfile)");
 		return errno;
 	}
+	filemode = 2;
 	return 0;
 }
 
@@ -111,6 +117,11 @@ set_mode_live(void)
 	char buf[64];
 	int res;
 
+	if (filemode == 2) {
+		fprintf(stderr, "Already initialized to file mode.\n");
+		cleanup();
+		return -1;
+	}
 	/* fill hardware structure and initialize hardware */
 	hw.pin = (unsigned)strtol(get_config_value("pin"), NULL, 10);
 	hw.active_high = (bool)strtol(get_config_value("activehigh"), NULL, 10);
@@ -183,6 +194,7 @@ set_mode_live(void)
 		return errno;
 	}
 #endif
+	filemode = 1;
 	return 0;
 #endif
 }
@@ -200,9 +212,6 @@ cleanup(void)
 	if (logfile != NULL && fclose(logfile) == EOF)
 		perror("fclose (logfile)");
 	logfile = NULL;
-	if (datafile != NULL && fclose(datafile) == EOF)
-		perror("fclose (datafile)");
-	datafile = NULL;
 	free(bit.signal);
 }
 
@@ -487,13 +496,13 @@ report:
 
 #define TRYCHAR \
 	oldinch = inch; \
-	inch = getc(datafile); \
+	inch = getc(logfile); \
 	if (inch == EOF) \
 		gb_res.done = true; \
 	if (inch == (int)'a' || inch == (int)'c') \
 		gb_res.skip = eskip_next; \
 	if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) { \
-		if (ungetc(inch, datafile) == EOF) /* EOF remains, IO error */\
+		if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */\
 			gb_res.done = true; \
 	}
 
@@ -524,7 +533,7 @@ get_bit_file(void)
 	bit.realfreq = 1000000000;
 
 	while (!valid) {
-		inch = getc(datafile);
+		inch = getc(logfile);
 		switch (inch) {
 		case EOF:
 			gb_res.done = true;
@@ -572,12 +581,12 @@ get_bit_file(void)
 			break;
 		case 'a':
 			/* acc_minlen */
-			READVALUE(fscanf(datafile, "%10u", &acc_minlen) != 1);
+			READVALUE(fscanf(logfile, "%10u", &acc_minlen) != 1);
 			read_acc_minlen = !gb_res.done;
 			break;
 		case 'c':
 			/* cutoff for newminute */
-			READVALUE(fscanf(datafile, "%6c", co) != 1);
+			READVALUE(fscanf(logfile, "%6c", co) != 1);
 			if (!gb_res.done && (co[1] == '.'))
 				cutoff = (co[0] - '0') * 10000 +
 				    (int)strtol(co + 2, (char **)NULL, 10);
