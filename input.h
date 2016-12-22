@@ -71,7 +71,7 @@ enum eGB_skip {
 struct GB_result {
 	/** I/O error while reading bit from hardware */
 	bool bad_io;
-	/** end of data, either end-of-file or user quit */
+	/** end of file data */
 	bool done;
 	/** the value of the currently received bit */
 	enum eGB_bitvalue bitval;
