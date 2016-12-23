@@ -30,11 +30,11 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-#define NUM_KEYS 8
-static const char * const key[NUM_KEYS] = {
+static const char * const key[] = {
 	"pin", "iodev", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
+#define NUM_KEYS (sizeof(key) / sizeof(key[0]))
 
 #define MAX_KEY_LEN 20
 #define MAX_VAL_LEN 255
