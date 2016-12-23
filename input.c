@@ -62,10 +62,10 @@ SUCH DAMAGE.
 #endif
 
 /** maximum number of bits in a minute */
-static const int buflen = 60;
+#define BUFLEN 60
 
 static int bitpos;               /* second */
-static int buffer[buflen];       /* wrap after buflen positions */
+static int buffer[BUFLEN];       /* wrap after BUFLEN positions */
 /*@null@*/ static FILE *logfile; /* auto-appended in live mode */
 static int fd;                   /* gpio file */
 static struct hardware hw;
@@ -630,7 +630,7 @@ next_bit(void)
 		bitpos = 0;
 	else if (gb_res.skip != eskip_next)
 		bitpos++;
-	if (bitpos == buflen) {
+	if (bitpos == BUFLEN) {
 		gb_res.marker = emark_toolong;
 		bitpos = 0;
 		return gb_res;

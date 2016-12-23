@@ -40,7 +40,7 @@ SUCH DAMAGE.
 #include <string.h>
 #include <time.h>
 
-static const unsigned maxbuf = 255;
+#define MAXBUF 255
 
 static WINDOW *input_win;
 static WINDOW *decode_win;
@@ -49,7 +49,7 @@ static WINDOW *main_win;
 
 static int old_bitpos = -1; /* timer for statusbar inactive */
 static int input_mode;      /* normal input (statusbar) or string input */
-static char keybuf[maxbuf];    /* accumulator for string input */
+static char keybuf[MAXBUF]; /* accumulator for string input */
 
 static void
 statusbar(int bitpos, const char * const fmt, ...)
@@ -240,7 +240,7 @@ display_time(struct DT_result dt, struct tm time)
 void
 display_thirdparty_buffer(const unsigned buf[])
 {
-	for (int i = 0; i < tpBufLen; i++)
+	for (int i = 0; i < TPBUFLEN; i++)
 		mvwprintw(tp_win, 0, i + 22, "%u", buf[i]);
 	wclrtoeol(tp_win);
 	wrefresh(tp_win);
@@ -337,7 +337,7 @@ process_input(struct ML_result in_ml, int bitpos)
 				wclrtoeol(main_win);
 			}
 			wnoutrefresh(main_win);
-		} else if (input_count == maxbuf - 1 ||
+		} else if (input_count == MAXBUF - 1 ||
 		    (inkey == KEY_ENTER || inkey == '\r' || inkey == '\n')) {
 			/* terminate to prevent overflow */
 			keybuf[input_count] = '\0';

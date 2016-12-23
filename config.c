@@ -30,23 +30,23 @@ SUCH DAMAGE.
 #include <stdlib.h>
 #include <string.h>
 
-static const int num_keys = 8;
-static const char * const key[num_keys] = {
+#define NUM_KEYS 8
+static const char * const key[NUM_KEYS] = {
 	"pin", "iodev", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
 
-static const unsigned max_key_len = 20;
-static const unsigned max_val_len = 255;
-static const unsigned max_len = (max_key_len + 3 + max_val_len + 2);
+#define MAX_KEY_LEN 20
+#define MAX_VAL_LEN 255
+static const unsigned max_len = (MAX_KEY_LEN + 3 + MAX_VAL_LEN + 2);
     /* "k = v\n\0" */
 
-static char *value[num_keys];
+static char *value[8];
 
 static int
 getpos(const char * const kw)
 {
-	for (int i = 0; i < num_keys; i++)
+	for (int i = 0; i < NUM_KEYS; i++)
 		if (strcmp(key[i], kw) == 0)
 			return i;
 	return -1;
@@ -84,7 +84,7 @@ read_config_file(const char * const filename)
 		return errno;
 	}
 	freeptr = line;
-	for (int i = 0; i < num_keys; i++)
+	for (int i = 0; i < NUM_KEYS; i++)
 		value[i] = NULL;
 
 	configfile = fopen(filename, "r");
@@ -112,8 +112,8 @@ read_config_file(const char * const filename)
 		i = (int)strlen(k);
 		k = strip(k);
 		v = strip(v);
-		if (i > max_key_len + 1 || strlen(k) == 0 ||
-		    strlen(k) > max_key_len) {
+		if (i > MAX_KEY_LEN + 1 || strlen(k) == 0 ||
+		    strlen(k) > MAX_KEY_LEN) {
 			printf("read_config_file: item with bad key length\n");
 			END_CONFIG(-1);
 		}
@@ -123,7 +123,7 @@ read_config_file(const char * const filename)
 			    k);
 			continue;
 		}
-		if (strlen(v) > max_val_len) {
+		if (strlen(v) > MAX_VAL_LEN) {
 			printf("read_config_file: item with too long value\n");
 			END_CONFIG(-1);
 		}
@@ -132,7 +132,7 @@ read_config_file(const char * const filename)
 			    " '%s'\n", k);
 		value[i] = strdup(v);
 	}
-	for (int i = 0; i < num_keys; i++)
+	for (int i = 0; i < NUM_KEYS; i++)
 		if (value[i] == NULL) {
 			printf("read_config_file: missing value for key '%s'\n",
 			    key[i]);
