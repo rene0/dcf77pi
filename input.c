@@ -92,16 +92,6 @@ set_mode_file(const char * const infilename)
 	return 0;
 }
 
-#define TRYWRITE(val, string) \
-do { \
-	res = snprintf(buf, sizeof(buf), string, val); \
-	if (res < 0 || res > sizeof(buf) - 1) { \
-		fprintf(stderr, "Hardware value too high? (%i)\n", res); \
-		cleanup(); \
-		return -1; \
-	} \
-} while (0)
-
 int
 set_mode_live(void)
 {
@@ -135,7 +125,12 @@ set_mode_live(void)
 	bit.signal = malloc(hw.freq / 2);
 #if defined(__FreeBSD__)
 	hw.iodev = (unsigned)strtol(get_config_value("iodev"), NULL, 10);
-	TRYWRITE(hw.iodev, "/dev/gpioc%u");
+	res = snprintf(buf, sizeof(buf), "/dev/gpioc%u", hw.iodev);
+	if (res < 0 || res >= sizeof(buf)) {
+		fprintf(stderr, "hw.iodev too high? (%i)\n", res);
+		cleanup();
+		return -1;
+	}
 	fd = open(buf, O_RDONLY);
 	if (fd < 0) {
 		fprintf(stderr, "open %s: ", buf);
@@ -157,7 +152,12 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	TRYWRITE(hw.pin, "%u");
+	res = snprintf(buf, sizeof(buf), "%u", hw.pin);
+	if (res < 0 || res >= sizeof(buf)) {
+		fprintf(stderr, "hw.pin too high? (%i)\n", res);
+		cleanup();
+		return -1;
+	}
 	if (write(fd, buf, res) < 0) {
 		perror("write(export)");
 		cleanup();
@@ -169,7 +169,12 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	TRYWRITE(hw.pin, "/sys/class/gpio/gpio%u/direction");
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction", hw.pin);
+	if (res < 0 || res >= sizeof(buf)) {
+		fprintf(stderr, "hw.pin too high? (%i)\n", res);
+		cleanup();
+		return -1;
+	}
 	fd = open(buf, O_WRONLY);
 	if (fd < 0) {
 		perror("open (direction)");
@@ -186,7 +191,12 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	TRYWRITE(hw.pin, "/sys/class/gpio/gpio%u/value");
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value", hw.pin);
+	if (res < 0 || res >= sizeof(buf)) {
+		fprintf(stderr, "hw.pin too high? (%i)\n", res);
+		cleanup();
+		return -1;
+	}
 	fd = open(buf, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror("open (value)");
