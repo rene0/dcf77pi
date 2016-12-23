@@ -103,6 +103,12 @@ struct hardware {
  * (Internal) information about the currently received bit:
  */
 struct bitinfo {
+	/** bit0 and bit20 were reset to their initial values (normally because
+	  * of reception errors or fluctuations in CPU usage) */
+	bool bitlen_reset;
+	/** realfreq was reset to {@link hardware.freq} (normally because of
+	  * reception errors or fluctuations in CPU usage) */
+	bool freq_reset;
 	/** time in samples when the signal went low again, -1 initially */
 	int tlow;
 	/** time in samples when the signal was last measured as 0,
@@ -110,6 +116,9 @@ struct bitinfo {
 	int tlast0;
 	/** length of this bit in samples */
 	unsigned t;
+	/** the raw received radio signal, {@link hardware.freq} / 2 items,
+	  * with each item holding 8 bits */
+	unsigned char *signal;
 	/** the average length of a bit in samples */
 	unsigned long long realfreq;
 	/** the average length of the high part of bit 0 (a 0 bit) in
@@ -118,15 +127,6 @@ struct bitinfo {
 	/** the average length of the high part of bit 20 (a 1 bit) in
 	  * samples */
 	unsigned long long bit20;
-	/** bit0 and bit20 were reset to their initial values (normally because
-	  * of reception errors or fluctuations in CPU usage) */
-	bool bitlen_reset;
-	/** realfreq was reset to {@link hardware.freq} (normally because of
-	  * reception errors or fluctuations in CPU usage) */
-	bool freq_reset;
-	/** the raw received radio signal, {@link hardware.freq} / 2 items,
-	  * with each item holding 8 bits */
-	unsigned char *signal;
 };
 
 /**
