@@ -516,15 +516,6 @@ report:
 			gb_res.done = true; \
 	}
 
-#define READVALUE(COND) \
-do { \
-	gb_res.skip = eskip_this; \
-	valid = true; \
-	bit.t = 0; \
-	if (COND) \
-		gb_res.done = true; \
-} while (0)
-
 struct GB_result
 get_bit_file(void)
 {
@@ -591,12 +582,20 @@ get_bit_file(void)
 			break;
 		case 'a':
 			/* acc_minlen */
-			READVALUE(fscanf(logfile, "%10u", &acc_minlen) != 1);
+			gb_res.skip = eskip_this;
+			valid = true;
+			bit.t = 0;
+			if (fscanf(logfile, "%10u", &acc_minlen) != 1)
+				gb_res.done = true;
 			read_acc_minlen = !gb_res.done;
 			break;
 		case 'c':
 			/* cutoff for newminute */
-			READVALUE(fscanf(logfile, "%6c", co) != 1);
+			gb_res.skip = eskip_this;
+			valid = true;
+			bit.t = 0;
+			if (fscanf(logfile, "%6c", co) != 1)
+				gb_res.done = true;
 			if (!gb_res.done && (co[1] == '.'))
 				cutoff = (co[0] - '0') * 10000 +
 				    (int)strtol(co + 2, (char **)NULL, 10);
