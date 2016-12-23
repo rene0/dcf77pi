@@ -504,18 +504,6 @@ report:
 	return gb_res;
 }
 
-#define TRYCHAR \
-	oldinch = inch; \
-	inch = getc(logfile); \
-	if (inch == EOF) \
-		gb_res.done = true; \
-	if (inch == (int)'a' || inch == (int)'c') \
-		gb_res.skip = eskip_next; \
-	if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) { \
-		if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */\
-			gb_res.done = true; \
-	}
-
 struct GB_result
 get_bit_file(void)
 {
@@ -605,7 +593,16 @@ get_bit_file(void)
 		}
 	}
 	/* Only allow \r , \n , \r\n , and \n\r as single EOM markers */
-	TRYCHAR else {
+	oldinch = inch;
+	inch = getc(logfile);
+	if (inch == EOF)
+		gb_res.done = true;
+	if (inch == (int)'a' || inch == (int)'c')
+		gb_res.skip = eskip_next;
+	if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) {
+		if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */
+			gb_res.done = true;
+	} else {
 		if (gb_res.marker == emark_none)
 			gb_res.marker = emark_minute;
 		else if (gb_res.marker == emark_toolong)
@@ -615,7 +612,16 @@ get_bit_file(void)
 		else
 			read_acc_minlen = false;
 		/* Check for \r\n or \n\r */
-		TRYCHAR
+		oldinch = inch;
+		inch = getc(logfile);
+		if (inch == EOF)
+			gb_res.done = true;
+		if (inch == (int)'a' || inch == (int)'c')
+			gb_res.skip = eskip_next;
+		if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) {
+			if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */
+				gb_res.done = true;
+		}
 	}
 	if (!read_acc_minlen)
 		acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
