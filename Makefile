@@ -1,5 +1,5 @@
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
-	uninstall-doxygen lint splint cppcheck iwyu
+	uninstall-doxygen lint splint cppcheck iwyu test
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
@@ -11,7 +11,8 @@ SPLINT_ARGS?=+posixlib -DETCDIR=\"$(ETCDIR)\"
 CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 	-DETCDIR=\"$(ETCDIR)\"
 
-all: libdcf77.so dcf77pi dcf77pi-analyze readpin testcentury
+all: libdcf77.so dcf77pi dcf77pi-analyze readpin
+test: testcentury
 
 hdrlib=input.h decode_time.h decode_alarm.h config.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
