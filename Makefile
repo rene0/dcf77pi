@@ -30,16 +30,17 @@ decode_alarm.o: decode_alarm.h
 	$(CC) -fpic $(CFLAGS) -c decode_alarm.c -o $@
 config.o: config.h
 	$(CC) -fpic $(CFLAGS) -c config.c -o $@
-setclock.o: setclock.h decode_time.h input.h
+setclock.o: setclock.h decode_time.h input.h calendar.h
 	$(CC) -fpic $(CFLAGS) -c setclock.c -o $@
-mainloop.o: mainloop.h input.h bits1to14.h
+mainloop.o: mainloop.h input.h bits1to14.h decode_alarm.h decode_time.h \
+	setclock.h
 	$(CC) -fpic $(CFLAGS) -c mainloop.c -o $@
 bits1to14.o: bits1to14.h input.h
 	$(CC) -fpic $(CFLAGS) -c bits1to14.c -o $@
 calendar.o: calendar.h
 	$(CC) -fpic $(CFLAGS) -c calendar.c -o $@
 
-libdcf77.so: $(objlib) $(hdrlib)
+libdcf77.so: $(objlib)
 	$(CC) -shared -o $@ $(objlib) -lm -lrt
 
 dcf77pi.o: bits1to14.h config.h decode_alarm.h decode_time.h input.h mainloop.h \

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -26,8 +26,6 @@ SUCH DAMAGE.
 #ifndef DCF77PI_DECODE_ALARM_H
 #define DCF77PI_DECODE_ALARM_H
 
-#include <stdint.h>
-
 /*
  * confirmed by "Vortrag INS Bevoelkerungswarnung Hannovermesse 2008.pdf"
  * (c) 2008 DIN e.V.
@@ -35,10 +33,10 @@ SUCH DAMAGE.
  */
 struct alm {
 	struct {
-		uint8_t r1, r2, r3, r4;
+		unsigned r1, r2, r3, r4;
 	} region[2];
 	struct {
-		uint8_t ps, pl;
+		unsigned ps, pl;
 	} parity[2];
 };
 
@@ -48,7 +46,7 @@ struct alm {
  * @param civbuf The input buffer containing the civil alarm.
  * @param alarm The structure containing the decoded values.
  */
-void decode_alarm(const uint8_t * const civbuf, struct alm * const alarm);
+void decode_alarm(const unsigned civbuf[], struct alm * const alarm);
 
 /**
  * Determines the name of the region which the alarm is broadcasted for.

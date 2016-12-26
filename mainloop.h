@@ -27,11 +27,17 @@ SUCH DAMAGE.
 #define DCF77PI_MAINLOOP_H
 
 #include <stdbool.h>
-#include <stdint.h>
 struct DT_result;
 struct GB_result;
 struct alm;
 struct tm;
+
+struct ML_result {
+	bool change_logfile;
+	bool quit;
+	bool settime;
+	char *logfilename;
+};
 
 /**
  * Provide a ready-to-use mainloop function for the main program. Both dcf77pi
@@ -61,28 +67,25 @@ struct tm;
  *   interactive user input.
  */
 void mainloop(/*@null@*/char *logfilename,
-    const struct GB_result * const (*get_bit)(void),
-    void (*display_bit)(const struct GB_result * const, uint8_t),
+    struct GB_result (*get_bit)(void),
+    void (*display_bit)(struct GB_result, int),
     void (*display_long_minute)(void),
-    void (*display_minute)(uint8_t),
+    void (*display_minute)(int),
     /*@null@*/void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
-    void (*display_time)(const struct DT_result * const, struct tm),
-    void (*display_thirdparty_buffer)(const uint8_t * const),
-    /*@null@*/void (*show_mainloop_result)(struct GB_result * const,
-	uint8_t),
-    /*@null@*/void (*process_input)(struct GB_result * const, uint8_t,
-	const char * const, bool * const, bool * const),
-    /*@null@*/void (*post_process_input)(char **, bool * const,
-	struct GB_result * const, uint8_t));
+    void (*display_time)(struct DT_result, struct tm),
+    void (*display_thirdparty_buffer)(const unsigned[]),
+    /*@null@*/struct ML_result (*show_mainloop_result)(struct ML_result, int),
+    /*@null@*/struct ML_result (*process_input)(struct ML_result, int),
+    /*@null@*/struct ML_result (*post_process_input)(struct ML_result, int));
 
 /**
  * Get the result value set by {@link mainloop}.
  *
  * @return The result value set by {@link mainloop}.
  */
-int8_t get_mainloop_result(void);
+int get_mainloop_result(void);
 
 #endif

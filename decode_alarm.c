@@ -34,11 +34,11 @@ static const char * const reg1m = "NRW, SA, BRA, B, TH, S";
 static const char * const reg1s = "RP, SAA, HS, BW, BYN, BYS";
 
 void
-decode_alarm(const uint8_t * const civbuf, struct alm * const alarm)
+decode_alarm(const unsigned civbuf[], struct alm * const alarm)
 {
 	/* Partial information only, no parity checks */
 
-	for (uint8_t i = 0; i < 2; i++) {
+	for (unsigned i = 0; i < 2; i++) {
 		alarm->region[i].r1 = civbuf[6 * i] +
 		    2 * civbuf[1 + 6 * i] +
 		    4 * civbuf[3 + 6 * i];

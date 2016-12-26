@@ -33,23 +33,22 @@ SUCH DAMAGE.
 #include <sys/time.h>
 
 bool
-setclock_ok(uint8_t init_min, const struct DT_result * const dt,
-    const struct GB_result * const bit)
+setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit)
 {
 	return init_min == 0 &&
-	    dt->bit0_ok && dt->bit20_ok && dt->minute_length == emin_ok &&
-	    dt->minute_status == eval_ok && dt->hour_status == eval_ok &&
-	    dt->mday_status == eval_ok && dt->wday_status == eval_ok &&
-	    dt->month_status == eval_ok && dt->year_status == eval_ok &&
-	    dt->dst_announce != eann_error &&
-	    (dt->dst_status == eDST_ok || dt->dst_status == eDST_done) &&
-	    dt->leap_announce != eann_error &&
-	    dt->leapsecond_status != els_one &&
-	    !bit->bad_io && bit->bitval != ebv_none && bit->hwstat == ehw_ok &&
-	    (bit->marker == emark_none || bit->marker == emark_minute);
+	    dt.bit0_ok && dt.bit20_ok && dt.minute_length == emin_ok &&
+	    dt.minute_status == eval_ok && dt.hour_status == eval_ok &&
+	    dt.mday_status == eval_ok && dt.wday_status == eval_ok &&
+	    dt.month_status == eval_ok && dt.year_status == eval_ok &&
+	    dt.dst_announce != eann_error &&
+	    (dt.dst_status == eDST_ok || dt.dst_status == eDST_done) &&
+	    dt.leap_announce != eann_error &&
+	    dt.leapsecond_status != els_one &&
+	    !bit.bad_io && bit.bitval != ebv_none && bit.hwstat == ehw_ok &&
+	    (bit.marker == emark_none || bit.marker == emark_minute);
 }
 
-int8_t
+int
 setclock(struct tm time)
 {
 	time_t epochtime;
@@ -70,5 +69,5 @@ setclock(struct tm time)
 	tv.tv_usec = 50000; /* adjust for bit reception algorithm */
 	tz.tz_minuteswest = -60;
 	tz.tz_dsttime = it.tm_isdst;
-	return (settimeofday(&tv, &tz) == -1) ? (int8_t)-2 : (int8_t)0;
+	return (settimeofday(&tv, &tz) == -1) ? -2 : 0;
 }

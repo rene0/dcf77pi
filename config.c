@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -26,21 +26,19 @@ SUCH DAMAGE.
 #include "config.h"
 
 #include <errno.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-static const char *key[] = {
+static const char * const key[] = {
 	"pin", "iodev", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
-
 #define NUM_KEYS (sizeof(key) / sizeof(key[0]))
 
-static const uint8_t max_key_len = 20;
-static const uint8_t max_val_len = 255;
-static const uint16_t max_len = (max_key_len + 3 + max_val_len + 2);
+#define MAX_KEYLEN 20
+#define MAX_VALLEN 255
+static const unsigned max_len = (MAX_KEYLEN + 3 + MAX_VALLEN + 2);
     /* "k = v\n\0" */
 
 static char *value[NUM_KEYS];
@@ -48,9 +46,7 @@ static char *value[NUM_KEYS];
 static int
 getpos(const char * const kw)
 {
-	int i;
-
-	for (i = 0; i < (int)NUM_KEYS; i++)
+	for (int i = 0; i < NUM_KEYS; i++)
 		if (strcmp(key[i], kw) == 0)
 			return i;
 	return -1;
@@ -59,27 +55,17 @@ getpos(const char * const kw)
 static char * const
 strip(char *s)
 {
-	int i;
-
 	while (s[0] == ' ' || s[0] == '\n' || s[0] == '\r' || s[0] == '\t')
 		s++;
-	for (i = (int)(strlen(s) - 1); s[i] == ' ' || s[i] == '\n' ||
+	for (int i = (int)(strlen(s) - 1); s[i] == ' ' || s[i] == '\n' ||
 	    s[i] == '\r' || s[i] == '\t'; i--)
 		s[i] = '\0';
 	return s;
 }
 
-#define END_CONFIG(ret) \
-do { \
-	(void)fclose(configfile); \
-	free(freeptr); \
-	return (ret); \
-} while (0)
-
 int
 read_config_file(const char * const filename)
 {
-	int i;
 	FILE *configfile;
 	char *k, *v;
 	char *line, *freeptr;
@@ -91,7 +77,7 @@ read_config_file(const char * const filename)
 		return errno;
 	}
 	freeptr = line;
-	for (i = 0; i < (int)NUM_KEYS; i++)
+	for (int i = 0; i < NUM_KEYS; i++)
 		value[i] = NULL;
 
 	configfile = fopen(filename, "r");
@@ -102,25 +88,33 @@ read_config_file(const char * const filename)
 	}
 
 	while (feof(configfile) == 0) {
+		int i;
+
 		if (fgets(line, max_len, configfile) == NULL) {
 			if (feof(configfile) != 0)
 				break;
 			printf("read_config_file: error reading file\n");
-			END_CONFIG(-1);
+			(void)fclose(configfile);
+			free(freeptr);
+			return -1;
 		}
 		if ((k = strsep(&line, "=")) != NULL)
 			v = line;
 		else {
 			printf("read_config_file: no key/value pair found\n");
-			END_CONFIG(-1);
+			(void)fclose(configfile);
+			free(freeptr);
+			return -1;
 		}
 		i = (int)strlen(k);
 		k = strip(k);
 		v = strip(v);
-		if (i > max_key_len + 1 || strlen(k) == 0 ||
-		    strlen(k) > max_key_len) {
+		if (i > MAX_KEYLEN + 1 || strlen(k) == 0 ||
+		    strlen(k) > MAX_KEYLEN) {
 			printf("read_config_file: item with bad key length\n");
-			END_CONFIG(-1);
+			(void)fclose(configfile);
+			free(freeptr);
+			return -1;
 		}
 		i = getpos(k);
 		if (i == -1) {
@@ -128,22 +122,28 @@ read_config_file(const char * const filename)
 			    k);
 			continue;
 		}
-		if (strlen(v) > max_val_len) {
+		if (strlen(v) > MAX_VALLEN) {
 			printf("read_config_file: item with too long value\n");
-			END_CONFIG(-1);
+			(void)fclose(configfile);
+			free(freeptr);
+			return -1;
 		}
 		if (value[i] != NULL)
 			printf("read_config_file: overwriting value for key"
 			    " '%s'\n", k);
 		value[i] = strdup(v);
 	}
-	for (i = 0; i < (int)NUM_KEYS; i++)
+	for (int i = 0; i < NUM_KEYS; i++)
 		if (value[i] == NULL) {
 			printf("read_config_file: missing value for key '%s'\n",
 			    key[i]);
-			END_CONFIG(-1);
+			(void)fclose(configfile);
+			free(freeptr);
+			return -1;
 		}
-	END_CONFIG(0);
+	(void)fclose(configfile);
+	free(freeptr);
+	return 0;
 }
 
 /*@null@*/char *

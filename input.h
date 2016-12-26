@@ -27,7 +27,6 @@ SUCH DAMAGE.
 #define DCF77PI_INPUT_H
 
 #include <stdbool.h>
-#include <stdint.h>
 
 enum eGB_bitvalue {
 	/** this bit has value 0 */
@@ -72,7 +71,7 @@ enum eGB_skip {
 struct GB_result {
 	/** I/O error while reading bit from hardware */
 	bool bad_io;
-	/** end of data, either end-of-file or user quit */
+	/** end of file data */
 	bool done;
 	/** the value of the currently received bit */
 	enum eGB_bitvalue bitval;
@@ -89,11 +88,11 @@ struct GB_result {
  */
 struct hardware {
 	/** sample frequency in Hz */
-	uint32_t freq;
+	unsigned freq;
 	/** GPIO device number (FreeBSD only) */
-	uint8_t iodev;
+	unsigned iodev;
 	/** pin number to read from */
-	uint16_t pin;
+	unsigned pin;
 	/** pin value is high (1) or low (0) for active signal */
 	bool active_high;
 };
@@ -102,30 +101,30 @@ struct hardware {
  * (Internal) information about the currently received bit:
  */
 struct bitinfo {
-	/** time in samples when the signal went low again, -1 initially */
-	int32_t tlow;
-	/** time in samples when the signal was last measured as 0,
-	  * -1 initially */
-	int32_t tlast0;
-	/** length of this bit in samples */
-	uint32_t t;
-	/** the average length of a bit in samples */
-	uint64_t realfreq;
-	/** the average length of the high part of bit 0 (a 0 bit) in
-	  * samples */
-	uint64_t bit0;
-	/** the average length of the high part of bit 20 (a 1 bit) in
-	  * samples */
-	uint64_t bit20;
 	/** bit0 and bit20 were reset to their initial values (normally because
 	  * of reception errors or fluctuations in CPU usage) */
 	bool bitlen_reset;
 	/** realfreq was reset to {@link hardware.freq} (normally because of
 	  * reception errors or fluctuations in CPU usage) */
 	bool freq_reset;
+	/** time in samples when the signal went low again, -1 initially */
+	int tlow;
+	/** time in samples when the signal was last measured as 0,
+	  * -1 initially */
+	int tlast0;
+	/** length of this bit in samples */
+	unsigned t;
 	/** the raw received radio signal, {@link hardware.freq} / 2 items,
 	  * with each item holding 8 bits */
-	uint8_t *signal;
+	unsigned char *signal;
+	/** the average length of a bit in samples */
+	unsigned long long realfreq;
+	/** the average length of the high part of bit 0 (a 0 bit) in
+	  * samples */
+	unsigned long long bit0;
+	/** the average length of the high part of bit 20 (a 1 bit) in
+	  * samples */
+	unsigned long long bit20;
 };
 
 /**
@@ -151,7 +150,7 @@ int set_mode_live(void);
  *
  * @return The hardware parameters.
  */
-const struct hardware * const get_hardware_parameters(void);
+struct hardware get_hardware_parameters(void);
 
 /**
  * Clean up when: close the device or input logfile, and output log file if
@@ -162,17 +161,17 @@ void cleanup(void);
 /**
  * Retrieve one pulse from the hardware.
  *
- * @return: 0 or 1 depending on the pin value and {@link hardware.active_high},
+ * @return 0 or 1 depending on the pin value and {@link hardware.active_high},
  *   or 2 if obtaining the pulse failed.
  */
-uint8_t get_pulse(void);
+int get_pulse(void);
 
 /**
  * Retrieve one bit from the log file.
  *
- * @return The current bit from the log file, a mask of eGB_* values.
+ * @return The current bit from the log file and its associated state.
  */
-const struct GB_result * const get_bit_file(void);
+struct GB_result get_bit_file(void);
 
 /**
  * Retrieve one live bit from the hardware. This function determines several
@@ -180,7 +179,7 @@ const struct GB_result * const get_bit_file(void);
  *
  * @return The currently received bit and its full status.
  */
-const struct GB_result * const get_bit_live(void);
+struct GB_result get_bit_live(void);
 
 /**
  * Prepare for the next bit: update the bit position or wrap it around.
@@ -188,21 +187,21 @@ const struct GB_result * const get_bit_live(void);
  * @return The current bit state structure, with the marker field adjusted
  *   to indicate state of the bit buffer and the minute end.
  */
-const struct GB_result * const next_bit(void);
+struct GB_result next_bit(void);
 
 /**
  * Retrieve the current bit position.
  *
  * @return The current bit position (0..60).
  */
-uint8_t get_bitpos(void);
+int get_bitpos(void);
 
 /**
  * Retrieve the current bit buffer.
  *
  * @return The bit buffer, an array of 0 and 1 values.
  */
-const uint8_t * const get_buffer(void);
+const int * const get_buffer(void);
 
 /**
  * Determine if there should be a space between the last bit and the current
@@ -210,7 +209,7 @@ const uint8_t * const get_buffer(void);
  *
  * @param bitpos The current bit position.
  */
-bool is_space_bit(uint8_t bitpos);
+bool is_space_bit(int bitpos);
 
 /**
  * Open the log file and append a "new log" marker to it.
@@ -232,14 +231,14 @@ int close_logfile(void);
  *
  * @return The bit information as described for {@link bitinfo}.
  */
-const struct bitinfo * const get_bitinfo(void);
+struct bitinfo get_bitinfo(void);
 
 /**
  * Retrieve the accumulated minute length in milliseconds.
  *
  * @return The accumulated minute length in milliseconds.
  */
-uint32_t get_acc_minlen(void);
+unsigned get_acc_minlen(void);
 
 /**
  * Reset the accumulated minute length.
@@ -251,6 +250,6 @@ void reset_acc_minlen(void);
  *
  * @return The cutoff value (multiplied by 10,000)
  */
-uint16_t get_cutoff(void);
+int get_cutoff(void);
 
 #endif

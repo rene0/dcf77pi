@@ -27,31 +27,29 @@ SUCH DAMAGE.
 
 #include "input.h"
 
-const uint8_t tpBufLen = 40;
-static uint8_t tpbuf[tpBufLen];
+static unsigned tpbuf[TPBUFLEN];
 static enum eTP tptype = eTP_unknown;
 
 void
-fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos,
-    const struct GB_result * const bit)
+fill_thirdparty_buffer(int minute, int bitpos, struct GB_result bit)
 {
-	static uint8_t tpstat;
+	static unsigned tpstat;
 
 	switch (minute % 3) {
 	case 0:
 		/* copy third party data */
 		if (bitpos > 1 && bitpos < 8)
-			tpbuf[bitpos - 2] = bit->bitval == ebv_1 ? 1 : 0;
+			tpbuf[bitpos - 2] = bit.bitval == ebv_1 ? 1 : 0;
 			/* 2..7 -> 0..5 */
 		if (bitpos > 8 && bitpos < 15)
-			tpbuf[bitpos - 3] = bit->bitval == ebv_1 ? 1 : 0;
+			tpbuf[bitpos - 3] = bit.bitval == ebv_1 ? 1 : 0;
 			/* 9..14 -> 6..11 */
 
 		/* copy third party type */
 		if (bitpos == 1)
-			tpstat = bit->bitval == ebv_1 ? 2 : 0;
+			tpstat = bit.bitval == ebv_1 ? 2 : 0;
 		if (bitpos == 8) {
-			if (bit->bitval == ebv_1)
+			if (bit.bitval == ebv_1)
 				tpstat++;
 			switch (tpstat) {
 			case 0:
@@ -69,19 +67,19 @@ fill_thirdparty_buffer(uint8_t minute, uint8_t bitpos,
 	case 1:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 11] = bit->bitval == ebv_1 ? 1 : 0;
+			tpbuf[bitpos + 11] = bit.bitval == ebv_1 ? 1 : 0;
 			/* 1..14 -> 12..25 */
 		break;
 	case 2:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 25] = bit->bitval == ebv_1 ? 1 : 0;
+			tpbuf[bitpos + 25] = bit.bitval == ebv_1 ? 1 : 0;
 			/* 1..14 -> 26..39 */
 		break;
 	}
 }
 
-const uint8_t * const
+const unsigned * const
 get_thirdparty_buffer(void)
 {
 	return tpbuf;
