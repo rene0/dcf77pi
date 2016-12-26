@@ -36,12 +36,12 @@ static const char * const key[] = {
 };
 #define NUM_KEYS (sizeof(key) / sizeof(key[0]))
 
-#define MAX_KEY_LEN 20
-#define MAX_VAL_LEN 255
-static const unsigned max_len = (MAX_KEY_LEN + 3 + MAX_VAL_LEN + 2);
+#define MAX_KEYLEN 20
+#define MAX_VALLEN 255
+static const unsigned max_len = (MAX_KEYLEN + 3 + MAX_VALLEN + 2);
     /* "k = v\n\0" */
 
-static char *value[8];
+static char *value[NUM_KEYS];
 
 static int
 getpos(const char * const kw)
@@ -109,8 +109,8 @@ read_config_file(const char * const filename)
 		i = (int)strlen(k);
 		k = strip(k);
 		v = strip(v);
-		if (i > MAX_KEY_LEN + 1 || strlen(k) == 0 ||
-		    strlen(k) > MAX_KEY_LEN) {
+		if (i > MAX_KEYLEN + 1 || strlen(k) == 0 ||
+		    strlen(k) > MAX_KEYLEN) {
 			printf("read_config_file: item with bad key length\n");
 			(void)fclose(configfile);
 			free(freeptr);
@@ -122,7 +122,7 @@ read_config_file(const char * const filename)
 			    k);
 			continue;
 		}
-		if (strlen(v) > MAX_VAL_LEN) {
+		if (strlen(v) > MAX_VALLEN) {
 			printf("read_config_file: item with too long value\n");
 			(void)fclose(configfile);
 			free(freeptr);

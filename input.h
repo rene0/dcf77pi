@@ -28,8 +28,6 @@ SUCH DAMAGE.
 
 #include <stdbool.h>
 
-#define TPBUFLEN 40
-
 enum eGB_bitvalue {
 	/** this bit has value 0 */
 	ebv_0,

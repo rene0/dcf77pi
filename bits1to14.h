@@ -26,6 +26,9 @@ SUCH DAMAGE.
 #ifndef DCF77PI_BITS1TO14_H
 #define DCF77PI_BITS1TO14_H
 
+/** Length of the third-party buffer in bits */
+#define TPBUFLEN 40
+
 struct GB_result;
 
 /** Indicates the type of the third party contents. */
