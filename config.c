@@ -34,10 +34,14 @@ static const char * const key[] = {
 	"pin", "iodev", "activehigh", "freq",
 	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
 };
+/** Number of known keywords for the configuration file */
 #define NUM_KEYS (sizeof(key) / sizeof(key[0]))
 
+/** Maximum length of a configuration keyword */
 #define MAX_KEYLEN 20
+/** Maximum length of a configuration value */
 #define MAX_VALLEN 255
+
 static const unsigned max_len = (MAX_KEYLEN + 3 + MAX_VALLEN + 2);
     /* "k = v\n\0" */
 

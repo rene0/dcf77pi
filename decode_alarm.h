@@ -26,7 +26,9 @@ SUCH DAMAGE.
 #ifndef DCF77PI_DECODE_ALARM_H
 #define DCF77PI_DECODE_ALARM_H
 
-/*
+/**
+ * Structure for the (defunct) German civil warning system
+ *
  * confirmed by "Vortrag INS Bevoelkerungswarnung Hannovermesse 2008.pdf"
  * (c) 2008 DIN e.V.
  * With permission from Mr. Karl Wenzelewski of DIN

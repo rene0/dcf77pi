@@ -28,6 +28,7 @@ SUCH DAMAGE.
 
 #include <stdbool.h>
 
+/** Value of the bit received by radio or log file */
 enum eGB_bitvalue {
 	/** this bit has value 0 */
 	ebv_0,
@@ -37,6 +38,7 @@ enum eGB_bitvalue {
 	ebv_none
 };
 
+/** Indicates if end-of-minute was reached, and related errors */
 enum eGB_marker {
 	/** normal bit */
 	emark_none,
@@ -48,6 +50,7 @@ enum eGB_marker {
 	emark_late
 };
 
+/** Radio reception state */
 enum eGB_HW {
 	/** no reception error */
 	ehw_ok,
@@ -59,6 +62,7 @@ enum eGB_HW {
 	ehw_random
 };
 
+/** Bit skip state when reading from log file */
 enum eGB_skip {
 	/** do not skip */
 	eskip_none,
@@ -68,6 +72,7 @@ enum eGB_skip {
 	eskip_next
 };
 
+/** Structure containing all information of the currnet bit */
 struct GB_result {
 	/** I/O error while reading bit from hardware */
 	bool bad_io;
@@ -77,7 +82,7 @@ struct GB_result {
 	enum eGB_bitvalue bitval;
 	/** any (missing) minute marker, if applicable */
 	enum eGB_marker marker;
-	/** hardware reception status */
+	/** radio reception status */
 	enum eGB_HW hwstat;
 	/** skip state for reading log files */
 	enum eGB_skip skip;
@@ -98,7 +103,7 @@ struct hardware {
 };
 
 /**
- * (Internal) information about the currently received bit:
+ * Detailed information about the radio reception:
  */
 struct bitinfo {
 	/** bit0 and bit20 were reset to their initial values (normally because
