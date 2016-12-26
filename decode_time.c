@@ -285,7 +285,7 @@ stamp_date_time(unsigned errflags, struct tm newtime, struct tm * const time)
 			time->tm_min = newtime.tm_min;
 		if ((errflags & 2) == 0)
 			time->tm_hour = newtime.tm_hour;
-		if ((errflags & 3) == 0) {
+		if ((errflags & 4) == 0) {
 			time->tm_mday = newtime.tm_mday;
 			time->tm_mon = newtime.tm_mon;
 			time->tm_year = newtime.tm_year;
