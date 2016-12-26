@@ -369,7 +369,6 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 		    (dt_res.dst_status == eDST_ok && time.tm_isdst == -1))
 			newtime->tm_isdst = buffer[17]; /* expected change */
 		else {
-			//XXX klopt deze if?
 			if (dt_res.dst_status != eDST_error)
 				dt_res.dst_status = eDST_jump;
 				/* sudden change, ignore */
