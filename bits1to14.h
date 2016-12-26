@@ -28,9 +28,6 @@ SUCH DAMAGE.
 
 struct GB_result;
 
-/** Length of the third-party buffer in bits */
-extern const int tpBufLen;
-
 /** Indicates the type of the third party contents. */
 enum eTP {
 	/** unknown content */
