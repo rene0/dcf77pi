@@ -1,9 +1,12 @@
 Version 4.0.0 -- future release
+===============================
+
 * merge interrupt branch
 
-Version 3.6.0 -- future release
+Version 3.6.0 -- 
+----------------
 
-Version 3.5.0 -- -- current release
+Version 3.5.0 -- 2016-
 
 Version 3.4.2 --
  
@@ -20,6 +23,8 @@ Version 3.1.0 --
 Version 3.0.0.1 --
 
 Version 3.0.0 --
+================
+
 * merge lib branch
 
 Version 2.1.0 --
@@ -31,6 +36,8 @@ Version 2.0.2 --
 Version 2.0.1 --
 
 Version 2.0.0 --
+===============
+
 * merge gui branch
 
 Version 1.1.3 --
