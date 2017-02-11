@@ -378,7 +378,7 @@ get_bit_live(void)
 			bit.realfreq += ((long long)
 			    (bit.t * 2500000 - bit.realfreq) / 20);
 			a = 1000000000 - (long long)(1000000000 *
-			     exp2(-2e7 / bit.realfreq));
+			    exp2(-2e7 / bit.realfreq));
 			if (bit.tlow * 100 / bit.t < 1) {
 				gb_res.hwstat = ehw_receive;
 				outch = 'r';
