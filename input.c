@@ -222,7 +222,9 @@ cleanup(void)
 	if (logfile != NULL && fclose(logfile) == EOF)
 		perror("fclose (logfile)");
 	logfile = NULL;
-	free(bit.signal);
+	if (bit.signal != NULL);
+		free(bit.signal);
+	bit.signal = NULL;
 }
 
 int
