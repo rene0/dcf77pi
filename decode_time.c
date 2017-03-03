@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -95,6 +95,11 @@ getbcd(const int buffer[], unsigned start, unsigned stop)
 	for (unsigned i = start; i <= stop; i++) {
 		val += mul * buffer[i];
 		mul *= 2;
+                if (mul == 16) {
+                    if (val > 9)
+                        return 100;
+                    mul = 10;
+                }
 	}
 	return val;
 }
@@ -175,72 +180,66 @@ static unsigned
 calculate_date_time(unsigned init_min, unsigned errflags, int increase,
     const int buffer[], struct tm time, struct tm * const newtime)
 {
-	int tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
+	int tmp0, tmp1, tmp2, tmp3;
 	bool p1, p2, p3;
 
 	p1 = getpar(buffer, 21, 28);
-	tmp0 = getbcd(buffer, 21, 24);
-	tmp1 = getbcd(buffer, 25, 27);
+	tmp0 = getbcd(buffer, 21, 27);
 	if (!p1)
 		dt_res.minute_status = eval_parity;
-	else if (tmp0 > 9 || tmp1 > 5) {
+	else if (tmp0 > 59) {
 		dt_res.minute_status = eval_bcd;
 		p1 = false;
 	} else
 		dt_res.minute_status = eval_ok;
 	if ((init_min == 2 || increase != 0) && p1 && errflags == 0) {
-		newtime->tm_min = tmp0 + 10 * tmp1;
+		newtime->tm_min = tmp0;
 		if (init_min == 0 && time.tm_min != newtime->tm_min)
 			dt_res.minute_status = eval_jump;
 	}
 
 	p2 = getpar(buffer, 29, 35);
-	tmp0 = getbcd(buffer, 29, 32);
-	tmp1 = getbcd(buffer, 33, 34);
+	tmp0 = getbcd(buffer, 29, 34);
 	if (!p2)
 		dt_res.hour_status = eval_parity;
-	else if (tmp0 > 9 || tmp1 > 2 || tmp0 + 10 * tmp1 > 23) {
+	else if (tmp0 > 23) {
 		dt_res.hour_status = eval_bcd;
 		p2 = false;
 	} else
 		dt_res.hour_status = eval_ok;
 	if ((init_min == 2 || increase != 0) && p2 && errflags == 0) {
-		newtime->tm_hour = tmp0 + 10 * tmp1;
+		newtime->tm_hour = tmp0;
 		if (init_min == 0 && time.tm_hour != newtime->tm_hour)
 			dt_res.hour_status = eval_jump;
 	}
 
 	p3 = getpar(buffer, 36, 58);
-	tmp0 = getbcd(buffer, 36, 39);
-	tmp1 = getbcd(buffer, 40, 41);
-	tmp2 = getbcd(buffer, 42, 44);
-	tmp3 = getbcd(buffer, 45, 48);
-	tmp4 = getbcd(buffer, 50, 53);
-	tmp5 = getbcd(buffer, 54, 57);
+	tmp0 = getbcd(buffer, 36, 41);
+	tmp1 = getbcd(buffer, 42, 44);
+	tmp2 = getbcd(buffer, 45, 49);
+	tmp3 = getbcd(buffer, 50, 57);
 	if (!p3) {
 		dt_res.mday_status = eval_parity;
 		dt_res.wday_status = eval_parity;
 		dt_res.month_status = eval_parity;
 		dt_res.year_status = eval_parity;
 	} else {
-		if (tmp0 > 9 || tmp0 + 10 * tmp1 == 0 ||
-		    tmp0 + 10 * tmp1 > 31) {
+		if (tmp0 == 0 || tmp0 > 31) {
 			dt_res.mday_status = eval_bcd;
 			p3 = false;
 		} else
 			dt_res.mday_status = eval_ok;
-		if (tmp2 == 0) {
+		if (tmp1 == 0) {
 			dt_res.wday_status = eval_bcd;
 			p3 = false;
 		} else
 			dt_res.wday_status = eval_ok;
-		if (tmp3 > 9 || tmp3 + 10 * buffer[49] == 0 ||
-		    tmp3 + 10 * buffer[49] > 12) {
+		if (tmp2 == 0 || tmp2 > 12) {
 			dt_res.month_status = eval_bcd;
 			p3 = false;
 		} else
 			dt_res.month_status = eval_ok;
-		if (tmp4 > 9 || tmp5 > 9) {
+		if (tmp3 > 99) {
 			dt_res.year_status = eval_bcd;
 			p3 = false;
 		} else
@@ -249,16 +248,16 @@ calculate_date_time(unsigned init_min, unsigned errflags, int increase,
 	if ((init_min == 2 || increase != 0) && p3 && errflags == 0) {
 		int centofs;
 
-		newtime->tm_mday = tmp0 + 10 * tmp1;
+		newtime->tm_mday = tmp0;
 		if (init_min == 0 && time.tm_mday != newtime->tm_mday)
 			dt_res.mday_status = eval_jump;
-		newtime->tm_wday = tmp2;
+		newtime->tm_wday = tmp1;
 		if (init_min == 0 && time.tm_wday != newtime->tm_wday)
 			dt_res.wday_status = eval_jump;
-		newtime->tm_mon = tmp3 + 10 * buffer[49];
+		newtime->tm_mon = tmp2;
 		if (init_min == 0 && time.tm_mon != newtime->tm_mon)
 			dt_res.month_status = eval_jump;
-		newtime->tm_year = tmp4 + 10 * tmp5;
+		newtime->tm_year = tmp3;
 		centofs = century_offset(*newtime);
 		if (centofs == -1) {
 			dt_res.year_status = eval_bcd;
