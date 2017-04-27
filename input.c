@@ -159,10 +159,11 @@ set_mode_live(void)
 		return -1;
 	}
 	if (write(fd, buf, res) < 0) {
-		perror("write(export)");
-		cleanup();
-		if (errno != EBUSY)
+		if (errno != EBUSY) {
+			perror("write(export)");
+			cleanup();
 			return errno; /* EBUSY -> pin already exported ? */
+		}
 	}
 	if (close(fd) == -1) {
 		perror("close(export)");
@@ -175,7 +176,7 @@ set_mode_live(void)
 		cleanup();
 		return -1;
 	}
-	fd = open(buf, O_WRONLY);
+	fd = open(buf, O_RDWR);
 	if (fd < 0) {
 		perror("open (direction)");
 		cleanup();
@@ -243,11 +244,11 @@ get_pulse(void)
 	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
 	if (count < 0)
 #elif defined(__linux__)
-	count = read(fd, &tmpch, sizeof(tmpch));
+	count = read(fd, &tmpch, 1);
 	tmpch -= '0';
 	if (lseek(fd, 0, SEEK_SET) == (off_t)-1)
 		return 2; /* rewind to prevent EBUSY/no read failed */
-	if (count != sizeof(tmpch))
+	if (count != 1)
 #endif
 		return 2; /* hardware failure? */
 
