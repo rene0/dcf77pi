@@ -83,3 +83,6 @@ And to make the change persistent across reboots:
 ```sh
 # echo "perm gpioc* 0660" >> /etc/devfs.conf
 ```
+
+On Raspbian Linux, the default permissions allow running dcf77pi and readpin as
+a normal user (typically "pi"), no extra configuration is needed.
