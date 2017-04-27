@@ -3,7 +3,7 @@
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
-CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
+CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g -std=c99
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
 LINT_ARGS?=-aabcehrsxS -Dlint -DETCDIR=\"$(ETCDIR)\"
