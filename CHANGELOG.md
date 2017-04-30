@@ -34,9 +34,20 @@ Version 2.0.0 --
 
 * merge gui branch
 
-Version 1.1.3 --
+Version 1.1.3 -- 2014-01-26
+* fix build with GCC 4.5
+* add NetBSD as a supported platform, but without live mode
+* check leapsecmonth values in config.txt, only add them if they are legal
+* check summermonth and wintermonth values, set to 0 if invalid (this means
+  either DST set respectively reset is never valid)
+* allow the predicted time to advance by more than one minute, useful in case
+  of thunderstorms
 
-Version 1.1.2 --
+Version 1.1.2 -- 2013-12-26
+* make the year field 4 digits wide
+* bound realfreq in case of thunderstorms
+* copy new realfreq code from readpin to the main program, remove realfreq from
+  config.txt
 
 Version 1.1.1 -- 2013-12-15
 * calculate the century from the given year, month, day-of-month and
