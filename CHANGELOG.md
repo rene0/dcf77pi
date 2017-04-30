@@ -54,12 +54,12 @@ Version 1.1.1 -- 2013-12-15
   day-of-week, set an error upon failure
 * ignore time offset changes if bit 17 and 18 are equal
 * set an error if the day-of-month value is too large
-* readpin: use parameter -t instead of conditional compilatino for time tuning
+* readpin: use parameter -t instead of conditional compilation for time tuning
 * fix an edge case where DST would never be valid
 * allow setting the system time using the -S parameter, idea from "Guenter"
 * plug some file descriptor leaks
 * improve resilience against reception errors
-* readpin: determine realfreq variable dynamically
+* readpin: determine 'realfreq' variable dynamically
 
 Version 1.1.0 -- 2013-12-02
 * Linux fixes
@@ -72,14 +72,15 @@ Version 1.1.0 -- 2013-12-02
 * update variables in config.txt
 * update README.md for new algorithm and variables
 * improve verbose output for readability
-* readpin: Conditionally compile in nanosleep() time tuning
+* readpin: Conditionally compile in nanosleep() time tuning (i.e. adjusting for
+  the time it takes to obtain a pulse)
 
 Version 1.0.5 -- 2013-10-28
 * update for stage support in FreeBSD
 * compile with debug information
 * add a "lint" target to check the code for both FreeBSD and Linux
 * some "make lint" fixes
-* readpin: substract the time it takes to get a pulse from the sleep time to
+* readpin: subtract the time it takes to get a pulse from the sleep time to
   bring the number of actual samples closer to the specified frequency, show
   the per-pulse sleep difference at the end of each second
 * readpin: do not hardcode the hardware filename
@@ -87,7 +88,7 @@ Version 1.0.5 -- 2013-10-28
 * decode if the end-of-minute marker is missing
 * show the bit position and the state when the -v parameter is given
 * show when the DST or leap second flags are erroneously set (not on the last
-  Sunday or last day of a month), do not processs them in these cases
+  Sunday or last day of a month), do not process them in these cases
 * only adjust the hour for DST changes on the last Sunday of the month, 00:59Z
 * synchronize radio code with that of readpin
 * replace hardware.txt by config.txt, which uses key/value pairs instead of
@@ -102,7 +103,7 @@ Version 1.0.4 -- 2013-09-10
 * improve radio reception and end-of-minute detection, for example during
   thunderstorms
 * detect the tail of the end-of-minute marker at startup
-* do not insist on a mininum wall clock minute length when an end-of-minute
+* do not insist on a minimum wall clock minute length when an end-of-minute
   marker is received, instead add the elapsed time to the expected time
 * check received time values per digit
 * only automatically increment the time if the wall clock minute length is long
@@ -145,7 +146,7 @@ Version 1.0.2 -- 2013-06-24
 * explicitly log the end-of-minute marker
 * use automatically incremented time when decoded values are incorrect
 * improve error messages
-* allow time changes when all previously received minutes contained an error
+* allow DST changes when all previously received minutes contained an error
 * indicate receiver and transmitter errors when decoding the log file
 
 Version 1.0.1 -- 2013-06-22
