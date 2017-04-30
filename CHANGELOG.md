@@ -73,8 +73,8 @@ Version 1.0.5 -- 2013-10-28
   the per-pulse sleep difference at the end of each second
 * readpin: do not hardcode the hardware filename
 * display different symbols for missing end-of-minute marker and too many bits
-* also decode if the end-of-minute marker is missing
-* also show the bit position and the state when the -v parameter is given
+* decode if the end-of-minute marker is missing
+* show the bit position and the state when the -v parameter is given
 * show when the DST or leap second flags are erroneously set (not on the last
   Sunday or last day of a month), do not processs them in these cases
 * only adjust the hour for DST changes on the last Sunday of the month, 00:59Z
@@ -110,7 +110,8 @@ Version 1.0.3.1 -- 2013-07-22
 * move hardware.txt to an etc/dcf77pi subdirectory for package installation
 
 Version 1.0.3 -- 2013-07-21
-* introduce isleap() to avoid relying on the system clock
+* do not rely on the system clock to determine if the current year is a leap
+  year
 * keep track of the wall clock minute length and only decode the date/time
   when it is long enough to avoid the clock from wandering off if no useful
   data is received
