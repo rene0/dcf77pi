@@ -21,18 +21,67 @@ Version 3.0.0 --
 
 * merge lib branch
 
-Version 2.1.0 --
+Version 2.1.0 -- 2014-05-11
+* readpin: add a -q (quiet) parameter to suppress displaying of the raw signal
+* determine maxzero and maxone dynamically using the currently received lengths
+  of bit 0 respectively bit 20, if received OK
+* readpin: various displaying updates, including for bit 0 and 20
+* add a state to indicate that a bit has been received but that its length (in
+  samples) is not fully settled yet
+* show bit0 and bit20, the radio state and maxone in the GUI
+* remove maxzero and maxone from config.txt, they are now determined dynamically
+* update README.md
+* always refresh the bit data in GUI mode not only on a new second to be able
+  to show it in case of reception errors
+* fix displaying of German civil warning in file mode
+* do not set the DST jump flag if bit 17 and 18 are equal
 
-Version 2.0.3 --
+Version 2.0.3 -- 2014-04-13
+* relax DST processing in case of reception errors
+* always reset DST change and leap second announcement flags at hh:00 to prevent
+  them from being set forever in case of reception errors
+* detect unexpected jumps to non-DST next to unexpected jumps to DST
+* mention the backspace key in README.md
 
-Version 2.0.2 --
+Version 2.0.2 -- 2014-03-31
+* code restructuring, move GUI functionality to new file guifuncs.[ch] and
+  code to set the system clock to setclock.[ch]
+* add March and September as valid months for leap seconds, per ITU-R TF.460-6
+* replace the -l parameter by a new variable 'outlogfile' in config.txt
+* forbid values without keys in config.txt
+* reset the frequency reset light once the frequency is OK again
+* fix displaying of the German civil warning in GUI mode
+* fix a bug which would leave the pulse counter at -1
+* introduce the 'L' key to change the name of the log file (including backspace
+  and scrolling functionality), use '.' to keep the current log file
+* plug some memory leaks
+* fix a buffer overflow bug when reading the key values of config.txt
+* update README.md for new GUI functionality and 'outlogfile' variable
+* be more flexible with end-of-line markers in the input log file
+* show bit read errors in the GUI
+* ensure that the hour value is considered valid on the DST transition itself,
+  bug introduced in version 1.1.1
 
-Version 2.0.1 --
+Version 2.0.1 -- 2014-02-21
+* Makefile: add various targets, use standard DESTDIR instead of inventing our
+  own
+* only display the third-party buffer each three minutes if it is fully received
+* plug ncurses memory leak
 
-Version 2.0.0 --
-===============
-
-* merge gui branch
+Version 2.0.0 -- 2014-02-16 - merge gui branch
+==============================================
+* ncurses is used for the GUI (so technically it is a text-user interface)
+* GUI shows both the previous and currently received minute, with full decoding
+* available keys are shown at the bottom of the screen, messages on the line
+  above it
+* parameter -v removed, implicit in the GUI
+* parameter -S removed, replaced by a toggleable 'S' key in the GUI
+* exit live mode with 'Q'
+* add GUI version of all error conditions, bit errors are shown as a yellow
+  version of the previous value instead of as an underscore
+* show wall clock minute length
+* show German civil warnings
+* show the contents of the third party buffer in GUI mode
 
 Version 1.1.3 -- 2014-01-26
 * fix build with GCC 4.5
