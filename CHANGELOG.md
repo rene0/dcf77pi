@@ -38,9 +38,30 @@ Version 1.1.3 --
 
 Version 1.1.2 --
 
-Version 1.1.1 --
+Version 1.1.1 -- 2013-12-15
+* calculate the century from the given year, month, day-of-month and
+  day-of-week, set an error upon failure
+* ignore time offset changes if bit 17 and 18 are equal
+* set an error if the day-of-month value is too large
+* readpin: use parameter -t instead of conditional compilatino for time tuning
+* fix an edge case where DST would never be valid
+* allow setting the system time using the -S parameter, idea from "Guenter"
+* plug some file descriptor leaks
+* improve resilience against reception errors
+* readpin: determine realfreq variable dynamically
 
-Version 1.1.0 --
+Version 1.1.0 -- 2013-12-02
+* Linux fixes
+* weaken conditions for processing leap seconds and DST changes (setting those
+  is not affected)
+* increase resilience against noise to prevent false '1' bits
+* some fixes from splint
+* replace bit detection algorithm by an idea from Udo Klein, with permission.
+  The new algorithm improves detection reduces bit detection errors by 99%
+* update variables in config.txt
+* update README.md for new algorithm and variables
+* improve verbose output for readability
+* readpin: Conditionally compile in nanosleep() time tuning
 
 Version 1.0.5 -- 2013-10-28
 * update for stage support in FreeBSD
