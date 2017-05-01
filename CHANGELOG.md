@@ -22,14 +22,14 @@ Version 3.0.0 -- 2014-06-01 - merge lib branch
 
 * split off the log analysis code (the -f parameter) into dcf77pi-analyze.c
 * move core functionality into libdcf77.so :
- * receiving bits
- * reading and writing log files
- * decoding time
- * decoding German civil warning
- * setting the system clock
- * reading the configuration file
- * main loop functionality common to dcf77pi.c and dcf77pi-analyze.c, using
-   callbacks to differentiate in functionality
+  * receiving bits
+  * reading and writing log files
+  * decoding time
+  * decoding German civil warning
+  * setting the system clock
+  * reading the configuration file
+  * main loop functionality common to dcf77pi.c and dcf77pi-analyze.c, using
+    callbacks to differentiate in functionality
 * add Doxygen descriptions to functions, structures and other definitions of
   libdcf77
 * move presentation functionality into dcf77pi.c or dcf77pi-analyze.c
