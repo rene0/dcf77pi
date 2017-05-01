@@ -1,25 +1,43 @@
 Version 3.6.0 --
 
-Version 3.5.0 -- 2016-
+Version 3.5.0 -- 2016-05-01
 
-Version 3.4.2 --
+Version 3.4.2 -- 2016-01-03
 
-Version 3.4.1 --
+Version 3.4.1 -- 2015-12-26
 
-Version 3.4.0 --
+Version 3.4.0 -- 2015-11-08
 
-Version 3.3.0 --
+Version 3.3.0 -- 2014-12-24
 
-Version 3.2.0 --
+Version 3.2.0 -- 2014-09-16
 
-Version 3.1.0 --
+Version 3.1.0 -- 2014-07-14
 
-Version 3.0.0.1 --
+Version 3.0.0.1 -- 2014-06-01
+* Fix parallel build and installation of libdcf77
 
-Version 3.0.0 --
-================
+Version 3.0.0 -- 2014-06-01 - merge lib branch
+==============================================
 
-* merge lib branch
+* split off the log analysis code (the -f parameter) into dcf77pi-analyze.c
+* move core functionality into libdcf77.so :
+ * receiving bits
+ * reading and writing log files
+ * decoding time
+ * decoding German civil warning
+ * setting the system clock
+ * reading the configuration file
+ * main loop functionality common to dcf77pi.c and dcf77pi-analyze.c, using
+   callbacks to differentiate in functionality
+* add Doxygen descriptions to functions, structures and other definitions of
+  libdcf77
+* move presentation functionality into dcf77pi.c or dcf77pi-analyze.c
+* only dcf77pi.c uses ncurses, guifuncs.c is fully merged into it
+* numerous interface cleanups
+* install library and header files
+* lint fixes
+* update README.md
 
 Version 2.1.0 -- 2014-05-11
 * readpin: add a -q (quiet) parameter to suppress displaying of the raw signal
