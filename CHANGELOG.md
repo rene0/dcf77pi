@@ -13,6 +13,23 @@ Version 3.3.0 -- 2014-12-24
 Version 3.2.0 -- 2014-09-16
 
 Version 3.1.0 -- 2014-07-14
+* change sleep time between getting pulses, realfreq now 6.5% more accurate
+* do not adjust length of bit0 or bit20 in case of reception errors or
+  end-of-minute
+* improve robustness against thunderstorms
+* ensure to clear DST/leap second announcement flags in case of a false
+  positive (should not happen)
+* introduce bit.tlast0, recording the last timestamp in a second where the
+  average signal is 0, useful to measure signal quality or the algorithmic
+  delay (~ 50 ms)
+* introduce bit.signal, recording the raw radio signal of that bit
+* readpin: drop tunetime, it was not part of the library and only gained ~1%
+  on realfreq
+* readpin: use getbit\_live() and next\_bit() from libdcf77 instead of
+  duplicating code
+* test for MacOS and Cygwin (non-live only)
+* fix compatibility with GNU make
+* update README.md
 
 Version 3.0.0.1 -- 2014-06-01
 * Fix parallel build and installation of libdcf77
