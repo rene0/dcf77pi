@@ -11,6 +11,23 @@ Version 3.4.0 -- 2015-11-08
 Version 3.3.0 -- 2014-12-24
 
 Version 3.2.0 -- 2014-09-16
+* extract generic part of decode\_alarm.[ch] into bits1to14.[ch]
+* reset lengths of bit0 and bit20 if the latter gets lower than the former
+* add schematics of my reveiver as a FidoCadJ file
+* eliminate some warnings on Cygwin GCC
+* remove redundant fields "a", "frac" and "maxone" from struct bitinfo
+* convert all floating point operations to integer operations
+* restrict ranges of some fields of struct hw
+* convert bit.signal[] into a packed array, reducing its size 7.5 times
+* add function setclock\_ok() to setclock.[ch]
+* add functions dcftime() and isotime() to decode\_time.[ch]
+* make acc\_minlen a first class citizen in decode\_time.[ch] and increase it
+  by the actually measured bit length in ms when decoding live
+* other small API fixes
+* readpin: prevent time from temporarily going backwards
+* readpin: clean up after ourselves when pressing Ctrl-C
+* lint fixes
+* updates to README.md and API documentation
 
 Version 3.1.0 -- 2014-07-14
 * change sleep time between getting pulses, realfreq now 6.5% more accurate
