@@ -9,6 +9,27 @@ Version 3.4.1 -- 2015-12-26
 Version 3.4.0 -- 2015-11-08
 
 Version 3.3.0 -- 2014-12-24
+* fixes to the schematics file
+* fix Linux build
+* optimize API documentation for Doxygen
+* re-introduce tunetime as part of get\_bit\_live()
+* refresh acc\_minlen in dcf77pi each second instead of each minute
+* rename process\_new\_minute() to process\_new\_second()
+* add cutoff value bit.t / bit.realfreq to each line of the log file, adapt
+  get\_bit\_file(), add function get\_cutoff() and add two new GETBIT flags
+* move acc\_minlen API form decode\_time.[ch] to input.[ch]
+* mostly synchronize the acc\_minlen behavior between live and file mode
+* show the cutoff value in dcf77pi and dcf77pi\_analyze
+* add the acculated minute length to each line of the log file, this can be
+  read back with dcf77pi\_analyze
+* skip consecutive end-of-minute markers in the log file instead of considering
+  them as a valid bit
+* also add the contents of the first full minute to the third-party buffer
+* more fine-grained time/date corrections
+* decode the alarm somewhat more and mention the main regions, with permission
+  from Mr. Karl Wenzelewski from DIN
+* other API improvements
+* bugfixes
 
 Version 3.2.0 -- 2014-09-16
 * extract generic part of decode\_alarm.[ch] into bits1to14.[ch]
