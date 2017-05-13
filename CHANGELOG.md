@@ -7,6 +7,24 @@ Version 3.4.2 -- 2016-01-03
 Version 3.4.1 -- 2015-12-26
 
 Version 3.4.0 -- 2015-11-08
+* detangle the third-party buffer fom decode\_alarm()
+* set the time in mainloop() instead of a frontend via set\_time(), add function
+  get\_mainloop\_result() to report on setting the time
+* display updates to dcf77pi
+* clean up Makefile, install files with proper mode, sanitize uninstallation
+* add doxygen support to Makefile
+* fix Linux build
+* support multiple GPIO devices (FreeBSD only)
+* write all initial error messages from input.c to stderr
+* support older glibc
+* rename write\_new\_logfile() to append\_logfile() to better describe its
+  purpose
+* cppcheck fixes, fix file decriptor leak
+* replace lint with splint and support splint on Cygwin
+* splint fixes
+  * return 2 instead of GETBIT\_IO if get\_pulse() failed on IO errors
+  * make sure bit.signal[] is allocated when writing to it
+* set DST flag to "unknown" upon start, make this fatal for setclock()
 
 Version 3.3.0 -- 2014-12-24
 * fixes to the schematics file
@@ -14,22 +32,24 @@ Version 3.3.0 -- 2014-12-24
 * optimize API documentation for Doxygen
 * re-introduce tunetime as part of get\_bit\_live()
 * refresh acc\_minlen in dcf77pi each second instead of each minute
-* rename process\_new\_minute() to process\_new\_second()
-* add cutoff value bit.t / bit.realfreq to each line of the log file, adapt
-  get\_bit\_file(), add function get\_cutoff() and add two new GETBIT flags
+* fix bug where acc\_minlen would be truncated by decode\_time()
 * move acc\_minlen API form decode\_time.[ch] to input.[ch]
 * mostly synchronize the acc\_minlen behavior between live and file mode
+* add acc\_minlen to each line of the log file, this can be read back with
+  dcf77pi\_analyze
+* add cutoff value bit.t / bit.realfreq to each line of the log file, adapt
+  get\_bit\_file(), add function get\_cutoff() and add two new GETBIT flags
 * show the cutoff value in dcf77pi and dcf77pi\_analyze
-* add the acculated minute length to each line of the log file, this can be
-  read back with dcf77pi\_analyze
+* rename process\_new\_minute() to process\_new\_second()
 * skip consecutive end-of-minute markers in the log file instead of considering
   them as a valid bit
 * also add the contents of the first full minute to the third-party buffer
 * more fine-grained time/date corrections
 * decode the alarm somewhat more and mention the main regions, with permission
   from Mr. Karl Wenzelewski from DIN
+* add substract\_minute() to decode\_time.[ch]
 * other API improvements
-* bugfixes
+* fix the "Q" button in dcf77pi
 
 Version 3.2.0 -- 2014-09-16
 * extract generic part of decode\_alarm.[ch] into bits1to14.[ch]
