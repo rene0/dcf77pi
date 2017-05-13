@@ -3,8 +3,15 @@ Version 3.6.0 --
 Version 3.5.0 -- 2016-05-01
 
 Version 3.4.2 -- 2016-01-03
+* fix bug where century calculation would sometimes be wrong, affects version
+  3.4.0 and 3.4.1
 
 Version 3.4.1 -- 2015-12-26
+* check if the DST flag is set within the expected date range, set DT\_DSTJUMP
+  otherwise
+* increase resilience against bit errors when checking for DST changes
+* allow changing the DST flag when a parity flag is wrong
+* do not set the DST state if DT\_DSTJUMP is set or if there is a generic error
 
 Version 3.4.0 -- 2015-11-08
 * detangle the third-party buffer fom decode\_alarm()
@@ -49,7 +56,8 @@ Version 3.3.0 -- 2014-12-24
   from Mr. Karl Wenzelewski from DIN
 * add substract\_minute() to decode\_time.[ch]
 * other API improvements
-* fix the "Q" button in dcf77pi
+* fix bug where acc\_minlen is sometimes 1000 ms short when reading from a log
+  file reaches the end
 
 Version 3.2.0 -- 2014-09-16
 * extract generic part of decode\_alarm.[ch] into bits1to14.[ch]
