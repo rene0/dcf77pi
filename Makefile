@@ -92,6 +92,11 @@ install-doxygen: html
 	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 	cp -R html $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
+install-md:
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
+	$(INSTALL) -m 0644 *.md \
+		$(DESTDIR)$(PREFIX)/share/doc/dcf77pi
+
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/lib/libdcf77.so
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi
@@ -101,7 +106,10 @@ uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
 
 uninstall-doxygen:
-	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
+	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/html
+
+uninstall-md:
+	rm $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/*.md
 
 lint:
 	lint -D__CYGWIN__ $(LINT_ARGS) $(srclib) $(srcbin) || true
@@ -109,7 +117,7 @@ lint:
 	lint -D__FreeBSD__ -D__FreeBSD_version=900022 \
 		$(LINT_ARGS) $(srclib) $(srcbin) || true
 
-#XXX no development since 2007-07-12, broken with clang 3.9
+#XXX no development since 2007-07-12, broken with clang 3.9 and higher
 splint:
 	splint -D__CYGWIN__ $(SPLINT_ARGS) $(srclib) $(srcbin) || true
 	splint -D__linux__ $(SPLINT_ARGS) $(srclib) $(srcbin) || true
