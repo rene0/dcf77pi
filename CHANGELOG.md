@@ -1,11 +1,67 @@
-Version 3.6.0 --
+Version 3.6.0 -- 2017-05-14
+* readpin: implement raw mode (parameter -r) to show the output of get\_pulse()
+* README.md: add -r parameter of readpin
+* add LICENSE.md [closes issue #5]
+* add this change log [closes issue #14]
+* default to "unknown third-party type" if the two third-party bits are unequal
+* change century\_offset() to start add 1900 instead of 2000 so that
+  transmissions from 1973 and onward can also be decoded
+* do not clear tm\_sec in get\_isotime()
+* show BCD errors in dcf77pi as blue parity bits
+* allow running readpin and dcf77pi as regular user, add instructions [closes
+  issue #9]
+* do not bail out if writing to /sys/class/gpio/export on Linux fails
+* split off the following calendar-related API from decode\_time.[ch] into
+  calendar.[ch] [closes issue #13]
+  * add\_minute()
+  * century\_offset()
+  * dayinleapyear[] (now public)
+  * get\_dcftime()
+  * get\_isotime()
+  * get\_utchour()
+  * get\_weekday (removed)
+  * isleapyear() (now public)
+  * lastday()
+  * substract\_minute()
+  * weekday[] (now public)
+* split decode\_time() into smaller functions [closes issue #13]
+* API overhaul to improve clarity by splitting up the bit masks into structures
+  consisting of several finer-grained enumerations:
+  * int, DT\_\* -> struct DT\_result, enum eDT\_\*
+  * TPTYPE -> enum eTP
+  * int, GETBIT\_\* -> struct GB\_result, enum eGB\_\*
+  * BASEYEAR -> constant integer base\_year
+  * BUFLEN -> private constant integer
+* pass non-changing structs by value instead of double const reference
+* pass array parameters as arrays, not as constant pointers
+* consolidate variables modified by mainloop() into struct ML\_result
+* add a value to struct DT\_result to indicate BCD errors
+* only handle bit 15 when the sanity checks pass
+* add Doxygen comments to all structures, enumeration and macros
+* use mostly native int for variable types:
+  * bool, char, short, int, and long long are all equal sized on armv6, amd64
+    and i386
+  * saves 1%-2% in binary sizes
+  * requires less casts
+  * no warnings from include-what-you-use 0.7 related to stdint.h
+* unroll most macros
+* use -1 instead of 0xFF for a bad minute length, adjust all related functions
+* fix double free when opening the GPIO device on Linux fails
+* add testcentury to 'make splint' and 'make all'
+* resurrect 'make lint', splint fails on contemporary clang versions [issue #6]
+* add 'make cppcheck' and 'make iwyu', other fixes [issue #6]
+* fix build with GCC 4.9.2
+* cppcheck, lint and iwyu (include-what-you-use) fixes
+* add 'make test' which calls 'make testcentury' [issue #3]
+* add 'make (un)install-md' to (un)install the .md files
 
 Version 3.5.0 -- 2016-05-01
 * rename isotime() to get\_isotime() and dcftime() to get\_dcftime() to not
   confuse Doxygen
 * make lastday() and century\_offset() public for testcentury.c
 * add a program testcentury to check the century calculations
-* allow GPIO pin numbers > 255 (16 bits instead of 8) [issue #1] [pull #2]
+* allow GPIO pin numbers > 255 (16 bits instead of 8) [closes issue #1, closes
+  pull #2]
 * improve README.md after a private e-mail discussion
 * Makefile fixes
 
@@ -21,19 +77,19 @@ Version 3.4.1 -- 2015-12-26
 * do not set the DST state if DT\_DSTJUMP is set or if there is a generic error
 
 Version 3.4.0 -- 2015-11-08
-* detangle the third-party buffer fom decode\_alarm()
+* detangle the third-party buffer from decode\_alarm()
 * set the time in mainloop() instead of a frontend via set\_time(), add function
   get\_mainloop\_result() to report on setting the time
 * display updates to dcf77pi
 * clean up Makefile, install files with proper mode, sanitize uninstallation
-* add doxygen support to Makefile
+* add Doxygen support to Makefile
 * fix Linux build
 * support multiple GPIO devices (FreeBSD only)
 * write all initial error messages from input.c to stderr
 * support older glibc
 * rename write\_new\_logfile() to append\_logfile() to better describe its
   purpose
-* cppcheck fixes, fix file decriptor leak
+* cppcheck fixes, fix file descriptor leak
 * replace lint with splint and support splint on Cygwin
 * splint fixes
   * return 2 instead of GETBIT\_IO if get\_pulse() failed on IO errors
@@ -69,7 +125,7 @@ Version 3.3.0 -- 2014-12-24
 Version 3.2.0 -- 2014-09-16
 * extract generic part of decode\_alarm.[ch] into bits1to14.[ch]
 * reset lengths of bit0 and bit20 if the latter gets lower than the former
-* add schematics of my reveiver as a FidoCadJ file
+* add schematics of my receiver as a FidoCadJ file
 * eliminate some warnings on Cygwin GCC
 * remove redundant fields "a", "frac" and "maxone" from struct bitinfo
 * convert all floating point operations to integer operations
