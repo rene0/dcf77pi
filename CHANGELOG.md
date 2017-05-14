@@ -1,6 +1,13 @@
 Version 3.6.0 --
 
 Version 3.5.0 -- 2016-05-01
+* rename isotime() to get\_isotime() and dcftime() to get\_dcftime() to not
+  confuse Doxygen
+* make lastday() and century\_offset() public for testcentury.c
+* add a program testcentury to check the century calculations
+* allow GPIO pin numbers > 255 (16 bits instead of 8) [issue #1] [pull #2]
+* improve README.md after a private e-mail discussion
+* Makefile fixes
 
 Version 3.4.2 -- 2016-01-03
 * fix bug where century calculation would sometimes be wrong, affects version
@@ -101,8 +108,6 @@ Version 3.0.0.1 -- 2014-06-01
 * Fix parallel build and installation of libdcf77
 
 Version 3.0.0 -- 2014-06-01 - merge lib branch
-==============================================
-
 * split off the log analysis code (the -f parameter) into dcf77pi-analyze.c
 * move core functionality into libdcf77.so :
   * receiving bits
@@ -121,6 +126,8 @@ Version 3.0.0 -- 2014-06-01 - merge lib branch
 * install library and header files
 * lint fixes
 * update README.md
+
+---
 
 Version 2.1.0 -- 2014-05-11
 * readpin: add a -q (quiet) parameter to suppress displaying of the raw signal
@@ -170,7 +177,6 @@ Version 2.0.1 -- 2014-02-21
 * plug ncurses memory leak
 
 Version 2.0.0 -- 2014-02-16 - merge gui branch
-==============================================
 * ncurses is used for the GUI (so technically it is a text-user interface)
 * GUI shows both the previous and currently received minute, with full decoding
 * available keys are shown at the bottom of the screen, messages on the line
@@ -183,6 +189,8 @@ Version 2.0.0 -- 2014-02-16 - merge gui branch
 * show wall clock minute length
 * show German civil warnings
 * show the contents of the third party buffer in GUI mode
+
+---
 
 Version 1.1.3 -- 2014-01-26
 * fix build with GCC 4.5
