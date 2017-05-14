@@ -1,9 +1,9 @@
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
-	uninstall-doxygen lint splint cppcheck iwyu
+	uninstall-doxygen lint splint cppcheck iwyu test
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
-CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g
+CFLAGS+=-Wall -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g -std=gnu99
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
 LINT_ARGS?=-aabcehrsxS -Dlint -DETCDIR=\"$(ETCDIR)\"
@@ -11,7 +11,8 @@ SPLINT_ARGS?=+posixlib -DETCDIR=\"$(ETCDIR)\"
 CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 	-DETCDIR=\"$(ETCDIR)\"
 
-all: libdcf77.so dcf77pi dcf77pi-analyze readpin testcentury
+all: libdcf77.so dcf77pi dcf77pi-analyze readpin
+test: testcentury
 
 hdrlib=input.h decode_time.h decode_alarm.h config.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
@@ -91,6 +92,11 @@ install-doxygen: html
 	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 	cp -R html $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
+install-md:
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
+	$(INSTALL) -m 0644 *.md \
+		$(DESTDIR)$(PREFIX)/share/doc/dcf77pi
+
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/lib/libdcf77.so
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi
@@ -100,7 +106,10 @@ uninstall:
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
 
 uninstall-doxygen:
-	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
+	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/html
+
+uninstall-md:
+	rm $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/*.md
 
 lint:
 	lint -D__CYGWIN__ $(LINT_ARGS) $(srclib) $(srcbin) || true
@@ -108,7 +117,7 @@ lint:
 	lint -D__FreeBSD__ -D__FreeBSD_version=900022 \
 		$(LINT_ARGS) $(srclib) $(srcbin) || true
 
-#XXX no development since 2007-07-12, broken with clang 3.9
+#XXX no development since 2007-07-12, broken with clang 3.9 and higher
 splint:
 	splint -D__CYGWIN__ $(SPLINT_ARGS) $(srclib) $(srcbin) || true
 	splint -D__linux__ $(SPLINT_ARGS) $(srclib) $(srcbin) || true

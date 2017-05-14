@@ -32,6 +32,7 @@ struct GB_result;
 struct alm;
 struct tm;
 
+/** User input which controls the client */
 struct ML_result {
 	bool change_logfile;
 	bool quit;

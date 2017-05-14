@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -111,9 +111,9 @@ obtain_pulse(/*@unused@*/ int sig)
 	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
 	if (count < 0)
 #elif defined(__linux__)
-	count = read(fd, &tmpch, sizeof(tmpch));
+	count = read(fd, &tmpch, 1);
 	tmpch -= '0';
-	if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || count != sizeof(tmpch))
+	if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || count != 1)
 #endif
 		pulse = 2; /* hardware or virtual FS failure? */
 	else if (hw.active_high)
@@ -192,10 +192,11 @@ set_mode_live(void)
 		return -1;
 	}
 	if (write(fd, buf, res) < 0) {
-		perror("write(export)");
-		cleanup();
-		if (errno != EBUSY)
+		if (errno != EBUSY) {
+			perror("write(export)");
+			cleanup();
 			return errno; /* EBUSY -> pin already exported ? */
+		}
 	}
 	if (close(fd) == -1) {
 		perror("close(export)");
@@ -208,7 +209,7 @@ set_mode_live(void)
 		cleanup();
 		return -1;
 	}
-	fd = open(buf, O_WRONLY);
+	fd = open(buf, O_RDWR);
 	if (fd < 0) {
 		perror("open (direction)");
 		cleanup();
@@ -266,7 +267,9 @@ cleanup(void)
 	if (logfile != NULL && fclose(logfile) == EOF)
 		perror("fclose (logfile)");
 	logfile = NULL;
-	free(bit.signal);
+	if (bit.signal != NULL)
+		free(bit.signal);
+	bit.signal = NULL;
 }
 
 int
@@ -386,7 +389,7 @@ get_bit_live(void)
 			bit.realfreq += ((long long)
 			    (bit.t * 2500000 - bit.realfreq) / 20);
 			a = 1000000000 - (long long)(1000000000 *
-			     exp2(-2e7 / bit.realfreq));
+			    exp2(-2e7 / bit.realfreq));
 			if (bit.tlow * 100 / bit.t < 1) {
 				gb_res.hwstat = ehw_receive;
 				outch = 'r';

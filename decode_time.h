@@ -29,6 +29,7 @@ SUCH DAMAGE.
 #include <stdbool.h>
 struct tm;
 
+/** Minute length state */
 enum eDT_length {
 	/** minute length ok */
 	emin_ok,
@@ -38,6 +39,7 @@ enum eDT_length {
 	emin_long
 };
 
+/** State of the decoded data/time values */
 enum eDT_tval {
 	/** value ok */
 	eval_ok,
@@ -49,6 +51,7 @@ enum eDT_tval {
 	eval_jump
 };
 
+/** State of the various announcements */
 enum eDT_announce {
 	/** no announcement */
 	eann_none,
@@ -58,6 +61,7 @@ enum eDT_announce {
 	eann_ok
 };
 
+/** Daylight saving time state */
 enum eDT_DST {
 	/** daylight saving time ok */
 	eDST_ok,
@@ -69,6 +73,7 @@ enum eDT_DST {
 	eDST_done
 };
 
+/** Leap second state */
 enum eDT_leapsecond {
 	/** no leap second */
 	els_none,
@@ -81,6 +86,7 @@ enum eDT_leapsecond {
 	els_done
 };
 
+/** Structure containing the state of all decoded information of this minute */
 struct DT_result {
 	/**
 	 * bit 0 must always be 0 :

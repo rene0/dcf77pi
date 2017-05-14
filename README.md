@@ -16,8 +16,7 @@ The software comes with three binaries and a library:
 * dcf77pi : Live decoding from the GPIO pins in interactive mode. Useable keys
   are shown at the bottom of the screen. The backspace key can be used to
   correct the last typed character of the input text (when changing the name of
-  the log file). Depending on the permissions of your GPIO device node (the
-  files in /dev), you might need to run this program as root or with sudo.
+  the log file).
 * dcf77pi-analyze filename : Decode from filename instead of the GPIO pins.
   Output is generated in report mode.
 * readpin [-qr] : Program to test reading from the GPIO pins and decode the
@@ -73,3 +72,17 @@ the configuration file into /usr/etc/dcf77pi :
 % make PREFIX=/usr
 % sudo make install PREFIX=/usr
 ```
+
+On FreeBSD, dcf77pi and readpin need to be run as root due to the permissions
+of /dev/gpioc\* , but this can be prevented by changing the permissions of the
+device node:
+```sh
+# chmod 0660 /dev/gpioc*
+```
+And to make the change persistent across reboots:
+```sh
+# echo "perm gpioc* 0660" >> /etc/devfs.conf
+```
+
+On Raspbian Linux, the default permissions allow running dcf77pi and readpin as
+a normal user (typically "pi"), no extra configuration is needed.
