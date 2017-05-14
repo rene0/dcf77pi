@@ -219,10 +219,10 @@ bool is_space_bit(int bitpos);
 /**
  * Open the log file and append a "new log" marker to it.
  *
- * @param logfile The name of the log file to use.
+ * @param logfilename The name of the log file to use.
  * @return The log file was opened succesfully (0), or errno on error.
  */
-int append_logfile(const char * const logfile);
+int append_logfile(const char * const logfilename);
 
 /**
  * Close the currently opened log file.
