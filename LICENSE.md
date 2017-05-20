@@ -1,6 +1,6 @@
 BSD 2-Clause License
 
-Copyright (c) 2013-2016, René Ladan
+Copyright (c) 2013-2017, René Ladan
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
