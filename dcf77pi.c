@@ -370,7 +370,7 @@ post_process_input(struct ML_result in_ml, int bitpos)
 	mlr = in_ml;
 
 	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 2) % 60 ||
-	    (old_bitpos == 57 && bitpos == 0))) {
+	    (old_bitpos > 2 && bitpos == 1))) {
 		/*
 		 * Time for status text passed, cannot use *sleep()
 		 * in statusbar() because that pauses reception
