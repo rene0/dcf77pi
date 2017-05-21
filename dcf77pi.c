@@ -472,7 +472,7 @@ show_mainloop_result(struct ML_result in_ml, int bitpos)
 		mlr.quit = true; /* error */
 		break;
 	case -2:
-		statusbar(bitpos, "settimeofday(): %s",
+		statusbar(bitpos, "clock_settime(): %s",
 		    strerror(errno));
 		mlr.quit = true; /* error */
 		break;

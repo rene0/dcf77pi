@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -102,8 +102,8 @@ read_config_file(const char * const filename)
 			free(freeptr);
 			return -1;
 		}
-		if ((k = strsep(&line, "=")) != NULL)
-			v = line;
+		if ((k = strtok(line, "=")) != NULL)
+			v = strtok(NULL, "=");
 		else {
 			printf("read_config_file: no key/value pair found\n");
 			(void)fclose(configfile);

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -30,7 +30,6 @@ SUCH DAMAGE.
 #include "input.h"
 
 #include <time.h>
-#include <sys/time.h>
 
 bool
 setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit)
@@ -53,10 +52,8 @@ setclock(struct tm time)
 {
 	time_t epochtime;
 	struct tm it;
-	struct timeval tv;
-	struct timezone tz;
-
 	tzset(); /* does not help for TZ=UTC */
+	struct timespec ts;
 
 	if (time.tm_isdst == -1)
 		return -1;
@@ -65,9 +62,7 @@ setclock(struct tm time)
 	epochtime = mktime(&it);
 	if (epochtime == -1)
 		return -1;
-	tv.tv_sec = epochtime;
-	tv.tv_usec = 50000; /* adjust for bit reception algorithm */
-	tz.tz_minuteswest = -60;
-	tz.tz_dsttime = it.tm_isdst;
-	return (settimeofday(&tv, &tz) == -1) ? -2 : 0;
+	ts.tv_sec = epochtime;
+	ts.tv_nsec = 50000000; /* adjust for bit reception algorithm */
+	return (clock_settime(CLOCK_REALTIME, &ts) == -1) ? -2 : 0;
 }

@@ -42,6 +42,7 @@ void
 init_time(void)
 {
 	char *freeptr, *lsm, *mon;
+	int i;
 
 	summermonth = (int)strtol(get_config_value("summermonth"), NULL, 10);
 	if (summermonth < 1 || summermonth > 12)
@@ -52,10 +53,11 @@ init_time(void)
 
 	freeptr = lsm = strdup(get_config_value("leapsecmonths"));
 	num_leapsecmonths = 0;
-	for (int i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
+	i = 0;
+	for (mon = strtok(lsm, ","); mon != NULL; mon = strtok(NULL, ",")) {
 		int m = (int)strtol(mon, NULL, 10);
 		if (m >= 1 && m <= 12) {
-			leapsecmonths[i] = m;
+			leapsecmonths[i++] = m;
 			num_leapsecmonths++;
 		}
 	}
@@ -290,10 +292,8 @@ stamp_date_time(unsigned errflags, struct tm newtime, struct tm * const time)
 			time->tm_year = newtime.tm_year;
 			time->tm_wday = newtime.tm_wday;
 		}
-		if (dt_res.dst_status != eDST_jump) {
+		if (dt_res.dst_status != eDST_jump)
 			time->tm_isdst = newtime.tm_isdst;
-			time->tm_gmtoff = newtime.tm_gmtoff;
-		}
 	}
 }
 
@@ -399,7 +399,6 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 			errflags |= (1 << 5);
 		}
 	}
-	newtime->tm_gmtoff = 3600 * (newtime->tm_isdst + 1);
 
 	/* done with DST */
 	if (dt_res.dst_announce == eann_ok && time.tm_min == 0) {

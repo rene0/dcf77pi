@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 René Ladan. All rights reserved.
+Copyright (c) 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -177,7 +177,6 @@ get_dcftime(struct tm isotime)
 	dt.tm_yday = dayinleapyear[isotime.tm_mon] + dt.tm_mday;
 	if (dt.tm_mon > 2 && !isleapyear(dt))
 		dt.tm_yday--;
-	dt.tm_zone = NULL;
 
 	return dt;
 }
@@ -195,7 +194,6 @@ get_isotime(struct tm dcftime)
 	it.tm_yday = dayinleapyear[it.tm_mon] + it.tm_mday;
 	if (dcftime.tm_mon > 2 && !isleapyear(dcftime))
 		it.tm_yday--;
-	it.tm_zone = NULL;
 
 	return it;
 }
