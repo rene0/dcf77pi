@@ -468,7 +468,7 @@ show_mainloop_result(struct ML_result in_ml, int bitpos)
 	mlr.quit = false;
 	switch (get_mainloop_result()) {
 	case -1:
-		statusbar(bitpos, "mktime() failed!");
+		statusbar(bitpos, "mktime() failed or bad DST");
 		mlr.quit = true; /* error */
 		break;
 	case -2:
@@ -477,7 +477,7 @@ show_mainloop_result(struct ML_result in_ml, int bitpos)
 		mlr.quit = true; /* error */
 		break;
 	case -3:
-		statusbar(bitpos, "Too early to set the time");
+		statusbar(bitpos, "Too early or unsafe to set the time");
 		break;
 	default:
 		statusbar(bitpos, "Time set");
