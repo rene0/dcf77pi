@@ -191,7 +191,7 @@ get_isotime(struct tm dcftime)
 	it.tm_year -= 1900;
 	if (it.tm_wday == 7)
 		it.tm_wday = 0;
-	it.tm_yday = dayinleapyear[it.tm_mon] + it.tm_mday;
+	it.tm_yday = dayinleapyear[it.tm_mon] + it.tm_mday - 1;
 	if (dcftime.tm_mon > 2 && !isleapyear(dcftime))
 		it.tm_yday--;
 
