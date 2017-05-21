@@ -52,7 +52,6 @@ setclock(struct tm time)
 {
 	time_t epochtime;
 	struct tm it;
-	tzset(); /* does not help for TZ=UTC */
 	struct timespec ts;
 
 	if (time.tm_isdst == -1)
