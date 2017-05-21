@@ -1,5 +1,5 @@
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
-	uninstall-doxygen lint splint cppcheck iwyu test
+	uninstall-doxygen lint cppcheck iwyu test
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
@@ -7,7 +7,6 @@ CFLAGS+=-Wall -D_POSIX_C_SOURCE=200809L -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g -std
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
 LINT_ARGS?=-aabcehrsxS -Dlint -DETCDIR=\"$(ETCDIR)\"
-SPLINT_ARGS?=+posixlib -DETCDIR=\"$(ETCDIR)\"
 CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 	-DETCDIR=\"$(ETCDIR)\"
 
@@ -116,13 +115,6 @@ lint:
 	lint -D__linux__ $(LINT_ARGS) $(srclib) $(srcbin) || true
 	lint -D__FreeBSD__ -D__FreeBSD_version=900022 \
 		$(LINT_ARGS) $(srclib) $(srcbin) || true
-
-#XXX no development since 2007-07-12, broken with clang 3.9 and higher
-splint:
-	splint -D__CYGWIN__ $(SPLINT_ARGS) $(srclib) $(srcbin) || true
-	splint -D__linux__ $(SPLINT_ARGS) $(srclib) $(srcbin) || true
-	splint -D__FreeBSD__ -D__FreeBSD_version=900022 \
-		$(SPLINT_ARGS) $(srclib) $(srcbin) || true
 
 cppcheck:
 	cppcheck -D__CYGWIN__ $(CPPCHECK_ARGS) . || true
