@@ -89,7 +89,7 @@ main(int argc, char *argv[])
 
 		if (raw) {
 			struct timespec slp;
-			slp.tv_sec = 1.0 / hw.freq;
+			slp.tv_sec = 0;
 			slp.tv_nsec = 1e9 / hw.freq;
 			printf("%i", get_pulse());
 			fflush(stdout);
