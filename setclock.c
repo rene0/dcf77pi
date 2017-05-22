@@ -54,9 +54,9 @@ setclock(struct tm time)
 	struct tm it;
 	struct timespec ts;
 
-	if (time.tm_isdst == -1)
-		return -1;
-	it = get_isotime(time);
+	time.tm_isdst = -1; /* allow mktime() when host timezone is UTC */
+	if (time.tm_year >= base_year)
+		it = get_isotime(time);
 	it.tm_sec = 0;
 	epochtime = mktime(&it);
 	if (epochtime == -1)

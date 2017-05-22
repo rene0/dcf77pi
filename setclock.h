@@ -45,7 +45,7 @@ bool setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit);
  * Set the system clock according to the given time. Note that this does *not*
  * work with no timezone or UTC.
  *
- * @param time The time to set the system clock to.
+ * @param time The time to set the system clock to, in ISO or DCF77 format.
  * @return The clock was set successfully (0), or the time was invalid (-1), or
  *   setting the clock somehow failed (-2).
  */
