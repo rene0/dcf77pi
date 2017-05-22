@@ -1,3 +1,10 @@
+Version 3.6.1 --
+* fix get\_isotime(): ISO days of year are 0-based, not 1-based
+* Makefile: drop splint target, does not work with Clang 4.0.0/FreeBSD 12
+  nor with GCC 5.4.0/Ubuntu 16.04 [issue #6]
+* dcf77pi: improvements to statusbar timing and messages
+* make code compliant with ISO C99/POSIX.1-2008 [closes issue #17]
+
 Version 3.6.0 -- 2017-05-14
 * readpin: implement raw mode (parameter -r) to show the output of get\_pulse()
 * README.md: add -r parameter of readpin
