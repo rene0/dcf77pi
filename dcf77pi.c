@@ -468,7 +468,7 @@ show_mainloop_result(struct ML_result in_ml, int bitpos)
 	mlr.quit = false;
 	switch (get_mainloop_result()) {
 	case -1:
-		statusbar(bitpos, "mktime() failed or bad DST");
+		statusbar(bitpos, "mktime() failed");
 		mlr.quit = true; /* error */
 		break;
 	case -2:
