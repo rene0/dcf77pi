@@ -86,3 +86,6 @@ And to make the change persistent across reboots:
 
 On Raspbian Linux, the default permissions allow running dcf77pi and readpin as
 a normal user (typically "pi"), no extra configuration is needed.
+
+Setting the system time via dcf77pi still requires enhanced privileges (e.g.,
+root).
