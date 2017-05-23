@@ -29,6 +29,8 @@ SUCH DAMAGE.
 #include "decode_time.h"
 #include "input.h"
 
+#include <locale.h>
+#include <string.h>
 #include <time.h>
 
 bool
@@ -48,20 +50,34 @@ setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit)
 }
 
 int
-setclock(struct tm time)
+setclock(struct tm settime)
 {
-	time_t epochtime;
+	time_t epochtime, t1, t2;
 	struct tm it;
 	struct timespec ts;
 
-	time.tm_isdst = -1; /* allow mktime() when host timezone is UTC */
-	if (time.tm_year >= base_year)
-		it = get_isotime(time);
+	/* determine time difference of host to UTC (t1 - t2) */
+	(void)time(&t1);
+	(void)gmtime_r(&t1, &it);
+	it.tm_isdst = -1;
+	setlocale(LC_TIME, "");
+	t2 = mktime(&it);
+	if (t2 == -1)
+		return -1;
+
+	if (settime.tm_year >= base_year)
+		it = get_isotime(settime);
+	else
+		memcpy((void *)&it, (const void *)&settime, sizeof(settime));
+	it.tm_isdst = -1; /* allow mktime() when host timezone is UTC */
 	it.tm_sec = 0;
 	epochtime = mktime(&it);
 	if (epochtime == -1)
 		return -1;
 	ts.tv_sec = epochtime;
+	/* UTC if t1 == t2, so adjust from local time in that case */
+	if (t1 == t2)
+		ts.tv_sec -= 3600 * (1 + settime.tm_isdst);
 	ts.tv_nsec = 50000000; /* adjust for bit reception algorithm */
 	return (clock_settime(CLOCK_REALTIME, &ts) == -1) ? -2 : 0;
 }
