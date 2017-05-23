@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -45,8 +45,8 @@ bool setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit);
  * Set the system clock according to the given time.
  *
  * @param settime The time to set the system clock to, in ISO or DCF77 format.
- * @return The clock was set successfully (0), or the time was invalid (-1), or
- *   setting the clock somehow failed (-2).
+ * @return The clock was set successfully (0), or the time was invalid (-1),
+ *   or setting the clock somehow failed (-2).
  */
 int setclock(struct tm settime);
 
