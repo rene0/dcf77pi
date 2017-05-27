@@ -456,6 +456,12 @@ get_bit_live(void)
 		while (twait > 0 && nanosleep(&slp, &slp))
 			;
 	}
+	if (bit.t >= hw.freq * 4) {
+		/* this can actually happen */
+		gb_res.hwstat = ehw_random;
+		outch = '#';
+		goto report;
+	}
 
 	if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
 	    (bit.bit0 + bit.bit20) * bit.t) {
