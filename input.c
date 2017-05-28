@@ -388,7 +388,7 @@ get_bit_live(void)
 				gb_res.hwstat = ehw_random;
 				outch = '#';
 			}
-			goto report; /* timeout */
+			goto checkoverflow; /* timeout */
 		}
 
 		/*
@@ -452,10 +452,13 @@ get_bit_live(void)
 		while (twait > 0 && nanosleep(&slp, &slp))
 			;
 	}
+checkoverflow:
 	if (bit.t >= hw.freq * 4) {
 		/* this can actually happen */
-		gb_res.hwstat = ehw_random;
-		outch = '#';
+		if (gb_res.hwstat == ehw_ok) {
+			gb_res.hwstat = ehw_random;
+			outch = '#';
+		}
 		reset_frequency();
 		goto report;
 	}
