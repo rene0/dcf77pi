@@ -456,6 +456,7 @@ get_bit_live(void)
 		/* this can actually happen */
 		gb_res.hwstat = ehw_random;
 		outch = '#';
+		reset_frequency();
 		goto report;
 	}
 
