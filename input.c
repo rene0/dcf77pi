@@ -462,45 +462,45 @@ get_bit_live(void)
 	}
 
 	if (!gb_res.bad_io && gb_res.hwstat == ehw_ok) {
-	if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
-	    (bit.bit0 + bit.bit20) * bit.t) {
-		/* zero bit, ~100 ms active signal */
-		gb_res.bitval = ebv_0;
-		outch = '0';
-		buffer[bitpos] = 0;
-	} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
-	    (bit.bit0 + bit.bit20) * bit.t) {
-		/* one bit, ~200 ms active signal */
-		gb_res.bitval = ebv_1;
-		outch = '1';
-		buffer[bitpos] = 1;
-	} else {
-		/* bad radio signal, retain old value */
-		gb_res.bitval = ebv_none;
-		outch = '_';
-		/* force bit 20 to be 1 to recover from too low b20 value */
-		if (bitpos == 20) {
+		if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
+		    (bit.bit0 + bit.bit20) * bit.t) {
+			/* zero bit, ~100 ms active signal */
+			gb_res.bitval = ebv_0;
+			outch = '0';
+			buffer[bitpos] = 0;
+		} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
+		    (bit.bit0 + bit.bit20) * bit.t) {
+			/* one bit, ~200 ms active signal */
 			gb_res.bitval = ebv_1;
 			outch = '1';
-			buffer[20] = 1;
+			buffer[bitpos] = 1;
+		} else {
+			/* bad radio signal, retain old value */
+			gb_res.bitval = ebv_none;
+			outch = '_';
+			/* force bit 20 to be 1 to recover from too low b20 value */
+			if (bitpos == 20) {
+				gb_res.bitval = ebv_1;
+				outch = '1';
+				buffer[20] = 1;
+			}
 		}
-	}
 	}
 
 	if (!gb_res.bad_io) {
-	if (init_bit == 1)
-		init_bit--;
-	else if (gb_res.hwstat == ehw_ok && gb_res.marker == emark_none) {
-		if (bitpos == 0 && gb_res.bitval == ebv_0)
-			bit.bit0 += ((long long)
-			    (bit.tlow * 1000000 - bit.bit0) / 2);
-		if (bitpos == 20 && gb_res.bitval == ebv_1)
-			bit.bit20 += ((long long)
-			    (bit.tlow * 1000000 - bit.bit20) / 2);
-		/* During a thunderstorm the value of bit20 might underflow */
-		if (bit.bit20 < bit.bit0)
-			reset_bitlen();
-	}
+		if (init_bit == 1)
+			init_bit--;
+		else if (gb_res.hwstat == ehw_ok && gb_res.marker == emark_none) {
+			if (bitpos == 0 && gb_res.bitval == ebv_0)
+				bit.bit0 += ((long long)
+				    (bit.tlow * 1000000 - bit.bit0) / 2);
+			if (bitpos == 20 && gb_res.bitval == ebv_1)
+				bit.bit20 += ((long long)
+				    (bit.tlow * 1000000 - bit.bit20) / 2);
+			/* During a thunderstorm the value of bit20 might underflow */
+			if (bit.bit20 < bit.bit0)
+				reset_bitlen();
+		}
 	}
 	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 	if (logfile != NULL) {
