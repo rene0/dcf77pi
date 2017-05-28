@@ -356,7 +356,7 @@ get_bit_live(void)
 		if (p == 2) {
 			gb_res.bad_io = true;
 			outch = '*';
-			goto report;
+			break;
 		}
 		if (bit.signal != NULL) {
 			if ((bit.t & 7) == 0)
@@ -388,7 +388,7 @@ get_bit_live(void)
 				gb_res.hwstat = ehw_random;
 				outch = '#';
 			}
-			goto checkoverflow; /* timeout */
+			break; /* timeout */
 		}
 
 		/*
@@ -452,7 +452,6 @@ get_bit_live(void)
 		while (twait > 0 && nanosleep(&slp, &slp))
 			;
 	}
-checkoverflow:
 	if (bit.t >= hw.freq * 4) {
 		/* this can actually happen */
 		if (gb_res.hwstat == ehw_ok) {
@@ -460,9 +459,9 @@ checkoverflow:
 			outch = '#';
 		}
 		reset_frequency();
-		goto report;
 	}
 
+	if (!gb_res.bad_io && gb_res.hwstat == ehw_ok) {
 	if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
 	    (bit.bit0 + bit.bit20) * bit.t) {
 		/* zero bit, ~100 ms active signal */
@@ -486,6 +485,9 @@ checkoverflow:
 			buffer[20] = 1;
 		}
 	}
+	}
+
+	if (!gb_res.bad_io) {
 	if (init_bit == 1)
 		init_bit--;
 	else if (gb_res.hwstat == ehw_ok && gb_res.marker == emark_none) {
@@ -499,7 +501,7 @@ checkoverflow:
 		if (bit.bit20 < bit.bit0)
 			reset_bitlen();
 	}
-report:
+	}
 	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
