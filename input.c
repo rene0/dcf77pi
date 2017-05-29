@@ -307,14 +307,12 @@ get_bit_live(void)
 	char outch;
 	bool newminute = false;
 	unsigned stv = 1;
-	int p;
 	struct timespec slp;
 #if !defined(MACOS)
 	struct timespec tp0, tp1;
 #endif
 	unsigned sec2;
 	long long a, y = 1000000000;
-	long long twait;
 	static int init_bit = 2;
 	bool is_eom = gb_res.marker == emark_minute ||
 	    gb_res.marker == emark_late;
@@ -352,7 +350,7 @@ get_bit_live(void)
 #if !defined(MACOS)
 		(void)clock_gettime(CLOCK_MONOTONIC, &tp0);
 #endif
-		p = get_pulse();
+		int p = get_pulse();
 		if (p == 2) {
 			gb_res.bad_io = true;
 			outch = '*';
@@ -441,7 +439,7 @@ get_bit_live(void)
 			}
 			break; /* start of new second */
 		}
-		twait = (long long)(sec2 * bit.realfreq / 1000000);
+		long long twait = (long long)(sec2 * bit.realfreq / 1000000);
 #if !defined(MACOS)
 		(void)clock_gettime(CLOCK_MONOTONIC, &tp1);
 		twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1000000000 -
