@@ -150,7 +150,7 @@ read_config_file(const char * const filename)
 	return 0;
 }
 
-/*@null@*/char *
+char *
 get_config_value(const char * const keyword)
 {
 	int i;

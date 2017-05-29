@@ -66,8 +66,8 @@ SUCH DAMAGE.
 
 static int bitpos;		 /* second */
 static int buffer[BUFLEN];	 /* wrap after BUFLEN positions */
-/*@null@*/ static FILE *logfile; /* auto-appended in live mode */
 static int fd;			 /* gpio file */
+static FILE *logfile;		/* auto-appended in live mode */
 static struct hardware hw;
 static struct bitinfo bit;
 static unsigned acc_minlen;

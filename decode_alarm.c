@@ -63,10 +63,10 @@ decode_alarm(const unsigned civbuf[], struct alm * const alarm)
 	}
 }
 
-/*@null@*/const char * const
+const char * const
 get_region_name(struct alm alarm)
 {
-	/*@null@*/char *res;
+	char *res;
 	bool need_comma;
 
 	/* Partial information only */
