@@ -69,7 +69,9 @@ enum eGB_skip {
 	/** this bit should be skipped (i.e. not displayed) */
 	eskip_this,
 	/** next bit should be skipped (i.e. not added to bitpos) */
-	eskip_next
+	eskip_next,
+	/** both this and next bit should be skipped */
+	eskip_both
 };
 
 /** Structure containing all information of the currnet bit */

@@ -607,7 +607,8 @@ get_bit_file(void)
 	if (inch == EOF)
 		gb_res.done = true;
 	if (inch == (int)'a' || inch == (int)'c')
-		gb_res.skip = eskip_next;
+		gb_res.skip =
+		    (gb_res.skip == eskip_none ? eskip_next : eskip_both);
 	if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) {
 		if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */
 			gb_res.done = true;
@@ -626,7 +627,8 @@ get_bit_file(void)
 		if (inch == EOF)
 			gb_res.done = true;
 		if (inch == (int)'a' || inch == (int)'c')
-			gb_res.skip = eskip_next;
+			gb_res.skip =
+			    (gb_res.skip == eskip_none ? eskip_next : eskip_both);
 		if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) {
 			if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */
 				gb_res.done = true;
@@ -652,7 +654,7 @@ next_bit(void)
 {
 	if (gb_res.marker == emark_minute || gb_res.marker == emark_late)
 		bitpos = 0;
-	else if (gb_res.skip != eskip_next)
+	else if (gb_res.skip != eskip_next && gb_res.skip != eskip_both)
 		bitpos++;
 	if (bitpos == BUFLEN) {
 		gb_res.marker = emark_toolong;

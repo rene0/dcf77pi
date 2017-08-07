@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -77,7 +77,7 @@ mainloop(char *logfilename,
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
 			mlr = post_process_input(mlr, bitpos);
-		if (bit.skip == eskip_none && !bit.done && !mlr.quit)
+		if (bit.skip != eskip_this && bit.skip != eskip_both && !mlr.quit)
 			display_bit(bit, bitpos);
 
 		if (init_min < 2)
