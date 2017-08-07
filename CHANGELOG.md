@@ -4,6 +4,7 @@ Version 3.6.1 --
   nor with GCC 5.4.0/Ubuntu 16.04 [issue #6]
 * dcf77pi: improvements to statusbar timing and messages
 * make code compliant with ISO C99/POSIX.1-2008 [closes issue #17]
+* display last bit of the minute in dcf77pi-analyze [closes issue #19]
 * allow setting the system time on UTC hosts [closes issue #20]
 * fix crashes on bad input signal, return ehw\_random in this case [closes
   issue #21]
