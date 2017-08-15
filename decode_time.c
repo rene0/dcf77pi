@@ -315,9 +315,8 @@ handle_leap_second(unsigned errflags, int minlen, unsigned utchour,
 			dt_res.leap_announce = eann_error;
 	}
 
-	/* process possible leap second, always reset announcement at hh:00 */
+	/* process possible leap second */
 	if (dt_res.leap_announce == eann_ok && time.tm_min == 0) {
-		dt_res.leap_announce = eann_none;
 		dt_res.leapsecond_status = els_done;
 		if (minlen == 59) {
 			/* leap second processed, but missing */
@@ -326,6 +325,9 @@ handle_leap_second(unsigned errflags, int minlen, unsigned utchour,
 		} else if (minlen == 60 && buffer[59] == 1)
 			dt_res.leapsecond_status = els_one;
 	}
+	/* always reset announcement at hh:00 */
+	if (time.tm_min == 0)
+		dt_res.leap_announce = eann_none;
 	if (minlen == 60 && dt_res.leapsecond_status == els_none) {
 		/* leap second not processed, so bad minute */
 		dt_res.minute_length = emin_long;
@@ -401,10 +403,11 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 	}
 
 	/* done with DST */
-	if (dt_res.dst_announce == eann_ok && time.tm_min == 0) {
-		dt_res.dst_announce = eann_none;
+	if (dt_res.dst_announce == eann_ok && time.tm_min == 0)
 		dt_res.dst_status = eDST_done;
-	}
+	/* like leap second, always clear the DST announcement at hh:00 */
+	if (time.tm_min == 0)
+		dt_res.dst_announce = eann_none;
 
 	return errflags;
 }
