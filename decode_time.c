@@ -281,17 +281,13 @@ calculate_date_time(unsigned init_min, unsigned errflags, int increase,
 static void
 stamp_date_time(unsigned errflags, struct tm newtime, struct tm * const time)
 {
-	if ((errflags & 0x0f) == 0) {
-		if ((errflags & 1) == 0)
-			time->tm_min = newtime.tm_min;
-		if ((errflags & 2) == 0)
-			time->tm_hour = newtime.tm_hour;
-		if ((errflags & 4) == 0) {
-			time->tm_mday = newtime.tm_mday;
-			time->tm_mon = newtime.tm_mon;
-			time->tm_year = newtime.tm_year;
-			time->tm_wday = newtime.tm_wday;
-		}
+	if ((dt_res.minute_length == emin_ok) && ((errflags & 0x0f) == 0)) {
+		time->tm_min = newtime.tm_min;
+		time->tm_hour = newtime.tm_hour;
+		time->tm_mday = newtime.tm_mday;
+		time->tm_mon = newtime.tm_mon;
+		time->tm_year = newtime.tm_year;
+		time->tm_wday = newtime.tm_wday;
 		if (dt_res.dst_status != eDST_jump)
 			time->tm_isdst = newtime.tm_isdst;
 	}
