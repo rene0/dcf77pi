@@ -109,10 +109,10 @@ getbcd(const int buffer[], unsigned start, unsigned stop)
 static bool
 check_time_sanity(int minlen, const int buffer[])
 {
-	if (minlen < 59)
-		dt_res.minute_length = emin_short;
-	else if (minlen > 60)
+	if (minlen == -1 || minlen > 60)
 		dt_res.minute_length = emin_long;
+	else if (minlen < 59)
+		dt_res.minute_length = emin_short;
 	else
 		dt_res.minute_length = emin_ok;
 
