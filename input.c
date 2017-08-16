@@ -170,7 +170,8 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction", hw.pin);
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction",
+	    hw.pin);
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
@@ -192,7 +193,8 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value", hw.pin);
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value",
+	    hw.pin);
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
@@ -360,7 +362,8 @@ get_bit_live(void)
 			if ((bit.t & 7) == 0)
 				bit.signal[bit.t / 8] = 0;
 				/* clear data from previous second */
-			bit.signal[bit.t / 8] |= p << (unsigned char)(bit.t & 7);
+			bit.signal[bit.t / 8] |= p <<
+			    (unsigned char)(bit.t & 7);
 		}
 
 		if (y >= 0 && y < a / 2)
@@ -476,7 +479,7 @@ get_bit_live(void)
 			/* bad radio signal, retain old value */
 			gb_res.bitval = ebv_none;
 			outch = '_';
-			/* force bit 20 to be 1 to recover from too low b20 value */
+			/* force b20 to 1 to recover from too low b20 value */
 			if (bitpos == 20) {
 				gb_res.bitval = ebv_1;
 				outch = '1';
@@ -488,14 +491,15 @@ get_bit_live(void)
 	if (!gb_res.bad_io) {
 		if (init_bit == 1)
 			init_bit--;
-		else if (gb_res.hwstat == ehw_ok && gb_res.marker == emark_none) {
+		else if (gb_res.hwstat == ehw_ok &&
+		    gb_res.marker == emark_none) {
 			if (bitpos == 0 && gb_res.bitval == ebv_0)
 				bit.bit0 += ((long long)
 				    (bit.tlow * 1000000 - bit.bit0) / 2);
 			if (bitpos == 20 && gb_res.bitval == ebv_1)
 				bit.bit20 += ((long long)
 				    (bit.tlow * 1000000 - bit.bit20) / 2);
-			/* During a thunderstorm the value of bit20 might underflow */
+			/* During a thunderstorm bit20 might underflow */
 			if (bit.bit20 < bit.bit0)
 				reset_bitlen();
 		}
@@ -628,10 +632,12 @@ get_bit_file(void)
 			gb_res.done = true;
 		if (inch == (int)'a' || inch == (int)'c')
 			gb_res.skip =
-			    (gb_res.skip == eskip_none ? eskip_next : eskip_both);
-		if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) {
-			if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */
-				gb_res.done = true;
+			    (gb_res.skip == eskip_none ? eskip_next :
+				 eskip_both);
+		if ((inch != (int)'\r' && inch != (int)'\n') ||
+		    inch == oldinch) {
+			if (ungetc(inch, logfile) == EOF)
+				gb_res.done = true; /* EOF remains, IO error */
 		}
 	}
 	if (!read_acc_minlen)

@@ -346,7 +346,8 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 		    time.tm_mon == wintermonth)) && ((time.tm_min > 0 &&
 		    utchour == 0) || (time.tm_min == 0 &&
 		    utchour == 1 + buffer[17] - buffer[18])))
-			dt_res.dst_announce = eann_ok; /* time zone just changed */
+			dt_res.dst_announce = eann_ok;
+			/* time zone just changed */
 		else {
 			dt_res.dst_announce = eann_none;
 			dt_res.dst_status = eDST_error;

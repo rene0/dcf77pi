@@ -3,7 +3,8 @@
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
-CFLAGS+=-Wall -D_POSIX_C_SOURCE=200809L -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" -g -std=c99
+CFLAGS+=-Wall -D_POSIX_C_SOURCE=200809L -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" \
+	-g -std=c99
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
 LINT_ARGS?=-aabcehrsxS -Dlint -DETCDIR=\"$(ETCDIR)\"
@@ -43,8 +44,8 @@ calendar.o: calendar.h
 libdcf77.so: $(objlib)
 	$(CC) -shared -o $@ $(objlib) -lm -lrt
 
-dcf77pi.o: bits1to14.h config.h decode_alarm.h decode_time.h input.h mainloop.h \
-	calendar.h
+dcf77pi.o: bits1to14.h config.h decode_alarm.h decode_time.h input.h \
+	mainloop.h calendar.h
 dcf77pi: dcf77pi.o libdcf77.so
 	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so
 

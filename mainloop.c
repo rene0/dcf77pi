@@ -77,7 +77,8 @@ mainloop(char *logfilename,
 		bitpos = get_bitpos();
 		if (post_process_input != NULL)
 			mlr = post_process_input(mlr, bitpos);
-		if (bit.skip != eskip_this && bit.skip != eskip_both && !mlr.quit)
+		if (bit.skip != eskip_this && bit.skip != eskip_both &&
+		    !mlr.quit)
 			display_bit(bit, bitpos);
 
 		if (init_min < 2)
