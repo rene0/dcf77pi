@@ -479,12 +479,12 @@ get_bit_live(void)
 			/* bad radio signal, retain old value */
 			gb_res.bitval = ebv_none;
 			outch = '_';
-			/* force b20 to 1 to recover from too low b20 value */
-			if (bitpos == 20) {
-				gb_res.bitval = ebv_1;
-				outch = '1';
-				buffer[20] = 1;
-			}
+		}
+		/* force b20 to 1 to recover from too low/high b20 values */
+		if (bitpos == 20) {
+			gb_res.bitval = ebv_1;
+			outch = '1';
+			buffer[20] = 1;
 		}
 	}
 
