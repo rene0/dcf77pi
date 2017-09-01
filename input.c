@@ -480,12 +480,6 @@ get_bit_live(void)
 			gb_res.bitval = ebv_none;
 			outch = '_';
 		}
-		/* force b20 to 1 to recover from too low/high b20 values */
-		if (bitpos == 20) {
-			gb_res.bitval = ebv_1;
-			outch = '1';
-			buffer[20] = 1;
-		}
 	}
 
 	if (!gb_res.bad_io) {
@@ -499,8 +493,8 @@ get_bit_live(void)
 			if (bitpos == 20 && gb_res.bitval == ebv_1)
 				bit.bit20 += ((long long)
 				    (bit.tlow * 1000000 - bit.bit20) / 2);
-			/* During a thunderstorm bit20 might underflow */
-			if (bit.bit20 < bit.bit0)
+			/* Force sane values during e.g. a thunderstorm */
+			if (bit.bit20 < bit.bit0 || bit.bit20 > bit.bit0 * 3)
 				reset_bitlen();
 		}
 	}
