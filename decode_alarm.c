@@ -75,7 +75,7 @@ get_region_name(struct alm alarm)
 	    alarm.parity[0].ps != alarm.parity[1].ps)
 		return "(inconsistent)";
 
-	res = malloc(strlen(reg1n) + 2 + strlen(reg1m) + 2 + strlen(reg1s) + 1);
+	res = calloc(1, strlen(reg1n) + 2 + strlen(reg1m) + 2 + strlen(reg1s) + 1);
 
 	if (res == NULL)
 		return res;
