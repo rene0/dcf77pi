@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -162,8 +162,6 @@ display_bit(struct GB_result bit, int bitpos)
 void
 display_time(struct DT_result dt, struct tm time)
 {
-	int cutoff;
-
 	/* color bits depending on the results */
 	mvwchgat(decode_win, 0, 4, 1, A_NORMAL,  dt.bit0_ok ? 2 : 1, NULL);
 	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt.dst_status == eDST_error ?
@@ -183,16 +181,10 @@ display_time(struct DT_result dt, struct tm time)
 	    time.tm_isdst == 1 ? "summer" : time.tm_isdst == 0 ? "winter" :
 	    "?     ", time.tm_year, time.tm_mon, time.tm_mday,
 	    weekday[time.tm_wday], time.tm_hour, time.tm_min);
-	/* display minute cutoff value */
-	cutoff = get_cutoff();
-	if (cutoff == -1)
-		mvwprintw(decode_win, 1, 40, "?     ");
-	else
-		mvwprintw(decode_win, 1, 40, "%6.4f", cutoff / 1e4);
 
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 
-	/* color date/time string and cutoff value depending on the results */
+	/* color date/time string value depending on the results */
 	if (dt.dst_status == eDST_jump)
 		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
 	if (dt.year_status == eval_jump)
@@ -207,8 +199,6 @@ display_time(struct DT_result dt, struct tm time)
 		mvwchgat(decode_win, 1, 22, 2, A_BOLD, 3, NULL);
 	if (dt.minute_status == eval_jump)
 		mvwchgat(decode_win, 1, 25, 2, A_BOLD, 3, NULL);
-	if (cutoff == -1)
-		mvwchgat(decode_win, 1, 40, 1, A_BOLD, 3, NULL);
 
 	/* flip lights depending on the results */
 	if (!dt.transmit_call)
@@ -444,7 +434,7 @@ display_long_minute(void)
 void
 display_minute(int minlen)
 {
-	int bp, xpos;
+	int bp, cutoff, xpos;
 
 	/* display bits of previous minute */
 	for (xpos = 4, bp = 0; bp < minlen; bp++, xpos++) {
@@ -456,6 +446,15 @@ display_minute(int minlen)
 	}
 	wclrtoeol(decode_win);
 	mvwchgat(decode_win, 0, 0, 80, A_NORMAL, 7, NULL);
+
+	/* display minute cutoff value */
+	cutoff = get_cutoff();
+	if (cutoff == -1) {
+		mvwprintw(decode_win, 1, 40, "?     ");
+		mvwchgat(decode_win, 1, 40, 1, A_BOLD, 3, NULL);
+	} else
+		mvwprintw(decode_win, 1, 40, "%6.4f", cutoff / 1e4);
+
 	wrefresh(decode_win);
 }
 
