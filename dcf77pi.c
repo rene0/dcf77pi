@@ -117,13 +117,12 @@ display_bit(struct GB_result bit, int bitpos)
 		mvwchgat(input_win, 3, 36, 21, A_NORMAL, 7, NULL);
 
 	wattron(input_win, COLOR_PAIR(2));
-	if (bit.marker == emark_minute)
+	if (bit.marker == emark_minute && bit.bitval != ebv_none)
 		mvwprintw(input_win, 3, 58, "minute   ");
-	else if (!bit.bad_io && bit.bitval != ebv_none &&
-	    bit.marker == emark_none && bit.hwstat == ehw_ok)
+	else if (bit.marker == emark_none && bit.bitval != ebv_none)
 		mvwprintw(input_win, 3, 58, "OK       ");
 	else
-		mvwprintw(input_win, 3, 58, "         ");
+		mvwprintw(input_win, 3, 58, "?        ");
 	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
@@ -138,6 +137,7 @@ display_bit(struct GB_result bit, int bitpos)
 	else if (bit.bad_io)
 		mvwprintw(input_win, 3, 68, "IO      ");
 	else {
+		/* bit.hwstat == ehw_ok */
 		wattron(input_win, COLOR_PAIR(2));
 		mvwprintw(input_win, 3, 68, "OK      ");
 		wattroff(input_win, COLOR_PAIR(2));
