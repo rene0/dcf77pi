@@ -139,7 +139,7 @@ static int
 increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
     struct tm * const time)
 {
-	static unsigned acc_minlen_partial, old_acc_minlen;
+	static unsigned acc_minlen_partial;
 	static bool prev_toolong;
 
 	int increase;
@@ -153,10 +153,7 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 		}
 	}
 	/* Calculate number of minutes to increase time with: */
-	if (prev_toolong)
-		increase = (acc_minlen - old_acc_minlen) / 60000;
-	else
-		increase = acc_minlen / 60000;
+	increase = acc_minlen / 60000;
 	if (acc_minlen >= 60000)
 		acc_minlen_partial %= 60000;
 	/* Account for complete minutes with a short acc_minlen: */
@@ -166,7 +163,6 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 	}
 
 	prev_toolong = (minlen == -1);
-	old_acc_minlen = acc_minlen - (acc_minlen % 60000);
 
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
