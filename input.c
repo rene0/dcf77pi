@@ -522,11 +522,10 @@ get_bit_file(void)
 	set_new_state();
 
 	/*
-	 * bit.realfreq and bit.t are set to fake value for compatibility with
-	 * old log files not storing acc_minlen values or to increase time
-	 * when mainloop() splits too long minutes
+	 * bit.t is set to fake value for compatibility with old log files
+	 * not storing acc_minlen values or to increase time when mainloop()
+	 * splits too long minutes
 	 */
-	bit.realfreq = 1000000000;
 
 	while (!valid) {
 		inch = getc(logfile);
@@ -635,7 +634,7 @@ get_bit_file(void)
 		}
 	}
 	if (!read_acc_minlen)
-		acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
+		acc_minlen += bit.t;
 
 	return gb_res;
 }
