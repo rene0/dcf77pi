@@ -172,7 +172,9 @@ display_time(struct DT_result dt, struct tm time)
 	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, dt.hour_status ==
 	    eval_parity ? 1 : dt.hour_status == eval_bcd ? 4 : 2, NULL);
 	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, dt.mday_status ==
-	    eval_parity ? 1 : dt.mday_status == eval_bcd ? 4 : 2, NULL);
+	    eval_parity ? 1 : (dt.mday_status == eval_bcd ||
+	    dt.wday_status == eval_bcd || dt.month_status == eval_bcd ||
+	    dt.year_status == eval_bcd) ? 4 : 2, NULL);
 	if (dt.leapsecond_status == els_one)
 		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
 
