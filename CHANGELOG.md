@@ -1,13 +1,21 @@
-Version 3.6.1 --
-* fix get\_isotime(): ISO days of year are 0-based, not 1-based
+Version 3.6.1 -- 2017-11-19
 * Makefile: drop splint target, does not work with Clang 4.0.0/FreeBSD 12
   nor with GCC 5.4.0/Ubuntu 16.04 [issue #6]
-* dcf77pi: improvements to statusbar timing and messages
 * make code compliant with ISO C99/POSIX.1-2008 [closes issue #17]
+* do not stamp time as OK when the minute is exactly one bit too long [closes
+  issue #18]
 * display last bit of the minute in dcf77pi-analyze [closes issue #19]
 * allow setting the system time on UTC hosts [closes issue #20]
 * fix crashes on bad input signal, return ehw\_random in this case [closes
   issue #21]
+* reset DST and leap second announcement flags at the hour [closes issue #22]
+* correctly handle bit buffer overflows [closes issue #26]
+* replace enumeration eGB\_skip by a boolean [closes issue #26]
+* fix parsing of log files when extra spaces are inserted [closes issue #25
+  and #26]
+* fix get\_isotime(): ISO days of year are 0-based, not 1-based
+* also recover from too high values of bit 20
+* dcf77pi: improvements to statusbar timing and messages and "state" light
 * update README.md on setting the system time
 
 Version 3.6.0 -- 2017-05-14
