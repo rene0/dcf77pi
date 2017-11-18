@@ -97,11 +97,11 @@ getbcd(const int buffer[], unsigned start, unsigned stop)
 	for (unsigned i = start; i <= stop; i++) {
 		val += mul * buffer[i];
 		mul *= 2;
-                if (mul == 16) {
-                    if (val > 9)
-                        return 100;
-                    mul = 10;
-                }
+		if (mul == 16) {
+			if (val > 9)
+				return 100;
+			mul = 10;
+		}
 	}
 	return val;
 }
@@ -376,13 +376,13 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 	/* check if DST is within expected date range */
 	if ((time.tm_mon > summermonth && time.tm_mon < wintermonth) ||
 	    (time.tm_mon == summermonth && time.tm_wday < 7 &&
-	      lastday(time) - time.tm_mday < 7) ||
+		lastday(time) - time.tm_mday < 7) ||
 	    (time.tm_mon == summermonth && time.tm_wday == 7 &&
-	      lastday(time) - time.tm_mday < 7 && utchour > 0) ||
+		lastday(time) - time.tm_mday < 7 && utchour > 0) ||
 	    (time.tm_mon == wintermonth && time.tm_wday < 7 &&
-	      lastday(time) - time.tm_mday >= 7) ||
+		lastday(time) - time.tm_mday >= 7) ||
 	    (time.tm_mon == wintermonth && time.tm_wday == 7 &&
-	      lastday(time) - time.tm_mday < 7 &&
+		lastday(time) - time.tm_mday < 7 &&
 		(utchour >= 22 /* previous day */ || utchour == 0))) {
 		/* expect DST */
 		if (newtime->tm_isdst == 0 && dt_res.dst_announce != eann_ok &&
