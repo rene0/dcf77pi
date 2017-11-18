@@ -1,5 +1,5 @@
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
-	uninstall-doxygen lint cppcheck iwyu test
+	uninstall-doxygen cppcheck iwyu test
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
@@ -7,7 +7,6 @@ CFLAGS+=-Wall -D_POSIX_C_SOURCE=200809L -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" \
 	-g -std=c99
 INSTALL?=install
 INSTALL_PROGRAM?=$(INSTALL)
-LINT_ARGS?=-aabcehrsxS -Dlint -DETCDIR=\"$(ETCDIR)\"
 CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 	-DETCDIR=\"$(ETCDIR)\"
 
@@ -110,12 +109,6 @@ uninstall-doxygen:
 
 uninstall-md:
 	rm $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/*.md
-
-lint:
-	lint -D__CYGWIN__ $(LINT_ARGS) $(srclib) $(srcbin) || true
-	lint -D__linux__ $(LINT_ARGS) $(srclib) $(srcbin) || true
-	lint -D__FreeBSD__ -D__FreeBSD_version=900022 \
-		$(LINT_ARGS) $(srclib) $(srcbin) || true
 
 cppcheck:
 	cppcheck -D__CYGWIN__ $(CPPCHECK_ARGS) . || true
