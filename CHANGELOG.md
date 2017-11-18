@@ -11,12 +11,14 @@ Version 3.6.1 -- 2017-11-19
   issue #21]
 * reset DST and leap second announcement flags at the hour [closes issue #22]
 * correctly handle bit buffer overflows [closes issue #26]
-* replace enumeration eGB\_skip by a boolean [closes issue #26]
 * fix parsing of log files when extra spaces are inserted [closes issue #25
   and #26]
+* replace enumeration eGB\_skip by a boolean
 * fix a bug where time could be all 0 if the previous minute was too long
 * fix get\_isotime(): ISO days of year are 0-based, not 1-based
 * also recover from too high values of bit 20
+* dcf77pi: fix bug where the date parity but would only turn blue when the day
+  of the month was wrong
 * dcf77pi: improvements to statusbar timing and messages and "state" light
 * update README.md on setting the system time
 
