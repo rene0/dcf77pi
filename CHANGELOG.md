@@ -1,6 +1,7 @@
 Version 3.6.1 -- 2017-11-19
 * Makefile: drop splint target, does not work with Clang 4.0.0/FreeBSD 12
   nor with GCC 5.4.0/Ubuntu 16.04 [issue #6]
+* Makefile: drop lint target, this is severely outdated [issue #6]
 * make code compliant with ISO C99/POSIX.1-2008 [closes issue #17]
 * do not stamp time as OK when the minute is exactly one bit too long [closes
   issue #18]
@@ -13,6 +14,7 @@ Version 3.6.1 -- 2017-11-19
 * replace enumeration eGB\_skip by a boolean [closes issue #26]
 * fix parsing of log files when extra spaces are inserted [closes issue #25
   and #26]
+* fix a bug where time could be all 0 if the previous minute was too long
 * fix get\_isotime(): ISO days of year are 0-based, not 1-based
 * also recover from too high values of bit 20
 * dcf77pi: improvements to statusbar timing and messages and "state" light
