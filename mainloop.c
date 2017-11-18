@@ -93,11 +93,8 @@ check_handle_new_minute(struct GB_result bit, struct ML_result *mlr, int bitpos,
 		if (*init_min > 0)
 			(*init_min)--;
 	}
-	if (have_result) {
-		if (show_mainloop_result != NULL)
-			*mlr = show_mainloop_result(*mlr, bitpos);
-		have_result = false;
-	}
+	if (have_result && show_mainloop_result != NULL)
+		*mlr = show_mainloop_result(*mlr, bitpos);
 }
 
 void

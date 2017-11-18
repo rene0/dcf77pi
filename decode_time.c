@@ -140,8 +140,6 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
     struct tm * const time)
 {
 	static unsigned acc_minlen_partial;
-	static bool prev_toolong;
-
 	int increase;
 
 	/* See if there are any partial / split minutes to be combined: */
@@ -161,8 +159,6 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 		increase++;
 		acc_minlen_partial %= 60000;
 	}
-
-	prev_toolong = (minlen == -1);
 
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {

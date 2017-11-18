@@ -48,7 +48,7 @@ SUCH DAMAGE.
 #  warning NetBSD, GPIO support not yet implemented
 #  define NOLIVE 1
 #elif defined(__linux__)
-#  include <sys/types.h>
+/* NOP */
 #elif defined(__APPLE__) && (defined(__OSX__) || defined(__MACH__))
 #  warning MacOS, GPIO support available but no port for Rapberry Pi
 #  define NOLIVE 1
