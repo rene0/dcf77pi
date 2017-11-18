@@ -32,6 +32,7 @@ SUCH DAMAGE.
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -267,14 +268,15 @@ get_pulse(void)
 static void
 set_new_state(void)
 {
-	cutoff = -1;
+	if (!gb_res.skip)
+		cutoff = -1;
 	gb_res.bad_io = false;
 	gb_res.bitval = ebv_none;
 	if (gb_res.marker != emark_toolong && gb_res.marker != emark_late)
 		gb_res.marker = emark_none;
 	gb_res.hwstat = ehw_ok;
 	gb_res.done = false;
-	gb_res.skip = eskip_none;
+	gb_res.skip = false;
 }
 
 static void
@@ -511,130 +513,128 @@ get_bit_live(void)
 	return gb_res;
 }
 
+/* Skip over invalid characters */
+static int
+skip_invalid(void)
+{
+	int inch = EOF;
+
+	do {
+		if (feof(logfile))
+			break;
+		inch = getc(logfile);
+	} while (strchr("01\r\nxr#*_ac", inch) == NULL);
+	return inch;
+}
+
 struct GB_result
 get_bit_file(void)
 {
-	int oldinch, inch;
-	bool valid = false;
+	static int oldinch;
 	static bool read_acc_minlen;
+	static bool dec_bp;
+	int inch;
 	char co[6];
 
 	set_new_state();
 
+	inch = skip_invalid();
 	/*
 	 * bit.t is set to fake value for compatibility with old log files
 	 * not storing acc_minlen values or to increase time when mainloop()
 	 * splits too long minutes
 	 */
 
-	while (!valid) {
-		inch = getc(logfile);
-		switch (inch) {
-		case EOF:
-			gb_res.done = true;
-			return gb_res;
-		case '0':
-		case '1':
-			buffer[bitpos] = inch - (int)'0';
-			gb_res.bitval = (inch == (int)'0') ? ebv_0 : ebv_1;
-			valid = true;
-			bit.t = 1000;
-			break;
-		case '\r':
-		case '\n':
-			/*
-			 * Skip multiple consecutive EOM markers,
-			 * these are made impossible by the reset_minlen()
-			 * invocation in get_bit_live()
-			 */
-			break;
-		case 'x':
-			gb_res.hwstat = ehw_transmit;
-			valid = true;
-			bit.t = 2500;
-			break;
-		case 'r':
-			gb_res.hwstat = ehw_receive;
-			valid = true;
-			bit.t = 2500;
-			break;
-		case '#':
-			gb_res.hwstat = ehw_random;
-			valid = true;
-			bit.t = 2500;
-			break;
-		case '*':
-			gb_res.bad_io = true;
-			valid = true;
-			bit.t = 0;
-			break;
-		case '_':
-			/* retain old value in buffer[bitpos] */
-			gb_res.bitval = ebv_none;
-			valid = true;
-			bit.t = 1000;
-			break;
-		case 'a':
-			/* acc_minlen */
-			gb_res.skip = eskip_this;
-			valid = true;
-			bit.t = 0;
-			if (fscanf(logfile, "%10u", &acc_minlen) != 1)
-				gb_res.done = true;
-			read_acc_minlen = !gb_res.done;
-			break;
-		case 'c':
-			/* cutoff for newminute */
-			gb_res.skip = eskip_this;
-			valid = true;
-			bit.t = 0;
-			if (fscanf(logfile, "%6c", co) != 1)
-				gb_res.done = true;
-			if (!gb_res.done && (co[1] == '.'))
-				cutoff = (co[0] - '0') * 10000 +
-				    (int)strtol(co + 2, (char **)NULL, 10);
-			break;
-		default:
-			break;
-		}
-	}
-	/* Only allow \r , \n , \r\n , and \n\r as single EOM markers */
-	oldinch = inch;
-	inch = getc(logfile);
-	if (inch == EOF)
+	switch (inch) {
+	case EOF:
 		gb_res.done = true;
-	if (inch == (int)'a' || inch == (int)'c')
-		gb_res.skip =
-		    (gb_res.skip == eskip_none ? eskip_next : eskip_both);
-	if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) {
-		if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */
-			gb_res.done = true;
-	} else {
-		if (gb_res.marker == emark_none)
-			gb_res.marker = emark_minute;
-		else if (gb_res.marker == emark_toolong)
-			gb_res.marker = emark_late;
-		if (!read_acc_minlen)
-			bit.t += 1000;
-		else
+		return gb_res;
+	case '0':
+	case '1':
+		buffer[bitpos] = inch - (int)'0';
+		gb_res.bitval = (inch == (int)'0') ? ebv_0 : ebv_1;
+		bit.t = 1000;
+		break;
+	case '\r':
+	case '\n':
+		/*
+		 * Skip multiple consecutive EOM markers,
+		 * these are made impossible by the reset_minlen()
+		 * invocation in get_bit_live()
+		 */
+		gb_res.skip = true;
+		if (oldinch != '\r' && oldinch != '\n') {
+			bit.t = read_acc_minlen ? 0 : 1000;
 			read_acc_minlen = false;
-		/* Check for \r\n or \n\r */
-		oldinch = inch;
-		inch = getc(logfile);
-		if (inch == EOF)
+			dec_bp = false;
+			if (gb_res.marker == emark_none)
+				gb_res.marker = emark_minute;
+			else if (gb_res.marker == emark_toolong)
+				gb_res.marker = emark_late;
+		} else
+			bit.t = 0;
+		break;
+	case 'x':
+		gb_res.hwstat = ehw_transmit;
+		bit.t = 2500;
+		break;
+	case 'r':
+		gb_res.hwstat = ehw_receive;
+		bit.t = 2500;
+		break;
+	case '#':
+		gb_res.hwstat = ehw_random;
+		bit.t = 2500;
+		break;
+	case '*':
+		gb_res.bad_io = true;
+		bit.t = 0;
+		break;
+	case '_':
+		/* retain old value in buffer[bitpos] */
+		gb_res.bitval = ebv_none;
+		bit.t = 1000;
+		break;
+	case 'a':
+		/* acc_minlen, up to 2^32-1 ms */
+		gb_res.skip = true;
+		bit.t = 0;
+		if (fscanf(logfile, "%10u", &acc_minlen) != 1)
 			gb_res.done = true;
-		if (inch == (int)'a' || inch == (int)'c')
-			gb_res.skip =
-			    (gb_res.skip == eskip_none ? eskip_next :
-				 eskip_both);
-		if ((inch != (int)'\r' && inch != (int)'\n') ||
-		    inch == oldinch) {
-			if (ungetc(inch, logfile) == EOF)
-				gb_res.done = true; /* EOF remains, IO error */
-		}
+		read_acc_minlen = !gb_res.done;
+		break;
+	case 'c':
+		/* cutoff for newminute */
+		gb_res.skip = true;
+		bit.t = 0;
+		if (fscanf(logfile, "%6c", co) != 1)
+			gb_res.done = true;
+		if (!gb_res.done && (co[1] == '.'))
+			cutoff = (co[0] - '0') * 10000 +
+			    (int)strtol(co + 2, (char **)NULL, 10);
+		break;
+	default:
+		break;
 	}
+
 	if (!read_acc_minlen)
 		acc_minlen += bit.t;
+
+	/*
+	 * Read-ahead 1 character to check if a minute marker is coming.
+	 * This prevents emark_toolong or emark_late being set 1 bit early.
+	 */
+	oldinch = inch;
+	inch = skip_invalid();
+	if (!feof(logfile)) {
+		if (!dec_bp && oldinch != '\r' && oldinch != '\n' && (inch == '\r' || inch == '\n' || inch == 'a' || inch == 'c')) {
+			dec_bp = true;
+			if (bitpos > 0)
+				bitpos--;
+		}
+	} else
+		gb_res.done = true;
+	ungetc(inch, logfile);
 
 	return gb_res;
 }
@@ -653,7 +653,7 @@ next_bit(void)
 {
 	if (gb_res.marker == emark_minute || gb_res.marker == emark_late)
 		bitpos = 0;
-	else if (gb_res.skip != eskip_next && gb_res.skip != eskip_both)
+	else if (!gb_res.skip)
 		bitpos++;
 	if (bitpos == BUFLEN) {
 		gb_res.marker = emark_toolong;

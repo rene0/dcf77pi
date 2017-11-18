@@ -62,18 +62,6 @@ enum eGB_HW {
 	ehw_random
 };
 
-/** Bit skip state when reading from log file */
-enum eGB_skip {
-	/** do not skip */
-	eskip_none,
-	/** this bit should be skipped (i.e. not displayed) */
-	eskip_this,
-	/** next bit should be skipped (i.e. not added to bitpos) */
-	eskip_next,
-	/** both this and next bit should be skipped */
-	eskip_both
-};
-
 /** Structure containing all information of the currnet bit */
 struct GB_result {
 	/** I/O error while reading bit from hardware */
@@ -87,7 +75,7 @@ struct GB_result {
 	/** radio reception status */
 	enum eGB_HW hwstat;
 	/** skip state for reading log files */
-	enum eGB_skip skip;
+	bool skip;
 };
 
 /**
