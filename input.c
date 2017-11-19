@@ -66,6 +66,7 @@ SUCH DAMAGE.
 #define BUFLEN 60
 
 static int bitpos;		/* second */
+static bool eom_reached;	/* end-of-minute reached */
 static int buffer[BUFLEN];	/* wrap after BUFLEN positions */
 static FILE *logfile;		/* auto-appended in live mode */
 static int fd;			/* gpio file */
@@ -532,7 +533,6 @@ get_bit_file(void)
 {
 	static int oldinch;
 	static bool read_acc_minlen;
-	static bool dec_bp;
 	int inch;
 	char co[6];
 
@@ -566,7 +566,7 @@ get_bit_file(void)
 		if (oldinch != '\r' && oldinch != '\n') {
 			bit.t = read_acc_minlen ? 0 : 1000;
 			read_acc_minlen = false;
-			dec_bp = false;
+			eom_reached = true;
 			if (gb_res.marker == emark_none)
 				gb_res.marker = emark_minute;
 			else if (gb_res.marker == emark_toolong)
@@ -627,11 +627,8 @@ get_bit_file(void)
 	oldinch = inch;
 	inch = skip_invalid();
 	if (!feof(logfile)) {
-		if (!dec_bp && oldinch != '\r' && oldinch != '\n' && (inch == '\r' || inch == '\n' || inch == 'a' || inch == 'c')) {
-			dec_bp = true;
-			if (bitpos > 0)
-				bitpos--;
-		}
+		if (eom_reached && oldinch != '\r' && oldinch != '\n' && (inch == '\r' || inch == '\n' || inch == 'a' || inch == 'c'))
+			eom_reached = false;
 	} else
 		gb_res.done = true;
 	ungetc(inch, logfile);
@@ -655,7 +652,7 @@ next_bit(void)
 		bitpos = 0;
 	else if (!gb_res.skip)
 		bitpos++;
-	if (bitpos == BUFLEN) {
+	if (bitpos == BUFLEN && eom_reached) {
 		gb_res.marker = emark_toolong;
 		bitpos = 0;
 		return gb_res;
