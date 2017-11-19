@@ -34,8 +34,6 @@ SUCH DAMAGE.
 #include <string.h>
 #include <time.h>
 
-static int mainloop_result;
-
 static void
 check_handle_new_minute(struct GB_result bit, struct ML_result *mlr, int bitpos,
     struct tm *curtime, int minlen, bool was_toolong, unsigned *init_min,
@@ -83,9 +81,9 @@ check_handle_new_minute(struct GB_result bit, struct ML_result *mlr, int bitpos,
 		if (mlr->settime) {
 			have_result = true;
 			if (setclock_ok(*init_min, dt, bit))
-				mainloop_result = setclock(*curtime);
+				mlr->settime_result = setclock(*curtime);
 			else
-				mainloop_result = -3;
+				mlr->settime_result = esc_unsafe;
 		}
 		if (bit.marker == emark_minute ||
 		    bit.marker == emark_late)
@@ -178,10 +176,4 @@ mainloop(char *logfilename,
 			break;
 	}
 	cleanup();
-}
-
-int
-get_mainloop_result(void)
-{
-	return mainloop_result;
 }

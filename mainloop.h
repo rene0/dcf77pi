@@ -26,6 +26,8 @@ SUCH DAMAGE.
 #ifndef DCF77PI_MAINLOOP_H
 #define DCF77PI_MAINLOOP_H
 
+#include "setclock.h"
+
 #include <stdbool.h>
 struct DT_result;
 struct GB_result;
@@ -37,6 +39,7 @@ struct ML_result {
 	bool change_logfile;
 	bool quit;
 	bool settime;
+	enum eSC_status settime_result;
 	char *logfilename;
 };
 
@@ -81,12 +84,5 @@ void mainloop(char *logfilename,
     struct ML_result (*show_mainloop_result)(struct ML_result, int),
     struct ML_result (*process_input)(struct ML_result, int),
     struct ML_result (*post_process_input)(struct ML_result, int));
-
-/**
- * Get the result value set by {@link mainloop}.
- *
- * @return The result value set by {@link mainloop}.
- */
-int get_mainloop_result(void);
 
 #endif

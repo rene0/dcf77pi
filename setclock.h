@@ -31,6 +31,18 @@ struct DT_result;
 struct GB_result;
 struct tm;
 
+/** State for setting the clock */
+enum eSC_status {
+	/** Clock was set successfully */
+	esc_ok,
+	/** Time was invalid */
+	esc_invalid,
+	/** Settting the clock failed */
+	esc_fail,
+	/** Too early or unsafe to set the time */
+	esc_unsafe
+};
+
 /**
  * Check if it is OK to set the system clock.
  *
@@ -45,9 +57,8 @@ bool setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit);
  * Set the system clock according to the given time.
  *
  * @param settime The time to set the system clock to, in ISO or DCF77 format.
- * @return The clock was set successfully (0), or the time was invalid (-1),
- *   or setting the clock somehow failed (-2).
+ * @return Whether the clock was set successfully.
  */
-int setclock(struct tm settime);
+enum eSC_status setclock(struct tm settime);
 
 #endif

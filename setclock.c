@@ -49,7 +49,7 @@ setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit)
 	    (bit.marker == emark_none || bit.marker == emark_minute);
 }
 
-int
+enum eSC_status
 setclock(struct tm settime)
 {
 	time_t epochtime, t1, t2;
@@ -63,7 +63,7 @@ setclock(struct tm settime)
 	setlocale(LC_TIME, "");
 	t2 = mktime(&it);
 	if (t2 == -1)
-		return -1;
+		return esc_invalid;
 
 	if (settime.tm_year >= base_year)
 		it = get_isotime(settime);
@@ -73,11 +73,11 @@ setclock(struct tm settime)
 	it.tm_sec = 0;
 	epochtime = mktime(&it);
 	if (epochtime == -1)
-		return -1;
+		return esc_invalid;
 	ts.tv_sec = epochtime;
 	/* UTC if t1 == t2, so adjust from local time in that case */
 	if (t1 == t2)
 		ts.tv_sec -= 3600 * (1 + settime.tm_isdst);
 	ts.tv_nsec = 50000000; /* adjust for bit reception algorithm */
-	return (clock_settime(CLOCK_REALTIME, &ts) == -1) ? -2 : 0;
+	return (clock_settime(CLOCK_REALTIME, &ts) == -1) ? esc_fail : esc_ok;
 }

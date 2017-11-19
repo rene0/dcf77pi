@@ -30,6 +30,7 @@ SUCH DAMAGE.
 #include "decode_time.h"
 #include "input.h"
 #include "mainloop.h"
+#include "setclock.h"
 
 #include <curses.h>
 #include <errno.h>
@@ -467,20 +468,20 @@ show_mainloop_result(struct ML_result in_ml, int bitpos)
 
 	mlr = in_ml;
 	mlr.quit = false;
-	switch (get_mainloop_result()) {
-	case -1:
+	switch (mlr.settime_result) {
+	case esc_fail:
 		statusbar(bitpos, "mktime() failed");
 		mlr.quit = true; /* error */
 		break;
-	case -2:
+	case esc_invalid:
 		statusbar(bitpos, "clock_settime(): %s",
 		    strerror(errno));
 		mlr.quit = true; /* error */
 		break;
-	case -3:
+	case esc_unsafe:
 		statusbar(bitpos, "Too early or unsafe to set the time");
 		break;
-	default:
+	case esc_ok:
 		statusbar(bitpos, "Time set");
 		break;
 	}
