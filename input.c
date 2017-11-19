@@ -566,6 +566,10 @@ get_bit_file(void)
 		if (oldinch != '\r' && oldinch != '\n') {
 			bit.t = read_acc_minlen ? 0 : 1000;
 			read_acc_minlen = false;
+			/*
+			 * The marker checks must be inside the oldinch check
+			 * to prevent spurious emin_short errors
+			 */
 			if (gb_res.marker == emark_none)
 				gb_res.marker = emark_minute;
 			else if (gb_res.marker == emark_toolong)
