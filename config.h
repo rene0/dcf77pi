@@ -39,7 +39,7 @@ int read_config_file(const char * const filename);
  *
  * @param keyword: the key for the value to retrieve. Valid keys are:
  *   "pin", "iodev", "activehigh", "freq", "summermonth", "wintermonth",
- *   "leapsecmonths", "outlogfile"
+ *   "outlogfile"
  * @return The corresponding value, or NULL when the key was not found.
  */
 char *get_config_value(const char * const keyword);

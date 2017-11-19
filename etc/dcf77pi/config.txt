@@ -4,5 +4,4 @@ activehigh = 1
 freq = 1000
 summermonth = 3
 wintermonth = 10
-leapsecmonths = 3,6,9,12
 outlogfile =

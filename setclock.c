@@ -43,7 +43,6 @@ setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit)
 	    dt.month_status == eval_ok && dt.year_status == eval_ok &&
 	    dt.dst_announce != eann_error &&
 	    (dt.dst_status == eDST_ok || dt.dst_status == eDST_done) &&
-	    dt.leap_announce != eann_error &&
 	    dt.leapsecond_status != els_one &&
 	    !bit.bad_io && bit.bitval != ebv_none && bit.hwstat == ehw_ok &&
 	    (bit.marker == emark_none || bit.marker == emark_minute);

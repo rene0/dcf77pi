@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -117,8 +117,8 @@ struct DT_result {
 	enum eDT_leapsecond leapsecond_status;
 	/** DST announcement ok ? */
 	enum eDT_announce dst_announce;
-	/** leap second announcement ok ? */
-	enum eDT_announce leap_announce;
+	/** leap second announcement ? */
+	bool leap_announce;
 };
 
 /**
@@ -126,8 +126,6 @@ struct DT_result {
  * - summermonth, wintermonth: 1..12 or none for out-of-bound values
  *   These values indicate in which month a change to daylight-saving
  *   respectively normal time is allowed.
- * - leapsecmonths: 1..12 (1 or more), or none for out-of-bound values.
- *   These values indicate in which months a leap second is allowed.
  */
 void init_time(void);
 

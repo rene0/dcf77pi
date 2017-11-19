@@ -212,12 +212,10 @@ display_time(struct DT_result dt, struct tm time)
 		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 2, NULL);
 	else if (dt.dst_announce == eann_error)
 		mvwchgat(decode_win, 1, 57, 3, A_BOLD, 3, NULL);
-	if (dt.leap_announce == eann_none)
+	if (!dt.leap_announce)
 		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 8, NULL);
 	else if (dt.leapsecond_status == els_done)
 		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 2, NULL);
-	else if (dt.leap_announce == eann_error)
-		mvwchgat(decode_win, 1, 61, 4, A_BOLD, 3, NULL);
 	if (dt.minute_length == emin_long) {
 		mvwprintw(decode_win, 1, 67, "long ");
 		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 1, NULL);

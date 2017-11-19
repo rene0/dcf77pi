@@ -32,7 +32,7 @@ SUCH DAMAGE.
 
 static const char * const key[] = {
 	"pin", "iodev", "activehigh", "freq",
-	"summermonth", "wintermonth", "leapsecmonths", "outlogfile"
+	"summermonth", "wintermonth", "outlogfile"
 };
 /** Number of known keywords for the configuration file */
 #define NUM_KEYS (sizeof(key) / sizeof(key[0]))

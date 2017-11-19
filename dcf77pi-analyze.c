@@ -111,10 +111,8 @@ display_time(struct DT_result dt, struct tm time)
 		printf("Time offset change announced\n");
 	else if (dt.dst_announce == eann_error)
 		printf("Spurious time offset change announcement\n");
-	if (dt.leap_announce == eann_ok)
+	if (dt.leap_announce)
 		printf("Leap second announced\n");
-	else if (dt.leap_announce == eann_error)
-		printf("Spurious leap second announcement\n");
 	if (dt.leapsecond_status == els_done)
 		printf("Leap second processed\n");
 	else if (dt.leapsecond_status == els_one)
