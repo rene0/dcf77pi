@@ -43,7 +43,7 @@ check_handle_new_minute(struct GB_result bit, struct ML_result *mlr, int bitpos,
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(struct DT_result, struct tm),
-    struct ML_result (*show_mainloop_result)(struct ML_result, int))
+    struct ML_result (*process_setclock_result)(struct ML_result, int))
 {
 	bool have_result = false;
 
@@ -91,8 +91,8 @@ check_handle_new_minute(struct GB_result bit, struct ML_result *mlr, int bitpos,
 		if (*init_min > 0)
 			(*init_min)--;
 	}
-	if (have_result && show_mainloop_result != NULL)
-		*mlr = show_mainloop_result(*mlr, bitpos);
+	if (have_result && process_setclock_result != NULL)
+		*mlr = process_setclock_result(*mlr, bitpos);
 }
 
 void
@@ -107,7 +107,7 @@ mainloop(char *logfilename,
     void (*display_weather)(void),
     void (*display_time)(struct DT_result, struct tm),
     void (*display_thirdparty_buffer)(const unsigned[]),
-    struct ML_result (*show_mainloop_result)(struct ML_result, int),
+    struct ML_result (*process_setclock_result)(struct ML_result, int),
     struct ML_result (*process_input)(struct ML_result, int),
     struct ML_result (*post_process_input)(struct ML_result, int))
 {
@@ -148,7 +148,7 @@ mainloop(char *logfilename,
 			    minlen, was_toolong, &init_min, display_minute,
 			    display_thirdparty_buffer, display_alarm,
 			    display_unknown, display_weather, display_time,
-			    show_mainloop_result);
+			    process_setclock_result);
 			was_toolong = true;
 		}
 
@@ -170,7 +170,7 @@ mainloop(char *logfilename,
 		    was_toolong, &init_min, display_minute,
 		    display_thirdparty_buffer, display_alarm,
 		    display_unknown, display_weather, display_time,
-		    show_mainloop_result);
+		    process_setclock_result);
 		was_toolong = false;
 		if (bit.done || mlr.quit)
 			break;

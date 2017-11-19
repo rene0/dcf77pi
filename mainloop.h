@@ -29,6 +29,7 @@ SUCH DAMAGE.
 #include "setclock.h"
 
 #include <stdbool.h>
+
 struct DT_result;
 struct GB_result;
 struct alm;
@@ -64,8 +65,8 @@ struct ML_result {
  * @param display_time The callback to display the decoded time.
  * @param display_thirdparty_buffer The callback to display the third party
  *   buffer.
- * @param show_mainloop_result The optional callback to display the result of
- *   actions performed by {@link mainloop}.
+ * @param process_setclock_result The optional callback to display the result of
+ *   setting the system clock.
  * @param process_input The optional callback to handle interactive user input.
  * @param post_process_input The optional callback to finish handling
  *   interactive user input.
@@ -81,7 +82,7 @@ void mainloop(char *logfilename,
     void (*display_weather)(void),
     void (*display_time)(struct DT_result, struct tm),
     void (*display_thirdparty_buffer)(const unsigned[]),
-    struct ML_result (*show_mainloop_result)(struct ML_result, int),
+    struct ML_result (*process_setclock_result)(struct ML_result, int),
     struct ML_result (*process_input)(struct ML_result, int),
     struct ML_result (*post_process_input)(struct ML_result, int));
 

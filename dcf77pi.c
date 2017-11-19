@@ -462,7 +462,7 @@ display_minute(int minlen)
 }
 
 static struct ML_result
-show_mainloop_result(struct ML_result in_ml, int bitpos)
+process_setclock_result(struct ML_result in_ml, int bitpos)
 {
 	struct ML_result mlr;
 
@@ -587,7 +587,7 @@ main(int argc, char *argv[])
 	mainloop(logfilename, get_bit_live, display_bit,
 	    display_long_minute, display_minute, wipe_input, display_alarm,
 	    display_unknown, display_weather, display_time,
-	    display_thirdparty_buffer, show_mainloop_result, process_input,
+	    display_thirdparty_buffer, process_setclock_result, process_input,
 	    post_process_input);
 
 	curses_cleanup(NULL);
