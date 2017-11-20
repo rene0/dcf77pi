@@ -518,13 +518,24 @@ get_bit_live(void)
 static int
 skip_invalid(void)
 {
-	int inch = EOF;
+	int oldinch, inch = EOF;
 
 	do {
+		oldinch = inch;
 		if (feof(logfile))
 			break;
 		inch = getc(logfile);
-	} while (strchr("01\r\nxr#*_ac", inch) == NULL);
+		/*
+		 * \r\n is implicitly converted because \r is invalid character
+		 * \n\r is implicitly converted because \n is found first
+		 * \n is OK
+		 * convert \r to \n
+		 */
+		if (oldinch == '\r' && inch != '\n') {
+			ungetc(inch, logfile);
+			inch = '\n';
+		}
+	} while (strchr("01\nxr#*_ac", inch) == NULL);
 	return inch;
 }
 
@@ -555,7 +566,6 @@ get_bit_file(void)
 		gb_res.bitval = (inch == (int)'0') ? ebv_0 : ebv_1;
 		bit.t = 1000;
 		break;
-	case '\r':
 	case '\n':
 		/*
 		 * Skip multiple consecutive EOM markers,
@@ -563,7 +573,7 @@ get_bit_file(void)
 		 * invocation in get_bit_live()
 		 */
 		gb_res.skip = true;
-		if (oldinch != '\r' && oldinch != '\n') {
+		if (oldinch != '\n') {
 			bit.t = read_acc_minlen ? 0 : 1000;
 			read_acc_minlen = false;
 			/*
@@ -630,9 +640,8 @@ get_bit_file(void)
 	oldinch = inch;
 	inch = skip_invalid();
 	if (!feof(logfile)) {
-		if (oldinch != '\r' && oldinch != '\n' && (inch == '\r' ||
-		    inch == '\n' || inch == 'a' || inch == 'c') &&
-		    dec_bp == 0 && bitpos > 0)
+		if (dec_bp == 0 && bitpos > 0 && oldinch != '\n' &&
+		    (inch == '\n' || inch == 'a' || inch == 'c'))
 			dec_bp = 1;
 	} else
 		gb_res.done = true;
