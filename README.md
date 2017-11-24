@@ -35,16 +35,9 @@ The meaning of the keywords in config.txt is:
 * iodev         = GPIO device number (FreeBSD only)
 * activehigh    = pulses are active high (1) or passive high (0)
 * freq          = sample frequency in Hz (10-155000)
-* summermonth   = month in which daylight saving time starts
-* wintermonth   = month in which daylight saving time ends
-* leapsecmonths = months (in UTC) in which a leap second might be inserted
 * outlogfile    = name of the output logfile which can be read back using
   dcf77pi-analyze (default empty). The log file itself only stores the
   received bits, but not the decoded date and time.
-
-Note that a value of 0 can be used for summermonth, wintermonth, or
-leapsecmonths to disallow daylight saving time changes or leap seconds.
-Otherwise use one or more values from 1 to 12.
 
 The end of the minute is noted by the absence of high pulses. An absence of low
 pulses probably means that the transmitter is out of range. Any other situation
