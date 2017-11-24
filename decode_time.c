@@ -262,7 +262,8 @@ handle_leap_second(unsigned errflags, int minlen, const int buffer[],
 	/* determine if a leap second is announced */
 	if (buffer[19] == 1 && errflags == 0)
 		leap_count++;
-	dt_res.leap_announce = 2 * leap_count > time.tm_min;
+	if (time.tm_min > 0)
+		dt_res.leap_announce = 2 * leap_count > time.tm_min;
 
 	/* process possible leap second */
 	if (dt_res.leap_announce && time.tm_min == 0) {
