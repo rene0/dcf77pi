@@ -115,8 +115,8 @@ struct DT_result {
 	enum eDT_DST dst_status;
 	/** leap second ok ? */
 	enum eDT_leapsecond leapsecond_status;
-	/** DST announcement ok ? */
-	enum eDT_announce dst_announce;
+	/** DST announcement ? */
+	bool dst_announce;
 	/** leap second announcement ? */
 	bool leap_announce;
 };

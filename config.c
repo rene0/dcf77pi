@@ -31,8 +31,7 @@ SUCH DAMAGE.
 #include <string.h>
 
 static const char * const key[] = {
-	"pin", "iodev", "activehigh", "freq",
-	"summermonth", "wintermonth", "outlogfile"
+	"pin", "iodev", "activehigh", "freq", "outlogfile"
 };
 /** Number of known keywords for the configuration file */
 #define NUM_KEYS (sizeof(key) / sizeof(key[0]))

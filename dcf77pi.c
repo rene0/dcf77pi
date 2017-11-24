@@ -206,12 +206,10 @@ display_time(struct DT_result dt, struct tm time)
 	/* flip lights depending on the results */
 	if (!dt.transmit_call)
 		mvwchgat(decode_win, 1, 50, 6, A_NORMAL, 8, NULL);
-	if (dt.dst_announce == eann_none)
+	if (!dt.dst_announce)
 		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 8, NULL);
 	else if (dt.dst_status == eDST_done)
 		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 2, NULL);
-	else if (dt.dst_announce == eann_error)
-		mvwchgat(decode_win, 1, 57, 3, A_BOLD, 3, NULL);
 	if (!dt.leap_announce)
 		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 8, NULL);
 	else if (dt.leapsecond_status == els_done)

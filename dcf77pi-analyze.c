@@ -107,10 +107,8 @@ display_time(struct DT_result dt, struct tm time)
 		printf("Date/time start marker error\n");
 	if (dt.transmit_call)
 		printf("Transmitter call bit set\n");
-	if (dt.dst_announce == eann_ok)
+	if (dt.dst_announce)
 		printf("Time offset change announced\n");
-	else if (dt.dst_announce == eann_error)
-		printf("Spurious time offset change announcement\n");
 	if (dt.leap_announce)
 		printf("Leap second announced\n");
 	if (dt.leapsecond_status == els_done)

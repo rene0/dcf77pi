@@ -106,15 +106,14 @@ get_utchour(struct tm time)
 }
 
 void
-add_minute(struct tm * const time, int summermonth, int wintermonth)
+add_minute(struct tm * const time, bool dst_changes)
 {
 	if (++time->tm_min == 60) {
 		time->tm_min = 0;
-		if (time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7 &&
-		    get_utchour(*time) == 0) {
-			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
+		if (dst_changes) {
+			if (time->tm_isdst == 1)
 				time->tm_hour--; /* will become non-DST */
-			if (time->tm_isdst == 0 && time->tm_mon == summermonth)
+			if (time->tm_isdst == 0)
 				time->tm_hour++; /* will become DST */
 		}
 		if (++time->tm_hour == 24) {
@@ -135,16 +134,15 @@ add_minute(struct tm * const time, int summermonth, int wintermonth)
 }
 
 void
-substract_minute(struct tm * const time, int summermonth, int wintermonth)
+substract_minute(struct tm * const time, bool dst_changes)
 {
 	if (--time->tm_min == -1) {
 		time->tm_min = 59;
-		if (time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7 &&
-		    get_utchour(*time) == 1) {
+		if (dst_changes) {
 			/* logic is backwards here */
-			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
+			if (time->tm_isdst == 1)
 				time->tm_hour++; /* will become DST */
-			if (time->tm_isdst == 0 && time->tm_mon == summermonth)
+			if (time->tm_isdst == 0)
 				time->tm_hour--; /* will become non-DST */
 		}
 		if (--time->tm_hour == -1) {
