@@ -24,7 +24,7 @@ objbin=dcf77pi.o dcf77pi-analyze.o readpin.o testcentury.o
 
 input.o: input.h config.h
 	$(CC) -fpic $(CFLAGS) -c input.c -o $@
-decode_time.o: decode_time.h config.h calendar.h
+decode_time.o: decode_time.h calendar.h
 	$(CC) -fpic $(CFLAGS) -c decode_time.c -o $@
 decode_alarm.o: decode_alarm.h
 	$(CC) -fpic $(CFLAGS) -c decode_alarm.c -o $@

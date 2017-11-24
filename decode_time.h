@@ -51,16 +51,6 @@ enum eDT_tval {
 	eval_jump
 };
 
-/** State of the various announcements */
-enum eDT_announce {
-	/** no announcement */
-	eann_none,
-	/** unexpected announcement */
-	eann_error,
-	/** announcement ok */
-	eann_ok
-};
-
 /** Daylight saving time state */
 enum eDT_DST {
 	/** daylight saving time ok */
@@ -120,14 +110,6 @@ struct DT_result {
 	/** leap second announcement ? */
 	bool leap_announce;
 };
-
-/**
- * Initialize the month values from the configuration:
- * - summermonth, wintermonth: 1..12 or none for out-of-bound values
- *   These values indicate in which month a change to daylight-saving
- *   respectively normal time is allowed.
- */
-void init_time(void);
 
 /**
  * Decodes the current time from the internal bit buffer.

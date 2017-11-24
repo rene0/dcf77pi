@@ -26,21 +26,13 @@ SUCH DAMAGE.
 #include "decode_time.h"
 
 #include "calendar.h"
-#include "config.h"
 
 #include <stdbool.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 static int dst_count, leap_count;
 static struct DT_result dt_res;
-
-void
-init_time(void)
-{
-
-}
 
 static bool
 getpar(const int buffer[], unsigned start, unsigned stop)

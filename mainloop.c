@@ -118,7 +118,6 @@ mainloop(char *logfilename,
 	struct ML_result mlr;
 	bool was_toolong = false;
 
-	init_time();
 	(void)memset(&curtime, 0, sizeof(curtime));
 	(void)memset(&mlr, 0, sizeof(mlr));
 	mlr.logfilename = logfilename;
