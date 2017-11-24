@@ -249,8 +249,7 @@ stamp_date_time(unsigned errflags, struct tm newtime, struct tm * const time)
 }
 
 static unsigned
-handle_leap_second(unsigned errflags, int minlen, const int buffer[],
-     struct tm time)
+handle_leap_second(unsigned errflags, int minlen, const int buffer[], struct tm time)
 {
 	/* determine if a leap second is announced */
 	if (buffer[19] == 1 && errflags == 0)
@@ -276,8 +275,10 @@ handle_leap_second(unsigned errflags, int minlen, const int buffer[],
 	}
 
 	/* always reset announcement at hh:00 */
-	if (time.tm_min == 0)
+	if (time.tm_min == 0) {
+		dt_res.leap_announce = false;
 		leap_count = 0;
+	}
 
 	return errflags;
 }
