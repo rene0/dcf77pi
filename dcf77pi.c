@@ -25,13 +25,13 @@ SUCH DAMAGE.
 
 #include "bits1to14.h"
 #include "calendar.h"
-#include "config.h"
 #include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
 #include "mainloop.h"
 #include "setclock.h"
 
+#include <json.h>
 #include <curses.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -39,6 +39,7 @@ SUCH DAMAGE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sysexits.h>
 #include <time.h>
 
 #define MAXBUF 255
@@ -488,16 +489,18 @@ process_setclock_result(struct ML_result in_ml, int bitpos)
 int
 main(int argc, char *argv[])
 {
+	struct json_object *config, *value;
 	int res;
-	char *logfilename;
+	char *logfilename = NULL;
 
-	res = read_config_file(ETCDIR"/config.txt");
-	if (res != 0) {
+	config = json_object_from_file(ETCDIR"/config.json");
+	if (config == NULL) {
 		/* non-existent file? */
 		cleanup();
-		return res;
+		return EX_NOINPUT;
 	}
-	logfilename = get_config_value("outlogfile");
+	if (json_object_object_get_ex(config, "outlogfile", &value))
+		logfilename = (char *)(json_object_get_string(value));
 	if (logfilename != NULL && strlen(logfilename) != 0) {
 		res = append_logfile(logfilename);
 		if (res != 0) {
@@ -505,7 +508,7 @@ main(int argc, char *argv[])
 			return res;
 		}
 	}
-	res = set_mode_live();
+	res = set_mode_live(config);
 	if (res != 0) {
 		/* something went wrong */
 		cleanup();

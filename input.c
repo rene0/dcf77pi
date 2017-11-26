@@ -25,14 +25,14 @@ SUCH DAMAGE.
 
 #include "input.h"
 
-#include "config.h"
-
+#include <json.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sysexits.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -95,7 +95,7 @@ set_mode_file(const char * const infilename)
 }
 
 int
-set_mode_live(void)
+set_mode_live(struct json_object *config)
 {
 #if defined(NOLIVE)
 	fprintf(stderr, "No GPIO interface available, "
@@ -107,6 +107,7 @@ set_mode_live(void)
 	struct gpio_pin pin;
 #endif
 	char buf[64];
+	struct json_object *value;
 	int res;
 
 	if (filemode == 2) {
@@ -115,9 +116,27 @@ set_mode_live(void)
 		return -1;
 	}
 	/* fill hardware structure and initialize hardware */
-	hw.pin = (unsigned)strtol(get_config_value("pin"), NULL, 10);
-	hw.active_high = (bool)strtol(get_config_value("activehigh"), NULL, 10);
-	hw.freq = (unsigned)strtol(get_config_value("freq"), NULL, 10);
+	if (json_object_object_get_ex(config, "pin", &value))
+		hw.pin = (unsigned)json_object_get_int(value);
+	else {
+		fprintf(stderr, "Key 'pin' not found\n");
+		cleanup();
+		return EX_DATAERR;
+	}
+	if (json_object_object_get_ex(config, "activehigh", &value))
+		hw.active_high = (bool)json_object_get_boolean(value);
+	else {
+		fprintf(stderr, "Key 'activehigh' not found\n");
+		cleanup();
+		return EX_DATAERR;
+	}
+	if (json_object_object_get_ex(config, "freq", &value))
+		hw.freq = (unsigned)json_object_get_int(value);
+	else {
+		fprintf(stderr, "Key 'freq' not found\n");
+		cleanup();
+		return EX_DATAERR;
+	}
 	if (hw.freq < 10 || hw.freq > 155000 || (hw.freq & 1) == 1) {
 		fprintf(stderr, "hw.freq must be an even number between 10 "
 		    "and 155000 inclusive\n");
@@ -126,7 +145,13 @@ set_mode_live(void)
 	}
 	bit.signal = malloc(hw.freq / 2);
 #if defined(__FreeBSD__)
-	hw.iodev = (unsigned)strtol(get_config_value("iodev"), NULL, 10);
+	if (json_object_object_get_ex(config, "iodev", &value))
+		hw.iodev = (unsigned)json_object_get_int(value);
+	else {
+		fprintf(stderr, "Key 'iodev' not found\n");
+		cleanup();
+		return EX_DATAERR;
+	}
 	res = snprintf(buf, sizeof(buf), "/dev/gpioc%u", hw.iodev);
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.iodev too high? (%i)\n", res);

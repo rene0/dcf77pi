@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -23,9 +23,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 */
 
-#include "config.h"
 #include "input.h"
 
+#include <json.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -47,6 +47,7 @@ main(int argc, char *argv[])
 {
 	struct sigaction sigact;
 	struct hardware hw;
+	struct json_object *config;
 	int ch, min, res;
 	bool raw = false, verbose = true;
 
@@ -64,12 +65,12 @@ main(int argc, char *argv[])
 		}
 	}
 
-	res = read_config_file(ETCDIR"/config.txt");
-	if (res != 0) {
+	config = json_object_from_file(ETCDIR"/config.json");
+	if (config == NULL) {
 		cleanup();
-		return res;
+		return EX_NOINPUT;
 	}
-	res = set_mode_live();
+	res = set_mode_live(config);
 	if (res != 0) {
 		cleanup();
 		return res;

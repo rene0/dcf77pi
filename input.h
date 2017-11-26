@@ -28,6 +28,8 @@ SUCH DAMAGE.
 
 #include <stdbool.h>
 
+struct json_object;
+
 /** Value of the bit received by radio or log file */
 enum eGB_bitvalue {
 	/** this bit has value 0 */
@@ -136,9 +138,11 @@ int set_mode_file(const char * const infilename);
  * The sample rate is set to {@link hardware.freq} Hz, reading from pin
  * {@link hardware.pin} using {@link hardware.active_high} logic.
  *
+ * @param config The JSON object containing the parsed configuration from
+ *  config.json
  * @return Preparation was succesful (0), -1 or errno otherwise.
  */
-int set_mode_live(void);
+int set_mode_live(struct json_object *config);
 
 /**
  * Return the hardware parameters.
