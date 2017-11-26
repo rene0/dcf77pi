@@ -143,7 +143,7 @@ display_weather(void)
 void
 display_long_minute(void)
 {
-	printf(" L");
+	printf(" L ");
 }
 
 void
