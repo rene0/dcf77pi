@@ -1,3 +1,6 @@
+# Copyright 2013-2017 René Ladan
+# SPDX-License-Identifier: BSD-2-Clause
+
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
 	uninstall-doxygen cppcheck iwyu test
 
@@ -87,6 +90,9 @@ install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	mkdir -p $(DESTDIR)$(PREFIX)/$(ETCDIR)
 	$(INSTALL) -m 0644 etc/dcf77pi/config.json \
 		$(DESTDIR)$(PREFIX)/$(ETCDIR)/config.json.sample
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
+	$(INSTALL) -m 0644 LICENSE.md
+		$(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
