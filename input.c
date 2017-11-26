@@ -141,7 +141,7 @@ set_mode_live(struct json_object *config)
 		fprintf(stderr, "hw.freq must be an even number between 10 "
 		    "and 155000 inclusive\n");
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	bit.signal = malloc(hw.freq / 2);
 #if defined(__FreeBSD__)
@@ -156,7 +156,7 @@ set_mode_live(struct json_object *config)
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.iodev too high? (%i)\n", res);
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	fd = open(buf, O_RDONLY);
 	if (fd < 0) {
@@ -183,7 +183,7 @@ set_mode_live(struct json_object *config)
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	if (write(fd, buf, res) < 0) {
 		if (errno != EBUSY) {
@@ -202,7 +202,7 @@ set_mode_live(struct json_object *config)
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	fd = open(buf, O_RDWR);
 	if (fd < 0) {
@@ -225,7 +225,7 @@ set_mode_live(struct json_object *config)
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	fd = open(buf, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
