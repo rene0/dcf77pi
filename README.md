@@ -52,7 +52,7 @@ Currently supporrted platforms:
 * Cygwin, MacOS, NetBSD: supported without GPIO communication for live decoding
 * Windows: only via Cygwin
 
-On Linux, you will have to install an (n)curses package development using your
+On Linux, you will have to install an (n)curses development package using your
 package manager to get the required header files and the .so library file.
 For example:
 ```sh
