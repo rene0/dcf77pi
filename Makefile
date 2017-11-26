@@ -106,19 +106,20 @@ install-md:
 	$(INSTALL) -m 0644 *.md \
 		$(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
-uninstall:
+uninstall: uninstall-doxygen uninstall-md
 	rm -f $(DESTDIR)$(PREFIX)/lib/libdcf77.so
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi-analyze
 	rm -f $(DESTDIR)$(PREFIX)/bin/readpin
 	rm -rf $(DESTDIR)$(PREFIX)/include/dcf77pi
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
+	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
 uninstall-doxygen:
 	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/html
 
 uninstall-md:
-	rm $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/*.md
+	rm -f $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/*.md
 
 cppcheck:
 	cppcheck -D__CYGWIN__ $(CPPCHECK_ARGS) . || true
