@@ -25,7 +25,6 @@ SUCH DAMAGE.
 
 #include "bits1to14.h"
 #include "calendar.h"
-#include "config.h"
 #include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
@@ -181,13 +180,6 @@ main(int argc, char *argv[])
 		return EX_USAGE;
 	}
 
-	res = read_config_file(ETCDIR"/config.txt");
-	if (res != 0) {
-		/* non-existent file? */
-		cleanup();
-		free(logfilename);
-		return res;
-	}
 	res = set_mode_file(logfilename);
 	if (res != 0) {
 		/* something went wrong */
