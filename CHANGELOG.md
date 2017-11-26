@@ -1,3 +1,35 @@
+Version 3.7.0 --
+* Replace verbose license texts in source files by SPDX identifiers.
+* Makefile: always install LICENSE.md and fix uninstall target.
+* Fix revival of issue #19.
+* Do not use leapsecmonth to determine when a leap second announcement is
+  valid, but count the number of valid 1 values of bit 19 in the preceding
+  hour. If at least 50% of them are valid, the announcement is considered
+  valid [closes issue #24].
+* Anologous to the leap second announcement, use the number of valid 1 values
+  of bit 16 instead of summermonth and wintermonth. [closes issue #24]
+* Make fields dst\_announce and leap\_announce of DT\_result a boolean as
+  invalid announcements are now impossible [closes issue #24].
+* Do not insist on DST changes only being valid on the last Sunday of the
+  month at 01:00 UTC in add\_minute() and substract\_minute() [closes issue #24]
+* Remove leapsecmonth, summermonth and wintermonth from config.txt [closes
+  issue #24]
+* Replace config.txt by config.json, its equivalent in JSON. Update Makefile
+  to compile/link various source files against json-c. set\_mode\_live() now
+  takes a json\_object\* parameter that contains the parsed configuration.
+  Remove now obsolete config.c and config.h [closes issue #11]
+* Makefile: link testcentury only against calendar.o instead of libdcf77.so
+* dcf77pi-analyze: no need to depend on the configuration file after removal
+  of the month parameters.
+* Only allow to set the system clock on the hour.
+* Use new enumeration eSC\_status to report the result of setting the system
+  clock instead of an integer, return this value via a new field in
+  ML\_result instead of using get\_mainloop\_result()
+* Rename show\_mainloop\_result() into process\_setclock\_result()
+* Return move values from sysexists.h in set\_mode\_live()
+* dcf77pi: increase the the of status bar messages to four seconds.
+* Update README for #11 and #24
+
 Version 3.6.1 -- 2017-11-19
 * Makefile: drop splint target, does not work with Clang 4.0.0/FreeBSD 12
   nor with GCC 5.4.0/Ubuntu 16.04 [issue #6]
