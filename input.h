@@ -145,7 +145,7 @@ int set_mode_file(const char * const infilename);
 int set_mode_live(struct json_object *config);
 
 /**
- * Return the hardware parameters.
+ * Return the hardware parameters parsed from {@link set_mode_live}.
  *
  * @return The hardware parameters.
  */
@@ -174,7 +174,7 @@ struct GB_result get_bit_file(void);
 
 /**
  * Retrieve one live bit from the hardware. This function determines several
- * values which can be retrieved using get_bitinfo().
+ * values which can be retrieved using {@link get_bitinfo}.
  *
  * @return The currently received bit and its full status.
  */
