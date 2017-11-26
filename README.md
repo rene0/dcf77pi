@@ -29,11 +29,11 @@ The software comes with three binaries and a library:
   third party buffer. Both dcf77pi and dcf77pi-analyze use this library. Header
   files to use the library in your own software are supplied.
 
-The meaning of the keywords in config.txt is:
+The meaning of the keywords in config.json is:
 
 * pin           = GPIO pin number (0-65535)
 * iodev         = GPIO device number (FreeBSD only)
-* activehigh    = pulses are active high (1) or passive high (0)
+* activehigh    = pulses are active high (true) or passive high (false)
 * freq          = sample frequency in Hz (10-155000)
 * outlogfile    = name of the output logfile which can be read back using
   dcf77pi-analyze (default empty). The log file itself only stores the
@@ -57,6 +57,13 @@ package manager to get the required header files and the .so library file.
 For example:
 ```sh
 % sudo apt-get install ncurses-devel
+```
+
+You will also need to install a json-c development package and a package
+providing pkg-config:
+For example, on FreeBSD:
+```sh
+% sudo pkg install json-c pkgconf
 ```
 
 To build and install the program into /usr/bin , the library into /usr/lib and
