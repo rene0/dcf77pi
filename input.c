@@ -543,10 +543,10 @@ get_bit_live(void)
 static int
 skip_invalid(void)
 {
-	int oldinch, inch = EOF;
+	int inch = EOF;
 
 	do {
-		oldinch = inch;
+		int oldinch = inch;
 		if (feof(logfile))
 			break;
 		inch = getc(logfile);
