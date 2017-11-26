@@ -49,9 +49,10 @@ dcf77pi.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 dcf77pi: dcf77pi.o libdcf77.so
 	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so $(JSON_L)
 
-dcf77pi-analyze.o: bits1to14.h config.h decode_alarm.h decode_time.h input.h \
+dcf77pi-analyze.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h
 dcf77pi-analyze: dcf77pi-analyze.o libdcf77.so
+	$(CC) -fpic $(CFLAGS) -c dcf77pi-analyze.c -o $@
 	$(CC) -o $@ dcf77pi-analyze.o libdcf77.so
 
 readpin.o: input.h
