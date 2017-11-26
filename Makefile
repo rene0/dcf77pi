@@ -57,8 +57,9 @@ readpin: readpin.o libdcf77.so
 	$(CC) -o $@ readpin.o libdcf77.so
 
 testcentury.o: calendar.h
-testcentury: testcentury.o libdcf77.so
-	$(CC) -o $@ testcentury.o libdcf77.so
+testcentury: testcentury.o calendar.o
+	$(CC) -fpic $(CFLAGS) -c testcentury.c -o $@
+	$(CC) -o $@ testcentury.o calendar.o
 
 doxygen:
 	doxygen
