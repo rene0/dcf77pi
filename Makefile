@@ -1,3 +1,6 @@
+# Copyright 2013-2017 René Ladan
+# SPDX-License-Identifier: BSD-2-Clause
+
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
 	uninstall-doxygen cppcheck iwyu test
 
@@ -87,6 +90,9 @@ install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	mkdir -p $(DESTDIR)$(PREFIX)/$(ETCDIR)
 	$(INSTALL) -m 0644 etc/dcf77pi/config.json \
 		$(DESTDIR)$(PREFIX)/$(ETCDIR)/config.json.sample
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
+	$(INSTALL) -m 0644 LICENSE.md
+		$(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
@@ -100,19 +106,20 @@ install-md:
 	$(INSTALL) -m 0644 *.md \
 		$(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
-uninstall:
+uninstall: uninstall-doxygen uninstall-md
 	rm -f $(DESTDIR)$(PREFIX)/lib/libdcf77.so
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi-analyze
 	rm -f $(DESTDIR)$(PREFIX)/bin/readpin
 	rm -rf $(DESTDIR)$(PREFIX)/include/dcf77pi
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
+	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
 uninstall-doxygen:
 	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/html
 
 uninstall-md:
-	rm $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/*.md
+	rm -f $(DESTDIR)$(PREFIX)/share/doc/dcf77pi/*.md
 
 cppcheck:
 	cppcheck -D__CYGWIN__ $(CPPCHECK_ARGS) . || true
