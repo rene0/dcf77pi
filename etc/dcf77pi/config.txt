@@ -1,8 +1,0 @@
-pin = 17
-iodev = 0
-activehigh = 1
-freq = 100
-summermonth = 3
-wintermonth = 10
-leapsecmonths = 3,6,9,12
-outlogfile =

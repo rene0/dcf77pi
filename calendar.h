@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 René Ladan. All rights reserved.
+Copyright (c) 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -86,14 +86,12 @@ int get_utchour(struct tm time);
  * {@link base_year} + 400.
  *
  * Leap years and switches to and from daylight saving time are taken into
- * account. The latter can be disabled by setting summermonth
- * respectively wintermonth to 0.
+ * account. The latter can be disabled by forcing {@link dst_changes} to false.
  *
  * @param time The current time to be increased with one minute.
- * @param summermonth The month that DST begins in.
- * @param wintermonth The month that DST ends in.
+ * @param dst_changes The daylight saving time is about to start or end.
  */
-void add_minute(struct tm * const time, int summermonth, int wintermonth);
+void add_minute(struct tm * const time, bool dst_changes);
 
 /**
  * Substracts one minute to the current time. Note that
@@ -101,14 +99,12 @@ void add_minute(struct tm * const time, int summermonth, int wintermonth);
  * {@link base_year} - 1.
  *
  * Leap years and switches to and from daylight saving time are taken into
- * account. The latter can be disabled by setting summermonth
- * respectively wintermonth to 0.
+ * account. The latter can be disabled by forcing {@link dst_changes} to false.
  *
  * @param time The current time to be decreased with one minute.
- * @param summermonth The month that DST begins in.
- * @param wintermonth The month that DST ends in.
+ * @param dst_changes The daylight saving time is about to start or end.
  */
-void substract_minute(struct tm * const time, int summermonth, int wintermonth);
+void substract_minute(struct tm * const time, bool dst_changes);
 
 /**
  * Convert the given time in ISO format to DCF77 format.

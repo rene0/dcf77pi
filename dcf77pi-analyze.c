@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -25,7 +25,6 @@ SUCH DAMAGE.
 
 #include "bits1to14.h"
 #include "calendar.h"
-#include "config.h"
 #include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
@@ -107,14 +106,10 @@ display_time(struct DT_result dt, struct tm time)
 		printf("Date/time start marker error\n");
 	if (dt.transmit_call)
 		printf("Transmitter call bit set\n");
-	if (dt.dst_announce == eann_ok)
+	if (dt.dst_announce)
 		printf("Time offset change announced\n");
-	else if (dt.dst_announce == eann_error)
-		printf("Spurious time offset change announcement\n");
-	if (dt.leap_announce == eann_ok)
+	if (dt.leap_announce)
 		printf("Leap second announced\n");
-	else if (dt.leap_announce == eann_error)
-		printf("Spurious leap second announcement\n");
 	if (dt.leapsecond_status == els_done)
 		printf("Leap second processed\n");
 	else if (dt.leapsecond_status == els_one)
@@ -147,7 +142,7 @@ display_weather(void)
 void
 display_long_minute(void)
 {
-	printf(" L");
+	printf(" L ");
 }
 
 void
@@ -185,13 +180,6 @@ main(int argc, char *argv[])
 		return EX_USAGE;
 	}
 
-	res = read_config_file(ETCDIR"/config.txt");
-	if (res != 0) {
-		/* non-existent file? */
-		cleanup();
-		free(logfilename);
-		return res;
-	}
 	res = set_mode_file(logfilename);
 	if (res != 0) {
 		/* something went wrong */

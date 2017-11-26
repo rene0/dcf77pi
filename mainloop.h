@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -26,7 +26,10 @@ SUCH DAMAGE.
 #ifndef DCF77PI_MAINLOOP_H
 #define DCF77PI_MAINLOOP_H
 
+#include "setclock.h"
+
 #include <stdbool.h>
+
 struct DT_result;
 struct GB_result;
 struct alm;
@@ -37,6 +40,7 @@ struct ML_result {
 	bool change_logfile;
 	bool quit;
 	bool settime;
+	enum eSC_status settime_result;
 	char *logfilename;
 };
 
@@ -61,32 +65,25 @@ struct ML_result {
  * @param display_time The callback to display the decoded time.
  * @param display_thirdparty_buffer The callback to display the third party
  *   buffer.
- * @param show_mainloop_result The optional callback to display the result of
- *   actions performed by {@link mainloop}.
+ * @param process_setclock_result The optional callback to display the result of
+ *   setting the system clock.
  * @param process_input The optional callback to handle interactive user input.
  * @param post_process_input The optional callback to finish handling
  *   interactive user input.
  */
-void mainloop(/*@null@*/char *logfilename,
+void mainloop(char *logfilename,
     struct GB_result (*get_bit)(void),
     void (*display_bit)(struct GB_result, int),
     void (*display_long_minute)(void),
     void (*display_minute)(int),
-    /*@null@*/void (*display_new_second)(void),
+    void (*display_new_second)(void),
     void (*display_alarm)(struct alm),
     void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(struct DT_result, struct tm),
     void (*display_thirdparty_buffer)(const unsigned[]),
-    /*@null@*/struct ML_result (*show_mainloop_result)(struct ML_result, int),
-    /*@null@*/struct ML_result (*process_input)(struct ML_result, int),
-    /*@null@*/struct ML_result (*post_process_input)(struct ML_result, int));
-
-/**
- * Get the result value set by {@link mainloop}.
- *
- * @return The result value set by {@link mainloop}.
- */
-int get_mainloop_result(void);
+    struct ML_result (*process_setclock_result)(struct ML_result, int),
+    struct ML_result (*process_input)(struct ML_result, int),
+    struct ML_result (*post_process_input)(struct ML_result, int));
 
 #endif

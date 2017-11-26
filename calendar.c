@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 René Ladan. All rights reserved.
+Copyright (c) 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -106,15 +106,14 @@ get_utchour(struct tm time)
 }
 
 void
-add_minute(struct tm * const time, int summermonth, int wintermonth)
+add_minute(struct tm * const time, bool dst_changes)
 {
 	if (++time->tm_min == 60) {
 		time->tm_min = 0;
-		if (time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7 &&
-		    get_utchour(*time) == 0) {
-			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
+		if (dst_changes) {
+			if (time->tm_isdst == 1)
 				time->tm_hour--; /* will become non-DST */
-			if (time->tm_isdst == 0 && time->tm_mon == summermonth)
+			if (time->tm_isdst == 0)
 				time->tm_hour++; /* will become DST */
 		}
 		if (++time->tm_hour == 24) {
@@ -135,16 +134,15 @@ add_minute(struct tm * const time, int summermonth, int wintermonth)
 }
 
 void
-substract_minute(struct tm * const time, int summermonth, int wintermonth)
+substract_minute(struct tm * const time, bool dst_changes)
 {
 	if (--time->tm_min == -1) {
 		time->tm_min = 59;
-		if (time->tm_wday == 7 && time->tm_mday > lastday(*time) - 7 &&
-		    get_utchour(*time) == 1) {
+		if (dst_changes) {
 			/* logic is backwards here */
-			if (time->tm_isdst == 1 && time->tm_mon == wintermonth)
+			if (time->tm_isdst == 1)
 				time->tm_hour++; /* will become DST */
-			if (time->tm_isdst == 0 && time->tm_mon == summermonth)
+			if (time->tm_isdst == 0)
 				time->tm_hour--; /* will become non-DST */
 		}
 		if (--time->tm_hour == -1) {
@@ -177,7 +175,6 @@ get_dcftime(struct tm isotime)
 	dt.tm_yday = dayinleapyear[isotime.tm_mon] + dt.tm_mday;
 	if (dt.tm_mon > 2 && !isleapyear(dt))
 		dt.tm_yday--;
-	dt.tm_zone = NULL;
 
 	return dt;
 }
@@ -192,10 +189,9 @@ get_isotime(struct tm dcftime)
 	it.tm_year -= 1900;
 	if (it.tm_wday == 7)
 		it.tm_wday = 0;
-	it.tm_yday = dayinleapyear[it.tm_mon] + it.tm_mday;
+	it.tm_yday = dayinleapyear[it.tm_mon] + it.tm_mday - 1;
 	if (dcftime.tm_mon > 2 && !isleapyear(dcftime))
 		it.tm_yday--;
-	it.tm_zone = NULL;
 
 	return it;
 }

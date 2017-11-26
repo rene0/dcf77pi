@@ -1,0 +1,7 @@
+{
+	"pin" : 17,
+	"iodev" : 0,
+	"activehigh" : true,
+	"freq" : 1000,
+	"outlogfile" : ""
+}

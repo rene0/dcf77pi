@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -56,6 +56,6 @@ void decode_alarm(const unsigned civbuf[], struct alm * const alarm);
  * @param alarm The structure containing the alarm information.
  * @return The region name.
  */
-/*@null@*/const char * const get_region_name(struct alm alarm);
+const char * const get_region_name(struct alm alarm);
 
 #endif

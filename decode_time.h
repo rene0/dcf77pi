@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -49,16 +49,6 @@ enum eDT_tval {
 	eval_parity,
 	/** value ok but jumped */
 	eval_jump
-};
-
-/** State of the various announcements */
-enum eDT_announce {
-	/** no announcement */
-	eann_none,
-	/** unexpected announcement */
-	eann_error,
-	/** announcement ok */
-	eann_ok
 };
 
 /** Daylight saving time state */
@@ -115,21 +105,11 @@ struct DT_result {
 	enum eDT_DST dst_status;
 	/** leap second ok ? */
 	enum eDT_leapsecond leapsecond_status;
-	/** DST announcement ok ? */
-	enum eDT_announce dst_announce;
-	/** leap second announcement ok ? */
-	enum eDT_announce leap_announce;
+	/** DST announcement ? */
+	bool dst_announce;
+	/** leap second announcement ? */
+	bool leap_announce;
 };
-
-/**
- * Initialize the month values from the configuration:
- * - summermonth, wintermonth: 1..12 or none for out-of-bound values
- *   These values indicate in which month a change to daylight-saving
- *   respectively normal time is allowed.
- * - leapsecmonths: 1..12 (1 or more), or none for out-of-bound values.
- *   These values indicate in which months a leap second is allowed.
- */
-void init_time(void);
 
 /**
  * Decodes the current time from the internal bit buffer.

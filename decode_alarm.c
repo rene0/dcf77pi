@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -63,10 +63,10 @@ decode_alarm(const unsigned civbuf[], struct alm * const alarm)
 	}
 }
 
-/*@null@*/const char * const
+const char * const
 get_region_name(struct alm alarm)
 {
-	/*@null@*/char *res;
+	char *res;
 	bool need_comma;
 
 	/* Partial information only */
@@ -75,7 +75,7 @@ get_region_name(struct alm alarm)
 	    alarm.parity[0].ps != alarm.parity[1].ps)
 		return "(inconsistent)";
 
-	res = malloc(strlen(reg1n) + 2 + strlen(reg1m) + 2 + strlen(reg1s) + 1);
+	res = calloc(1, strlen(reg1n) + 2 + strlen(reg1m) + 2 + strlen(reg1s) + 1);
 
 	if (res == NULL)
 		return res;

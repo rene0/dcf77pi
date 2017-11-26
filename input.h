@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -27,6 +27,8 @@ SUCH DAMAGE.
 #define DCF77PI_INPUT_H
 
 #include <stdbool.h>
+
+struct json_object;
 
 /** Value of the bit received by radio or log file */
 enum eGB_bitvalue {
@@ -62,16 +64,6 @@ enum eGB_HW {
 	ehw_random
 };
 
-/** Bit skip state when reading from log file */
-enum eGB_skip {
-	/** do not skip */
-	eskip_none,
-	/** this bit should be skipped (i.e. not displayed) */
-	eskip_this,
-	/** next bit should be skipped (i.e. not added to bitpos) */
-	eskip_next
-};
-
 /** Structure containing all information of the currnet bit */
 struct GB_result {
 	/** I/O error while reading bit from hardware */
@@ -85,7 +77,7 @@ struct GB_result {
 	/** radio reception status */
 	enum eGB_HW hwstat;
 	/** skip state for reading log files */
-	enum eGB_skip skip;
+	bool skip;
 };
 
 /**
@@ -146,12 +138,14 @@ int set_mode_file(const char * const infilename);
  * The sample rate is set to {@link hardware.freq} Hz, reading from pin
  * {@link hardware.pin} using {@link hardware.active_high} logic.
  *
+ * @param config The JSON object containing the parsed configuration from
+ *  config.json
  * @return Preparation was succesful (0), -1 or errno otherwise.
  */
-int set_mode_live(void);
+int set_mode_live(struct json_object *config);
 
 /**
- * Return the hardware parameters.
+ * Return the hardware parameters parsed from {@link set_mode_live}.
  *
  * @return The hardware parameters.
  */
@@ -180,7 +174,7 @@ struct GB_result get_bit_file(void);
 
 /**
  * Retrieve one live bit from the hardware. This function determines several
- * values which can be retrieved using get_bitinfo().
+ * values which can be retrieved using {@link get_bitinfo}.
  *
  * @return The currently received bit and its full status.
  */

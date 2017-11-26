@@ -26,56 +26,13 @@ SUCH DAMAGE.
 #include "decode_time.h"
 
 #include "calendar.h"
-#include "config.h"
 
 #include <stdbool.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-static int summermonth, wintermonth;
-static int leapsecmonths[12];
-static int num_leapsecmonths;
+static int dst_count, leap_count;
 static struct DT_result dt_res;
-
-void
-init_time(void)
-{
-	char *freeptr, *lsm, *mon;
-
-	summermonth = (int)strtol(get_config_value("summermonth"), NULL, 10);
-	if (summermonth < 1 || summermonth > 12)
-		summermonth = 0;
-	wintermonth = (int)strtol(get_config_value("wintermonth"), NULL, 10);
-	if (wintermonth < 1 || wintermonth > 12)
-		wintermonth = 0;
-
-	freeptr = lsm = strdup(get_config_value("leapsecmonths"));
-	num_leapsecmonths = 0;
-	for (int i = 0; (mon = strsep(&lsm, ",")) != NULL; i++) {
-		int m = (int)strtol(mon, NULL, 10);
-		if (m >= 1 && m <= 12) {
-			leapsecmonths[i] = m;
-			num_leapsecmonths++;
-		}
-	}
-	free(freeptr);
-}
-
-static bool
-is_leapsecmonth(struct tm time)
-{
-	/*
-	 * Local time is 1 or 2 hours ahead of UTC, which is what the
-	 * configuration file uses, so adjust for that.
-	 */
-	if (--time.tm_mon == 0)
-		time.tm_mon = 12;
-	for (int i = 0; i < num_leapsecmonths; i++)
-		if (leapsecmonths[i] == time.tm_mon)
-			return true;
-	return false;
-}
 
 static bool
 getpar(const int buffer[], unsigned start, unsigned stop)
@@ -95,11 +52,11 @@ getbcd(const int buffer[], unsigned start, unsigned stop)
 	for (unsigned i = start; i <= stop; i++) {
 		val += mul * buffer[i];
 		mul *= 2;
-                if (mul == 16) {
-                    if (val > 9)
-                        return 100;
-                    mul = 10;
-                }
+		if (mul == 16) {
+			if (val > 9)
+				return 100;
+			mul = 10;
+		}
 	}
 	return val;
 }
@@ -107,10 +64,10 @@ getbcd(const int buffer[], unsigned start, unsigned stop)
 static bool
 check_time_sanity(int minlen, const int buffer[])
 {
-	if (minlen < 59)
-		dt_res.minute_length = emin_short;
-	else if (minlen > 60)
+	if (minlen == -1 || minlen > 60)
 		dt_res.minute_length = emin_long;
+	else if (minlen < 59)
+		dt_res.minute_length = emin_short;
 	else
 		dt_res.minute_length = emin_ok;
 
@@ -137,9 +94,7 @@ static int
 increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
     struct tm * const time)
 {
-	static unsigned acc_minlen_partial, old_acc_minlen;
-	static bool prev_toolong;
-
+	static unsigned acc_minlen_partial;
 	int increase;
 
 	/* See if there are any partial / split minutes to be combined: */
@@ -151,10 +106,7 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 		}
 	}
 	/* Calculate number of minutes to increase time with: */
-	if (prev_toolong)
-		increase = (acc_minlen - old_acc_minlen) / 60000;
-	else
-		increase = acc_minlen / 60000;
+	increase = acc_minlen / 60000;
 	if (acc_minlen >= 60000)
 		acc_minlen_partial %= 60000;
 	/* Account for complete minutes with a short acc_minlen: */
@@ -163,15 +115,12 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 		acc_minlen_partial %= 60000;
 	}
 
-	prev_toolong = (minlen == -1);
-	old_acc_minlen = acc_minlen - (acc_minlen % 60000);
-
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
 		for (int i = increase; increase > 0 && i > 0; i--)
-			add_minute(time, summermonth, wintermonth);
+			add_minute(time, dt_res.dst_announce);
 		for (int i = increase; increase < 0 && i < 0; i++)
-			substract_minute(time, summermonth, wintermonth);
+			substract_minute(time, dt_res.dst_announce);
 	}
 	return increase;
 }
@@ -279,45 +228,29 @@ calculate_date_time(unsigned init_min, unsigned errflags, int increase,
 static void
 stamp_date_time(unsigned errflags, struct tm newtime, struct tm * const time)
 {
-	if ((errflags & 0x0f) == 0) {
-		if ((errflags & 1) == 0)
-			time->tm_min = newtime.tm_min;
-		if ((errflags & 2) == 0)
-			time->tm_hour = newtime.tm_hour;
-		if ((errflags & 4) == 0) {
-			time->tm_mday = newtime.tm_mday;
-			time->tm_mon = newtime.tm_mon;
-			time->tm_year = newtime.tm_year;
-			time->tm_wday = newtime.tm_wday;
-		}
-		if (dt_res.dst_status != eDST_jump) {
+	if ((dt_res.minute_length == emin_ok) && ((errflags & 0x0f) == 0)) {
+		time->tm_min = newtime.tm_min;
+		time->tm_hour = newtime.tm_hour;
+		time->tm_mday = newtime.tm_mday;
+		time->tm_mon = newtime.tm_mon;
+		time->tm_year = newtime.tm_year;
+		time->tm_wday = newtime.tm_wday;
+		if (dt_res.dst_status != eDST_jump)
 			time->tm_isdst = newtime.tm_isdst;
-			time->tm_gmtoff = newtime.tm_gmtoff;
-		}
 	}
 }
 
 static unsigned
-handle_leap_second(unsigned errflags, int minlen, unsigned utchour,
-    const int buffer[], struct tm time)
+handle_leap_second(unsigned errflags, int minlen, const int buffer[], struct tm time)
 {
-	/*
-	 * h==23, last day of month (UTC) or h==0, first day of next month (UTC)
-	 * according to IERS Bulletin C
-	 * flag still set at 00:00 UTC, prevent leapsecond announcement error
-	 */
-	if (buffer[19] == 1 && errflags == 0) {
-		if (time.tm_mday == 1 && is_leapsecmonth(time) &&
-		    ((time.tm_min > 0 && utchour == 23) ||
-		    (time.tm_min == 0 && utchour == 0)))
-			dt_res.leap_announce = eann_ok;
-		else
-			dt_res.leap_announce = eann_error;
-	}
+	/* determine if a leap second is announced */
+	if (buffer[19] == 1 && errflags == 0)
+		leap_count++;
+	if (time.tm_min > 0)
+		dt_res.leap_announce = 2 * leap_count > time.tm_min;
 
-	/* process possible leap second, always reset announcement at hh:00 */
-	if (dt_res.leap_announce == eann_ok && time.tm_min == 0) {
-		dt_res.leap_announce = eann_none;
+	/* process possible leap second */
+	if (dt_res.leap_announce && time.tm_min == 0) {
 		dt_res.leapsecond_status = els_done;
 		if (minlen == 59) {
 			/* leap second processed, but missing */
@@ -325,35 +258,32 @@ handle_leap_second(unsigned errflags, int minlen, unsigned utchour,
 			errflags |= (1 << 4);
 		} else if (minlen == 60 && buffer[59] == 1)
 			dt_res.leapsecond_status = els_one;
-	}
+	} else
+		dt_res.leapsecond_status = els_none;
 	if (minlen == 60 && dt_res.leapsecond_status == els_none) {
 		/* leap second not processed, so bad minute */
 		dt_res.minute_length = emin_long;
 		errflags |= (1 << 4);
 	}
+
+	/* always reset announcement at hh:00 */
+	if (time.tm_min == 0) {
+		dt_res.leap_announce = false;
+		leap_count = 0;
+	}
+
 	return errflags;
 }
 
 static unsigned
-handle_dst(unsigned errflags, bool olderr, unsigned utchour,
-    const int buffer[], struct tm time, struct tm * const newtime)
+handle_dst(unsigned errflags, bool olderr, const int buffer[], struct tm time,
+    struct tm * const newtime)
 {
-	/*
-	 * h==0 (UTC) because sz->wz -> h==2 and wz->sz -> h==1,
-	 * last Sunday of month (reference?)
-	 */
-	if (buffer[16] == 1 && errflags == 0) {
-		if ((time.tm_wday == 7 && time.tm_mday > lastday(time) - 7 &&
-		    (time.tm_mon == summermonth ||
-		    time.tm_mon == wintermonth)) && ((time.tm_min > 0 &&
-		    utchour == 0) || (time.tm_min == 0 &&
-		    utchour == 1 + buffer[17] - buffer[18])))
-			dt_res.dst_announce = eann_ok; /* time zone just changed */
-		else {
-			dt_res.dst_announce = eann_none;
-			dt_res.dst_status = eDST_error;
-		}
-	}
+	/* determine if a DST change is announced */
+	if (buffer[16] == 1 && errflags == 0)
+		dst_count++;
+	if (time.tm_min > 0)
+		dt_res.dst_announce = 2 * dst_count > time.tm_min;
 
 	if (buffer[17] != time.tm_isdst || buffer[18] == time.tm_isdst) {
 		/*
@@ -363,7 +293,7 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 		 *   startup is problematic)
 		 * - initial state (otherwise DST would never be valid)
 		 */
-		if ((dt_res.dst_announce == eann_ok && time.tm_min == 0) ||
+		if ((dt_res.dst_announce && time.tm_min == 0) ||
 		    (olderr && errflags == 0) ||
 		    (dt_res.dst_status == eDST_ok && time.tm_isdst == -1))
 			newtime->tm_isdst = buffer[17]; /* expected change */
@@ -374,39 +304,15 @@ handle_dst(unsigned errflags, bool olderr, unsigned utchour,
 			errflags |= (1 << 5);
 		}
 	}
-	/* check if DST is within expected date range */
-	if ((time.tm_mon > summermonth && time.tm_mon < wintermonth) ||
-	    (time.tm_mon == summermonth && time.tm_wday < 7 &&
-	      lastday(time) - time.tm_mday < 7) ||
-	    (time.tm_mon == summermonth && time.tm_wday == 7 &&
-	      lastday(time) - time.tm_mday < 7 && utchour > 0) ||
-	    (time.tm_mon == wintermonth && time.tm_wday < 7 &&
-	      lastday(time) - time.tm_mday >= 7) ||
-	    (time.tm_mon == wintermonth && time.tm_wday == 7 &&
-	      lastday(time) - time.tm_mday < 7 &&
-		(utchour >= 22 /* previous day */ || utchour == 0))) {
-		/* expect DST */
-		if (newtime->tm_isdst == 0 && dt_res.dst_announce != eann_ok &&
-		    utchour < 24) {
-			dt_res.dst_status = eDST_jump; /* sudden change */
-			errflags |= (1 << 5);
-		}
-	} else {
-		/* expect non-DST */
-		if (newtime->tm_isdst == 1 && dt_res.dst_announce != eann_ok &&
-		    utchour < 24) {
-			dt_res.dst_status = eDST_jump; /* sudden change */
-			errflags |= (1 << 5);
-		}
-	}
-	newtime->tm_gmtoff = 3600 * (newtime->tm_isdst + 1);
 
 	/* done with DST */
-	if (dt_res.dst_announce == eann_ok && time.tm_min == 0) {
-		dt_res.dst_announce = eann_none;
+	if (dt_res.dst_announce && time.tm_min == 0)
 		dt_res.dst_status = eDST_done;
+	/* like leap second, always clear the DST announcement at hh:00 */
+	if (time.tm_min == 0) {
+		dt_res.dst_announce = false;
+		dst_count = 0;
 	}
-
 	return errflags;
 }
 
@@ -416,18 +322,14 @@ decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
 {
 	static bool olderr;
 
-	unsigned utchour;
 	unsigned errflags;
 	int increase;
 	struct tm newtime;
 
 	memset(&newtime, 0, sizeof(newtime));
 	/* Initially, set time offset to unknown */
-	if (init_min == 2) {
+	if (init_min == 2)
 		time->tm_isdst = -1;
-		dt_res.dst_announce = eann_none;
-		dt_res.leap_announce = eann_none;
-	}
 	newtime.tm_isdst = time->tm_isdst; /* save DST value */
 
 	errflags = check_time_sanity(minlen, buffer) ? 0 : 1;
@@ -440,12 +342,12 @@ decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
 	errflags = calculate_date_time(init_min, errflags, increase, buffer,
 	    *time, &newtime);
 
-	utchour = get_utchour(*time);
+	if (init_min < 2) {
+		errflags = handle_leap_second(errflags, minlen, buffer, *time);
 
-	errflags = handle_leap_second(errflags, minlen, utchour, buffer, *time);
-
-	errflags = handle_dst(errflags, olderr, utchour, buffer, *time,
-	    &newtime);
+		errflags = handle_dst(errflags, olderr, buffer, *time,
+		    &newtime);
+	}
 
 	stamp_date_time(errflags, newtime, time);
 

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013-2014, 2016 René Ladan. All rights reserved.
+Copyright (c) 2013-2014, 2016-2017 René Ladan. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -31,6 +31,18 @@ struct DT_result;
 struct GB_result;
 struct tm;
 
+/** State for setting the clock */
+enum eSC_status {
+	/** Clock was set successfully */
+	esc_ok,
+	/** Time was invalid */
+	esc_invalid,
+	/** Settting the clock failed */
+	esc_fail,
+	/** Too early or unsafe to set the time */
+	esc_unsafe
+};
+
 /**
  * Check if it is OK to set the system clock.
  *
@@ -42,13 +54,11 @@ struct tm;
 bool setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit);
 
 /**
- * Set the system clock according to the given time. Note that this does *not*
- * work with no timezone or UTC.
+ * Set the system clock according to the given time.
  *
- * @param time The time to set the system clock to.
- * @return The clock was set successfully (0), or the time was invalid (-1), or
- *   setting the clock somehow failed (-2).
+ * @param settime The time to set the system clock to, in ISO or DCF77 format.
+ * @return Whether the clock was set successfully.
  */
-int setclock(struct tm time);
+enum eSC_status setclock(struct tm settime);
 
 #endif

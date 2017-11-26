@@ -29,22 +29,15 @@ The software comes with three binaries and a library:
   third party buffer. Both dcf77pi and dcf77pi-analyze use this library. Header
   files to use the library in your own software are supplied.
 
-The meaning of the keywords in config.txt is:
+The meaning of the keywords in config.json is:
 
 * pin           = GPIO pin number (0-65535)
 * iodev         = GPIO device number (FreeBSD only)
-* activehigh    = pulses are active high (1) or passive high (0)
+* activehigh    = pulses are active high (true) or passive high (false)
 * freq          = sample frequency in Hz (10-155000)
-* summermonth   = month in which daylight saving time starts
-* wintermonth   = month in which daylight saving time ends
-* leapsecmonths = months (in UTC) in which a leap second might be inserted
 * outlogfile    = name of the output logfile which can be read back using
   dcf77pi-analyze (default empty). The log file itself only stores the
   received bits, but not the decoded date and time.
-
-Note that a value of 0 can be used for summermonth, wintermonth, or
-leapsecmonths to disallow daylight saving time changes or leap seconds.
-Otherwise use one or more values from 1 to 12.
 
 The end of the minute is noted by the absence of high pulses. An absence of low
 pulses probably means that the transmitter is out of range. Any other situation
@@ -59,11 +52,18 @@ Currently supporrted platforms:
 * Cygwin, MacOS, NetBSD: supported without GPIO communication for live decoding
 * Windows: only via Cygwin
 
-On Linux, you will have to install an (n)curses package development using your
+On Linux, you will have to install an (n)curses development package using your
 package manager to get the required header files and the .so library file.
 For example:
 ```sh
 % sudo apt-get install ncurses-devel
+```
+
+You will also need to install a json-c development package and a package
+providing pkg-config:
+For example, on FreeBSD:
+```sh
+% sudo pkg install json-c pkgconf
 ```
 
 To build and install the program into /usr/bin , the library into /usr/lib and
@@ -86,3 +86,6 @@ And to make the change persistent across reboots:
 
 On Raspbian Linux, the default permissions allow running dcf77pi and readpin as
 a normal user (typically "pi"), no extra configuration is needed.
+
+Setting the system time via dcf77pi still requires enhanced privileges (e.g.,
+root).

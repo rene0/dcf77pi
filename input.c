@@ -25,8 +25,7 @@ SUCH DAMAGE.
 
 #include "input.h"
 
-#include "config.h"
-
+#include <json.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
@@ -34,6 +33,7 @@ SUCH DAMAGE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sysexits.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -51,7 +51,7 @@ SUCH DAMAGE.
 #  warning NetBSD, GPIO support not yet implemented
 #  define NOLIVE 1
 #elif defined(__linux__)
-#  include <sys/types.h>
+/* NOP */
 #elif defined(__APPLE__) && (defined(__OSX__) || defined(__MACH__))
 #  warning MacOS, GPIO support available but no port for Rapberry Pi
 #  define NOLIVE 1
@@ -67,10 +67,11 @@ SUCH DAMAGE.
 /** maximum number of bits in a minute */
 #define BUFLEN 60
 
-static int bitpos;               /* second */
-static int buffer[BUFLEN];       /* wrap after BUFLEN positions */
-/*@null@*/ static FILE *logfile; /* auto-appended in live mode */
-static int fd;                   /* gpio file */
+static int bitpos;		/* second */
+static unsigned dec_bp;		/* bitpos decrease in file mode */
+static int buffer[BUFLEN];	/* wrap after BUFLEN positions */
+static FILE *logfile;		/* auto-appended in live mode */
+static int fd;			/* gpio file */
 static struct hardware hw;
 static struct bitinfo bit;
 static unsigned acc_minlen;
@@ -124,7 +125,7 @@ obtain_pulse(/*@unused@*/ int sig)
 }
 
 int
-set_mode_live(void)
+set_mode_live(struct json_object *config)
 {
 #if defined(NOLIVE)
 	fprintf(stderr, "No GPIO interface available, "
@@ -138,6 +139,7 @@ set_mode_live(void)
 	struct itimerval itv;
 	struct sigaction sigact;
 	char buf[64];
+	struct json_object *value;
 	int res;
 
 	if (filemode == 2) {
@@ -146,23 +148,47 @@ set_mode_live(void)
 		return -1;
 	}
 	/* fill hardware structure and initialize hardware */
-	hw.pin = (unsigned)strtol(get_config_value("pin"), NULL, 10);
-	hw.active_high = (bool)strtol(get_config_value("activehigh"), NULL, 10);
-	hw.freq = (unsigned)strtol(get_config_value("freq"), NULL, 10);
+	if (json_object_object_get_ex(config, "pin", &value))
+		hw.pin = (unsigned)json_object_get_int(value);
+	else {
+		fprintf(stderr, "Key 'pin' not found\n");
+		cleanup();
+		return EX_DATAERR;
+	}
+	if (json_object_object_get_ex(config, "activehigh", &value))
+		hw.active_high = (bool)json_object_get_boolean(value);
+	else {
+		fprintf(stderr, "Key 'activehigh' not found\n");
+		cleanup();
+		return EX_DATAERR;
+	}
+	if (json_object_object_get_ex(config, "freq", &value))
+		hw.freq = (unsigned)json_object_get_int(value);
+	else {
+		fprintf(stderr, "Key 'freq' not found\n");
+		cleanup();
+		return EX_DATAERR;
+	}
 	if (hw.freq < 10 || hw.freq > 155000 || (hw.freq & 1) == 1) {
 		fprintf(stderr, "hw.freq must be an even number between 10 "
 		    "and 155000 inclusive\n");
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	bit.signal = malloc(hw.freq / 2);
 #if defined(__FreeBSD__)
-	hw.iodev = (unsigned)strtol(get_config_value("iodev"), NULL, 10);
+	if (json_object_object_get_ex(config, "iodev", &value))
+		hw.iodev = (unsigned)json_object_get_int(value);
+	else {
+		fprintf(stderr, "Key 'iodev' not found\n");
+		cleanup();
+		return EX_DATAERR;
+	}
 	res = snprintf(buf, sizeof(buf), "/dev/gpioc%u", hw.iodev);
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.iodev too high? (%i)\n", res);
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	fd = open(buf, O_RDONLY);
 	if (fd < 0) {
@@ -189,7 +215,7 @@ set_mode_live(void)
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	if (write(fd, buf, res) < 0) {
 		if (errno != EBUSY) {
@@ -203,11 +229,12 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction", hw.pin);
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction",
+	    hw.pin);
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	fd = open(buf, O_RDWR);
 	if (fd < 0) {
@@ -225,11 +252,12 @@ set_mode_live(void)
 		cleanup();
 		return errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value", hw.pin);
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value",
+	    hw.pin);
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
-		return -1;
+		return EX_DATAERR;
 	}
 	fd = open(buf, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
@@ -285,14 +313,15 @@ get_pulse(void)
 static void
 set_new_state(void)
 {
-	cutoff = -1;
+	if (!gb_res.skip)
+		cutoff = -1;
 	gb_res.bad_io = false;
 	gb_res.bitval = ebv_none;
 	if (gb_res.marker != emark_toolong && gb_res.marker != emark_late)
 		gb_res.marker = emark_none;
 	gb_res.hwstat = ehw_ok;
 	gb_res.done = false;
-	gb_res.skip = eskip_none;
+	gb_res.skip = false;
 }
 
 static void
@@ -360,17 +389,18 @@ get_bit_live(void)
 	bit.tlow = -1;
 	bit.tlast0 = -1;
 
-	for (bit.t = 0; bit.t != 0xFFFFFFFF; bit.t++) {
+	for (bit.t = 0; bit.t < hw.freq * 4; bit.t++) {
 		if (pulse == 2) {
 			gb_res.bad_io = true;
 			outch = '*';
-			goto report;
+			break;
 		}
 		if (bit.signal != NULL) {
 			if ((bit.t & 7) == 0)
 				bit.signal[bit.t / 8] = 0;
 				/* clear data from previous second */
-			bit.signal[bit.t / 8] |= pulse << (unsigned char)(bit.t & 7);
+			bit.signal[bit.t / 8] |= pulse <<
+			    (unsigned char)(bit.t & 7);
 		}
 
 		if (y >= 0 && y < a / 2)
@@ -386,10 +416,6 @@ get_bit_live(void)
 			reset_frequency();
 
 		if (bit.t > bit.realfreq * 2500000) {
-			bit.realfreq += ((long long)
-			    (bit.t * 2500000 - bit.realfreq) / 20);
-			a = 1000000000 - (long long)(1000000000 *
-			    exp2(-2e7 / bit.realfreq));
 			if (bit.tlow * 100 / bit.t < 1) {
 				gb_res.hwstat = ehw_receive;
 				outch = 'r';
@@ -400,7 +426,7 @@ get_bit_live(void)
 				gb_res.hwstat = ehw_random;
 				outch = '#';
 			}
-			goto report; /* timeout */
+			break; /* timeout */
 		}
 
 		/*
@@ -454,44 +480,51 @@ get_bit_live(void)
 			break; /* start of new second */
 		}
 	}
+	if (bit.t >= hw.freq * 4) {
+		/* this can actually happen */
+		if (gb_res.hwstat == ehw_ok) {
+			gb_res.hwstat = ehw_random;
+			outch = '#';
+		}
+		reset_frequency();
+	}
 
-	if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
-	    (bit.bit0 + bit.bit20) * bit.t) {
-		/* zero bit, ~100 ms active signal */
-		gb_res.bitval = ebv_0;
-		outch = '0';
-		buffer[bitpos] = 0;
-	} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
-	    (bit.bit0 + bit.bit20) * bit.t) {
-		/* one bit, ~200 ms active signal */
-		gb_res.bitval = ebv_1;
-		outch = '1';
-		buffer[bitpos] = 1;
-	} else {
-		/* bad radio signal, retain old value */
-		gb_res.bitval = ebv_none;
-		outch = '_';
-		/* force bit 20 to be 1 to recover from too low b20 value */
-		if (bitpos == 20) {
+	if (!gb_res.bad_io && gb_res.hwstat == ehw_ok) {
+		if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
+		    (bit.bit0 + bit.bit20) * bit.t) {
+			/* zero bit, ~100 ms active signal */
+			gb_res.bitval = ebv_0;
+			outch = '0';
+			buffer[bitpos] = 0;
+		} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
+		    (bit.bit0 + bit.bit20) * bit.t) {
+			/* one bit, ~200 ms active signal */
 			gb_res.bitval = ebv_1;
 			outch = '1';
-			buffer[20] = 1;
+			buffer[bitpos] = 1;
+		} else {
+			/* bad radio signal, retain old value */
+			gb_res.bitval = ebv_none;
+			outch = '_';
 		}
 	}
-	if (init_bit == 1)
-		init_bit--;
-	else if (gb_res.hwstat == ehw_ok && gb_res.marker == emark_none) {
-		if (bitpos == 0 && gb_res.bitval == ebv_0)
-			bit.bit0 += ((long long)
-			    (bit.tlow * 1000000 - bit.bit0) / 2);
-		if (bitpos == 20 && gb_res.bitval == ebv_1)
-			bit.bit20 += ((long long)
-			    (bit.tlow * 1000000 - bit.bit20) / 2);
-		/* During a thunderstorm the value of bit20 might underflow */
-		if (bit.bit20 < bit.bit0)
-			reset_bitlen();
+
+	if (!gb_res.bad_io) {
+		if (init_bit == 1)
+			init_bit--;
+		else if (gb_res.hwstat == ehw_ok &&
+		    gb_res.marker == emark_none) {
+			if (bitpos == 0 && gb_res.bitval == ebv_0)
+				bit.bit0 += ((long long)
+				    (bit.tlow * 1000000 - bit.bit0) / 2);
+			if (bitpos == 20 && gb_res.bitval == ebv_1)
+				bit.bit20 += ((long long)
+				    (bit.tlow * 1000000 - bit.bit20) / 2);
+			/* Force sane values during e.g. a thunderstorm */
+			if (bit.bit20 < bit.bit0 || bit.bit20 > bit.bit0 * 3)
+				reset_bitlen();
+		}
 	}
-report:
 	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
@@ -505,127 +538,138 @@ report:
 	return gb_res;
 }
 
+/* Skip over invalid characters */
+static int
+skip_invalid(void)
+{
+	int inch = EOF;
+
+	do {
+		int oldinch = inch;
+		if (feof(logfile))
+			break;
+		inch = getc(logfile);
+		/*
+		 * \r\n is implicitly converted because \r is invalid character
+		 * \n\r is implicitly converted because \n is found first
+		 * \n is OK
+		 * convert \r to \n
+		 */
+		if (oldinch == '\r' && inch != '\n') {
+			ungetc(inch, logfile);
+			inch = '\n';
+		}
+	} while (strchr("01\nxr#*_ac", inch) == NULL);
+	return inch;
+}
+
 struct GB_result
 get_bit_file(void)
 {
-	int oldinch, inch;
-	bool valid = false;
+	static int oldinch;
 	static bool read_acc_minlen;
+	int inch;
 	char co[6];
 
 	set_new_state();
 
+	inch = skip_invalid();
 	/*
-	 * bit.realfreq and bit.t are set to fake value for compatibility with
-	 * old log files not storing acc_minlen values or to increase time
-	 * when mainloop() splits too long minutes
+	 * bit.t is set to fake value for compatibility with old log files
+	 * not storing acc_minlen values or to increase time when mainloop()
+	 * splits too long minutes
 	 */
-	bit.realfreq = 1000000000;
 
-	while (!valid) {
-		inch = getc(logfile);
-		switch (inch) {
-		case EOF:
-			gb_res.done = true;
-			return gb_res;
-		case '0':
-		case '1':
-			buffer[bitpos] = inch - (int)'0';
-			gb_res.bitval = (inch == (int)'0') ? ebv_0 : ebv_1;
-			valid = true;
-			bit.t = 1000;
-			break;
-		case '\r':
-		case '\n':
-			/*
-			 * Skip multiple consecutive EOM markers,
-			 * these are made impossible by the reset_minlen()
-			 * invocation in get_bit_live()
-			 */
-			break;
-		case 'x':
-			gb_res.hwstat = ehw_transmit;
-			valid = true;
-			bit.t = 2500;
-			break;
-		case 'r':
-			gb_res.hwstat = ehw_receive;
-			valid = true;
-			bit.t = 2500;
-			break;
-		case '#':
-			gb_res.hwstat = ehw_random;
-			valid = true;
-			bit.t = 2500;
-			break;
-		case '*':
-			gb_res.bad_io = true;
-			valid = true;
-			bit.t = 0;
-			break;
-		case '_':
-			/* retain old value in buffer[bitpos] */
-			gb_res.bitval = ebv_none;
-			valid = true;
-			bit.t = 1000;
-			break;
-		case 'a':
-			/* acc_minlen */
-			gb_res.skip = eskip_this;
-			valid = true;
-			bit.t = 0;
-			if (fscanf(logfile, "%10u", &acc_minlen) != 1)
-				gb_res.done = true;
-			read_acc_minlen = !gb_res.done;
-			break;
-		case 'c':
-			/* cutoff for newminute */
-			gb_res.skip = eskip_this;
-			valid = true;
-			bit.t = 0;
-			if (fscanf(logfile, "%6c", co) != 1)
-				gb_res.done = true;
-			if (!gb_res.done && (co[1] == '.'))
-				cutoff = (co[0] - '0') * 10000 +
-				    (int)strtol(co + 2, (char **)NULL, 10);
-			break;
-		default:
-			break;
-		}
-	}
-	/* Only allow \r , \n , \r\n , and \n\r as single EOM markers */
-	oldinch = inch;
-	inch = getc(logfile);
-	if (inch == EOF)
+	switch (inch) {
+	case EOF:
 		gb_res.done = true;
-	if (inch == (int)'a' || inch == (int)'c')
-		gb_res.skip = eskip_next;
-	if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) {
-		if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */
-			gb_res.done = true;
-	} else {
-		if (gb_res.marker == emark_none)
-			gb_res.marker = emark_minute;
-		else if (gb_res.marker == emark_toolong)
-			gb_res.marker = emark_late;
-		if (!read_acc_minlen)
-			bit.t += 1000;
-		else
+		return gb_res;
+	case '0':
+	case '1':
+		buffer[bitpos] = inch - (int)'0';
+		gb_res.bitval = (inch == (int)'0') ? ebv_0 : ebv_1;
+		bit.t = 1000;
+		break;
+	case '\n':
+		/*
+		 * Skip multiple consecutive EOM markers,
+		 * these are made impossible by the reset_minlen()
+		 * invocation in get_bit_live()
+		 */
+		gb_res.skip = true;
+		if (oldinch != '\n') {
+			bit.t = read_acc_minlen ? 0 : 1000;
 			read_acc_minlen = false;
-		/* Check for \r\n or \n\r */
-		oldinch = inch;
-		inch = getc(logfile);
-		if (inch == EOF)
+			/*
+			 * The marker checks must be inside the oldinch check
+			 * to prevent spurious emin_short errors
+			 */
+			if (gb_res.marker == emark_none)
+				gb_res.marker = emark_minute;
+			else if (gb_res.marker == emark_toolong)
+				gb_res.marker = emark_late;
+		} else
+			bit.t = 0;
+		break;
+	case 'x':
+		gb_res.hwstat = ehw_transmit;
+		bit.t = 2500;
+		break;
+	case 'r':
+		gb_res.hwstat = ehw_receive;
+		bit.t = 2500;
+		break;
+	case '#':
+		gb_res.hwstat = ehw_random;
+		bit.t = 2500;
+		break;
+	case '*':
+		gb_res.bad_io = true;
+		bit.t = 0;
+		break;
+	case '_':
+		/* retain old value in buffer[bitpos] */
+		gb_res.bitval = ebv_none;
+		bit.t = 1000;
+		break;
+	case 'a':
+		/* acc_minlen, up to 2^32-1 ms */
+		gb_res.skip = true;
+		bit.t = 0;
+		if (fscanf(logfile, "%10u", &acc_minlen) != 1)
 			gb_res.done = true;
-		if (inch == (int)'a' || inch == (int)'c')
-			gb_res.skip = eskip_next;
-		if ((inch != (int)'\r' && inch != (int)'\n') || inch == oldinch) {
-			if (ungetc(inch, logfile) == EOF) /* EOF remains, IO error */
-				gb_res.done = true;
-		}
+		read_acc_minlen = !gb_res.done;
+		break;
+	case 'c':
+		/* cutoff for newminute */
+		gb_res.skip = true;
+		bit.t = 0;
+		if (fscanf(logfile, "%6c", co) != 1)
+			gb_res.done = true;
+		if (!gb_res.done && (co[1] == '.'))
+			cutoff = (co[0] - '0') * 10000 +
+			    (int)strtol(co + 2, (char **)NULL, 10);
+		break;
+	default:
+		break;
 	}
+
 	if (!read_acc_minlen)
-		acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
+		acc_minlen += bit.t;
+
+	/*
+	 * Read-ahead 1 character to check if a minute marker is coming.
+	 * This prevents emark_toolong or emark_late being set 1 bit early.
+	 */
+	oldinch = inch;
+	inch = skip_invalid();
+	if (!feof(logfile)) {
+		if (dec_bp == 0 && bitpos > 0 && oldinch != '\n' &&
+		    (inch == '\n' || inch == 'a' || inch == 'c'))
+			dec_bp = 1;
+	} else
+		gb_res.done = true;
+	ungetc(inch, logfile);
 
 	return gb_res;
 }
@@ -642,9 +686,14 @@ is_space_bit(int bitpos)
 struct GB_result
 next_bit(void)
 {
-	if (gb_res.marker == emark_minute || gb_res.marker == emark_late)
+	if (dec_bp == 1) {
+		bitpos--;
+		dec_bp = 2;
+	}
+	if (gb_res.marker == emark_minute || gb_res.marker == emark_late) {
 		bitpos = 0;
-	else if (gb_res.skip != eskip_next)
+		dec_bp = 0;
+	} else if (!gb_res.skip)
 		bitpos++;
 	if (bitpos == BUFLEN) {
 		gb_res.marker = emark_toolong;
