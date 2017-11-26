@@ -84,8 +84,8 @@ install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	mkdir -p $(DESTDIR)$(PREFIX)/include/dcf77pi
 	$(INSTALL) -m 0644 $(hdrlib) $(DESTDIR)$(PREFIX)/include/dcf77pi
 	mkdir -p $(DESTDIR)$(PREFIX)/$(ETCDIR)
-	$(INSTALL) -m 0644 etc/dcf77pi/config.txt \
-		$(DESTDIR)$(PREFIX)/$(ETCDIR)/config.txt.sample
+	$(INSTALL) -m 0644 etc/dcf77pi/config.json \
+		$(DESTDIR)$(PREFIX)/$(ETCDIR)/config.json.sample
 
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
