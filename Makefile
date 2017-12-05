@@ -17,7 +17,6 @@ JSON_C?=`pkg-config --cflags json-c`
 JSON_L?=`pkg-config --libs json-c`
 
 all: libdcf77.so dcf77pi dcf77pi-analyze readpin
-test: testcentury
 
 hdrlib=input.h decode_time.h decode_alarm.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
@@ -25,7 +24,7 @@ srclib=input.c decode_time.c decode_alarm.c setclock.c mainloop.c \
 	bits1to14.c calendar.c
 objlib=input.o decode_time.o decode_alarm.o setclock.o mainloop.o \
 	bits1to14.o calendar.o
-objbin=dcf77pi.o dcf77pi-analyze.o readpin.o testcentury.o
+objbin=dcf77pi.o dcf77pi-analyze.o readpin.o
 
 input.o: input.h
 	$(CC) -fpic $(CFLAGS) $(JSON_C) -c input.c -o $@
@@ -63,11 +62,6 @@ readpin.o: input.h
 readpin: readpin.o libdcf77.so
 	$(CC) -o $@ readpin.o libdcf77.so $(JSON_L)
 
-testcentury.o: calendar.h
-testcentury: testcentury.o calendar.o
-	$(CC) -fpic $(CFLAGS) -c testcentury.c -o $@
-	$(CC) -o $@ testcentury.o calendar.o
-
 doxygen:
 	doxygen
 
@@ -75,7 +69,6 @@ clean:
 	rm -f dcf77pi
 	rm -f dcf77pi-analyze
 	rm -f readpin
-	rm -f testcentury
 	rm -f $(objbin)
 	rm -f libdcf77.so $(objlib)
 
