@@ -14,8 +14,8 @@ CFLAGS+=-Wall -D_POSIX_C_SOURCE=200809L -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" \
 objbin=testcentury.o
 
 testcentury.o: ../calendar.h
-testcentury: testcentury.o ../calendar.o
 	$(CC) -fpic $(CFLAGS) -I.. -c testcentury.c -o $@
+testcentury: testcentury.o ../calendar.o
 	$(CC) -o $@ testcentury.o ../calendar.o
 
 clean:
