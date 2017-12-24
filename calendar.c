@@ -70,17 +70,36 @@ lastday(struct tm time)
 	return 31;
 }
 
-int
-get_utchour(struct tm time)
+static void
+substract_hour(struct tm * const dt)
 {
-	int utchour;
+	if (--dt->tm_hour == -1) {
+		dt->tm_hour = 23;
+		if (--dt->tm_wday == 0)
+			dt->tm_wday = 7;
+		if (--dt->tm_mday == 0) {
+			if (--dt->tm_mon == 0) {
+				dt->tm_mon = 12;
+				if (--dt->tm_year == base_year - 1)
+					dt->tm_year = base_year + 399;
+					/* bump! */
+			}
+			dt->tm_mday = lastday(*dt);
+		}
+	}
+}
 
-	if (time.tm_isdst == -1)
-		return 24;
-	utchour = time.tm_hour - 1 - time.tm_isdst;
-	if (utchour < 0)
-		utchour += 24;
-	return utchour;
+struct tm
+get_utctime(struct tm time)
+{
+	struct tm dt;
+
+	memcpy((void *)&dt, (const void*)&time, sizeof(time));
+	substract_hour(&dt);
+	if (time.tm_isdst == 1)
+		substract_hour(&dt);
+	dt.tm_isdst = -2; /* indicate UTC */
+	return dt;
 }
 
 struct tm
@@ -130,20 +149,7 @@ substract_minute(struct tm time, bool dst_changes)
 			if (dt.tm_isdst == 0)
 				dt.tm_hour--; /* will become non-DST */
 		}
-		if (--dt.tm_hour == -1) {
-			dt.tm_hour = 23;
-			if (--dt.tm_wday == 0)
-				dt.tm_wday = 7;
-			if (--dt.tm_mday == 0) {
-				if (--dt.tm_mon == 0) {
-					dt.tm_mon = 12;
-					if (--dt.tm_year == base_year - 1)
-						dt.tm_year = base_year + 399;
-						/* bump! */
-				}
-				dt.tm_mday = lastday(dt);
-			}
-		}
+		substract_hour(&dt);
 	}
 	return dt;
 }

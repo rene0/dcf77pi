@@ -51,12 +51,12 @@ int lastday(struct tm time);
 int century_offset(struct tm time);
 
 /**
- * Calculates the hour in UTC from the given time.
+ * Calculates the time in UTC from the given time.
  *
- * @param time The time to calculate the hour in UTC from.
- * @return The hour value in UTC, or 24 in case of an error.
+ * @param time The time to calculate the UTC time from.
+ * @return The time in UTC, with tm_isdst set to -2.
  */
-int get_utchour(struct tm time);
+struct tm get_utctime(struct tm time);
 
 /**
  * Adds one minute to the current time. Note that the
