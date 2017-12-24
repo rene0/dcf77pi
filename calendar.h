@@ -54,7 +54,7 @@ int century_offset(struct tm time);
  * Calculates the time in UTC from the given time.
  *
  * @param time The time to calculate the UTC time from.
- * @return The time in UTC, with tm_isdst set to -2.
+ * @return The time in UTC with tm_isdst set to -2 if tm_isdst is valid.
  */
 struct tm get_utctime(struct tm time);
 

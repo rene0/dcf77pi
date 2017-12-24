@@ -95,10 +95,12 @@ get_utctime(struct tm time)
 	struct tm dt;
 
 	memcpy((void *)&dt, (const void*)&time, sizeof(time));
-	substract_hour(&dt);
-	if (time.tm_isdst == 1)
+	if (time.tm_isdst == 0 || time.tm_isdst == 1) {
 		substract_hour(&dt);
-	dt.tm_isdst = -2; /* indicate UTC */
+		if (time.tm_isdst == 1)
+			substract_hour(&dt);
+		dt.tm_isdst = -2; /* indicate UTC */
+	}
 	return dt;
 }
 
