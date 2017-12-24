@@ -20,10 +20,8 @@ all: libdcf77.so dcf77pi dcf77pi-analyze readpin
 
 hdrlib=input.h decode_time.h decode_alarm.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
-srclib=input.c decode_time.c decode_alarm.c setclock.c mainloop.c \
-	bits1to14.c calendar.c
-objlib=input.o decode_time.o decode_alarm.o setclock.o mainloop.o \
-	bits1to14.o calendar.o
+srclib=${hdrlib:.h=.c}
+objlib=${hdrlib:.h=.o}
 objbin=dcf77pi.o dcf77pi-analyze.o readpin.o
 
 input.o: input.h

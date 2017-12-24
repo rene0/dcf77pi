@@ -3,20 +3,27 @@
 
 .PHONY: all clean test
 
+objbin=testcentury.o test_bits1to14.o
+exebin=${objbin:.o=}
+
 all: test
-test: testcentury
+test: $(exebin)
 	./testcentury
+	./test_bits1to14
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
 CFLAGS+=-Wall -D_POSIX_C_SOURCE=200809L -DETCDIR=\"$(PREFIX)/$(ETCDIR)\" \
 	-g -std=c99
-objbin=testcentury.o
 
 testcentury.o: ../calendar.h
 	$(CC) -fpic $(CFLAGS) -I.. -c testcentury.c -o $@
 testcentury: testcentury.o ../calendar.o
 	$(CC) -o $@ testcentury.o ../calendar.o
+test_bits1to14.o: ../bits1to14.h
+	$(CC) -fpic $(CFLAGS) -I.. -c test_bits1to14.c -o $@
+test_bits1to14: test_bits1to14.o ../bits1to14.o
+	$(CC) -o $@ test_bits1to14.o ../bits1to14.o
 
 clean:
-	rm -f $(objbin) testcentury
+	rm -f $(objbin) $(exebin)
