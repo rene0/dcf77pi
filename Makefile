@@ -84,7 +84,7 @@ install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	$(INSTALL) -m 0644 etc/dcf77pi/config.json \
 		$(DESTDIR)$(PREFIX)/$(ETCDIR)/config.json.sample
 	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
-	$(INSTALL) -m 0644 LICENSE.md
+	$(INSTALL) -m 0644 LICENSE.md \
 		$(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
 install-strip:
