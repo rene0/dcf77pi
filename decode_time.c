@@ -96,9 +96,9 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
 		for (int i = increase; increase > 0 && i > 0; i--)
-			add_minute(time, dt_res.dst_announce);
+			*time = add_minute(*time, dt_res.dst_announce);
 		for (int i = increase; increase < 0 && i < 0; i++)
-			substract_minute(time, dt_res.dst_announce);
+			*time = substract_minute(*time, dt_res.dst_announce);
 	}
 	return increase;
 }

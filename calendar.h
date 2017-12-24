@@ -68,8 +68,9 @@ int get_utchour(struct tm time);
  *
  * @param time The current time to be increased with one minute.
  * @param dst_changes The daylight saving time is about to start or end.
+ * @return The increased time.
  */
-void add_minute(struct tm * const time, bool dst_changes);
+struct tm add_minute(struct tm time, bool dst_changes);
 
 /**
  * Substracts one minute to the current time. Note that
@@ -81,8 +82,9 @@ void add_minute(struct tm * const time, bool dst_changes);
  *
  * @param time The current time to be decreased with one minute.
  * @param dst_changes The daylight saving time is about to start or end.
+ * @return The decreased time.
  */
-void substract_minute(struct tm * const time, bool dst_changes);
+struct tm substract_minute(struct tm time, bool dst_changes);
 
 /**
  * Convert the given time in ISO format to DCF77 format.

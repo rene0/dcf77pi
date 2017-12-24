@@ -83,61 +83,69 @@ get_utchour(struct tm time)
 	return utchour;
 }
 
-void
-add_minute(struct tm * const time, bool dst_changes)
+struct tm
+add_minute(struct tm time, bool dst_changes)
 {
-	if (++time->tm_min == 60) {
-		time->tm_min = 0;
+	struct tm dt;
+
+	memcpy((void *)&dt, (const void*)&time, sizeof(time));
+	if (++dt.tm_min == 60) {
+		dt.tm_min = 0;
 		if (dst_changes) {
-			if (time->tm_isdst == 1)
-				time->tm_hour--; /* will become non-DST */
-			if (time->tm_isdst == 0)
-				time->tm_hour++; /* will become DST */
+			if (dt.tm_isdst == 1)
+				dt.tm_hour--; /* will become non-DST */
+			if (dt.tm_isdst == 0)
+				dt.tm_hour++; /* will become DST */
 		}
-		if (++time->tm_hour == 24) {
-			time->tm_hour = 0;
-			if (++time->tm_wday == 8)
-				time->tm_wday = 1;
-			if (++time->tm_mday > lastday(*time)) {
-				time->tm_mday = 1;
-				if (++time->tm_mon == 13) {
-					time->tm_mon = 1;
-					if (++time->tm_year == base_year + 400)
-						time->tm_year = base_year;
+		if (++dt.tm_hour == 24) {
+			dt.tm_hour = 0;
+			if (++dt.tm_wday == 8)
+				dt.tm_wday = 1;
+			if (++dt.tm_mday > lastday(dt)) {
+				dt.tm_mday = 1;
+				if (++dt.tm_mon == 13) {
+					dt.tm_mon = 1;
+					if (++dt.tm_year == base_year + 400)
+						dt.tm_year = base_year;
 						/* bump! */
 				}
 			}
 		}
 	}
+	return dt;
 }
 
-void
-substract_minute(struct tm * const time, bool dst_changes)
+struct tm
+substract_minute(struct tm time, bool dst_changes)
 {
-	if (--time->tm_min == -1) {
-		time->tm_min = 59;
+	struct tm dt;
+
+	memcpy((void *)&dt, (const void*)&time, sizeof(time));
+	if (--dt.tm_min == -1) {
+		dt.tm_min = 59;
 		if (dst_changes) {
 			/* logic is backwards here */
-			if (time->tm_isdst == 1)
-				time->tm_hour++; /* will become DST */
-			if (time->tm_isdst == 0)
-				time->tm_hour--; /* will become non-DST */
+			if (dt.tm_isdst == 1)
+				dt.tm_hour++; /* will become DST */
+			if (dt.tm_isdst == 0)
+				dt.tm_hour--; /* will become non-DST */
 		}
-		if (--time->tm_hour == -1) {
-			time->tm_hour = 23;
-			if (--time->tm_wday == 0)
-				time->tm_wday = 7;
-			if (--time->tm_mday == 0) {
-				if (--time->tm_mon == 0) {
-					time->tm_mon = 12;
-					if (--time->tm_year == base_year - 1)
-						time->tm_year = base_year + 399;
+		if (--dt.tm_hour == -1) {
+			dt.tm_hour = 23;
+			if (--dt.tm_wday == 0)
+				dt.tm_wday = 7;
+			if (--dt.tm_mday == 0) {
+				if (--dt.tm_mon == 0) {
+					dt.tm_mon = 12;
+					if (--dt.tm_year == base_year - 1)
+						dt.tm_year = base_year + 399;
 						/* bump! */
 				}
-				time->tm_mday = lastday(*time);
+				dt.tm_mday = lastday(dt);
 			}
 		}
 	}
+	return dt;
 }
 
 struct tm
