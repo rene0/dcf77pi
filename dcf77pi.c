@@ -30,6 +30,7 @@ static WINDOW *main_win;
 static int old_bitpos = -1; /* timer for statusbar inactive */
 static int input_mode;      /* normal input (statusbar) or string input */
 static char keybuf[MAXBUF]; /* accumulator for string input */
+static bool show_utc;       /* show time in UTC */
 
 static void
 statusbar(int bitpos, const char * const fmt, ...)
@@ -49,12 +50,13 @@ statusbar(int bitpos, const char * const fmt, ...)
 static void
 draw_keys(void)
 {
-	mvwprintw(main_win, 1, 0, "[Q] -> quit [L] -> change log file"
-	    " [S] -> toggle time sync");
+	mvwprintw(main_win, 1, 0, "[Q] quit [L] change log file"
+	    " [S] time sync on  [u] UTC display on ");
 	wclrtoeol(main_win);
 	mvwchgat(main_win, 1, 1, 1, A_BOLD, 4, NULL); /* [Q] */
-	mvwchgat(main_win, 1, 13, 1, A_BOLD, 4, NULL); /* [L] */
-	mvwchgat(main_win, 1, 36, 1, A_BOLD, 4, NULL); /* [S] */
+	mvwchgat(main_win, 1, 10, 1, A_BOLD, 4, NULL); /* [L] */
+	mvwchgat(main_win, 1, 30, 1, A_BOLD, 4, NULL); /* [S] */
+	mvwchgat(main_win, 1, 48, 1, A_BOLD, 4, NULL); /* [u] */
 	wnoutrefresh(main_win);
 }
 
@@ -142,6 +144,9 @@ display_bit(struct GB_result bit, int bitpos)
 void
 display_time(struct DT_result dt, struct tm time)
 {
+	if (show_utc)
+		time = get_utctime(time);
+
 	/* color bits depending on the results */
 	mvwchgat(decode_win, 0, 4, 1, A_NORMAL,  dt.bit0_ok ? 2 : 1, NULL);
 	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt.dst_status == eDST_error ?
@@ -161,8 +166,9 @@ display_time(struct DT_result dt, struct tm time)
 	/* display date and time */
 	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d",
 	    time.tm_isdst == 1 ? "summer" : time.tm_isdst == 0 ? "winter" :
-	    "?     ", time.tm_year, time.tm_mon, time.tm_mday,
-	    weekday[time.tm_wday], time.tm_hour, time.tm_min);
+	    time.tm_isdst == -2 ? "UTC   " : "?     ", time.tm_year,
+	    time.tm_mon, time.tm_mday, weekday[time.tm_wday], time.tm_hour,
+	    time.tm_min);
 
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 
@@ -280,8 +286,13 @@ process_input(struct ML_result in_ml, int bitpos)
 			break;
 		case 'S':
 			mlr.settime = !mlr.settime;
-			statusbar(bitpos, "Time synchronization %s",
-			    mlr.settime ? "on" : "off");
+			mvwprintw(main_win, 1, 43, mlr.settime ? "off": "on ");
+			wnoutrefresh(main_win);
+			break;
+		case 'u':
+			show_utc = !show_utc;
+			mvwprintw(main_win, 1, 63, show_utc ? "off" : "on ");
+			wnoutrefresh(main_win);
 			break;
 		}
 		doupdate();
