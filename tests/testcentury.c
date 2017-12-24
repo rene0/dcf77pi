@@ -30,8 +30,8 @@ main(int argc, char *argv[])
 
 					co = century_offset(time);
 					if (co != century) {
-						printf("%d-%d-%d,%d : %d "
-						    "should be %d\n",
+						printf("%s: %d-%d-%d,%d : %d "
+						    "should be %d\n", argv[0],
 						    time.tm_year, time.tm_mon,
 						    time.tm_mday, time.tm_wday,
 						    co, century);
