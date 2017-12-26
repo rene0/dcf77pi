@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
-	uninstall-doxygen cppcheck iwyu test
+	uninstall-doxygen cppcheck iwyu
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
