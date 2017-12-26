@@ -4,6 +4,7 @@
 #include "calendar.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <sysexits.h>
 #include <time.h>
 
@@ -71,7 +72,7 @@ test_utc(char *name, int hours)
 int
 main(int argc, char *argv[])
 {
-	struct tm time, time2;
+	struct tm time, time2, time3;
 	int i;
 
 	/* base_year is currently 1900, and 1900-01-01 is a Monday */
@@ -201,8 +202,36 @@ main(int argc, char *argv[])
 	if (i != EX_OK)
 		return i;
 
-	/* get_isotime(): check for each minute or day if it matches */
-	/* get_dcftime(): check for each minute or day if it matches */
+	/* get_isotime(): check for each day if it matches */
+	init_fwd_tm(&time2);
+	memset(&time, 0, sizeof(time));
+	time.tm_wday = 1;
+	time.tm_isdst = -1;
+	for (time.tm_year = base_year; time.tm_year < base_year + 400;
+	    time.tm_year++) {
+		for (time.tm_mon = 1; time.tm_mon < 13; time.tm_mon++) {
+			int lday;
+
+			lday = lastday(time);
+			for (time.tm_mday = 1; time.tm_mday <= lday; time.tm_mday++) {
+				int r;
+
+				time2 = get_isotime(time);
+				memcpy((void*)&time3, (const void*)&time2, sizeof(time2));
+				r = mktime(&time3); /* leaves year,mon,mday of time3 untouched */
+				if (time.tm_year != time3.tm_year + 1900 ||
+				    time.tm_mon != time3.tm_mon + 1 ||
+				    time.tm_mday != time3.tm_mday ||
+				    time3.tm_yday != time2.tm_yday ||
+				    time3.tm_wday != time2.tm_wday || r == -1) {
+					printf("%s: get_isotime: (%i) %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n", argv[0], r, time2.tm_year, time2.tm_mon, time2.tm_mday, time2.tm_wday, time2.tm_yday, time.tm_year - 1900, time.tm_mon - 1, time.tm_mday, time3.tm_wday, time3.tm_yday);
+					return EX_SOFTWARE;
+				}
+				if (++time.tm_wday == 8)
+					time.tm_wday = 1;
+			}
+		}
+	}
 
 	return EX_OK;
 }
