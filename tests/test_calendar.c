@@ -94,8 +94,8 @@ main(int argc, char *argv[])
 
 					co = century_offset(time);
 					if (co != century) {
-						printf("%s: %d-%d-%d,%d : %d "
-						    "should be %d\n", argv[0],
+						printf("%s: %d-%d-%d,%d : co "
+						    "%d must be %d\n", argv[0],
 						    time.tm_year, time.tm_mon,
 						    time.tm_mday, time.tm_wday,
 						    co, century);
