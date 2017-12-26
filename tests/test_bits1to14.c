@@ -49,7 +49,7 @@ main(int argc, char *argv[])
 			for (unsigned i = 0; i < TPBUFLEN; i++) {
 				if (in_buf[i] != rb_ptr[i]) {
 					printf("%s: ofs %i type %u bit %u:"
-					   " %u should be %u\n", argv[0], ofs,
+					   " %u must be %u\n", argv[0], ofs,
 					   type, i, rb_ptr[i], in_buf[i]);
 					return EX_SOFTWARE;
 				}
@@ -59,7 +59,7 @@ main(int argc, char *argv[])
 			enum eTP tp_type;
 			tp_type = get_thirdparty_type();
 			if (tp_type != tp_res[type]) {
-				printf("%s: ofs %i: type %i should be %i\n",
+				printf("%s: ofs %i: type %i must be %i\n",
 				    argv[0], ofs, tp_type, tp_res[type]);
 				return EX_SOFTWARE;
 			}
