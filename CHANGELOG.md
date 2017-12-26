@@ -1,6 +1,10 @@
 Version 3.7.0 --
 * Replace verbose license texts in source files by SPDX identifiers.
 * Makefile: always install LICENSE.md and fix uninstall target.
+* Replace config.txt by config.json, its equivalent in JSON. Update Makefile
+  to compile/link various source files against json-c. set\_mode\_live() now
+  takes a json\_object\* parameter that contains the parsed configuration.
+  Remove now obsolete config.c and config.h [closes issue #11]
 * Fix revival of issue #19.
 * Do not use leapsecmonth to determine when a leap second announcement is
   valid, but count the number of valid 1 values of bit 19 in the preceding
@@ -14,10 +18,9 @@ Version 3.7.0 --
   month at 01:00 UTC in add\_minute() and substract\_minute() [closes issue #24]
 * Remove leapsecmonth, summermonth and wintermonth from config.txt [closes
   issue #24]
-* Replace config.txt by config.json, its equivalent in JSON. Update Makefile
-  to compile/link various source files against json-c. set\_mode\_live() now
-  takes a json\_object\* parameter that contains the parsed configuration.
-  Remove now obsolete config.c and config.h [closes issue #11]
+* replace get\_utchour() by get\_utctime() which takes date changes into
+  account [closes issue #28]
+* dcf77pi: key 'u' toggles between UTC and local time [closes issue #28]
 * Makefile: link testcentury only against calendar.o instead of libdcf77.so
 * dcf77pi-analyze: no need to depend on the configuration file after removal
   of the month parameters.
