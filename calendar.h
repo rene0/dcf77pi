@@ -90,7 +90,7 @@ struct tm substract_minute(struct tm time, bool dst_changes);
  * Convert the given time in ISO format to DCF77 format.
  *
  * @param isotime The time in ISO format to convert
- * @return The time in DCF77 format, with the tm_zone field left to NULL.
+ * @return The time in DCF77 format, with the tm_zone field left untouched.
  */
 struct tm get_dcftime(struct tm isotime);
 
@@ -98,7 +98,7 @@ struct tm get_dcftime(struct tm isotime);
  * Convert the given time in DCF77 format to ISO format.
  *
  * @param dcftime The time in DCF77 format to convert
- * @return The time in ISO format, with the tm_zone field left to NULL.
+ * @return The time in ISO format, with the tm_zone field left untouched.
  */
 struct tm get_isotime(struct tm dcftime);
 
