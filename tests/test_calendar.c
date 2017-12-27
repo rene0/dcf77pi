@@ -17,10 +17,10 @@ init_fwd_tm(struct tm * const time)
 	time->tm_wday = 1;
 	time->tm_hour = 0;
 	time->tm_min = 0;
+	time->tm_isdst = -1;
 	/* extra fields: */
 	time->tm_sec = 0;
 	time->tm_yday = 0;
-	time->tm_isdst = -1;
 	time->tm_zone = NULL;
 }
 
@@ -38,7 +38,9 @@ test_utc(char *name, int hours)
 
 	for (time.tm_year = base_year; time.tm_year < base_year + 400; time.tm_year++) {
 		for (time.tm_mon = 1; time.tm_mon < 13; time.tm_mon++) {
-			int lday = lastday(time);
+			int lday;
+
+			lday = lastday(time);
 			for (time.tm_mday = 1; time.tm_mday <= lday; time.tm_mday++) {
 				for (time.tm_hour = 0; time.tm_hour < 24;
 				    time.tm_hour++) {
@@ -75,12 +77,10 @@ main(int argc, char *argv[])
 	struct tm time, time2, time3;
 	int i;
 
-	/* base_year is currently 1900, and 1900-01-01 is a Monday */
-	time.tm_wday = 1; /* Monday */
-
 	/* isleeapyear() and lastday() are OK by definition */
 
 	/* century_offset(): check for every date if it matches */
+	time.tm_wday = 1; /* base_year-01-01 is a Monday */
 	for (int century = 0; century < 4; century++)
 		for (time.tm_year = 0; time.tm_year < 100; time.tm_year++)
 			for (time.tm_mon = 1; time.tm_mon < 13; time.tm_mon++) {
@@ -112,7 +112,9 @@ main(int argc, char *argv[])
 	time.tm_wday = 1;
 	for (time.tm_year = base_year; time.tm_year < base_year + 400; time.tm_year++) {
 		for (time.tm_mon = 1; time.tm_mon < 13; time.tm_mon++) {
-			int lday = lastday(time);
+			int lday;
+
+			lday = lastday(time);
 			for (time.tm_mday = 1; time.tm_mday <= lday; time.tm_mday++) {
 				for (time.tm_hour = 0; time.tm_hour < 24;
 				    time.tm_hour++) {
@@ -152,16 +154,18 @@ main(int argc, char *argv[])
 	time2.tm_wday = 7;
 	time2.tm_hour = 23;
 	time2.tm_min = 59;
+	time2.tm_isdst = -1;
 	/* extra fields: */
 	time2.tm_sec = 0;
 	time2.tm_yday = 0;
-	time2.tm_isdst = -1;
 	time2.tm_zone = NULL;
 	time.tm_wday = 7;
 	for (time.tm_year = base_year + 399; time.tm_year >= base_year;
 	    time.tm_year--) {
 		for (time.tm_mon = 12; time.tm_mon > 0; time.tm_mon--) {
-			int lday = lastday(time);
+			int lday;
+
+			lday = lastday(time);
 			for (time.tm_mday = lday; time.tm_mday > 0; time.tm_mday--) {
 				for (time.tm_hour = 23; time.tm_hour >= 0;
 				    time.tm_hour--) {
