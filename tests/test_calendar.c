@@ -237,5 +237,38 @@ main(int argc, char *argv[])
 		}
 	}
 
+	/* get_dcftime(): check for each day if it matches */
+	init_fwd_tm(&time2);
+	memset(&time, 0, sizeof(time));
+	time.tm_wday = 1;
+	time.tm_isdst = -1;
+	for (time.tm_year = base_year - 1900; time.tm_year < base_year - 1500; time.tm_year++) {
+		for (time.tm_mon = 0; time.tm_mon < 12; time.tm_mon++) {
+			int lday;
+
+			time.tm_year += 1900;
+			time.tm_mon += 1;
+			lday = lastday(time);
+			time.tm_mon -= 1;
+			time.tm_year -= 1900;
+			for (time.tm_mday = 1; time.tm_mday <= lday; time.tm_mday++) {
+				int r;
+
+				time2 = get_dcftime(time);
+				memcpy((void*)&time3, (const void*)&time, sizeof(time));
+				r = mktime(&time3); /* leaves year,mon,mday of time3 untouched */
+				if (time2.tm_year != time3.tm_year + 1900 ||
+				    time2.tm_mon != time3.tm_mon + 1 ||
+				    time2.tm_mday != time3.tm_mday ||
+				    time2.tm_yday != time3.tm_yday + 1 ||
+				    time.tm_wday != time3.tm_wday || r == -1) {
+					printf("%s: get_isotime: (%i) %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n", argv[0], r, time2.tm_year, time2.tm_mon, time2.tm_mday, time2.tm_wday, time2.tm_yday, time.tm_year + 1900, time.tm_mon + 1, time.tm_mday, time3.tm_wday, time3.tm_yday + 1);
+					return EX_SOFTWARE;
+				}
+				if (++time.tm_wday == 7)
+					time.tm_wday = 0;
+			}
+		}
+	}
 	return EX_OK;
 }
