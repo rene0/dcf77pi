@@ -93,7 +93,7 @@ struct tm substract_minute(struct tm time, bool dst_changes);
  * yday = 1..366
  *
  * @param isotime The time in ISO format to convert
- * @return The time in DCF77 format, with the tm_zone field left untouched.
+ * @return The time in DCF77 format.
  */
 struct tm get_dcftime(struct tm isotime);
 
@@ -104,7 +104,7 @@ struct tm get_dcftime(struct tm isotime);
  * Sunday = 0, yday = 0..365
  *
  * @param dcftime The time in DCF77 format to convert
- * @return The time in ISO format, with the tm_zone field left untouched.
+ * @return The time in ISO format.
  */
 struct tm get_isotime(struct tm dcftime);
 

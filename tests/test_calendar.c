@@ -21,7 +21,6 @@ init_fwd_tm(struct tm * const time)
 	/* extra fields: */
 	time->tm_sec = 0;
 	time->tm_yday = 0;
-	time->tm_zone = NULL;
 }
 
 static int
@@ -158,7 +157,6 @@ main(int argc, char *argv[])
 	/* extra fields: */
 	time2.tm_sec = 0;
 	time2.tm_yday = 0;
-	time2.tm_zone = NULL;
 	time.tm_wday = 7;
 	for (time.tm_year = base_year + 399; time.tm_year >= base_year;
 	    time.tm_year--) {
