@@ -130,7 +130,7 @@ int set_mode_live(struct json_object *config);
 struct hardware get_hardware_parameters(void);
 
 /**
- * Clean up when: close the device or input logfile, and output log file if
+ * Clean up when closing the device or input logfile, and closing the output log file if
  * applicable.
  */
 void cleanup(void);
