@@ -15,10 +15,15 @@ struct tm;
 
 /** User input which controls the client */
 struct ML_result {
+	/** Request to change the name of the log file */
 	bool change_logfile;
+	/** Request to quit the program */
 	bool quit;
+	/** Request to set the system time upon each valid minute */
 	bool settime;
+	/** Result of setting the system time */
 	enum eSC_status settime_result;
+	/** The name of the log file */
 	char *logfilename;
 };
 
