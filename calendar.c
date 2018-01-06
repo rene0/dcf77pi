@@ -26,11 +26,13 @@ century_offset(struct tm time)
 	/* weekday 1 is a Monday, assume this year is a leap year */
 	/* if leap, we should reach Monday xx00-02-28 */
 	d = dayinleapyear[time.tm_mon - 1] + time.tm_mday;
-	if (d < 60) { /* at or before 02-28 (day 59) */
+	if (d < 60) {
+		/* at or before 02-28 (day 59) */
 		nw = (59 - d) / 7;
 		nd = wd == 1 ? 0 : (8 - wd);
 		tmp = d + (nw * 7) + nd;
-	} else { /* after 02-28 (day 59) */
+	} else {
+		/* after 02-28 (day 59) */
 		if ((time.tm_year % 4) > 0)
 			d--; /* no 02-29 for obvious non-leap years */
 		nw = (d - 59) / 7;

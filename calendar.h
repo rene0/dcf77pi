@@ -20,6 +20,7 @@ extern const char * const weekday[8];
 
 /**
  * Determines if the year of the current time is a leap year.
+ *
  * @param time The current time.
  * @return The year of the current time is a leap year.
  */
