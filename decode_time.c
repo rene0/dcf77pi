@@ -58,8 +58,7 @@ check_time_sanity(int minlen, const int buffer[])
 		dt_res.dst_status = eDST_ok;
 
 	/* only decode if set */
-	return (dt_res.minute_length == emin_ok) && dt_res.bit0_ok &&
-	    dt_res.bit20_ok && (dt_res.dst_status == eDST_ok);
+	return (dt_res.minute_length == emin_ok) && dt_res.bit0_ok && dt_res.bit20_ok && (dt_res.dst_status == eDST_ok);
 }
 
 static void
@@ -69,8 +68,7 @@ handle_special_bits(const int buffer[])
 }
 
 static int
-increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
-    struct tm * const time)
+increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen, struct tm * const time)
 {
 	static unsigned acc_minlen_partial;
 	int increase;
@@ -104,8 +102,7 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 }
 
 static unsigned
-calculate_date_time(unsigned init_min, unsigned errflags, int increase,
-    const int buffer[], struct tm time, struct tm * const newtime)
+calculate_date_time(unsigned init_min, unsigned errflags, int increase, const int buffer[], struct tm time, struct tm * const newtime)
 {
 	int tmp0, tmp1, tmp2, tmp3;
 	bool p1, p2, p3;
@@ -190,8 +187,7 @@ calculate_date_time(unsigned init_min, unsigned errflags, int increase,
 			dt_res.year_status = eval_bcd;
 			p3 = false;
 		} else {
-			if (init_min == 0 && time.tm_year !=
-			    base_year + 100 * centofs + newtime->tm_year)
+			if (init_min == 0 && time.tm_year != base_year + 100 * centofs + newtime->tm_year)
 				dt_res.year_status = eval_jump;
 			newtime->tm_year += base_year + 100 * centofs;
 			if (newtime->tm_mday > lastday(*newtime)) {
@@ -254,8 +250,7 @@ handle_leap_second(unsigned errflags, int minlen, const int buffer[], struct tm 
 }
 
 static unsigned
-handle_dst(unsigned errflags, bool olderr, const int buffer[], struct tm time,
-    struct tm * const newtime)
+handle_dst(unsigned errflags, bool olderr, const int buffer[], struct tm time, struct tm * const newtime)
 {
 	/* determine if a DST change is announced */
 	if (buffer[16] == 1 && errflags == 0)
@@ -267,18 +262,14 @@ handle_dst(unsigned errflags, bool olderr, const int buffer[], struct tm time,
 		/*
 		 * Time offset change is OK if:
 		 * - announced and on the hour
-		 * - there was an error but not any more (needed if decoding at
-		 *   startup is problematic)
+		 * - there was an error but not any more (needed if decoding at startup is problematic)
 		 * - initial state (otherwise DST would never be valid)
 		 */
-		if ((dt_res.dst_announce && time.tm_min == 0) ||
-		    (olderr && errflags == 0) ||
-		    (dt_res.dst_status == eDST_ok && time.tm_isdst == -1))
+		if ((dt_res.dst_announce && time.tm_min == 0) || (olderr && errflags == 0) || (dt_res.dst_status == eDST_ok && time.tm_isdst == -1))
 			newtime->tm_isdst = buffer[17]; /* expected change */
 		else {
 			if (dt_res.dst_status != eDST_error)
-				dt_res.dst_status = eDST_jump;
-				/* sudden change, ignore */
+				dt_res.dst_status = eDST_jump; /* sudden change, ignore */
 			errflags |= (1 << 5);
 		}
 	}
@@ -295,8 +286,7 @@ handle_dst(unsigned errflags, bool olderr, const int buffer[], struct tm time,
 }
 
 struct DT_result
-decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
-    const int buffer[], struct tm * const time)
+decode_time(unsigned init_min, int minlen, unsigned acc_minlen, const int buffer[], struct tm * const time)
 {
 	static bool olderr;
 
@@ -317,14 +307,12 @@ decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
 
 	increase = increase_old_time(init_min, minlen, acc_minlen, time);
 
-	errflags = calculate_date_time(init_min, errflags, increase, buffer,
-	    *time, &newtime);
+	errflags = calculate_date_time(init_min, errflags, increase, buffer, *time, &newtime);
 
 	if (init_min < 2) {
 		errflags = handle_leap_second(errflags, minlen, buffer, *time);
 
-		errflags = handle_dst(errflags, olderr, buffer, *time,
-		    &newtime);
+		errflags = handle_dst(errflags, olderr, buffer, *time, &newtime);
 	}
 
 	stamp_date_time(errflags, newtime, time);

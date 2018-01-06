@@ -7,11 +7,9 @@
 
 const int base_year = 1900;
 
-const int dayinleapyear[12] =
-    {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
+const int dayinleapyear[12] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
 
-const char * const weekday[8] =
-    {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+const char * const weekday[8] = {"???", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 
 /* based on: xx00-02-28 is a Monday if and only if xx00 is a leap year */
 int
@@ -21,8 +19,7 @@ century_offset(struct tm time)
 	int tmp; /* resulting day of year, 02-28 if xx00 is leap */
 
 	/* substract year days from weekday, including normal leap years */
-	wd = (time.tm_wday - time.tm_year - time.tm_year / 4 -
-	    (((time.tm_year % 4) > 0) ? 1 : 0)) % 7;
+	wd = (time.tm_wday - time.tm_year - time.tm_year / 4 - (((time.tm_year % 4) > 0) ? 1 : 0)) % 7;
 	if (wd < 1)
 		wd += 7;
 
@@ -55,8 +52,7 @@ century_offset(struct tm time)
 bool
 isleapyear(struct tm time)
 {
-	return (time.tm_year % 4 == 0 && time.tm_year % 100 != 0) ||
-	    time.tm_year % 400 == 0;
+	return (time.tm_year % 4 == 0 && time.tm_year % 100 != 0) || time.tm_year % 400 == 0;
 }
 
 int
@@ -64,8 +60,7 @@ lastday(struct tm time)
 {
 	if (time.tm_mon == 2)
 		return 28 + (isleapyear(time) ? 1 : 0);
-	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 ||
-	    time.tm_mon == 11)
+	if (time.tm_mon == 4 || time.tm_mon == 6 || time.tm_mon == 9 || time.tm_mon == 11)
 		return 30;
 	return 31;
 }
@@ -81,8 +76,7 @@ substract_hour(struct tm * const dt)
 			if (--dt->tm_mon == 0) {
 				dt->tm_mon = 12;
 				if (--dt->tm_year == base_year - 1)
-					dt->tm_year = base_year + 399;
-					/* bump! */
+					dt->tm_year = base_year + 399; /* bump! */
 			}
 			dt->tm_mday = lastday(*dt);
 		}
@@ -127,8 +121,7 @@ add_minute(struct tm time, bool dst_changes)
 				if (++dt.tm_mon == 13) {
 					dt.tm_mon = 1;
 					if (++dt.tm_year == base_year + 400)
-						dt.tm_year = base_year;
-						/* bump! */
+						dt.tm_year = base_year; /* bump! */
 				}
 			}
 		}

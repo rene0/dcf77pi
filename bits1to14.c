@@ -17,11 +17,9 @@ fill_thirdparty_buffer(int minute, int bitpos, struct GB_result bit)
 	case 0:
 		/* copy third party data */
 		if (bitpos > 1 && bitpos < 8)
-			tpbuf[bitpos - 2] = bit.bitval == ebv_1 ? 1 : 0;
-			/* 2..7 -> 0..5 */
+			tpbuf[bitpos - 2] = bit.bitval == ebv_1 ? 1 : 0; /* 2..7 -> 0..5 */
 		if (bitpos > 8 && bitpos < 15)
-			tpbuf[bitpos - 3] = bit.bitval == ebv_1 ? 1 : 0;
-			/* 9..14 -> 6..11 */
+			tpbuf[bitpos - 3] = bit.bitval == ebv_1 ? 1 : 0; /* 9..14 -> 6..11 */
 
 		/* copy third party type */
 		if (bitpos == 1)
@@ -45,14 +43,12 @@ fill_thirdparty_buffer(int minute, int bitpos, struct GB_result bit)
 	case 1:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 11] = bit.bitval == ebv_1 ? 1 : 0;
-			/* 1..14 -> 12..25 */
+			tpbuf[bitpos + 11] = bit.bitval == ebv_1 ? 1 : 0; /* 1..14 -> 12..25 */
 		break;
 	case 2:
 		/* copy third party data */
 		if (bitpos > 0 && bitpos < 15)
-			tpbuf[bitpos + 25] = bit.bitval == ebv_1 ? 1 : 0;
-			/* 1..14 -> 26..39 */
+			tpbuf[bitpos + 25] = bit.bitval == ebv_1 ? 1 : 0; /* 1..14 -> 26..39 */
 		break;
 	}
 }

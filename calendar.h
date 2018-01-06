@@ -8,20 +8,14 @@
 #include <time.h>
 
 /**
- * The base year for {@link century_offset}.
- * Update every 400 years, now at 2300-01-01
- */
+ * The base year for {@link century_offset}. Update every 400 years, now at 2300-01-01 */
 extern const int base_year;
 
-/**
- * An array containing the day numbers of each month in a leap year.
- */
+/** An array containing the day numbers of each month in a leap year. */
 extern const int dayinleapyear[12];
 
 /**
- * Textual representation of the day of week, with Monday = 1,
- * Sunday = 7, and an unknown day being 0.
- */
+ * Textual representation of the day of week, with Monday = 1, Sunday = 7, and an unknown day being 0. */
 extern const char * const weekday[8];
 
 /**
@@ -89,8 +83,7 @@ struct tm substract_minute(struct tm time, bool dst_changes);
 /**
  * Convert the given time in ISO format to DCF77 format.
  *
- * year starts at base_year, month = 1..12, mday = 1..lastday, Sunday = 7,
- * yday = 1..366
+ * year starts at base_year, month = 1..12, mday = 1..lastday, Sunday = 7, yday = 1..366
  *
  * @param isotime The time in ISO format to convert
  * @return The time in DCF77 format.
@@ -100,8 +93,7 @@ struct tm get_dcftime(struct tm isotime);
 /**
  * Convert the given time in DCF77 format to ISO format.
  *
- * year starts at base_year - 1900, month = 0..11, mday = 1..lastday,
- * Sunday = 0, yday = 0..365
+ * year starts at base_year - 1900, month = 0..11, mday = 1..lastday, Sunday = 0, yday = 0..365
  *
  * @param dcftime The time in DCF77 format to convert
  * @return The time in ISO format.

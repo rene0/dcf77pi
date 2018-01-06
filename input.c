@@ -76,8 +76,7 @@ int
 set_mode_live(struct json_object *config)
 {
 #if defined(NOLIVE)
-	fprintf(stderr, "No GPIO interface available, "
-	    "disabling live decoding\n");
+	fprintf(stderr, "No GPIO interface available, disabling live decoding\n");
 	cleanup();
 	return -1;
 #else
@@ -116,8 +115,7 @@ set_mode_live(struct json_object *config)
 		return EX_DATAERR;
 	}
 	if (hw.freq < 10 || hw.freq > 155000 || (hw.freq & 1) == 1) {
-		fprintf(stderr, "hw.freq must be an even number between 10 "
-		    "and 155000 inclusive\n");
+		fprintf(stderr, "hw.freq must be an even number between 10 and 155000 inclusive\n");
 		cleanup();
 		return EX_DATAERR;
 	}
@@ -175,8 +173,7 @@ set_mode_live(struct json_object *config)
 		cleanup();
 		return errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction",
-	    hw.pin);
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/direction", hw.pin);
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
@@ -198,8 +195,7 @@ set_mode_live(struct json_object *config)
 		cleanup();
 		return errno;
 	}
-	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value",
-	    hw.pin);
+	res = snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%u/value", hw.pin);
 	if (res < 0 || res >= sizeof(buf)) {
 		fprintf(stderr, "hw.pin too high? (%i)\n", res);
 		cleanup();
@@ -287,8 +283,7 @@ static void
 reset_frequency(void)
 {
 	if (logfile != NULL)
-		fprintf(logfile, "%s", bit.realfreq <= hw.freq * 500000 ? "<" :
-		    bit.realfreq >= hw.freq * 1500000 ? ">" : "");
+		fprintf(logfile, "%s", bit.realfreq <= hw.freq * 500000 ? "<" : bit.realfreq >= hw.freq * 1500000 ? ">" : "");
 	bit.realfreq = hw.freq * 1000000;
 	bit.freq_reset = true;
 }
@@ -304,9 +299,7 @@ reset_bitlen(void)
 }
 
 /*
- * The bits are decoded from the signal using an exponential low-pass filter in
- * conjunction with a Schmitt trigger. The idea and the initial implementation
- * for this come from Udo Klein, with permission.
+ * The bits are decoded from the signal using an exponential low-pass filter in conjunction with a Schmitt trigger. The idea and the initial implementation for this come from Udo Klein, with permission.
  * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
  */
 struct GB_result
@@ -322,8 +315,7 @@ get_bit_live(void)
 	unsigned sec2;
 	long long a, y = 1000000000;
 	static int init_bit = 2;
-	bool is_eom = gb_res.marker == emark_minute ||
-	    gb_res.marker == emark_late;
+	bool is_eom = gb_res.marker == emark_minute || gb_res.marker == emark_late;
 
 	bit.freq_reset = false;
 	bit.bitlen_reset = false;
@@ -331,11 +323,7 @@ get_bit_live(void)
 	set_new_state();
 
 	/*
-	 * One period is either 1000 ms or 2000 ms long (normal or padding for
-	 * last). The active part is either 100 ms ('0') or 200 ms ('1') long.
-	 * The maximum allowed values as percentage of the second length are
-	 * specified as half the value and the whole value of the lengths of
-	 * bit 0 and bit 20 respectively.
+	 * One period is either 1000 ms or 2000 ms long (normal or padding for last). The active part is either 100 ms ('0') or 200 ms ('1') long. The maximum allowed values as percentage of the second length are specified as half the value and the whole value of the lengths of bit 0 and bit 20 respectively.
 	 *
 	 *  ~A > 3/2 * realfreq: end-of-minute
 	 *  ~A > 5/2 * realfreq: timeout
@@ -347,9 +335,7 @@ get_bit_live(void)
 		bit.bit20 = bit.realfreq / 5;
 	}
 	sec2 = 1000000000 / (hw.freq * hw.freq);
-	/*
-	 * Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms)
-	 */
+	/* Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms) */
 	a = 1000000000 - (long long)(1000000000 * exp2(-2e7 / bit.realfreq));
 	bit.tlow = -1;
 	bit.tlast0 = -1;
@@ -366,22 +352,16 @@ get_bit_live(void)
 		}
 		if (bit.signal != NULL) {
 			if ((bit.t & 7) == 0)
-				bit.signal[bit.t / 8] = 0;
-				/* clear data from previous second */
-			bit.signal[bit.t / 8] |= p <<
-			    (unsigned char)(bit.t & 7);
+				bit.signal[bit.t / 8] = 0; /* clear data from previous second */
+			bit.signal[bit.t / 8] |= p << (unsigned char)(bit.t & 7);
 		}
 
 		if (y >= 0 && y < a / 2)
 			bit.tlast0 = (int)bit.t;
 		y += a * (p * 1000000000 - y) / 1000000000;
 
-		/*
-		 * Prevent algorithm collapse during thunderstorms
-		 * or scheduler abuse
-		 */
-		if (bit.realfreq <= hw.freq * 500000 ||
-		    bit.realfreq >= hw.freq * 1500000)
+		/* Prevent algorithm collapse during thunderstorms or scheduler abuse */
+		if (bit.realfreq <= hw.freq * 500000 || bit.realfreq >= hw.freq * 1500000)
 			reset_frequency();
 
 		if (bit.t > bit.realfreq * 2500000) {
@@ -399,9 +379,7 @@ get_bit_live(void)
 		}
 
 		/*
-		 * Schmitt trigger, maximize value to introduce
-		 * hysteresis and to avoid infinite memory.
-		 */
+		 * Schmitt trigger, maximize value to introduce hysteresis and to avoid infinite memory. */
 		if (y < 500000000 && stv == 1) {
 			/* end of high part of second */
 			y = 0;
@@ -418,21 +396,14 @@ get_bit_live(void)
 				init_bit--;
 			else {
 				if (newminute)
-					bit.realfreq += ((long long)(bit.t *
-					    500000 - bit.realfreq) / 20);
+					bit.realfreq += ((long long)(bit.t * 500000 - bit.realfreq) / 20);
 				else
-					bit.realfreq += ((long long)(bit.t *
-					    1000000 - bit.realfreq) / 20);
-				a = 1000000000 - (long long)(1000000000 *
-				    exp2(-2e7 / bit.realfreq));
+					bit.realfreq += ((long long)(bit.t * 1000000 - bit.realfreq) / 20);
+				a = 1000000000 - (long long)(1000000000 * exp2(-2e7 / bit.realfreq));
 			}
 
 			if (newminute) {
-				/*
-				 * Reset the frequency and the EOM flag if two
-				 * consecutive EOM markers come in, which means
-				 * something is wrong.
-				 */
+				/* Reset the frequency and the EOM flag if two consecutive EOM markers come in, which means something is wrong. */
 				if (is_eom) {
 					if (gb_res.marker == emark_minute)
 						gb_res.marker = emark_none;
@@ -451,8 +422,7 @@ get_bit_live(void)
 		long long twait = (long long)(sec2 * bit.realfreq / 1000000);
 #if !defined(MACOS)
 		(void)clock_gettime(CLOCK_MONOTONIC, &tp1);
-		twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1000000000 -
-		   (tp1.tv_nsec - tp0.tv_nsec);
+		twait = twait - (tp1.tv_sec - tp0.tv_sec) * 1000000000 - (tp1.tv_nsec - tp0.tv_nsec);
 #endif
 		slp.tv_sec = twait / 1000000000;
 		slp.tv_nsec = twait % 1000000000;
@@ -469,14 +439,12 @@ get_bit_live(void)
 	}
 
 	if (!gb_res.bad_io && gb_res.hwstat == ehw_ok) {
-		if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
-		    (bit.bit0 + bit.bit20) * bit.t) {
+		if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) < (bit.bit0 + bit.bit20) * bit.t) {
 			/* zero bit, ~100 ms active signal */
 			gb_res.bitval = ebv_0;
 			outch = '0';
 			buffer[bitpos] = 0;
-		} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
-		    (bit.bit0 + bit.bit20) * bit.t) {
+		} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) < (bit.bit0 + bit.bit20) * bit.t) {
 			/* one bit, ~200 ms active signal */
 			gb_res.bitval = ebv_1;
 			outch = '1';
@@ -491,14 +459,11 @@ get_bit_live(void)
 	if (!gb_res.bad_io) {
 		if (init_bit == 1)
 			init_bit--;
-		else if (gb_res.hwstat == ehw_ok &&
-		    gb_res.marker == emark_none) {
+		else if (gb_res.hwstat == ehw_ok && gb_res.marker == emark_none) {
 			if (bitpos == 0 && gb_res.bitval == ebv_0)
-				bit.bit0 += ((long long)
-				    (bit.tlow * 1000000 - bit.bit0) / 2);
+				bit.bit0 += ((long long)(bit.tlow * 1000000 - bit.bit0) / 2);
 			if (bitpos == 20 && gb_res.bitval == ebv_1)
-				bit.bit20 += ((long long)
-				    (bit.tlow * 1000000 - bit.bit20) / 2);
+				bit.bit20 += ((long long)(bit.tlow * 1000000 - bit.bit20) / 2);
 			/* Force sane values during e.g. a thunderstorm */
 			if (bit.bit20 < bit.bit0 || bit.bit20 > bit.bit0 * 3)
 				reset_bitlen();
@@ -507,10 +472,8 @@ get_bit_live(void)
 	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
-		if (gb_res.marker == emark_minute ||
-		    gb_res.marker == emark_late)
-			fprintf(logfile, "a%uc%6.4f\n", acc_minlen,
-			    (double)((bit.t * 1e6) / bit.realfreq));
+		if (gb_res.marker == emark_minute || gb_res.marker == emark_late)
+			fprintf(logfile, "a%uc%6.4f\n", acc_minlen, (double)((bit.t * 1e6) / bit.realfreq));
 	}
 	if (gb_res.marker == emark_minute || gb_res.marker == emark_late)
 		cutoff = bit.t * 1000000 / (bit.realfreq / 10000);
@@ -553,11 +516,7 @@ get_bit_file(void)
 	set_new_state();
 
 	inch = skip_invalid();
-	/*
-	 * bit.t is set to fake value for compatibility with old log files
-	 * not storing acc_minlen values or to increase time when mainloop()
-	 * splits too long minutes
-	 */
+	/* bit.t is set to fake value for compatibility with old log files not storing acc_minlen values or to increase time when mainloop() splits too long minutes. */
 
 	switch (inch) {
 	case EOF:
@@ -570,19 +529,12 @@ get_bit_file(void)
 		bit.t = 1000;
 		break;
 	case '\n':
-		/*
-		 * Skip multiple consecutive EOM markers,
-		 * these are made impossible by the reset_minlen()
-		 * invocation in get_bit_live()
-		 */
+		/* Skip multiple consecutive EOM markers, these are made impossible by the reset_minlen() invocation in get_bit_live() */
 		gb_res.skip = true;
 		if (oldinch != '\n') {
 			bit.t = read_acc_minlen ? 0 : 1000;
 			read_acc_minlen = false;
-			/*
-			 * The marker checks must be inside the oldinch check
-			 * to prevent spurious emin_short errors
-			 */
+			/* * The marker checks must be inside the oldinch check to prevent spurious emin_short errors. */
 			if (gb_res.marker == emark_none)
 				gb_res.marker = emark_minute;
 			else if (gb_res.marker == emark_toolong)
@@ -626,8 +578,7 @@ get_bit_file(void)
 		if (fscanf(logfile, "%6c", co) != 1)
 			gb_res.done = true;
 		if (!gb_res.done && (co[1] == '.'))
-			cutoff = (co[0] - '0') * 10000 +
-			    (int)strtol(co + 2, (char **)NULL, 10);
+			cutoff = (co[0] - '0') * 10000 + (int)strtol(co + 2, (char **)NULL, 10);
 		break;
 	default:
 		break;
@@ -636,15 +587,11 @@ get_bit_file(void)
 	if (!read_acc_minlen)
 		acc_minlen += bit.t;
 
-	/*
-	 * Read-ahead 1 character to check if a minute marker is coming.
-	 * This prevents emark_toolong or emark_late being set 1 bit early.
-	 */
+	/* Read-ahead 1 character to check if a minute marker is coming. This prevents emark_toolong or emark_late being set 1 bit early. */
 	oldinch = inch;
 	inch = skip_invalid();
 	if (!feof(logfile)) {
-		if (dec_bp == 0 && bitpos > 0 && oldinch != '\n' &&
-		    (inch == '\n' || inch == 'a' || inch == 'c'))
+		if (dec_bp == 0 && bitpos > 0 && oldinch != '\n' && (inch == '\n' || inch == 'a' || inch == 'c'))
 			dec_bp = 1;
 	} else
 		gb_res.done = true;
@@ -656,10 +603,7 @@ get_bit_file(void)
 bool
 is_space_bit(int bitpos)
 {
-	return (bitpos == 1 || bitpos == 15 || bitpos == 16 || bitpos == 19 ||
-	    bitpos == 20 || bitpos == 21 || bitpos == 28 || bitpos == 29 ||
-	    bitpos == 35 || bitpos == 36 || bitpos == 42 || bitpos == 45 ||
-	    bitpos == 50 || bitpos == 58 || bitpos == 59 || bitpos == 60);
+	return (bitpos == 1 || bitpos == 15 || bitpos == 16 || bitpos == 19 || bitpos == 20 || bitpos == 21 || bitpos == 28 || bitpos == 29 || bitpos == 35 || bitpos == 36 || bitpos == 42 || bitpos == 45 || bitpos == 50 || bitpos == 58 || bitpos == 59 || bitpos == 60);
 }
 
 struct GB_result
