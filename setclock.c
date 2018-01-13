@@ -14,7 +14,16 @@
 bool
 setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit)
 {
-	return init_min == 0 && bit.marker == emark_minute && dt.bit0_ok && dt.bit20_ok && dt.minute_length == emin_ok && dt.minute_status == eval_ok && dt.hour_status == eval_ok && dt.mday_status == eval_ok && dt.wday_status == eval_ok && dt.month_status == eval_ok && dt.year_status == eval_ok && (dt.dst_status == eDST_ok || dt.dst_status == eDST_done) && dt.leapsecond_status != els_one && !bit.bad_io && bit.bitval != ebv_none && bit.hwstat == ehw_ok;
+	return init_min == 0 && bit.marker == emark_minute && dt.bit0_ok &&
+	       dt.bit20_ok && dt.minute_length == emin_ok &&
+	       dt.minute_status ==
+	       eval_ok && dt.hour_status == eval_ok && dt.mday_status ==
+	       eval_ok &&
+	       dt.wday_status == eval_ok && dt.month_status == eval_ok &&
+	       dt.year_status == eval_ok &&
+	       (dt.dst_status == eDST_ok ||
+	    dt.dst_status == eDST_done) && dt.leapsecond_status != els_one &&
+	       !bit.bad_io && bit.bitval != ebv_none && bit.hwstat == ehw_ok;
 }
 
 enum eSC_status

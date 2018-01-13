@@ -47,14 +47,16 @@ enum eDT_leapsecond {
 	els_none,
 	/**
 	 * leap second should always be 0 if present :
-	 * http://www.ptb.de/cms/en/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
+	 *
+	 *http://www.ptb.de/cms/en/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
 	 */
 	els_one,
 	/** leap second just processed */
 	els_done
 };
 
-/** Structure containing the state of all decoded information of this minute */
+/** Structure containing the state of all decoded information of this minute
+ **/
 struct DT_result {
 	/**
 	 * bit 0 must always be 0 :
@@ -92,18 +94,25 @@ struct DT_result {
 /**
  * Decodes the current time from the internal bit buffer.
  *
- * The current time is first increased using add_minute(), and only if the parities and other checks match these values are replaced by their calculated counterparts.
+ * The current time is first increased using add_minute(), and only if the
+ *parities and other checks match these values are replaced by their
+ *calculated counterparts.
  *
  * @param init_min Indicates whether the state of the decoder is initial:
  *   0 = normal, first two minute marks passed
  *   1 = first minute mark passed
  *   2 = just starting
- * @param minlen The length of this minute in bits (normally 59 or 60 in case of a leap second).
- * @param acc_minlen The accumulated minute length of this minute in milliseconds.
+ * @param minlen The length of this minute in bits (normally 59 or 60 in case
+ *of a leap second).
+ * @param acc_minlen The accumulated minute length of this minute in
+ *milliseconds.
  * @param buffer The bit buffer.
  * @param time The current time, to be updated.
- * @return A structure containing the results of all the checks performed on the calculated time.
+ * @return A structure containing the results of all the checks performed on
+ *the calculated time.
  */
-struct DT_result decode_time(unsigned init_min, int minlen, unsigned acc_minlen, const int buffer[], struct tm * const time);
+struct DT_result decode_time(unsigned init_min, int minlen,
+    unsigned acc_minlen, const int buffer[],
+    struct tm * const time);
 
 #endif

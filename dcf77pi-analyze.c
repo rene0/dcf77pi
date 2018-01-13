@@ -34,7 +34,12 @@ display_bit(struct GB_result bit, int bitpos)
 void
 display_time(struct DT_result dt, struct tm time)
 {
-	printf("%s %04d-%02d-%02d %s %02d:%02d\n", time.tm_isdst == 1 ? "summer" : time.tm_isdst == 0 ? "winter" : "?     ", time.tm_year, time.tm_mon, time.tm_mday, weekday[time.tm_wday], time.tm_hour, time.tm_min);
+	printf(
+	    "%s %04d-%02d-%02d %s %02d:%02d\n", time.tm_isdst ==
+	    1 ? "summer" : time.tm_isdst == 0 ? "winter" : "?     ",
+	    time.tm_year,
+	    time.tm_mon, time.tm_mday, weekday[time.tm_wday], time.tm_hour,
+	    time.tm_min);
 	if (dt.minute_length == emin_long)
 		printf("Minute too long\n");
 	else if (dt.minute_length == emin_short)
@@ -97,7 +102,11 @@ display_alarm(struct alm alarm)
 {
 	printf("German civil warning for: %s\n", get_region_name(alarm));
 	for (unsigned i = 0; i < 2; i++)
-		printf("%u Regions: %x %x %x %x parities %x %x\n", i, alarm.region[i].r1, alarm.region[i].r2, alarm.region[i].r3, alarm.region[i].r4, alarm.parity[i].ps, alarm.parity[i].pl);
+		printf("%u Regions: %x %x %x %x parities %x %x\n", i,
+		    alarm.region[i].r1, alarm.region[i].r2,
+		    alarm.region[i].r3,
+		    alarm.region[i].r4, alarm.parity[i].ps,
+		    alarm.parity[i].pl);
 }
 
 void
@@ -160,7 +169,11 @@ main(int argc, char *argv[])
 		return res;
 	}
 
-	mainloop(NULL, get_bit_file, display_bit, display_long_minute, display_minute, NULL, display_alarm, display_unknown, display_weather, display_time, display_thirdparty_buffer, NULL, NULL, NULL);
+	mainloop(NULL, get_bit_file, display_bit, display_long_minute,
+	    display_minute, NULL, display_alarm, display_unknown,
+	    display_weather,
+	    display_time, display_thirdparty_buffer, NULL, NULL,
+	    NULL);
 	free(logfilename);
 	return res;
 }

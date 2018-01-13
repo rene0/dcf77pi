@@ -76,23 +76,29 @@ struct hardware {
  * Detailed information about the radio reception:
  */
 struct bitinfo {
-	/** bit0 and bit20 were reset to their initial values (normally because of reception errors or fluctuations in CPU usage) */
+	/** bit0 and bit20 were reset to their initial values (normally
+	 *because of reception errors or fluctuations in CPU usage) */
 	bool bitlen_reset;
-	/** realfreq was reset to {@link hardware.freq} (normally because of reception errors or fluctuations in CPU usage) */
+	/** realfreq was reset to {@link hardware.freq} (normally because of
+	 *reception errors or fluctuations in CPU usage) */
 	bool freq_reset;
 	/** time in samples when the signal went low again, -1 initially */
 	int tlow;
-	/** time in samples when the signal was last measured as 0, -1 initially */
+	/** time in samples when the signal was last measured as 0, -1
+	 *initially */
 	int tlast0;
 	/** length of this bit in samples */
 	unsigned t;
-	/** the raw received radio signal, {@link hardware.freq} / 2 items, with each item holding 8 bits */
+	/** the raw received radio signal, {@link hardware.freq} / 2 items,
+	 *with each item holding 8 bits */
 	unsigned char *signal;
 	/** the average length of a bit in samples */
 	unsigned long long realfreq;
-	/** the average length of the high part of bit 0 (a 0 bit) in samples */
+	/** the average length of the high part of bit 0 (a 0 bit) in samples
+	 **/
 	unsigned long long bit0;
-	/** the average length of the high part of bit 20 (a 1 bit) in samples */
+	/** the average length of the high part of bit 20 (a 1 bit) in samples
+	 **/
 	unsigned long long bit20;
 };
 
@@ -107,9 +113,11 @@ int set_mode_file(const char * const infilename);
 /**
  * Prepare for live input.
  *
- * The sample rate is set to {@link hardware.freq} Hz, reading from pin {@link hardware.pin} using {@link hardware.active_high} logic.
+ * The sample rate is set to {@link hardware.freq} Hz, reading from pin {@link
+ *hardware.pin} using {@link hardware.active_high} logic.
  *
- * @param config The JSON object containing the parsed configuration from config.json
+ * @param config The JSON object containing the parsed configuration from
+ *config.json
  * @return Preparation was succesful (0), -1 or errno otherwise.
  */
 int set_mode_live(struct json_object *config);
@@ -122,14 +130,16 @@ int set_mode_live(struct json_object *config);
 struct hardware get_hardware_parameters(void);
 
 /**
- * Clean up when closing the device or input logfile, and closing the output log file if applicable.
+ * Clean up when closing the device or input logfile, and closing the output
+ *log file if applicable.
  */
 void cleanup(void);
 
 /**
  * Retrieve one pulse from the hardware.
  *
- * @return 0 or 1 depending on the pin value and {@link hardware.active_high}, or 2 if obtaining the pulse failed.
+ * @return 0 or 1 depending on the pin value and {@link hardware.active_high},
+ *or 2 if obtaining the pulse failed.
  */
 int get_pulse(void);
 
@@ -141,7 +151,8 @@ int get_pulse(void);
 struct GB_result get_bit_file(void);
 
 /**
- * Retrieve one live bit from the hardware. This function determines several values which can be retrieved using {@link get_bitinfo}.
+ * Retrieve one live bit from the hardware. This function determines several
+ *values which can be retrieved using {@link get_bitinfo}.
  *
  * @return The currently received bit and its full status.
  */
@@ -150,7 +161,8 @@ struct GB_result get_bit_live(void);
 /**
  * Prepare for the next bit: update the bit position or wrap it around.
  *
- * @return The current bit state structure, with the marker field adjusted to indicate state of the bit buffer and the minute end.
+ * @return The current bit state structure, with the marker field adjusted to
+ *indicate state of the bit buffer and the minute end.
  */
 struct GB_result next_bit(void);
 
@@ -169,7 +181,8 @@ int get_bitpos(void);
 const int * const get_buffer(void);
 
 /**
- * Determine if there should be a space between the last bit and the current bit when displaying the bit buffer.
+ * Determine if there should be a space between the last bit and the current
+ *bit when displaying the bit buffer.
  *
  * @param bitpos The current bit position.
  */

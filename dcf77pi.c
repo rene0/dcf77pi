@@ -50,7 +50,9 @@ statusbar(int bitpos, const char * const fmt, ...)
 static void
 draw_keys(void)
 {
-	mvwprintw(main_win, 1, 0, "[Q] quit [L] change log file [S] time sync on  [u] UTC display on ");
+	mvwprintw(
+	    main_win, 1, 0,
+	    "[Q] quit [L] change log file [S] time sync on  [u] UTC display on ");
 	wclrtoeol(main_win);
 	mvwchgat(main_win, 1, 1, 1, A_BOLD, 4, NULL); /* [Q] */
 	mvwchgat(main_win, 1, 10, 1, A_BOLD, 4, NULL); /* [L] */
@@ -85,7 +87,11 @@ display_bit(struct GB_result bit, int bitpos)
 
 	bitinf = get_bitinfo();
 
-	mvwprintw(input_win, 3, 1, "%2u %6u %6u %6u %10.3f %10.3f %10.3f", bitpos, bitinf.tlow, bitinf.tlast0, bitinf.t, bitinf.realfreq / 1e6, bitinf.bit0 / 1e6, bitinf.bit20 / 1e6);
+	mvwprintw(input_win, 3, 1, "%2u %6u %6u %6u %10.3f %10.3f %10.3f",
+	    bitpos, bitinf.tlow, bitinf.tlast0, bitinf.t, bitinf.realfreq /
+	    1e6,
+	    bitinf.bit0 / 1e6,
+	    bitinf.bit20 / 1e6);
 	if (bitinf.freq_reset)
 		mvwchgat(input_win, 3, 25, 10, A_BOLD, 3, NULL);
 	else
@@ -146,16 +152,33 @@ display_time(struct DT_result dt, struct tm time)
 
 	/* color bits depending on the results */
 	mvwchgat(decode_win, 0, 4, 1, A_NORMAL,  dt.bit0_ok ? 2 : 1, NULL);
-	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt.dst_status == eDST_error ?  1 : 2, NULL);
+	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt.dst_status ==
+	    eDST_error ?  1 : 2,
+	    NULL);
 	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, dt.bit20_ok ? 2 : 1, NULL);
-	mvwchgat(decode_win, 0, 39, 1, A_NORMAL, dt.minute_status == eval_parity ? 1 : dt.minute_status == eval_bcd ? 4 : 2, NULL);
-	mvwchgat(decode_win, 0, 48, 1, A_NORMAL, dt.hour_status == eval_parity ? 1 : dt.hour_status == eval_bcd ? 4 : 2, NULL);
-	mvwchgat(decode_win, 0, 76, 1, A_NORMAL, dt.mday_status == eval_parity ? 1 : (dt.mday_status == eval_bcd || dt.wday_status == eval_bcd || dt.month_status == eval_bcd || dt.year_status == eval_bcd) ? 4 : 2, NULL);
+	mvwchgat(
+	    decode_win, 0, 39, 1, A_NORMAL, dt.minute_status ==
+	    eval_parity ? 1 : dt.minute_status == eval_bcd ? 4 : 2, NULL);
+	mvwchgat(
+	    decode_win, 0, 48, 1, A_NORMAL, dt.hour_status ==
+	    eval_parity ? 1 : dt.hour_status == eval_bcd ? 4 : 2, NULL);
+	mvwchgat(
+	    decode_win, 0, 76, 1, A_NORMAL, dt.mday_status ==
+	    eval_parity ? 1 : (dt.mday_status == eval_bcd ||
+		    dt.wday_status ==
+		    eval_bcd || dt.month_status == eval_bcd ||
+		    dt.year_status ==
+		    eval_bcd) ? 4 : 2, NULL);
 	if (dt.leapsecond_status == els_one)
 		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
 
 	/* display date and time */
-	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d", time.tm_isdst == 1 ? "summer" : time.tm_isdst == 0 ? "winter" : time.tm_isdst == -2 ? "UTC   " : "?     ", time.tm_year, time.tm_mon, time.tm_mday, weekday[time.tm_wday], time.tm_hour, time.tm_min);
+	mvwprintw(
+	    decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d",
+	    time.tm_isdst ==
+	    1 ? "summer" : time.tm_isdst == 0 ? "winter" : time.tm_isdst ==
+	    -2 ? "UTC   " : "?     ", time.tm_year, time.tm_mon, time.tm_mday,
+	    weekday[time.tm_wday], time.tm_hour, time.tm_min);
 
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 
@@ -207,7 +230,8 @@ display_thirdparty_buffer(const unsigned buf[])
 	wrefresh(tp_win);
 }
 
-/* In live mode, reaching this point means a decoding error as alarm messages were only broadcasted for testing between 2003-10-13 and 2003-12-10. */
+/* In live mode, reaching this point means a decoding error as alarm messages
+ *were only broadcasted for testing between 2003-10-13 and 2003-12-10. */
 void
 display_alarm(struct alm alarm)
 {
@@ -256,8 +280,12 @@ process_input(struct ML_result in_ml, int bitpos)
 			break;
 		case 'L':
 			inkey = ERR; /* prevent key repeat */
-			mvwprintw(main_win, 0, 0, "Current log (.): %s", (mlr.logfilename != NULL && strlen(mlr.logfilename) > 0) ?  mlr.logfilename : "(none)");
-			mvwprintw(main_win, 1, 0, "Log file (empty for none):");
+			mvwprintw(main_win, 0, 0, "Current log (.): %s",
+			    (mlr.logfilename != NULL &&
+				    strlen(mlr.logfilename) >
+				    0) ?  mlr.logfilename : "(none)");
+			mvwprintw(main_win, 1, 0,
+			    "Log file (empty for none):");
 			wclrtoeol(main_win);
 			wnoutrefresh(main_win);
 			input_mode = 1;
@@ -267,7 +295,8 @@ process_input(struct ML_result in_ml, int bitpos)
 			break;
 		case 'S':
 			mlr.settime = !mlr.settime;
-			mvwprintw(main_win, 1, 43, mlr.settime ? "off": "on ");
+			mvwprintw(main_win, 1, 43,
+			    mlr.settime ? "off" : "on ");
 			wnoutrefresh(main_win);
 			break;
 		case 'u':
@@ -283,12 +312,15 @@ process_input(struct ML_result in_ml, int bitpos)
 		char dispbuf[80];
 
 		if (input_count > 0 &&
-		    (inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127)) {
+		    (inkey == KEY_BACKSPACE || inkey == '\b' || inkey ==
+			    127)) {
 			input_count--;
 			input_xpos--;
 			if (input_xpos > 78) {
-				/* Shift display line one character to right */
-				(void)strncpy(dispbuf, keybuf + (input_xpos - 79), 53);
+				/* Shift display line one character to right
+				 **/
+				(void)strncpy(dispbuf, keybuf +
+				    (input_xpos - 79), 53);
 				dispbuf[54] = '\0';
 				mvwprintw(main_win, 1, 27, "%s", dispbuf);
 			} else {
@@ -296,7 +328,8 @@ process_input(struct ML_result in_ml, int bitpos)
 				wclrtoeol(main_win);
 			}
 			wnoutrefresh(main_win);
-		} else if (input_count == MAXBUF - 1 || (inkey == KEY_ENTER || inkey == '\r' || inkey == '\n')) {
+		} else if (input_count == MAXBUF - 1 ||
+		    (inkey == KEY_ENTER || inkey == '\r' || inkey == '\n')) {
 			/* terminate to prevent overflow */
 			keybuf[input_count] = '\0';
 			draw_keys();
@@ -306,11 +339,13 @@ process_input(struct ML_result in_ml, int bitpos)
 			input_xpos++;
 			if (input_xpos > 79) {
 				/* Shift displayed line one character left */
-				(void)strncpy(dispbuf, keybuf + (input_xpos - 79), 53);
+				(void)strncpy(dispbuf, keybuf +
+				    (input_xpos - 79), 53);
 				dispbuf[54] = '\0';
 				mvwprintw(main_win, 1, 27, "%s", dispbuf);
 			} else
-				mvwprintw(main_win, 1, input_xpos, "%c", inkey);
+				mvwprintw(main_win, 1, input_xpos, "%c",
+				    inkey);
 			wnoutrefresh(main_win);
 		}
 		doupdate();
@@ -326,8 +361,11 @@ post_process_input(struct ML_result in_ml, int bitpos)
 
 	mlr = in_ml;
 
-	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 4) % 60 || (old_bitpos > 4 && bitpos == 1))) {
-		/* Time for status text passed, cannot use *sleep() in statusbar() because that pauses reception */
+	if (old_bitpos != -1 &&
+	    (bitpos % 60 == (old_bitpos + 4) % 60 ||
+		    (old_bitpos > 4 && bitpos == 1))) {
+		/* Time for status text passed, cannot use *sleep() in
+		 *statusbar() because that pauses reception */
 		old_bitpos = -1;
 		draw_keys();
 	}
@@ -352,7 +390,9 @@ post_process_input(struct ML_result in_ml, int bitpos)
 			if (strcmp(old_logfilename, mlr.logfilename) != 0) {
 				if (strlen(old_logfilename) > 0 &&
 				    close_logfile() != 0) {
-					statusbar(bitpos, "Error closing old log file");
+					statusbar(
+					    bitpos,
+					    "Error closing old log file");
 					mlr.quit = true; /* error */
 				}
 				if (strlen(mlr.logfilename) > 0) {
@@ -360,7 +400,8 @@ post_process_input(struct ML_result in_ml, int bitpos)
 
 					res = append_logfile(mlr.logfilename);
 					if (res != 0) {
-						statusbar(bitpos, strerror(res));
+						statusbar(bitpos,
+						    strerror(res));
 						mlr.quit = true; /* error */
 					}
 				}
@@ -454,7 +495,7 @@ main(int argc, char *argv[])
 	int res;
 	char *logfilename = NULL;
 
-	config = json_object_from_file(ETCDIR"/config.json");
+	config = json_object_from_file(ETCDIR "/config.json");
 	if (config == NULL) {
 		/* non-existent file? */
 		cleanup();
@@ -537,13 +578,19 @@ main(int argc, char *argv[])
 	wnoutrefresh(tp_win);
 
 	mvwprintw(input_win, 0, 0, "new");
-	mvwprintw(input_win, 2, 0, "bit    act  last0  total   realfreq         b0        b20 state     radio");
+	mvwprintw(
+	    input_win, 2, 0,
+	    "bit    act  last0  total   realfreq         b0        b20 state     radio");
 	wnoutrefresh(input_win);
 
 	draw_keys();
 	doupdate();
 
-	mainloop(logfilename, get_bit_live, display_bit, display_long_minute, display_minute, wipe_input, display_alarm, display_unknown, display_weather, display_time, display_thirdparty_buffer, process_setclock_result, process_input, post_process_input);
+	mainloop(logfilename, get_bit_live, display_bit, display_long_minute,
+	    display_minute, wipe_input, display_alarm, display_unknown,
+	    display_weather, display_time, display_thirdparty_buffer,
+	    process_setclock_result, process_input,
+	    post_process_input);
 
 	curses_cleanup(NULL);
 	if (logfilename != NULL)

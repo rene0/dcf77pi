@@ -31,10 +31,10 @@ main(int argc, char *argv[])
 
 	while ((ch = getopt(argc, argv, "qr")) != -1) {
 		switch (ch) {
-		case 'q' :
+		case 'q':
 			verbose = false;
 			break;
-		case 'r' :
+		case 'r':
 			raw = true;
 			break;
 		default:
@@ -43,7 +43,7 @@ main(int argc, char *argv[])
 		}
 	}
 
-	config = json_object_from_file(ETCDIR"/config.json");
+	config = json_object_from_file(ETCDIR "/config.json");
 	if (config == NULL) {
 		cleanup();
 		return EX_NOINPUT;
@@ -62,7 +62,7 @@ main(int argc, char *argv[])
 
 	min = -1;
 
-	for (;;) {
+	for (;; ) {
 		struct bitinfo bi;
 		struct GB_result bit;
 
@@ -85,18 +85,24 @@ main(int argc, char *argv[])
 			/* display first bi->t pulses */
 			for (unsigned long long i = 0; i < bi.t / 8; i++)
 				for (unsigned j = 0; j < 8; j++)
-					printf("%c", (bi.signal[i] & (1 << j)) > 0 ? '+' : '-');
+					printf(
+					    "%c", (bi.signal[i] & (1 << j)) >
+					    0 ? '+' : '-');
 			/*
 			 * display pulses in the last partially filled item
 			 * bi.t is 0-based, hence the <= comparison
 			 */
 			for (unsigned j = 0; j <= (bi.t & 7); j++)
-				printf("%c", (bi.signal[bi.t / 8] & (1 << j)) > 0 ? '+' : '-');
+				printf(
+				    "%c", (bi.signal[bi.t / 8] & (1 << j)) >
+				    0 ? '+' : '-');
 			printf("\n");
 		}
 		if (bit.marker == emark_toolong || bit.marker == emark_late)
 			min++;
-		printf("%i %i %u %llu %llu %llu %i:%i\n", bi.tlow, bi.tlast0, bi.t, bi.bit0, bi.bit20, bi.realfreq, min, get_bitpos());
+		printf("%i %i %u %llu %llu %llu %i:%i\n", bi.tlow, bi.tlast0,
+		    bi.t, bi.bit0, bi.bit20, bi.realfreq, min,
+		    get_bitpos());
 		if (bit.marker == emark_minute)
 			min++;
 		bit = next_bit();
