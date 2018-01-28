@@ -270,7 +270,7 @@ handle_dst(unsigned errflags, bool olderr, const int buffer[], struct tm time,
 		 * Time offset change is OK if:
 		 * - announced and on the hour
 		 * - there was an error but not any more (needed if decoding
-		 *at startup is problematic)
+		 * at startup is problematic)
 		 * - initial state (otherwise DST would never be valid)
 		 */
 		if ((dt_res.dst_announce &&
@@ -281,9 +281,8 @@ handle_dst(unsigned errflags, bool olderr, const int buffer[], struct tm time,
 			newtime->tm_isdst = buffer[17];  /* expected change */
 		else {
 			if (dt_res.dst_status != eDST_error)
-				dt_res.dst_status = eDST_jump;  /* sudden
-			                                         *change,
-			                                         *ignore */
+				dt_res.dst_status = eDST_jump;
+			/* sudden change, ignore */
 			errflags |= (1 << 5);
 		}
 	}

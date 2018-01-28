@@ -22,8 +22,10 @@ main(int argc, char *argv[])
 		for (unsigned type = 0; type < 4; type++) {
 			/* fill the buffer */
 			for (int i = 0; i < TPBUFLEN + 2; i++) {
-				/* Calculate absolute position in buffer when
-				 *jumping in half-way a message. */
+				/*
+				 * Calculate absolute position in buffer when
+				 * jumping in half-way a message.
+				 */
 				int k = i - 14 * ofs;
 				if (k < 0)
 					k += TPBUFLEN + 2;

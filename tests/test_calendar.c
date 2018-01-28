@@ -172,8 +172,7 @@ main(int argc, char *argv[])
 		}
 	}
 
-	/* substract_minute(): check for every minute increase if it matches
-	 **/
+	/* substract_minute(): check for every minute increase if it matches */
 	time2.tm_year = base_year + 399;
 	time2.tm_mon = 12;
 	time2.tm_mday = 31;
@@ -263,8 +262,8 @@ main(int argc, char *argv[])
 				time2 = get_isotime(time);
 				memcpy((void*)&time3, (const void*)&time2,
 				    sizeof(time2));
-				r = mktime(&time3); /* leaves year, mon, mday
-				                     *of time3 untouched */
+				r = mktime(&time3);
+				/* leaves year, mon, mday of time3 untouched */
 				if (time.tm_year != time3.tm_year + 1900 ||
 				    time.tm_mon != time3.tm_mon + 1 ||
 				    time.tm_mday != time3.tm_mday ||
@@ -310,8 +309,8 @@ main(int argc, char *argv[])
 				time2 = get_dcftime(time);
 				memcpy((void*)&time3, (const void*)&time,
 				    sizeof(time));
-				r = mktime(&time3); /* leaves year, mon, mday
-				                     *of time3 untouched */
+				r = mktime(&time3);
+				/* leaves year, mon, mday of time3 untouched */
 				if (time2.tm_year != time3.tm_year + 1900 ||
 				    time2.tm_mon != time3.tm_mon + 1 ||
 				    time2.tm_mday != time3.tm_mday ||

@@ -29,34 +29,34 @@ struct ML_result {
 
 /**
  * Provide a ready-to-use mainloop function for the main program. Both dcf77pi
- *and dcf77pi-analyze use it.
+ * and dcf77pi-analyze use it.
  *
  * @param logfilename The name of the log file to write the live data to or
  * NULL if not in live mode.
  * @param get_bit The callback to obtain a bit (either live or from a log
- *file).
+ * file).
  * @param display_bit The callback to display the currently received bit
- *(either live or from a log file).
+ * (either live or from a log file).
  * @param display_long_minute The callback to indicate that this minute is too
- *long (eGB_too_long is set).
+ * long (eGB_too_long is set).
  * @param display_minute The callback to display information about the current
- *minute.
+ * minute.
  * @param display_new_second The optional callback for additional actions
- *after the bit is displayed and the minute information is updated.
+ * after the bit is displayed and the minute information is updated.
  * @param display_alarm The callback to display third party alarm messsages.
  * @param display_unknown The callback to display unknown third party
- *messages.
+ * messages.
  * @param display_weather The callback to display third party weather
- *messages.
+ * messages.
  * @param display_time The callback to display the decoded time.
  * @param display_thirdparty_buffer The callback to display the third party
- *buffer.
+ * buffer.
  * @param process_setclock_result The optional callback to display the result
- *of setting the system clock.
+ * of setting the system clock.
  * @param process_input The optional callback to handle interactive user
- *input.
+ * input.
  * @param post_process_input The optional callback to finish handling
- *interactive user input.
+ * interactive user input.
  */
 void mainloop(char *logfilename, struct GB_result (*get_bit)(
 	    void), void (*display_bit)(struct GB_result,

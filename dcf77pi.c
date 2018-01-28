@@ -230,8 +230,10 @@ display_thirdparty_buffer(const unsigned buf[])
 	wrefresh(tp_win);
 }
 
-/* In live mode, reaching this point means a decoding error as alarm messages
- *were only broadcasted for testing between 2003-10-13 and 2003-12-10. */
+/*
+ * In live mode, reaching this point means a decoding error as alarm messages
+ * were only broadcasted for testing between 2003-10-13 and 2003-12-10.
+ */
 void
 display_alarm(struct alm alarm)
 {
@@ -317,8 +319,7 @@ process_input(struct ML_result in_ml, int bitpos)
 			input_count--;
 			input_xpos--;
 			if (input_xpos > 78) {
-				/* Shift display line one character to right
-				 **/
+				/* Shift display line one character to right */
 				(void)strncpy(dispbuf, keybuf +
 				    (input_xpos - 79), 53);
 				dispbuf[54] = '\0';
@@ -364,8 +365,10 @@ post_process_input(struct ML_result in_ml, int bitpos)
 	if (old_bitpos != -1 &&
 	    (bitpos % 60 == (old_bitpos + 4) % 60 ||
 		    (old_bitpos > 4 && bitpos == 1))) {
-		/* Time for status text passed, cannot use *sleep() in
-		 *statusbar() because that pauses reception */
+		/*
+		 * Time for status text passed, cannot use *sleep() in
+		 * statusbar() because that pauses reception
+		 */
 		old_bitpos = -1;
 		draw_keys();
 	}

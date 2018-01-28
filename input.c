@@ -308,8 +308,8 @@ reset_bitlen(void)
 
 /*
  * The bits are decoded from the signal using an exponential low-pass filter
- *in conjunction with a Schmitt trigger. The idea and the initial
- *implementation for this come from Udo Klein, with permission.
+ * in conjunction with a Schmitt trigger. The idea and the initial
+ * implementation for this come from Udo Klein, with permission.
  * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
  */
 struct GB_result
@@ -335,10 +335,10 @@ get_bit_live(void)
 
 	/*
 	 * One period is either 1000 ms or 2000 ms long (normal or padding for
-	 *last). The active part is either 100 ms ('0') or 200 ms ('1') long.
-	 *The maximum allowed values as percentage of the second length are
-	 *specified as half the value and the whole value of the lengths of
-	 *bit 0 and bit 20 respectively.
+	 * last). The active part is either 100 ms ('0') or 200 ms ('1') long.
+	 * The maximum allowed values as percentage of the second length are
+	 * specified as half the value and the whole value of the lengths of
+	 * bit 0 and bit 20 respectively.
 	 *
 	 *  ~A > 3/2 * realfreq: end-of-minute
 	 *  ~A > 5/2 * realfreq: timeout
@@ -367,9 +367,8 @@ get_bit_live(void)
 		}
 		if (bit.signal != NULL) {
 			if ((bit.t & 7) == 0)
-				bit.signal[bit.t / 8] = 0;  /* clear data from
-			                                     *previous second
-			                                     **/
+				bit.signal[bit.t / 8] = 0;
+			/* clear data from previous second */
 			bit.signal[bit.t /
 			    8] |= p << (unsigned char)(bit.t & 7);
 		}
@@ -378,8 +377,10 @@ get_bit_live(void)
 			bit.tlast0 = (int)bit.t;
 		y += a * (p * 1000000000 - y) / 1000000000;
 
-		/* Prevent algorithm collapse during thunderstorms or
-		 *scheduler abuse */
+		/*
+		 * Prevent algorithm collapse during thunderstorms or
+		 * scheduler abuse
+		 */
 		if (bit.realfreq <= hw.freq * 500000 || bit.realfreq >=
 		    hw.freq * 1500000)
 			reset_frequency();
@@ -400,7 +401,8 @@ get_bit_live(void)
 
 		/*
 		 * Schmitt trigger, maximize value to introduce hysteresis and
-		 *to avoid infinite memory. */
+		 * to avoid infinite memory.
+		 */
 		if (y < 500000000 && stv == 1) {
 			/* end of high part of second */
 			y = 0;
@@ -430,9 +432,11 @@ get_bit_live(void)
 			}
 
 			if (newminute) {
-				/* Reset the frequency and the EOM flag if two
-				 *consecutive EOM markers come in, which means
-				 *something is wrong. */
+				/*
+				 * Reset the frequency and the EOM flag if two
+				 * consecutive EOM markers come in, which means
+				 * something is wrong.
+				 */
 				if (is_eom) {
 					if (gb_res.marker == emark_minute)
 						gb_res.marker = emark_none;
@@ -534,8 +538,7 @@ skip_invalid(void)
 			break;
 		inch = getc(logfile);
 		/*
-		 * \r\n is implicitly converted because \r is invalid
-		 *character
+		 * \r\n is implicitly converted because \r is invalid character
 		 * \n\r is implicitly converted because \n is found first
 		 * \n is OK
 		 * convert \r to \n
@@ -559,9 +562,11 @@ get_bit_file(void)
 	set_new_state();
 
 	inch = skip_invalid();
-	/* bit.t is set to fake value for compatibility with old log files not
-	 *storing acc_minlen values or to increase time when mainloop() splits
-	 *too long minutes. */
+	/*
+	 * bit.t is set to fake value for compatibility with old log files not
+	 * storing acc_minlen values or to increase time when mainloop() splits
+	 * too long minutes.
+	 */
 
 	switch (inch) {
 	case EOF:
@@ -574,15 +579,19 @@ get_bit_file(void)
 		bit.t = 1000;
 		break;
 	case '\n':
-		/* Skip multiple consecutive EOM markers, these are made
-		 *impossible by the reset_minlen() invocation in
-		 *get_bit_live() */
+		/*
+		 * Skip multiple consecutive EOM markers, these are made
+		 * impossible by the reset_minlen() invocation in
+		 * get_bit_live()
+		 */
 		gb_res.skip = true;
 		if (oldinch != '\n') {
 			bit.t = read_acc_minlen ? 0 : 1000;
 			read_acc_minlen = false;
-			/* * The marker checks must be inside the oldinch
-			 *check to prevent spurious emin_short errors. */
+			/*
+			 * The marker checks must be inside the oldinch
+			 * check to prevent spurious emin_short errors.
+			 */
 			if (gb_res.marker == emark_none)
 				gb_res.marker = emark_minute;
 			else if (gb_res.marker == emark_toolong)
@@ -638,8 +647,10 @@ get_bit_file(void)
 	if (!read_acc_minlen)
 		acc_minlen += bit.t;
 
-	/* Read-ahead 1 character to check if a minute marker is coming. This
-	 *prevents emark_toolong or emark_late being set 1 bit early. */
+	/*
+	 * Read-ahead 1 character to check if a minute marker is coming. This
+	 * prevents emark_toolong or emark_late being set 1 bit early.
+	 */
 	oldinch = inch;
 	inch = skip_invalid();
 	if (!feof(logfile)) {

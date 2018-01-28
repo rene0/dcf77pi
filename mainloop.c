@@ -130,13 +130,15 @@ mainloop(char *logfilename, struct GB_result (*get_bit)(
 		}
 
 		if (bit.marker == emark_minute)
-			minlen = bitpos + 1;  /* handle the missing bit due to
-		                               *the minute marker */
+			minlen = bitpos + 1;
+		/* handle the missing bit due to the minute marker */
 		else if (bit.marker == emark_toolong || bit.marker ==
 		    emark_late) {
 			minlen = -1;
-			/* leave acc_minlen alone, any minute marker already
-			 *processed */
+			/*
+			 * leave acc_minlen alone, any minute marker already
+			 * processed
+			 */
 			display_long_minute();
 		}
 		if (display_new_second != NULL)
