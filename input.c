@@ -509,7 +509,7 @@ get_bit_live(void)
 				    ((long long)(bit.tlow * 1000000 -
 					    bit.bit20) / 2);
 			/* Force sane values during e.g. a thunderstorm */
-			if (bit.bit20 < bit.bit0 || bit.bit20 > bit.bit0 * 3)
+			if (2 * bit.bit20 < bit.bit0 * 3 || bit.bit20 > bit.bit0 * 3)
 				reset_bitlen();
 		}
 	}
