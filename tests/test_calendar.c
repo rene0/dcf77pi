@@ -81,7 +81,7 @@ test_utc(char *name, int hours)
 int
 main(int argc, char *argv[])
 {
-	struct tm time, time2, time3;
+	struct tm time, time2;
 	int i;
 
 	/* isleeapyear() and lastday() are OK by definition */
@@ -251,34 +251,28 @@ main(int argc, char *argv[])
 	time.tm_isdst = -1;
 	for (time.tm_year = base_year; time.tm_year < base_year + 400;
 	    time.tm_year++) {
+		time.tm_yday = 1;
 		for (time.tm_mon = 1; time.tm_mon < 13; time.tm_mon++) {
 			int lday;
 
 			lday = lastday(time);
 			for (time.tm_mday = 1; time.tm_mday <= lday;
-			    time.tm_mday++) {
-				int r;
-
+			    time.tm_mday++, time.tm_yday++) {
 				time2 = get_isotime(time);
-				memcpy((void*)&time3, (const void*)&time2,
-				    sizeof(time2));
-				r = mktime(&time3);
-				/* leaves year, mon, mday of time3 untouched */
-				if (time.tm_year != time3.tm_year + 1900 ||
-				    time.tm_mon != time3.tm_mon + 1 ||
-				    time.tm_mday != time3.tm_mday ||
-				    time3.tm_yday != time2.tm_yday ||
-				    time3.tm_wday != time2.tm_wday || r ==
-				    -1) {
+				if (time2.tm_year != time.tm_year - 1900 ||
+				    time2.tm_mon  != time.tm_mon - 1 ||
+				    time2.tm_mday != time.tm_mday ||
+				    time2.tm_wday != time.tm_wday % 7 ||
+				    time2.tm_yday != time.tm_yday - 1) {
 					printf(
-					    "%s: get_isotime: (%i) %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n",
-					    argv[0], r, time2.tm_year,
+					    "%s: get_isotime: %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n",
+					    argv[0], time2.tm_year,
 					    time2.tm_mon, time2.tm_mday,
 					    time2.tm_wday, time2.tm_yday,
 					    time.tm_year - 1900,
 					    time.tm_mon - 1,
-					    time.tm_mday, time3.tm_wday,
-					    time3.tm_yday);
+					    time.tm_mday, time.tm_wday % 7,
+					    time.tm_yday - 1);
 					return EX_SOFTWARE;
 				}
 				if (++time.tm_wday == 8)
@@ -294,6 +288,7 @@ main(int argc, char *argv[])
 	time.tm_isdst = -1;
 	for (time.tm_year = base_year - 1900; time.tm_year < base_year - 1500;
 	    time.tm_year++) {
+		time.tm_yday = 0;
 		for (time.tm_mon = 0; time.tm_mon < 12; time.tm_mon++) {
 			int lday;
 
@@ -303,29 +298,22 @@ main(int argc, char *argv[])
 			time.tm_mon -= 1;
 			time.tm_year -= 1900;
 			for (time.tm_mday = 1; time.tm_mday <= lday;
-			    time.tm_mday++) {
-				int r;
-
+			    time.tm_mday++, time.tm_yday++) {
 				time2 = get_dcftime(time);
-				memcpy((void*)&time3, (const void*)&time,
-				    sizeof(time));
-				r = mktime(&time3);
-				/* leaves year, mon, mday of time3 untouched */
-				if (time2.tm_year != time3.tm_year + 1900 ||
-				    time2.tm_mon != time3.tm_mon + 1 ||
-				    time2.tm_mday != time3.tm_mday ||
-				    time2.tm_yday != time3.tm_yday + 1 ||
-				    time.tm_wday != time3.tm_wday || r ==
-				    -1) {
+				if (time2.tm_year != time.tm_year + 1900 ||
+				    time2.tm_mon != time.tm_mon + 1 ||
+				    time2.tm_mday != time.tm_mday ||
+				    time2.tm_wday % 7 != time.tm_wday ||
+				    time2.tm_yday != time.tm_yday + 1) {
 					printf(
-					    "%s: get_dcftime: (%i) %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n",
-					    argv[0], r, time2.tm_year,
+					    "%s: get_dcftime: %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n",
+					    argv[0], time2.tm_year,
 					    time2.tm_mon, time2.tm_mday,
 					    time2.tm_wday, time2.tm_yday,
 					    time.tm_year + 1900,
 					    time.tm_mon + 1,
-					    time.tm_mday, time3.tm_wday,
-					    time3.tm_yday + 1);
+					    time.tm_mday, (time.tm_wday == 0 ? 7 : time.tm_wday),
+					    time.tm_yday + 1);
 					return EX_SOFTWARE;
 				}
 				if (++time.tm_wday == 7)
