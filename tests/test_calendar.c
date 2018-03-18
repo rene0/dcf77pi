@@ -104,7 +104,7 @@ main(int argc, char *argv[])
 					co = century_offset(time);
 					if (co != century) {
 						printf(
-						    "%s: %d-%d-%d,%d : co %d must be %d\n",
+						    "%s: %d-%d-%d,%d: co %d must be %d\n",
 						    argv[0], time.tm_year,
 						    time.tm_mon,
 						    time.tm_mday,
@@ -210,7 +210,7 @@ main(int argc, char *argv[])
 						    time2.tm_min !=
 						    time.tm_min) {
 							printf(
-							    "%s: substract_minute:  %d-%d-%d,%d %d:%d must be %d-%d-%d,%d %d:%d\n",
+							    "%s: substract_minute: %d-%d-%d,%d %d:%d must be %d-%d-%d,%d %d:%d\n",
 							    argv[0],
 							    time2.tm_year,
 							    time2.tm_mon,
