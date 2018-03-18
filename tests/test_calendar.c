@@ -318,7 +318,7 @@ main(int argc, char *argv[])
 				    time.tm_wday != time3.tm_wday || r ==
 				    -1) {
 					printf(
-					    "%s: get_isotime: (%i) %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n",
+					    "%s: get_dcftime: (%i) %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n",
 					    argv[0], r, time2.tm_year,
 					    time2.tm_mon, time2.tm_mday,
 					    time2.tm_wday, time2.tm_yday,
