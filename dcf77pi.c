@@ -471,11 +471,11 @@ process_setclock_result(struct ML_result in_ml, int bitpos)
 	mlr = in_ml;
 	mlr.quit = false;
 	switch (mlr.settime_result) {
-	case esc_fail:
+	case esc_invalid:
 		statusbar(bitpos, "mktime() failed");
 		mlr.quit = true; /* error */
 		break;
-	case esc_invalid:
+	case esc_fail:
 		statusbar(bitpos, "clock_settime(): %s",
 		    strerror(errno));
 		mlr.quit = true; /* error */
