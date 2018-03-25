@@ -9,7 +9,7 @@
 #include <string.h>
 #include <time.h>
 
-static int dst_count, leap_count;
+static int dst_count, leap_count, minute_count;
 static struct DT_result dt_res;
 
 static bool
@@ -227,7 +227,7 @@ handle_leap_second(unsigned errflags, int minlen, const int buffer[],
 	if (buffer[19] == 1 && errflags == 0)
 		leap_count++;
 	if (time.tm_min > 0)
-		dt_res.leap_announce = 2 * leap_count > time.tm_min;
+		dt_res.leap_announce = 2 * leap_count > minute_count;
 
 	/* process possible leap second */
 	if (dt_res.leap_announce && time.tm_min == 0) {
@@ -263,7 +263,7 @@ handle_dst(unsigned errflags, bool olderr, const int buffer[], struct tm time,
 	if (buffer[16] == 1 && errflags == 0)
 		dst_count++;
 	if (time.tm_min > 0)
-		dt_res.dst_announce = 2 * dst_count > time.tm_min;
+		dt_res.dst_announce = 2 * dst_count > minute_count;
 
 	if (buffer[17] != time.tm_isdst || buffer[18] == time.tm_isdst) {
 		/*
@@ -316,9 +316,11 @@ decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
 	newtime.tm_isdst = time->tm_isdst; /* save DST value */
 
 	errflags = check_time_sanity(minlen, buffer) ? 0 : 1;
-
-	if (errflags == 0)
+	if (errflags == 0) {
 		handle_special_bits(buffer);
+		if (++minute_count == 60)
+			minute_count = 0;
+	}
 
 	increase = increase_old_time(init_min, minlen, acc_minlen, time);
 
