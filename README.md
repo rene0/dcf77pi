@@ -52,18 +52,17 @@ Currently supporrted platforms:
 * Cygwin, MacOS, NetBSD: supported without GPIO communication for live decoding
 * Windows: only via Cygwin
 
-On Linux, you will have to install an (n)curses development package using your
-package manager to get the required header files and the .so library file.
-For example:
-```sh
-% sudo apt-get install ncurses-devel
-```
-
-You will also need to install a json-c development package and a package
-providing pkg-config:
-For example, on FreeBSD:
+You will need to install a json-c development package and a package providing
+pkg-config to get the required header files and the .so library files. For
+example, on FreeBSD:
 ```sh
 % sudo pkg install json-c pkgconf
+```
+
+On Linux, you will also have to install an (n)curses development package using
+your package manager. For example, on Raspbian:
+```sh
+% sudo apt-get install libncurses5-dev libncursesw5-dev libjson-c-dev
 ```
 
 To build and install the program into /usr/bin , the library into /usr/lib and
