@@ -511,6 +511,10 @@ get_bit_live(void)
 			/* Force sane values during e.g. a thunderstorm */
 			if (2 * bit.bit20 < bit.bit0 * 3 || bit.bit20 > bit.bit0 * 3)
 				reset_bitlen();
+			if (20 * bit.bit0 < bit.realfreq || 5 * bit.bit0 > bit.realfreq)
+				reset_bitlen();
+			if (10 * bit.bit20 < bit.realfreq || 5 * bit.bit20 > 2 * bit.realfreq)
+				reset_bitlen();
 		}
 	}
 	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
