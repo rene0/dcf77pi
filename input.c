@@ -13,6 +13,7 @@
 #include <sysexits.h>
 #include <time.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #if defined(__FreeBSD__)
 #  include <sys/param.h>
@@ -722,6 +723,16 @@ get_hardware_parameters(void)
 	return hw;
 }
 
+void
+*flush_logfile()
+{
+	for(;;)
+	{
+		fflush(logfile);
+		sleep(60);
+	}
+}
+
 int
 append_logfile(const char * const logfilename)
 {
@@ -729,6 +740,8 @@ append_logfile(const char * const logfilename)
 	if (logfile == NULL)
 		return errno;
 	fprintf(logfile, "\n--new log--\n\n");
+	pthread_t flush_thread;
+	pthread_create(&flush_thread, NULL, flush_logfile, NULL);
 	return 0;
 }
 

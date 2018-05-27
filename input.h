@@ -239,4 +239,9 @@ void reset_acc_minlen(void);
  */
 int get_cutoff(void);
 
+/**
+ * Flush the current log file to its storage location.
+ */
+void *flush_logfile();
+
 #endif
