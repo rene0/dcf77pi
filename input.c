@@ -500,6 +500,7 @@ get_bit_live(void)
 			init_bit--;
 		else if (gb_res.hwstat == ehw_ok && gb_res.marker ==
 		    emark_none) {
+			unsigned long long avg;
 			if (bitpos == 0 && gb_res.bitval == ebv_0)
 				bit.bit0 +=
 				    ((long long)(bit.tlow * 1000000 -
@@ -511,9 +512,10 @@ get_bit_live(void)
 			/* Force sane values during e.g. a thunderstorm */
 			if (2 * bit.bit20 < bit.bit0 * 3 || bit.bit20 > bit.bit0 * 3)
 				reset_bitlen();
-			if (20 * bit.bit0 < bit.realfreq || 5 * bit.bit0 > bit.realfreq)
+			avg = (bit.bit20 - bit.bit0) / 2;
+			if (bit.bit0 + avg < bit.realfreq / 10 || bit.bit0 - avg > bit.realfreq / 10)
 				reset_bitlen();
-			if (10 * bit.bit20 < bit.realfreq || 5 * bit.bit20 > 2 * bit.realfreq)
+			if (bit.bit20 + avg < bit.realfreq / 5 || bit.bit20 - avg > bit.realfreq / 5)
 				reset_bitlen();
 		}
 	}
