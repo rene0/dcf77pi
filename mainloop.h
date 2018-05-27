@@ -58,18 +58,19 @@ struct ML_result {
  * @param post_process_input The optional callback to finish handling
  * interactive user input.
  */
-void mainloop(char *logfilename, struct GB_result (*get_bit)(
-	    void), void (*display_bit)(struct GB_result,
-	    int), void (*display_long_minute)(
-	    void), void (*display_minute)(int), void (*display_new_second)(
-	    void), void (*display_alarm)(struct alm), void (*display_unknown)(
-	    void), void (*display_weather)(void), void (*display_time)(
-	    struct DT_result,
-	    struct tm), void (*display_thirdparty_buffer)(
-	    const unsigned[]), struct ML_result (*process_setclock_result)(
-	    struct ML_result, int), struct ML_result (*process_input)(
-	    struct ML_result,
-	    int), struct ML_result (*post_process_input)(struct ML_result,
-	    int));
+void mainloop(char *logfilename,
+    struct GB_result (*get_bit)(void),
+    void (*display_bit)(struct GB_result, int),
+    void (*display_long_minute)(void),
+    void (*display_minute)(int),
+    void (*display_new_second)(void),
+    void (*display_alarm)(struct alm),
+    void (*display_unknown)(void),
+    void (*display_weather)(void),
+    void (*display_time)(struct DT_result, struct tm),
+    void (*display_thirdparty_buffer)(const unsigned[]),
+    struct ML_result (*process_setclock_result)(struct ML_result, int),
+    struct ML_result (*process_input)(struct ML_result, int),
+    struct ML_result (*post_process_input)(struct ML_result, int));
 
 #endif

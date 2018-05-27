@@ -89,8 +89,7 @@ struct bitinfo {
 	/** time in samples when the signal went low again, -1 initially */
 	int tlow;
 	/**
-	 * time in samples when the signal was last measured as 0, -1
-	 * initially
+	 * time in samples when the signal was last measured as 0, -1 initially
 	 */
 	int tlast0;
 	/** length of this bit in samples */

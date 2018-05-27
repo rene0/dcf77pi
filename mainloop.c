@@ -15,24 +15,22 @@
 static void
 check_handle_new_minute(struct GB_result bit, struct ML_result *mlr,
     int bitpos, struct tm *curtime, int minlen, bool was_toolong,
-    unsigned *init_min, void (*display_minute)(
-	    int), void (*display_thirdparty_buffer)(
-	    const unsigned[]), void (*display_alarm)(
-	    struct alm), void (*display_unknown)(
-	    void), void (*display_weather)(void), void (*display_time)(
-	    struct DT_result,
-	    struct tm), struct ML_result (*process_setclock_result)(
-	    struct ML_result, int))
+    unsigned *init_min, void (*display_minute)(int),
+    void (*display_thirdparty_buffer)(const unsigned[]),
+    void (*display_alarm)(struct alm), void (*display_unknown)(void),
+    void (*display_weather)(void),
+    void (*display_time)(struct DT_result, struct tm),
+    struct ML_result (*process_setclock_result)(struct ML_result, int))
 {
 	bool have_result = false;
 
-	if ((bit.marker == emark_minute ||
-		    bit.marker == emark_late) && !was_toolong) {
+	if ((bit.marker == emark_minute || bit.marker == emark_late) &&
+	    !was_toolong) {
 		struct DT_result dt;
 
 		display_minute(minlen);
-		dt = decode_time(*init_min, minlen,
-		    get_acc_minlen(), get_buffer(), curtime);
+		dt = decode_time(*init_min, minlen, get_acc_minlen(),
+		    get_buffer(), curtime);
 
 		if (curtime->tm_min % 3 == 0 && *init_min == 0) {
 			const unsigned *tpbuf;
@@ -46,8 +44,8 @@ check_handle_new_minute(struct GB_result bit, struct ML_result *mlr,
 
 				decode_alarm(tpbuf, &civwarn);
 				display_alarm(civwarn);
+				break;
 			}
-			break;
 			case eTP_unknown:
 				display_unknown();
 				break;
@@ -60,34 +58,35 @@ check_handle_new_minute(struct GB_result bit, struct ML_result *mlr,
 
 		if (mlr->settime) {
 			have_result = true;
-			if (setclock_ok(*init_min, dt, bit))
+			if (setclock_ok(*init_min, dt, bit)) {
 				mlr->settime_result = setclock(*curtime);
-			else
+			} else {
 				mlr->settime_result = esc_unsafe;
+			}
 		}
-		if (bit.marker == emark_minute || bit.marker == emark_late)
+		if (bit.marker == emark_minute || bit.marker == emark_late) {
 			reset_acc_minlen();
-		if (*init_min > 0)
+		}
+		if (*init_min > 0) {
 			(*init_min)--;
+		}
 	}
-	if (have_result && process_setclock_result != NULL)
+	if (have_result && process_setclock_result != NULL) {
 		*mlr = process_setclock_result(*mlr, bitpos);
+	}
 }
 
 void
-mainloop(char *logfilename, struct GB_result (*get_bit)(
-	    void), void (*display_bit)(struct GB_result,
-	    int), void (*display_long_minute)(
-	    void), void (*display_minute)(int), void (*display_new_second)(
-	    void), void (*display_alarm)(struct alm), void (*display_unknown)(
-	    void), void (*display_weather)(void), void (*display_time)(
-	    struct DT_result,
-	    struct tm), void (*display_thirdparty_buffer)(
-	    const unsigned[]), struct ML_result (*process_setclock_result)(
-	    struct ML_result, int), struct ML_result (*process_input)(
-	    struct ML_result,
-	    int), struct ML_result (*post_process_input)(struct ML_result,
-	    int))
+mainloop(char *logfilename, struct GB_result (*get_bit)(void),
+    void (*display_bit)(struct GB_result, int),
+    void (*display_long_minute)(void), void (*display_minute)(int),
+    void (*display_new_second)(void), void (*display_alarm)(struct alm),
+    void (*display_unknown)(void), void (*display_weather)(void),
+    void (*display_time)(struct DT_result, struct tm),
+    void (*display_thirdparty_buffer)(const unsigned[]),
+    struct ML_result (*process_setclock_result)(struct ML_result, int),
+    struct ML_result (*process_input)(struct ML_result, int),
+    struct ML_result (*post_process_input)(struct ML_result, int))
 {
 	int minlen = 0;
 	int bitpos = 0;
@@ -100,24 +99,28 @@ mainloop(char *logfilename, struct GB_result (*get_bit)(
 	(void)memset(&mlr, 0, sizeof(mlr));
 	mlr.logfilename = logfilename;
 
-	for (;; ) {
+	for (;;) {
 		struct GB_result bit;
 
 		bit = get_bit();
 		if (process_input != NULL) {
 			mlr = process_input(mlr, bitpos);
-			if (bit.done || mlr.quit)
+			if (bit.done || mlr.quit) {
 				break;
+			}
 		}
 
 		bitpos = get_bitpos();
-		if (post_process_input != NULL)
+		if (post_process_input != NULL) {
 			mlr = post_process_input(mlr, bitpos);
-		if (!bit.skip && !mlr.quit)
+		}
+		if (!bit.skip && !mlr.quit) {
 			display_bit(bit, bitpos);
+		}
 
-		if (init_min < 2)
+		if (init_min < 2) {
 			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
+		}
 
 		bit = next_bit();
 		if (minlen == -1) {
@@ -129,11 +132,11 @@ mainloop(char *logfilename, struct GB_result (*get_bit)(
 			was_toolong = true;
 		}
 
-		if (bit.marker == emark_minute)
+		if (bit.marker == emark_minute) {
 			minlen = bitpos + 1;
-		/* handle the missing bit due to the minute marker */
-		else if (bit.marker == emark_toolong || bit.marker ==
-		    emark_late) {
+			/* handle the missing bit due to the minute marker */
+		} else if (bit.marker == emark_toolong ||
+		    bit.marker == emark_late) {
 			minlen = -1;
 			/*
 			 * leave acc_minlen alone, any minute marker already
@@ -141,17 +144,18 @@ mainloop(char *logfilename, struct GB_result (*get_bit)(
 			 */
 			display_long_minute();
 		}
-		if (display_new_second != NULL)
+		if (display_new_second != NULL) {
 			display_new_second();
+		}
 
 		check_handle_new_minute(bit, &mlr, bitpos, &curtime, minlen,
 		    was_toolong, &init_min, display_minute,
 		    display_thirdparty_buffer, display_alarm, display_unknown,
-		    display_weather, display_time,
-		    process_setclock_result);
+		    display_weather, display_time, process_setclock_result);
 		was_toolong = false;
-		if (bit.done || mlr.quit)
+		if (bit.done || mlr.quit) {
 			break;
+		}
 	}
 	cleanup();
 }

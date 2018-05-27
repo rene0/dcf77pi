@@ -32,8 +32,9 @@ test_utc(char *name, int hours)
 	time.tm_min = 0;
 	/* initialize to UTC */
 	init_fwd_tm(&time2);
-	for (int i = 0; i < 60 * hours; i++)
+	for (int i = 0; i < 60 * hours; i++) {
 		time2 = substract_minute(time2, false);
+	}
 
 	for (time.tm_year = base_year; time.tm_year < base_year + 400;
 	    time.tm_year++) {
@@ -51,27 +52,27 @@ test_utc(char *name, int hours)
 					    time2.tm_mday != time3.tm_mday ||
 					    time2.tm_wday != time3.tm_wday ||
 					    time2.tm_hour != time3.tm_hour) {
-						printf(
-						    "%s: get_utchour %i: %d-%d-%d,%d %d must be %d-%d-%d,%d %d\n",
-						    name, hours,
-						    time3.tm_year,
-						    time3.tm_mon,
-						    time3.tm_mday,
+						printf("%s: get_utchour %i: "
+						    "%d-%d-%d,%d %d must be "
+						    "%d-%d-%d,%d %d\n", name,
+						    hours, time3.tm_year,
+						    time3.tm_mon, time3.tm_mday,
 						    time3.tm_wday,
 						    time3.tm_hour,
-						    time2.tm_year,
-						    time2.tm_mon,
+						    time2.tm_year, time2.tm_mon,
 						    time2.tm_mday,
 						    time2.tm_wday,
 						    time2.tm_hour);
 						return EX_SOFTWARE;
 					}
-					for (int i = 0; i < 60; i++)
+					for (int i = 0; i < 60; i++) {
 						time2 = add_minute(time2,
 						    false);
+					}
 				}
-				if (++time.tm_wday == 8)
+				if (++time.tm_wday == 8) {
 					time.tm_wday = 1;
+				}
 			}
 		}
 	}
@@ -88,10 +89,9 @@ main(int argc, char *argv[])
 
 	/* century_offset(): check for every date if it matches */
 	time.tm_wday = 1; /* base_year-01-01 is a Monday */
-	for (int century = 0; century < 4; century++)
-		for (time.tm_year = 0; time.tm_year < 100; time.tm_year++)
-			for (time.tm_mon = 1; time.tm_mon < 13;
-			    time.tm_mon++) {
+	for (int century = 0; century < 4; century++) {
+		for (time.tm_year = 0; time.tm_year < 100; time.tm_year++) {
+			for (time.tm_mon = 1; time.tm_mon < 13; time.tm_mon++) {
 				int lday;
 
 				time.tm_year += base_year + century * 100;
@@ -103,20 +103,20 @@ main(int argc, char *argv[])
 
 					co = century_offset(time);
 					if (co != century) {
-						printf(
-						    "%s: %d-%d-%d,%d: co %d must be %d\n",
-						    argv[0], time.tm_year,
-						    time.tm_mon,
-						    time.tm_mday,
-						    time.tm_wday, co,
-						    century);
+						printf("%s: %d-%d-%d,%d: co %d "
+						    "must be %d\n", argv[0],
+						    time.tm_year, time.tm_mon,
+						    time.tm_mday, time.tm_wday,
+						    co, century);
 						return EX_SOFTWARE;
 					}
-					if (++time.tm_wday == 8)
+					if (++time.tm_wday == 8) {
 						time.tm_wday = 1;
+					}
 				}
 			}
-
+		}
+	}
 	/* add_minute(): check for every minute increase if it matches */
 	init_fwd_tm(&time2);
 	time.tm_wday = 1;
@@ -130,8 +130,7 @@ main(int argc, char *argv[])
 			    time.tm_mday++) {
 				for (time.tm_hour = 0; time.tm_hour < 24;
 				    time.tm_hour++) {
-					for (time.tm_min = 0;
-					    time.tm_min < 60;
+					for (time.tm_min = 0; time.tm_min < 60;
 					    time.tm_min++) {
 						if (time2.tm_year !=
 						    time.tm_year ||
@@ -145,8 +144,10 @@ main(int argc, char *argv[])
 						    time.tm_hour ||
 						    time2.tm_min !=
 						    time.tm_min) {
-							printf(
-							    "%s: add_minute: %d-%d-%d,%d %d:%d must be %d-%d-%d,%d %d:%d\n",
+							printf("%s: add_minute:"
+							    " %d-%d-%d,%d %d:%d"
+							    " must be %d-%d-%d,"
+							    "%d %d:%d\n",
 							    argv[0],
 							    time2.tm_year,
 							    time2.tm_mon,
@@ -166,8 +167,9 @@ main(int argc, char *argv[])
 						    false);
 					}
 				}
-				if (++time.tm_wday == 8)
+				if (++time.tm_wday == 8) {
 					time.tm_wday = 1;
+				}
 			}
 		}
 	}
@@ -194,8 +196,7 @@ main(int argc, char *argv[])
 			    time.tm_mday--) {
 				for (time.tm_hour = 23; time.tm_hour >= 0;
 				    time.tm_hour--) {
-					for (time.tm_min = 59;
-					    time.tm_min >= 0;
+					for (time.tm_min = 59; time.tm_min >= 0;
 					    time.tm_min--) {
 						if (time2.tm_year !=
 						    time.tm_year ||
@@ -209,8 +210,11 @@ main(int argc, char *argv[])
 						    time.tm_hour ||
 						    time2.tm_min !=
 						    time.tm_min) {
-							printf(
-							    "%s: substract_minute: %d-%d-%d,%d %d:%d must be %d-%d-%d,%d %d:%d\n",
+							printf("%s: "
+							    "substract_minute: "
+							    "%d-%d-%d,%d %d:%d "
+							    "must be %d-%d-%d,"
+							    "%d %d:%d\n",
 							    argv[0],
 							    time2.tm_year,
 							    time2.tm_mon,
@@ -226,23 +230,26 @@ main(int argc, char *argv[])
 							    time.tm_min);
 							return EX_SOFTWARE;
 						}
-						time2 = substract_minute(
-						    time2, false);
+						time2 = substract_minute(time2,
+						    false);
 					}
 				}
-				if (--time.tm_wday == 0)
+				if (--time.tm_wday == 0) {
 					time.tm_wday = 7;
+				}
 			}
 		}
 	}
 
 	/* get_utchour(): check for each hour if it matches */
 	i = test_utc(argv[0], 1);
-	if (i != EX_OK)
+	if (i != EX_OK) {
 		return i;
+	}
 	i = test_utc(argv[0], 2);
-	if (i != EX_OK)
+	if (i != EX_OK) {
 		return i;
+	}
 
 	/* get_isotime(): check for each day if it matches */
 	init_fwd_tm(&time2);
@@ -264,19 +271,20 @@ main(int argc, char *argv[])
 				    time2.tm_mday != time.tm_mday ||
 				    time2.tm_wday != time.tm_wday % 7 ||
 				    time2.tm_yday != time.tm_yday - 1) {
-					printf(
-					    "%s: get_isotime: %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n",
+					printf("%s: get_isotime: "
+					    "%d-%d-%d,%d,%d must be "
+					    "%d-%d-%d,%d,%d\n",
 					    argv[0], time2.tm_year,
 					    time2.tm_mon, time2.tm_mday,
 					    time2.tm_wday, time2.tm_yday,
 					    time.tm_year - 1900,
-					    time.tm_mon - 1,
-					    time.tm_mday, time.tm_wday % 7,
-					    time.tm_yday - 1);
+					    time.tm_mon - 1, time.tm_mday,
+					    time.tm_wday % 7, time.tm_yday - 1);
 					return EX_SOFTWARE;
 				}
-				if (++time.tm_wday == 8)
+				if (++time.tm_wday == 8) {
 					time.tm_wday = 1;
+				}
 			}
 		}
 	}
@@ -305,19 +313,22 @@ main(int argc, char *argv[])
 				    time2.tm_mday != time.tm_mday ||
 				    time2.tm_wday % 7 != time.tm_wday ||
 				    time2.tm_yday != time.tm_yday + 1) {
-					printf(
-					    "%s: get_dcftime: %d-%d-%d,%d,%d must be %d-%d-%d,%d,%d\n",
+					printf("%s: get_dcftime: %d-%d-%d,%d,%d"
+					    " must be %d-%d-%d,%d,%d\n",
 					    argv[0], time2.tm_year,
 					    time2.tm_mon, time2.tm_mday,
 					    time2.tm_wday, time2.tm_yday,
 					    time.tm_year + 1900,
 					    time.tm_mon + 1,
-					    time.tm_mday, (time.tm_wday == 0 ? 7 : time.tm_wday),
+					    time.tm_mday,
+					    time.tm_wday == 0 ? 7 :
+					    time.tm_wday,
 					    time.tm_yday + 1);
 					return EX_SOFTWARE;
 				}
-				if (++time.tm_wday == 7)
+				if (++time.tm_wday == 7) {
 					time.tm_wday = 0;
+				}
 			}
 		}
 	}

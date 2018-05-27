@@ -8,8 +8,8 @@
 #include <time.h>
 
 /**
- * The base year for {@link century_offset}. Update every 400 years, now at
- * 2300-01-01
+ * The base year for {@link century_offset}. Update every 400 years,
+ * now at 2300-01-01
  */
 extern const int base_year;
 
@@ -17,8 +17,8 @@ extern const int base_year;
 extern const int dayinleapyear[12];
 
 /**
- * Textual representation of the day of week, with Monday = 1, Sunday = 7, and
- * an unknown day being 0.
+ * Textual representation of the day of week, with Monday = 1, Sunday = 7,
+ * and an unknown day being 0.
  */
 extern const char * const weekday[8];
 
@@ -61,8 +61,8 @@ struct tm get_utctime(struct tm time);
  * Adds one minute to the current time.
  *
  * The year will fall back to {@link base_year} when it reaches
- * {@link base_year} + 400. Leap years and switches to and from daylight
- * saving time are taken into account. The latter can be disabled by forcing
+ * {@link base_year} + 400. Leap years and switches to and from daylight saving
+ * time are taken into account. The latter can be disabled by forcing
  * {@link dst_changes} to false.
  *
  * @param time The current time to be increased with one minute.
@@ -99,8 +99,8 @@ struct tm get_dcftime(struct tm isotime);
 /**
  * Convert the given time in DCF77 format to ISO format.
  *
- * year starts at base_year - 1900, month = 0..11, mday = 1..lastday, Sunday =
- * 0, yday = 0..365
+ * year starts at base_year - 1900, month = 0..11, mday = 1..lastday,
+ * Sunday = 0, yday = 0..365
  *
  * @param dcftime The time in DCF77 format to convert
  * @return The time in ISO format.

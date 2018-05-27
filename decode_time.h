@@ -55,8 +55,7 @@ enum eDT_leapsecond {
 	els_done
 };
 
-/** Structure containing the state of all decoded information of this minute
- */
+/** Structure containing the state of all decoded information of this minute */
 struct DT_result {
 	/**
 	 * bit 0 must always be 0 :
@@ -111,8 +110,7 @@ struct DT_result {
  * @return A structure containing the results of all the checks performed on
  * the calculated time.
  */
-struct DT_result decode_time(unsigned init_min, int minlen,
-    unsigned acc_minlen, const int buffer[],
-    struct tm * const time);
+struct DT_result decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
+    const int buffer[], struct tm * const time);
 
 #endif

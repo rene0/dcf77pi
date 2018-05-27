@@ -54,7 +54,7 @@ static struct bitinfo bit;
 static unsigned acc_minlen;
 static int cutoff;
 static struct GB_result gb_res;
-static unsigned filemode = 0; /* 0 = no file, 1 = input, 2 = output */
+static unsigned filemode = 0;   /* 0 = no file, 1 = input, 2 = output */
 
 int
 set_mode_file(const char * const infilename)
@@ -95,39 +95,38 @@ set_mode_live(struct json_object *config)
 		return -1;
 	}
 	/* fill hardware structure and initialize hardware */
-	if (json_object_object_get_ex(config, "pin", &value))
+	if (json_object_object_get_ex(config, "pin", &value)) {
 		hw.pin = (unsigned)json_object_get_int(value);
-	else {
+	} else {
 		fprintf(stderr, "Key 'pin' not found\n");
 		cleanup();
 		return EX_DATAERR;
 	}
-	if (json_object_object_get_ex(config, "activehigh", &value))
+	if (json_object_object_get_ex(config, "activehigh", &value)) {
 		hw.active_high = (bool)json_object_get_boolean(value);
-	else {
+	} else {
 		fprintf(stderr, "Key 'activehigh' not found\n");
 		cleanup();
 		return EX_DATAERR;
 	}
-	if (json_object_object_get_ex(config, "freq", &value))
+	if (json_object_object_get_ex(config, "freq", &value)) {
 		hw.freq = (unsigned)json_object_get_int(value);
-	else {
+	} else {
 		fprintf(stderr, "Key 'freq' not found\n");
 		cleanup();
 		return EX_DATAERR;
 	}
 	if (hw.freq < 10 || hw.freq > 155000 || (hw.freq & 1) == 1) {
-		fprintf(
-		    stderr,
-		    "hw.freq must be an even number between 10 and 155000 inclusive\n");
+		fprintf(stderr, "hw.freq must be an even number between 10 and"
+		    "155000 inclusive\n");
 		cleanup();
 		return EX_DATAERR;
 	}
 	bit.signal = malloc(hw.freq / 2);
 #if defined(__FreeBSD__)
-	if (json_object_object_get_ex(config, "iodev", &value))
+	if (json_object_object_get_ex(config, "iodev", &value)) {
 		hw.iodev = (unsigned)json_object_get_int(value);
-	else {
+	} else {
 		fprintf(stderr, "Key 'iodev' not found\n");
 		cleanup();
 		return EX_DATAERR;
@@ -222,18 +221,21 @@ set_mode_live(struct json_object *config)
 void
 cleanup(void)
 {
-	if (fd > 0 && close(fd) == -1)
+	if (fd > 0 && close(fd) == -1) {
 #if defined(__FreeBSD__)
 		perror("close (/dev/gpioc*)");
 #elif defined(__linux__)
 		perror("close (/sys/class/gpio/*)");
 #endif
+	}
 	fd = 0;
-	if (logfile != NULL && fclose(logfile) == EOF)
+	if (logfile != NULL && fclose(logfile) == EOF) {
 		perror("fclose (logfile)");
+	}
 	logfile = NULL;
-	if (bit.signal != NULL)
+	if (bit.signal != NULL) {
 		free(bit.signal);
+	}
 	bit.signal = NULL;
 }
 
@@ -251,18 +253,20 @@ get_pulse(void)
 	req.gp_pin = hw.pin;
 	count = ioctl(fd, GPIOGET, &req);
 	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
-	if (count < 0)
+	if (count < 0) {
 #elif defined(__linux__)
 	count = read(fd, &tmpch, 1);
 	tmpch -= '0';
 	if (lseek(fd, 0, SEEK_SET) == (off_t)-1)
-		return 2;  /* rewind to prevent EBUSY/no read failed */
-	if (count != 1)
+		return 2; /* rewind to prevent EBUSY/no read failed */
+	if (count != 1) {
 #endif
-		return 2;  /* hardware failure? */
+		return 2; /* hardware failure? */
+	}
 
-	if (!hw.active_high)
+	if (!hw.active_high) {
 		tmpch = 1 - tmpch;
+	}
 #endif
 	return tmpch;
 }
@@ -274,12 +278,14 @@ get_pulse(void)
 static void
 set_new_state(void)
 {
-	if (!gb_res.skip)
+	if (!gb_res.skip) {
 		cutoff = -1;
+	}
 	gb_res.bad_io = false;
 	gb_res.bitval = ebv_none;
-	if (gb_res.marker != emark_toolong && gb_res.marker != emark_late)
+	if (gb_res.marker != emark_toolong && gb_res.marker != emark_late) {
 		gb_res.marker = emark_none;
+	}
 	gb_res.hwstat = ehw_ok;
 	gb_res.done = false;
 	gb_res.skip = false;
@@ -288,11 +294,11 @@ set_new_state(void)
 static void
 reset_frequency(void)
 {
-	if (logfile != NULL)
-		fprintf(
-		    logfile, "%s", bit.realfreq <= hw.freq *
-		    500000 ? "<" : bit.realfreq >= hw.freq *
-		    1500000 ? ">" : "");
+	if (logfile != NULL) {
+		fprintf(logfile, "%s",
+		    bit.realfreq <= hw.freq * 500000 ? "<" :
+		    bit.realfreq >= hw.freq * 1500000 ? ">" : "");
+	}
 	bit.realfreq = hw.freq * 1000000;
 	bit.freq_reset = true;
 }
@@ -300,8 +306,9 @@ reset_frequency(void)
 static void
 reset_bitlen(void)
 {
-	if (logfile != NULL)
+	if (logfile != NULL) {
 		fprintf(logfile, "!");
+	}
 	bit.bit0 = bit.realfreq / 10;
 	bit.bit20 = bit.realfreq / 5;
 	bit.bitlen_reset = true;
@@ -326,8 +333,8 @@ get_bit_live(void)
 	unsigned sec2;
 	long long a, y = 1000000000;
 	static int init_bit = 2;
-	bool is_eom = gb_res.marker == emark_minute || gb_res.marker ==
-	    emark_late;
+	bool is_eom = gb_res.marker == emark_minute ||
+	    gb_res.marker == emark_late;
 
 	bit.freq_reset = false;
 	bit.bitlen_reset = false;
@@ -367,23 +374,25 @@ get_bit_live(void)
 			break;
 		}
 		if (bit.signal != NULL) {
-			if ((bit.t & 7) == 0)
+			if ((bit.t & 7) == 0) {
 				bit.signal[bit.t / 8] = 0;
+			}
 			/* clear data from previous second */
-			bit.signal[bit.t /
-			    8] |= p << (unsigned char)(bit.t & 7);
+			bit.signal[bit.t / 8] |=
+			    p << (unsigned char)(bit.t & 7);
 		}
 
-		if (y >= 0 && y < a / 2)
+		if (y >= 0 && y < a / 2) {
 			bit.tlast0 = (int)bit.t;
+		}
 		y += a * (p * 1000000000 - y) / 1000000000;
 
 		/*
 		 * Prevent algorithm collapse during thunderstorms or
 		 * scheduler abuse
 		 */
-		if (bit.realfreq <= hw.freq * 500000 || bit.realfreq >=
-		    hw.freq * 1500000)
+		if (bit.realfreq <= hw.freq * 500000 ||
+		    bit.realfreq >= hw.freq * 1500000)
 			reset_frequency();
 
 		if (bit.t > bit.realfreq * 2500000) {
@@ -416,17 +425,18 @@ get_bit_live(void)
 			stv = 1;
 
 			newminute = bit.t * 2000000 > bit.realfreq * 3;
-			if (init_bit == 2)
+			if (init_bit == 2) {
 				init_bit--;
-			else {
-				if (newminute)
+			} else {
+				if (newminute) {
 					bit.realfreq +=
 					    ((long long)(bit.t * 500000 -
-						    bit.realfreq) / 20);
-				else
+					    bit.realfreq) / 20);
+				} else {
 					bit.realfreq +=
 					    ((long long)(bit.t * 1000000 -
-						    bit.realfreq) / 20);
+					    bit.realfreq) / 20);
+				}
 				a = 1000000000 -
 				    (long long)(1000000000 *
 				    exp2(-2e7 / bit.realfreq));
@@ -439,17 +449,20 @@ get_bit_live(void)
 				 * something is wrong.
 				 */
 				if (is_eom) {
-					if (gb_res.marker == emark_minute)
+					if (gb_res.marker == emark_minute) {
 						gb_res.marker = emark_none;
-					else if (gb_res.marker == emark_late)
+					} else if (gb_res.marker ==
+					    emark_late) {
 						gb_res.marker = emark_toolong;
+					}
 					reset_frequency();
 				} else {
-					if (gb_res.marker == emark_none)
+					if (gb_res.marker == emark_none) {
 						gb_res.marker = emark_minute;
-					else if (gb_res.marker ==
-					    emark_toolong)
+					} else if (gb_res.marker ==
+					    emark_toolong) {
 						gb_res.marker = emark_late;
+					}
 				}
 			}
 			break; /* start of new second */
@@ -457,14 +470,13 @@ get_bit_live(void)
 		long long twait = (long long)(sec2 * bit.realfreq / 1000000);
 #if !defined(MACOS)
 		(void)clock_gettime(CLOCK_MONOTONIC, &tp1);
-		twait = twait -
-		    (tp1.tv_sec -
-		    tp0.tv_sec) * 1000000000 - (tp1.tv_nsec - tp0.tv_nsec);
+		twait = twait - (tp1.tv_sec - tp0.tv_sec) *
+		    1000000000 - (tp1.tv_nsec - tp0.tv_nsec);
 #endif
 		slp.tv_sec = twait / 1000000000;
 		slp.tv_nsec = twait % 1000000000;
 		while (twait > 0 && nanosleep(&slp, &slp))
-			;
+			; /* empty loop */
 	}
 	if (bit.t >= hw.freq * 4) {
 		/* this can actually happen */
@@ -482,8 +494,7 @@ get_bit_live(void)
 			gb_res.bitval = ebv_0;
 			outch = '0';
 			buffer[bitpos] = 0;
-		} else if (bit.realfreq * bit.tlow *
-		    (1 + (newminute ? 1 : 0)) <
+		} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
 		    (bit.bit0 + bit.bit20) * bit.t) {
 			/* one bit, ~200 ms active signal */
 			gb_res.bitval = ebv_1;
@@ -497,39 +508,49 @@ get_bit_live(void)
 	}
 
 	if (!gb_res.bad_io) {
-		if (init_bit == 1)
+		if (init_bit == 1) {
 			init_bit--;
-		else if (gb_res.hwstat == ehw_ok && gb_res.marker ==
-		    emark_none) {
+		} else if (gb_res.hwstat == ehw_ok &&
+		    gb_res.marker == emark_none) {
 			unsigned long long avg;
-			if (bitpos == 0 && gb_res.bitval == ebv_0)
+			if (bitpos == 0 && gb_res.bitval == ebv_0) {
 				bit.bit0 +=
 				    ((long long)(bit.tlow * 1000000 -
-					    bit.bit0) / 2);
-			if (bitpos == 20 && gb_res.bitval == ebv_1)
+				    bit.bit0) / 2);
+			}
+			if (bitpos == 20 && gb_res.bitval == ebv_1) {
 				bit.bit20 +=
 				    ((long long)(bit.tlow * 1000000 -
-					    bit.bit20) / 2);
+				    bit.bit20) / 2);
+			}
 			/* Force sane values during e.g. a thunderstorm */
-			if (2 * bit.bit20 < bit.bit0 * 3 || bit.bit20 > bit.bit0 * 3)
+			if (2 * bit.bit20 < bit.bit0 * 3 ||
+			    bit.bit20 > bit.bit0 * 3) {
 				reset_bitlen();
+			}
 			avg = (bit.bit20 - bit.bit0) / 2;
-			if (bit.bit0 + avg < bit.realfreq / 10 || bit.bit0 - avg > bit.realfreq / 10)
+			if (bit.bit0 + avg < bit.realfreq / 10 ||
+			    bit.bit0 - avg > bit.realfreq / 10) {
 				reset_bitlen();
-			if (bit.bit20 + avg < bit.realfreq / 5 || bit.bit20 - avg > bit.realfreq / 5)
+			}
+			if (bit.bit20 + avg < bit.realfreq / 5 ||
+			    bit.bit20 - avg > bit.realfreq / 5) {
 				reset_bitlen();
+			}
 		}
 	}
 	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
-		if (gb_res.marker == emark_minute || gb_res.marker ==
-		    emark_late)
+		if (gb_res.marker == emark_minute ||
+		    gb_res.marker == emark_late) {
 			fprintf(logfile, "a%uc%6.4f\n", acc_minlen,
 			    (double)((bit.t * 1e6) / bit.realfreq));
+		}
 	}
-	if (gb_res.marker == emark_minute || gb_res.marker == emark_late)
+	if (gb_res.marker == emark_minute || gb_res.marker == emark_late) {
 		cutoff = bit.t * 1000000 / (bit.realfreq / 10000);
+	}
 	return gb_res;
 }
 
@@ -541,8 +562,9 @@ skip_invalid(void)
 
 	do {
 		int oldinch = inch;
-		if (feof(logfile))
+		if (feof(logfile)) {
 			break;
+		}
 		inch = getc(logfile);
 		/*
 		 * \r\n is implicitly converted because \r is invalid character
@@ -599,12 +621,14 @@ get_bit_file(void)
 			 * The marker checks must be inside the oldinch
 			 * check to prevent spurious emin_short errors.
 			 */
-			if (gb_res.marker == emark_none)
+			if (gb_res.marker == emark_none) {
 				gb_res.marker = emark_minute;
-			else if (gb_res.marker == emark_toolong)
+			} else if (gb_res.marker == emark_toolong) {
 				gb_res.marker = emark_late;
-		} else
+			}
+		} else {
 			bit.t = 0;
+		}
 		break;
 	case 'x':
 		gb_res.hwstat = ehw_transmit;
@@ -631,28 +655,30 @@ get_bit_file(void)
 		/* acc_minlen, up to 2^32-1 ms */
 		gb_res.skip = true;
 		bit.t = 0;
-		if (fscanf(logfile, "%10u", &acc_minlen) != 1)
+		if (fscanf(logfile, "%10u", &acc_minlen) != 1) {
 			gb_res.done = true;
+		}
 		read_acc_minlen = !gb_res.done;
 		break;
 	case 'c':
 		/* cutoff for newminute */
 		gb_res.skip = true;
 		bit.t = 0;
-		if (fscanf(logfile, "%6c", co) != 1)
+		if (fscanf(logfile, "%6c", co) != 1) {
 			gb_res.done = true;
-		if (!gb_res.done && (co[1] == '.'))
-			cutoff =
-			    (co[0] -
-			    '0') * 10000 + (int)strtol(co + 2, (char **)NULL,
-			    10);
+		}
+		if (!gb_res.done && (co[1] == '.')) {
+			cutoff = (co[0] - '0') * 10000 +
+			    (int)strtol(co + 2, (char **)NULL, 10);
+		}
 		break;
 	default:
 		break;
 	}
 
-	if (!read_acc_minlen)
+	if (!read_acc_minlen) {
 		acc_minlen += bit.t;
+	}
 
 	/*
 	 * Read-ahead 1 character to check if a minute marker is coming. This
@@ -662,10 +688,12 @@ get_bit_file(void)
 	inch = skip_invalid();
 	if (!feof(logfile)) {
 		if (dec_bp == 0 && bitpos > 0 && oldinch != '\n' &&
-		    (inch == '\n' || inch == 'a' || inch == 'c'))
+		    (inch == '\n' || inch == 'a' || inch == 'c')) {
 			dec_bp = 1;
-	} else
+		}
+	} else {
 		gb_res.done = true;
+	}
 	ungetc(inch, logfile);
 
 	return gb_res;
@@ -674,11 +702,11 @@ get_bit_file(void)
 bool
 is_space_bit(int bitpos)
 {
-	return (bitpos == 1 || bitpos == 15 || bitpos == 16 || bitpos ==
-	    19 || bitpos == 20 || bitpos == 21 || bitpos == 28 || bitpos ==
-	    29 ||
-	    bitpos == 35 || bitpos == 36 || bitpos == 42 || bitpos == 45 ||
-	    bitpos == 50 || bitpos == 58 || bitpos == 59 || bitpos == 60);
+	return (bitpos == 1 || bitpos == 15 || bitpos == 16 ||
+	    bitpos == 19 || bitpos == 20 || bitpos == 21 || bitpos == 28 ||
+	    bitpos == 29 || bitpos == 35 || bitpos == 36 || bitpos == 42 ||
+	    bitpos == 45 || bitpos == 50 || bitpos == 58 || bitpos == 59 ||
+	    bitpos == 60);
 }
 
 struct GB_result
@@ -691,17 +719,20 @@ next_bit(void)
 	if (gb_res.marker == emark_minute || gb_res.marker == emark_late) {
 		bitpos = 0;
 		dec_bp = 0;
-	} else if (!gb_res.skip)
+	} else if (!gb_res.skip) {
 		bitpos++;
+	}
 	if (bitpos == BUFLEN) {
 		gb_res.marker = emark_toolong;
 		bitpos = 0;
 		return gb_res;
 	}
-	if (gb_res.marker == emark_toolong)
-		gb_res.marker = emark_none;  /* fits again */
-	else if (gb_res.marker == emark_late)
-		gb_res.marker = emark_minute;  /* cannot happen? */
+	if (gb_res.marker == emark_toolong) {
+		gb_res.marker = emark_none; /* fits again */
+	}
+	else if (gb_res.marker == emark_late) {
+		gb_res.marker = emark_minute; /* cannot happen? */
+	}
 	return gb_res;
 }
 
@@ -726,7 +757,7 @@ get_hardware_parameters(void)
 void
 *flush_logfile()
 {
-	for(;;)
+	for (;;)
 	{
 		fflush(logfile);
 		sleep(60);
@@ -737,8 +768,9 @@ int
 append_logfile(const char * const logfilename)
 {
 	logfile = fopen(logfilename, "a");
-	if (logfile == NULL)
+	if (logfile == NULL) {
 		return errno;
+	}
 	fprintf(logfile, "\n--new log--\n\n");
 	pthread_t flush_thread;
 	pthread_create(&flush_thread, NULL, flush_logfile, NULL);

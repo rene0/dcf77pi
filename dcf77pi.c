@@ -50,9 +50,9 @@ statusbar(int bitpos, const char * const fmt, ...)
 static void
 draw_keys(void)
 {
-	mvwprintw(
-	    main_win, 1, 0,
-	    "[Q] quit [L] change log file [S] time sync on  [u] UTC display on ");
+	mvwprintw(main_win, 1, 0,
+	    "[Q] quit [L] change log file [S] time sync on  "
+	    "[u] UTC display on ");
 	wclrtoeol(main_win);
 	mvwchgat(main_win, 1, 1, 1, A_BOLD, 4, NULL); /* [Q] */
 	mvwchgat(main_win, 1, 10, 1, A_BOLD, 4, NULL); /* [L] */
@@ -64,14 +64,18 @@ draw_keys(void)
 static void
 curses_cleanup(const char * const reason)
 {
-	if (decode_win != NULL)
+	if (decode_win != NULL) {
 		delwin(decode_win);
-	if (tp_win != NULL)
+	}
+	if (tp_win != NULL) {
 		delwin(tp_win);
-	if (input_win != NULL)
+	}
+	if (input_win != NULL) {
 		delwin(input_win);
-	if (main_win != NULL)
+	}
+	if (main_win != NULL) {
 		delwin(main_win);
+	}
 	endwin();
 	if (reason != NULL) {
 		printf("%s", reason);
@@ -88,40 +92,42 @@ display_bit(struct GB_result bit, int bitpos)
 	bitinf = get_bitinfo();
 
 	mvwprintw(input_win, 3, 1, "%2u %6u %6u %6u %10.3f %10.3f %10.3f",
-	    bitpos, bitinf.tlow, bitinf.tlast0, bitinf.t, bitinf.realfreq /
-	    1e6,
-	    bitinf.bit0 / 1e6,
-	    bitinf.bit20 / 1e6);
-	if (bitinf.freq_reset)
+	    bitpos, bitinf.tlow, bitinf.tlast0, bitinf.t, bitinf.realfreq / 1e6,
+	    bitinf.bit0 / 1e6, bitinf.bit20 / 1e6);
+	if (bitinf.freq_reset) {
 		mvwchgat(input_win, 3, 25, 10, A_BOLD, 3, NULL);
-	else
+	} else {
 		mvwchgat(input_win, 3, 25, 10, A_NORMAL, 7, NULL);
-	if (bitinf.bitlen_reset)
+	}
+	if (bitinf.bitlen_reset) {
 		mvwchgat(input_win, 3, 36, 21, A_BOLD, 3, NULL);
-	else
+	} else {
 		mvwchgat(input_win, 3, 36, 21, A_NORMAL, 7, NULL);
+	}
 
 	wattron(input_win, COLOR_PAIR(2));
-	if (bit.marker == emark_minute && bit.bitval != ebv_none)
+	if (bit.marker == emark_minute && bit.bitval != ebv_none) {
 		mvwprintw(input_win, 3, 58, "minute   ");
-	else if (bit.marker == emark_none && bit.bitval != ebv_none)
+	} else if (bit.marker == emark_none && bit.bitval != ebv_none) {
 		mvwprintw(input_win, 3, 58, "OK       ");
-	else
+	} else {
 		mvwprintw(input_win, 3, 58, "?        ");
+	}
 	wattroff(input_win, COLOR_PAIR(2));
 
 	wattron(input_win, COLOR_PAIR(1));
-	if (bit.bitval == ebv_none)
+	if (bit.bitval == ebv_none) {
 		mvwprintw(input_win, 3, 58, "read     ");
-	if (bit.hwstat == ehw_receive)
+	}
+	if (bit.hwstat == ehw_receive) {
 		mvwprintw(input_win, 3, 68, "receive ");
-	else if (bit.hwstat == ehw_transmit)
+	} else if (bit.hwstat == ehw_transmit) {
 		mvwprintw(input_win, 3, 68, "transmit");
-	else if (bit.hwstat == ehw_random)
+	} else if (bit.hwstat == ehw_random) {
 		mvwprintw(input_win, 3, 68, "random  ");
-	else if (bit.bad_io)
+	} else if (bit.bad_io) {
 		mvwprintw(input_win, 3, 68, "IO      ");
-	else {
+	} else {
 		/* bit.hwstat == ehw_ok */
 		wattron(input_win, COLOR_PAIR(2));
 		mvwprintw(input_win, 3, 68, "OK      ");
@@ -129,13 +135,16 @@ display_bit(struct GB_result bit, int bitpos)
 	}
 	wattroff(input_win, COLOR_PAIR(1));
 
-	for (xpos = bitpos + 4, bp = 0; bp <= bitpos; bp++)
-		if (is_space_bit(bp))
+	for (xpos = bitpos + 4, bp = 0; bp <= bitpos; bp++) {
+		if (is_space_bit(bp)) {
 			xpos++;
+		}
+	}
 
 	mvwprintw(input_win, 0, xpos, "%u", get_buffer()[bitpos]);
-	if (bit.bitval == ebv_none)
+	if (bit.bitval == ebv_none) {
 		mvwchgat(input_win, 0, xpos, 1, A_BOLD, 3, NULL);
+	}
 	wnoutrefresh(input_win);
 
 	mvwprintw(decode_win, 1, 28, "(%10u", get_acc_minlen());
@@ -147,76 +156,85 @@ display_bit(struct GB_result bit, int bitpos)
 void
 display_time(struct DT_result dt, struct tm time)
 {
-	if (show_utc)
+	if (show_utc) {
 		time = get_utctime(time);
+	}
 
 	/* color bits depending on the results */
 	mvwchgat(decode_win, 0, 4, 1, A_NORMAL,  dt.bit0_ok ? 2 : 1, NULL);
-	mvwchgat(decode_win, 0, 24, 2, A_NORMAL, dt.dst_status ==
-	    eDST_error ?  1 : 2,
-	    NULL);
+	mvwchgat(decode_win, 0, 24, 2, A_NORMAL,
+	    dt.dst_status == eDST_error ?  1 : 2, NULL);
 	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, dt.bit20_ok ? 2 : 1, NULL);
-	mvwchgat(
-	    decode_win, 0, 39, 1, A_NORMAL, dt.minute_status ==
-	    eval_parity ? 1 : dt.minute_status == eval_bcd ? 4 : 2, NULL);
-	mvwchgat(
-	    decode_win, 0, 48, 1, A_NORMAL, dt.hour_status ==
-	    eval_parity ? 1 : dt.hour_status == eval_bcd ? 4 : 2, NULL);
-	mvwchgat(
-	    decode_win, 0, 76, 1, A_NORMAL, dt.mday_status ==
-	    eval_parity ? 1 : (dt.mday_status == eval_bcd ||
-		    dt.wday_status ==
-		    eval_bcd || dt.month_status == eval_bcd ||
-		    dt.year_status ==
-		    eval_bcd) ? 4 : 2, NULL);
-	if (dt.leapsecond_status == els_one)
+	mvwchgat(decode_win, 0, 39, 1, A_NORMAL,
+	    dt.minute_status == eval_parity ? 1 :
+	    dt.minute_status == eval_bcd ? 4 : 2, NULL);
+	mvwchgat(decode_win, 0, 48, 1, A_NORMAL,
+	    dt.hour_status == eval_parity ? 1 :
+	    dt.hour_status == eval_bcd ? 4 : 2, NULL);
+	mvwchgat(decode_win, 0, 76, 1, A_NORMAL,
+	    dt.mday_status == eval_parity ? 1 :
+	    (dt.mday_status == eval_bcd || dt.wday_status == eval_bcd ||
+	    dt.month_status == eval_bcd || dt.year_status == eval_bcd) ? 4 : 2,
+	    NULL);
+	if (dt.leapsecond_status == els_one) {
 		mvwchgat(decode_win, 0, 78, 1, A_NORMAL, 3, NULL);
+	}
 
 	/* display date and time */
-	mvwprintw(
-	    decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d",
-	    time.tm_isdst ==
-	    1 ? "summer" : time.tm_isdst == 0 ? "winter" : time.tm_isdst ==
-	    -2 ? "UTC   " : "?     ", time.tm_year, time.tm_mon, time.tm_mday,
-	    weekday[time.tm_wday], time.tm_hour, time.tm_min);
+	mvwprintw(decode_win, 1, 0, "%s %04d-%02d-%02d %s %02d:%02d",
+	    time.tm_isdst == 1 ? "summer" : time.tm_isdst == 0 ? "winter" :
+	    time.tm_isdst == -2 ? "UTC   " : "?     ", time.tm_year,
+	    time.tm_mon, time.tm_mday, weekday[time.tm_wday], time.tm_hour,
+	    time.tm_min);
 
 	mvwchgat(decode_win, 1, 0, 80, A_NORMAL, 7, NULL);
 
 	/* color date/time string value depending on the results */
-	if (dt.dst_status == eDST_jump)
+	if (dt.dst_status == eDST_jump) {
 		mvwchgat(decode_win, 1, 0, 6, A_BOLD, 3, NULL);
-	if (dt.year_status == eval_jump)
+	}
+	if (dt.year_status == eval_jump) {
 		mvwchgat(decode_win, 1, 7, 4, A_BOLD, 3, NULL);
-	if (dt.month_status == eval_jump)
+	}
+	if (dt.month_status == eval_jump) {
 		mvwchgat(decode_win, 1, 12, 2, A_BOLD, 3, NULL);
-	if (dt.mday_status == eval_jump)
+	}
+	if (dt.mday_status == eval_jump) {
 		mvwchgat(decode_win, 1, 15, 2, A_BOLD, 3, NULL);
-	if (dt.wday_status == eval_jump)
+	}
+	if (dt.wday_status == eval_jump) {
 		mvwchgat(decode_win, 1, 18, 3, A_BOLD, 3, NULL);
-	if (dt.hour_status == eval_jump)
+	}
+	if (dt.hour_status == eval_jump) {
 		mvwchgat(decode_win, 1, 22, 2, A_BOLD, 3, NULL);
-	if (dt.minute_status == eval_jump)
+	}
+	if (dt.minute_status == eval_jump) {
 		mvwchgat(decode_win, 1, 25, 2, A_BOLD, 3, NULL);
+	}
 
 	/* flip lights depending on the results */
-	if (!dt.transmit_call)
+	if (!dt.transmit_call) {
 		mvwchgat(decode_win, 1, 50, 6, A_NORMAL, 8, NULL);
-	if (!dt.dst_announce)
+	}
+	if (!dt.dst_announce) {
 		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 8, NULL);
-	else if (dt.dst_status == eDST_done)
+	} else if (dt.dst_status == eDST_done) {
 		mvwchgat(decode_win, 1, 57, 3, A_NORMAL, 2, NULL);
-	if (!dt.leap_announce)
+	}
+	if (!dt.leap_announce) {
 		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 8, NULL);
-	else if (dt.leapsecond_status == els_done)
+	} else if (dt.leapsecond_status == els_done) {
 		mvwchgat(decode_win, 1, 61, 4, A_NORMAL, 2, NULL);
+	}
 	if (dt.minute_length == emin_long) {
 		mvwprintw(decode_win, 1, 67, "long ");
 		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 1, NULL);
 	} else if (dt.minute_length == emin_short) {
 		mvwprintw(decode_win, 1, 67, "short");
 		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 1, NULL);
-	} else
+	} else {
 		mvwchgat(decode_win, 1, 67, 5, A_NORMAL, 8, NULL);
+	}
 
 	wrefresh(decode_win);
 }
@@ -224,8 +242,9 @@ display_time(struct DT_result dt, struct tm time)
 void
 display_thirdparty_buffer(const unsigned buf[])
 {
-	for (int i = 0; i < TPBUFLEN; i++)
+	for (int i = 0; i < TPBUFLEN; i++) {
 		mvwprintw(tp_win, 0, i + 22, "%u", buf[i]);
+	}
 	wclrtoeol(tp_win);
 	wrefresh(tp_win);
 }
@@ -284,10 +303,9 @@ process_input(struct ML_result in_ml, int bitpos)
 			inkey = ERR; /* prevent key repeat */
 			mvwprintw(main_win, 0, 0, "Current log (.): %s",
 			    (mlr.logfilename != NULL &&
-				    strlen(mlr.logfilename) >
-				    0) ?  mlr.logfilename : "(none)");
-			mvwprintw(main_win, 1, 0,
-			    "Log file (empty for none):");
+			    strlen(mlr.logfilename) > 0) ? mlr.logfilename :
+			    "(none)");
+			mvwprintw(main_win, 1, 0, "Log file (empty for none):");
 			wclrtoeol(main_win);
 			wnoutrefresh(main_win);
 			input_mode = 1;
@@ -297,8 +315,7 @@ process_input(struct ML_result in_ml, int bitpos)
 			break;
 		case 'S':
 			mlr.settime = !mlr.settime;
-			mvwprintw(main_win, 1, 43,
-			    mlr.settime ? "off" : "on ");
+			mvwprintw(main_win, 1, 43, mlr.settime ? "off" : "on ");
 			wnoutrefresh(main_win);
 			break;
 		case 'u':
@@ -314,8 +331,7 @@ process_input(struct ML_result in_ml, int bitpos)
 		char dispbuf[80];
 
 		if (input_count > 0 &&
-		    (inkey == KEY_BACKSPACE || inkey == '\b' || inkey ==
-			    127)) {
+		    (inkey == KEY_BACKSPACE || inkey == '\b' || inkey == 127)) {
 			input_count--;
 			input_xpos--;
 			if (input_xpos > 78) {
@@ -344,9 +360,9 @@ process_input(struct ML_result in_ml, int bitpos)
 				    (input_xpos - 79), 53);
 				dispbuf[54] = '\0';
 				mvwprintw(main_win, 1, 27, "%s", dispbuf);
-			} else
-				mvwprintw(main_win, 1, input_xpos, "%c",
-				    inkey);
+			} else {
+				mvwprintw(main_win, 1, input_xpos, "%c", inkey);
+			}
 			wnoutrefresh(main_win);
 		}
 		doupdate();
@@ -362,9 +378,8 @@ post_process_input(struct ML_result in_ml, int bitpos)
 
 	mlr = in_ml;
 
-	if (old_bitpos != -1 &&
-	    (bitpos % 60 == (old_bitpos + 4) % 60 ||
-		    (old_bitpos > 4 && bitpos == 1))) {
+	if (old_bitpos != -1 && (bitpos % 60 == (old_bitpos + 4) % 60 ||
+	    (old_bitpos > 4 && bitpos == 1))) {
 		/*
 		 * Time for status text passed, cannot use *sleep() in
 		 * statusbar() because that pauses reception
@@ -380,8 +395,9 @@ post_process_input(struct ML_result in_ml, int bitpos)
 			wclrtoeol(main_win);
 			wnoutrefresh(main_win);
 
-			if (in_ml.logfilename == NULL)
+			if (in_ml.logfilename == NULL) {
 				mlr.logfilename = strdup("");
+			}
 			old_logfilename = strdup(mlr.logfilename);
 			free(mlr.logfilename);
 			mlr.logfilename = strdup(keybuf);
@@ -393,8 +409,7 @@ post_process_input(struct ML_result in_ml, int bitpos)
 			if (strcmp(old_logfilename, mlr.logfilename) != 0) {
 				if (strlen(old_logfilename) > 0 &&
 				    close_logfile() != 0) {
-					statusbar(
-					    bitpos,
+					statusbar(bitpos,
 					    "Error closing old log file");
 					mlr.quit = true; /* error */
 				}
@@ -443,10 +458,12 @@ display_minute(int minlen)
 
 	/* display bits of previous minute */
 	for (xpos = 4, bp = 0; bp < minlen; bp++, xpos++) {
-		if (bp > 59)
+		if (bp > 59) {
 			break;
-		if (is_space_bit(bp))
+		}
+		if (is_space_bit(bp)) {
 			xpos++;
+		}
 		mvwprintw(decode_win, 0, xpos, "%u", get_buffer()[bp]);
 	}
 	wclrtoeol(decode_win);
@@ -457,8 +474,9 @@ display_minute(int minlen)
 	if (cutoff == -1) {
 		mvwprintw(decode_win, 1, 40, "?     ");
 		mvwchgat(decode_win, 1, 40, 1, A_BOLD, 3, NULL);
-	} else
+	} else {
 		mvwprintw(decode_win, 1, 40, "%6.4f", cutoff / 1e4);
+	}
 
 	wrefresh(decode_win);
 }
@@ -476,8 +494,7 @@ process_setclock_result(struct ML_result in_ml, int bitpos)
 		mlr.quit = true; /* error */
 		break;
 	case esc_fail:
-		statusbar(bitpos, "clock_settime(): %s",
-		    strerror(errno));
+		statusbar(bitpos, "clock_settime(): %s", strerror(errno));
 		mlr.quit = true; /* error */
 		break;
 	case esc_unsafe:
@@ -504,8 +521,9 @@ main(int argc, char *argv[])
 		cleanup();
 		return EX_NOINPUT;
 	}
-	if (json_object_object_get_ex(config, "outlogfile", &value))
+	if (json_object_object_get_ex(config, "outlogfile", &value)) {
 		logfilename = (char *)(json_object_get_string(value));
+	}
 	if (logfilename != NULL && strlen(logfilename) != 0) {
 		res = append_logfile(logfilename);
 		if (res != 0) {
@@ -581,9 +599,8 @@ main(int argc, char *argv[])
 	wnoutrefresh(tp_win);
 
 	mvwprintw(input_win, 0, 0, "new");
-	mvwprintw(
-	    input_win, 2, 0,
-	    "bit    act  last0  total   realfreq         b0        b20 state     radio");
+	mvwprintw(input_win, 2, 0, "bit    act  last0  total   "
+	    "realfreq         b0        b20 state     radio");
 	wnoutrefresh(input_win);
 
 	draw_keys();
@@ -592,11 +609,11 @@ main(int argc, char *argv[])
 	mainloop(logfilename, get_bit_live, display_bit, display_long_minute,
 	    display_minute, wipe_input, display_alarm, display_unknown,
 	    display_weather, display_time, display_thirdparty_buffer,
-	    process_setclock_result, process_input,
-	    post_process_input);
+	    process_setclock_result, process_input, post_process_input);
 
 	curses_cleanup(NULL);
-	if (logfilename != NULL)
+	if (logfilename != NULL) {
 		free(logfilename);
+	}
 	return res;
 }
