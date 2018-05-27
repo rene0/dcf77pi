@@ -41,7 +41,7 @@ calendar.o: calendar.h
 	$(CC) -fpic $(CFLAGS) -c calendar.c -o $@
 
 libdcf77.so: $(objlib)
-	$(CC) -shared -o $@ $(objlib) -lm -lrt $(JSON_L)
+	$(CC) -shared -o $@ $(objlib) -lm -lpthread -lrt $(JSON_L)
 
 dcf77pi.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h

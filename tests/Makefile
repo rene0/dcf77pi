@@ -24,7 +24,8 @@ test_calendar: test_calendar.o ../calendar.o
 test_bits1to14.o: ../bits1to14.h
 	$(CC) -fpic $(CFLAGS) -I.. -c test_bits1to14.c -o $@
 test_bits1to14: test_bits1to14.o ../bits1to14.o ../input.o
-	$(CC) -o $@ test_bits1to14.o ../bits1to14.o ../input.o -lm $(JSON_L)
+	$(CC) -o $@ test_bits1to14.o ../bits1to14.o ../input.o -lm -lpthread \
+	$(JSON_L)
 
 clean:
 	rm -f $(objbin) $(exebin)
