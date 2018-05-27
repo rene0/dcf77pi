@@ -348,8 +348,8 @@ get_bit_live(void)
 	 * specified as half the value and the whole value of the lengths of
 	 * bit 0 and bit 20 respectively.
 	 *
-	 *  ~A > 3/2 * realfreq: end-of-minute
-	 *  ~A > 5/2 * realfreq: timeout
+	 * ~A > 3/2 * realfreq: end-of-minute
+	 * ~A > 5/2 * realfreq: timeout
 	 */
 
 	if (init_bit == 2) {

@@ -87,7 +87,7 @@ main(int argc, char *argv[])
 			for (unsigned long long i = 0; i < bi.t / 8; i++) {
 				for (unsigned j = 0; j < 8; j++) {
 					printf("%c", (bi.signal[i] & (1 << j)) >
-					    0 ?  '+' : '-');
+					    0 ? '+' : '-');
 				}
 			}
 			/*

@@ -161,9 +161,9 @@ display_time(struct DT_result dt, struct tm time)
 	}
 
 	/* color bits depending on the results */
-	mvwchgat(decode_win, 0, 4, 1, A_NORMAL,  dt.bit0_ok ? 2 : 1, NULL);
+	mvwchgat(decode_win, 0, 4, 1, A_NORMAL, dt.bit0_ok ? 2 : 1, NULL);
 	mvwchgat(decode_win, 0, 24, 2, A_NORMAL,
-	    dt.dst_status == eDST_error ?  1 : 2, NULL);
+	    dt.dst_status == eDST_error ? 1 : 2, NULL);
 	mvwchgat(decode_win, 0, 29, 1, A_NORMAL, dt.bit20_ok ? 2 : 1, NULL);
 	mvwchgat(decode_win, 0, 39, 1, A_NORMAL,
 	    dt.minute_status == eval_parity ? 1 :
