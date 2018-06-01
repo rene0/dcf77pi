@@ -137,7 +137,7 @@ set_mode_live(struct json_object *config)
 		cleanup();
 		return EX_DATAERR;
 	}
-	fd = open(buf, O_RDONLY);
+	fd = open(buf, O_RDWR);
 	if (fd < 0) {
 		fprintf(stderr, "open %s: ", buf);
 		perror(NULL);
@@ -146,8 +146,9 @@ set_mode_live(struct json_object *config)
 	}
 
 	pin.gp_pin = hw.pin;
-	if (ioctl(fd, GPIOGETCONFIG, &pin) < 0) {
-		perror("ioctl(GPIOGETCONFIG)");
+	pin.gp_flags = GPIO_PIN_INPUT;
+	if (ioctl(fd, GPIOSETCONFIG, &pin) < 0) {
+		perror("ioctl(GPIOSETCONFIG)");
 		cleanup();
 		return errno;
 	}
