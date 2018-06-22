@@ -63,7 +63,7 @@ struct tm get_utctime(struct tm time);
  * The year will fall back to {@link base_year} when it reaches
  * {@link base_year} + 400. Leap years and switches to and from daylight saving
  * time are taken into account. The latter can be disabled by forcing
- * {@link dst_changes} to false.
+ * dst_changes to false.
  *
  * @param time The current time to be increased with one minute.
  * @param dst_changes The daylight saving time is about to start or end.
@@ -77,7 +77,7 @@ struct tm add_minute(struct tm time, bool dst_changes);
  * The year will fall back to {@link base_year} + 399 when it reaches
  * {@link base_year} - 1. Leap years and switches to and from daylight saving
  * time are taken into account. The latter can be disabled by forcing
- * {@link dst_changes} to false.
+ * dst_changes to false.
  *
  * @param time The current time to be decreased with one minute.
  * @param dst_changes The daylight saving time is about to start or end.
