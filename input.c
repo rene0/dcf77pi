@@ -325,6 +325,7 @@ struct GB_result
 get_bit_live(void)
 {
 	char outch;
+	bool adj_freq = true;
 	bool newminute = false;
 	unsigned stv = 1;
 	struct timespec slp;
@@ -395,6 +396,7 @@ get_bit_live(void)
 		if (bit.realfreq <= hw.freq * 500000 ||
 		    bit.realfreq > hw.freq * 1000000) {
 			reset_frequency();
+			adj_freq = false;
 		}
 
 		if (bit.t > bit.realfreq * 2500000) {
@@ -408,6 +410,7 @@ get_bit_live(void)
 				gb_res.hwstat = ehw_random;
 				outch = '#';
 			}
+			adj_freq = false;
 			break; /* timeout */
 		}
 
@@ -429,16 +432,6 @@ get_bit_live(void)
 			newminute = bit.t * 2000000 > bit.realfreq * 3;
 			if (init_bit == 2) {
 				init_bit--;
-			} else {
-				if (newminute) {
-					bit.realfreq +=
-					    ((long long)(bit.t * 500000 -
-					    bit.realfreq) / 20);
-				} else {
-					bit.realfreq +=
-					    ((long long)(bit.t * 1000000 -
-					    bit.realfreq) / 20);
-				}
 			}
 
 			if (newminute) {
@@ -455,6 +448,7 @@ get_bit_live(void)
 						gb_res.marker = emark_toolong;
 					}
 					reset_frequency();
+					adj_freq = false;
 				} else {
 					if (gb_res.marker == emark_none) {
 						gb_res.marker = emark_minute;
@@ -484,6 +478,7 @@ get_bit_live(void)
 			outch = '#';
 		}
 		reset_frequency();
+		adj_freq = false;
 	}
 
 	if (!gb_res.bad_io && gb_res.hwstat == ehw_ok) {
@@ -503,6 +498,7 @@ get_bit_live(void)
 			/* bad radio signal, retain old value */
 			gb_res.bitval = ebv_none;
 			outch = '_';
+			adj_freq = false;
 		}
 	}
 
@@ -526,16 +522,28 @@ get_bit_live(void)
 			if (2 * bit.bit20 < bit.bit0 * 3 ||
 			    bit.bit20 > bit.bit0 * 3) {
 				reset_bitlen();
+				adj_freq = false;
 			}
 			avg = (bit.bit20 - bit.bit0) / 2;
 			if (bit.bit0 + avg < bit.realfreq / 10 ||
 			    bit.bit0 - avg > bit.realfreq / 10) {
 				reset_bitlen();
+				adj_freq = false;
 			}
 			if (bit.bit20 + avg < bit.realfreq / 5 ||
 			    bit.bit20 - avg > bit.realfreq / 5) {
 				reset_bitlen();
+				adj_freq = false;
 			}
+		}
+	}
+	if (adj_freq) {
+		if (newminute) {
+			bit.realfreq +=
+			    ((long long)(bit.t * 500000 - bit.realfreq) / 20);
+		} else {
+			bit.realfreq +=
+			    ((long long)(bit.t * 1000000 - bit.realfreq) / 20);
 		}
 	}
 	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
