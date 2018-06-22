@@ -42,7 +42,7 @@ enum eGB_HW {
 	ehw_random
 };
 
-/** Structure containing all information of the currnet bit */
+/** Structure containing all information of the current bit */
 struct GB_result {
 	/** I/O error while reading bit from hardware */
 	bool bad_io;
