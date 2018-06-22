@@ -359,8 +359,8 @@ get_bit_live(void)
 		bit.bit20 = bit.realfreq / 5;
 	}
 	sec2 = 1000000000 / (hw.freq * hw.freq);
-	/* Set up filter, reach 50% after realfreq/20 samples (i.e. 50 ms) */
-	a = 1000000000 - (long long)(1000000000 * exp2(-2e7 / bit.realfreq));
+	/* Set up filter, reach 50% after hw.freq/20 samples (i.e. 50 ms) */
+	a = 1000000000 - (long long)(1000000000 * exp2(-20.0 / hw.freq));
 	bit.tlow = -1;
 	bit.tlast0 = -1;
 
@@ -439,9 +439,6 @@ get_bit_live(void)
 					    ((long long)(bit.t * 1000000 -
 					    bit.realfreq) / 20);
 				}
-				a = 1000000000 -
-				    (long long)(1000000000 *
-				    exp2(-2e7 / bit.realfreq));
 			}
 
 			if (newminute) {
