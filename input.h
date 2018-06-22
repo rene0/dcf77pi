@@ -1,4 +1,4 @@
-// Copyright 2013-2017 René Ladan
+// Copyright 2013-2018 René Ladan and "JsBergbau"
 // SPDX-License-Identifier: BSD-2-Clause
 
 #ifndef DCF77PI_INPUT_H
