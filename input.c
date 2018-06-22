@@ -324,7 +324,7 @@ reset_bitlen(void)
 struct GB_result
 get_bit_live(void)
 {
-	char outch;
+	char outch = '?';
 	bool adj_freq = true;
 	bool newminute = false;
 	unsigned stv = 1;
