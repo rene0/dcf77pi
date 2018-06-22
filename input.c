@@ -298,7 +298,7 @@ reset_frequency(void)
 	if (logfile != NULL) {
 		fprintf(logfile, "%s",
 		    bit.realfreq <= hw.freq * 500000 ? "<" :
-		    bit.realfreq >= hw.freq * 1500000 ? ">" : "");
+		    bit.realfreq > hw.freq * 1000000 ? ">" : "");
 	}
 	bit.realfreq = hw.freq * 1000000;
 	bit.freq_reset = true;
@@ -393,8 +393,9 @@ get_bit_live(void)
 		 * scheduler abuse
 		 */
 		if (bit.realfreq <= hw.freq * 500000 ||
-		    bit.realfreq >= hw.freq * 1500000)
+		    bit.realfreq > hw.freq * 1000000) {
 			reset_frequency();
+		}
 
 		if (bit.t > bit.realfreq * 2500000) {
 			if (bit.tlow * 100 / bit.t < 1) {
