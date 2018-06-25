@@ -39,6 +39,13 @@ The meaning of the keywords in config.json is:
   dcf77pi-analyze (default empty). The log file itself only stores the
   received bits, but not the decoded date and time.
 
+Depending on your operating system and distribution, you might need to copy
+config.json.sample to config.json (in the same directory) to get started. You
+might also want to check and update the provided configuration to match your
+setup.
+
+---
+
 The end of the minute is noted by the absence of high pulses. An absence of low
 pulses probably means that the transmitter is out of range. Any other situation
 will result in a logical read error.
