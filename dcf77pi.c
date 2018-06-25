@@ -527,7 +527,7 @@ main(int argc, char *argv[])
 	if (logfilename != NULL && strlen(logfilename) != 0) {
 		res = append_logfile(logfilename);
 		if (res != 0) {
-			perror("fopen (logfile)");
+			perror("fopen(logfile)");
 			return res;
 		}
 	}

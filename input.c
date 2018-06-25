@@ -66,7 +66,7 @@ set_mode_file(const char * const infilename)
 	}
 	logfile = fopen(infilename, "r");
 	if (logfile == NULL) {
-		perror("fopen (logfile)");
+		perror("fopen(logfile)");
 		return errno;
 	}
 	filemode = 2;
@@ -155,7 +155,7 @@ set_mode_live(struct json_object *config)
 #elif defined(__linux__)
 	fd = open("/sys/class/gpio/export", O_WRONLY);
 	if (fd < 0) {
-		perror("open (/sys/class/gpio/export)");
+		perror("open(/sys/class/gpio/export)");
 		cleanup();
 		return errno;
 	}
@@ -186,7 +186,7 @@ set_mode_live(struct json_object *config)
 	}
 	fd = open(buf, O_RDWR);
 	if (fd < 0) {
-		perror("open (direction)");
+		perror("open(direction)");
 		cleanup();
 		return errno;
 	}
@@ -209,7 +209,7 @@ set_mode_live(struct json_object *config)
 	}
 	fd = open(buf, O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
-		perror("open (value)");
+		perror("open(value)");
 		cleanup();
 		return errno;
 	}
@@ -224,14 +224,14 @@ cleanup(void)
 {
 	if (fd > 0 && close(fd) == -1) {
 #if defined(__FreeBSD__)
-		perror("close (/dev/gpioc*)");
+		perror("close(/dev/gpioc*)");
 #elif defined(__linux__)
-		perror("close (/sys/class/gpio/*)");
+		perror("close(/sys/class/gpio/*)");
 #endif
 	}
 	fd = 0;
 	if (logfile != NULL && fclose(logfile) == EOF) {
-		perror("fclose (logfile)");
+		perror("fclose(logfile)");
 	}
 	logfile = NULL;
 	if (bit.signal != NULL) {
