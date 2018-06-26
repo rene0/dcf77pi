@@ -24,7 +24,7 @@ Version 3.7.0 --
 * Makefile: link testcentury only against calendar.o instead of libdcf77.so
 * dcf77pi-analyze: no need to depend on the configuration file after removal
   of the month parameters.
-* Only allow to set the system clock on the hour.
+* Only allow to set the system clock on the minute.
 * Use new enumeration eSC\_status to report the result of setting the system
   clock instead of an integer, return this value via a new field in
   ML\_result instead of using get\_mainloop\_result()
