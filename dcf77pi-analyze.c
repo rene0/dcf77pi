@@ -29,7 +29,7 @@ display_bit(struct GB_result bit, int bitpos)
 	} else if (bit.bitval == ebv_none) {
 		printf("_");
 	} else {
-		printf("%u", get_buffer()[bitpos]);
+		printf("%i", get_buffer()[bitpos]);
 	}
 }
 
