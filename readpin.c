@@ -12,10 +12,20 @@
 #include <time.h>
 #include <unistd.h>
 
+static struct json_object *config;
+
 static void
-do_cleanup(/*@unused@*/ int sig)
+client_cleanup()
 {
+	/* Caller is supposed to exit the program after this. */
 	cleanup();
+	free(config);
+}
+
+static void
+sigint_handler(/*@unused@*/ int sig)
+{
+	client_cleanup();
 	printf("done\n");
 	exit(0);
 }
@@ -25,7 +35,6 @@ main(int argc, char *argv[])
 {
 	struct sigaction sigact;
 	struct hardware hw;
-	struct json_object *config;
 	int ch, min, res;
 	bool raw = false, verbose = true;
 
@@ -45,17 +54,17 @@ main(int argc, char *argv[])
 
 	config = json_object_from_file(ETCDIR "/config.json");
 	if (config == NULL) {
-		cleanup();
+		client_cleanup();
 		return EX_NOINPUT;
 	}
 	res = set_mode_live(config);
 	if (res != 0) {
-		cleanup();
+		client_cleanup();
 		return res;
 	}
 	hw = get_hardware_parameters();
 
-	sigact.sa_handler = do_cleanup;
+	sigact.sa_handler = sigint_handler;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 	sigaction(SIGINT, &sigact, NULL);
