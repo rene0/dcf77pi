@@ -676,7 +676,7 @@ get_bit_file(void)
 		}
 		if (!gb_res.done && (co[1] == '.')) {
 			cutoff = (co[0] - '0') * 10000 +
-			    (int)strtol(co + 2, (char **)NULL, 10);
+			    (int)strtol(co + 2, NULL, 10);
 		}
 		break;
 	default:

@@ -58,7 +58,7 @@ main(int argc, char *argv[])
 	sigact.sa_handler = do_cleanup;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
-	sigaction(SIGINT, &sigact, (struct sigaction *)NULL);
+	sigaction(SIGINT, &sigact, NULL);
 
 	min = -1;
 
