@@ -88,9 +88,7 @@ client_cleanup(const char * const reason, char *logfilename)
 {
 	/* Caller is supposed to exit the program after this */
 	curses_cleanup(reason);
-	if (logfilename != NULL) {
-		free(logfilename);
-	}
+	free(logfilename);
 }
 
 static void

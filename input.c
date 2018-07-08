@@ -237,10 +237,7 @@ cleanup(void)
 			logfile = NULL;
 		}
 	}
-	if (bit.signal != NULL) {
-		free(bit.signal);
-		bit.signal = NULL;
-	}
+	free(bit.signal);
 }
 
 int
