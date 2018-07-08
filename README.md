@@ -39,6 +39,13 @@ The meaning of the keywords in config.json is:
   dcf77pi-analyze (default empty). The log file itself only stores the
   received bits, but not the decoded date and time.
 
+Depending on your operating system and distribution, you might need to copy
+config.json.sample to config.json (in the same directory) to get started. You
+might also want to check and update the provided configuration to match your
+setup.
+
+---
+
 The end of the minute is noted by the absence of high pulses. An absence of low
 pulses probably means that the transmitter is out of range. Any other situation
 will result in a logical read error.
@@ -52,18 +59,17 @@ Currently supporrted platforms:
 * Cygwin, MacOS, NetBSD: supported without GPIO communication for live decoding
 * Windows: only via Cygwin
 
-On Linux, you will have to install an (n)curses development package using your
-package manager to get the required header files and the .so library file.
-For example:
-```sh
-% sudo apt-get install ncurses-devel
-```
-
-You will also need to install a json-c development package and a package
-providing pkg-config:
-For example, on FreeBSD:
+You will need to install a json-c development package and a package providing
+pkg-config to get the required header files and the .so library files. For
+example, on FreeBSD:
 ```sh
 % sudo pkg install json-c pkgconf
+```
+
+On Linux, you will also have to install an (n)curses development package using
+your package manager. For example, on Raspbian:
+```sh
+% sudo apt-get install libncurses5-dev libncursesw5-dev libjson-c-dev
 ```
 
 To build and install the program into /usr/bin , the library into /usr/lib and

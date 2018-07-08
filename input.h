@@ -1,4 +1,4 @@
-// Copyright 2013-2017 René Ladan
+// Copyright 2013-2018 René Ladan and "JsBergbau"
 // SPDX-License-Identifier: BSD-2-Clause
 
 #ifndef DCF77PI_INPUT_H
@@ -42,7 +42,7 @@ enum eGB_HW {
 	ehw_random
 };
 
-/** Structure containing all information of the currnet bit */
+/** Structure containing all information of the current bit */
 struct GB_result {
 	/** I/O error while reading bit from hardware */
 	bool bad_io;
@@ -76,29 +76,38 @@ struct hardware {
  * Detailed information about the radio reception:
  */
 struct bitinfo {
-	/** bit0 and bit20 were reset to their initial values (normally because
-	  * of reception errors or fluctuations in CPU usage) */
+	/**
+	 * bit0 and bit20 were reset to their initial values (normally
+	 * because of reception errors or fluctuations in CPU usage)
+	 */
 	bool bitlen_reset;
-	/** realfreq was reset to {@link hardware.freq} (normally because of
-	  * reception errors or fluctuations in CPU usage) */
+	/**
+	 * realfreq was reset to {@link hardware.freq} (normally because of
+	 * reception errors or fluctuations in CPU usage)
+	 */
 	bool freq_reset;
 	/** time in samples when the signal went low again, -1 initially */
 	int tlow;
-	/** time in samples when the signal was last measured as 0,
-	  * -1 initially */
+	/**
+	 * time in samples when the signal was last measured as 0, -1 initially
+	 */
 	int tlast0;
 	/** length of this bit in samples */
 	unsigned t;
-	/** the raw received radio signal, {@link hardware.freq} / 2 items,
-	  * with each item holding 8 bits */
+	/**
+	 * the raw received radio signal, {@link hardware.freq} / 2 items,
+	 * with each item holding 8 bits
+	 */
 	unsigned char *signal;
 	/** the average length of a bit in samples */
 	unsigned long long realfreq;
-	/** the average length of the high part of bit 0 (a 0 bit) in
-	  * samples */
+	/**
+	 * the average length of the high part of bit 0 (a 0 bit) in samples
+	 */
 	unsigned long long bit0;
-	/** the average length of the high part of bit 20 (a 1 bit) in
-	  * samples */
+	/**
+	 * the average length of the high part of bit 20 (a 1 bit) in samples
+	 */
 	unsigned long long bit20;
 };
 
@@ -117,7 +126,7 @@ int set_mode_file(const char * const infilename);
  * {@link hardware.pin} using {@link hardware.active_high} logic.
  *
  * @param config The JSON object containing the parsed configuration from
- *  config.json
+ * config.json
  * @return Preparation was succesful (0), -1 or errno otherwise.
  */
 int set_mode_live(struct json_object *config);
@@ -130,8 +139,8 @@ int set_mode_live(struct json_object *config);
 struct hardware get_hardware_parameters(void);
 
 /**
- * Clean up when: close the device or input logfile, and output log file if
- * applicable.
+ * Clean up when closing the device or input logfile, and closing the output
+ *log file if applicable.
  */
 void cleanup(void);
 
@@ -139,7 +148,7 @@ void cleanup(void);
  * Retrieve one pulse from the hardware.
  *
  * @return 0 or 1 depending on the pin value and {@link hardware.active_high},
- *   or 2 if obtaining the pulse failed.
+ * or 2 if obtaining the pulse failed.
  */
 int get_pulse(void);
 
@@ -161,8 +170,8 @@ struct GB_result get_bit_live(void);
 /**
  * Prepare for the next bit: update the bit position or wrap it around.
  *
- * @return The current bit state structure, with the marker field adjusted
- *   to indicate state of the bit buffer and the minute end.
+ * @return The current bit state structure, with the marker field adjusted to
+ * indicate state of the bit buffer and the minute end.
  */
 struct GB_result next_bit(void);
 
@@ -228,5 +237,10 @@ void reset_acc_minlen(void);
  * @return The cutoff value (multiplied by 10,000)
  */
 int get_cutoff(void);
+
+/**
+ * Flush the current log file to its storage location.
+ */
+void *flush_logfile();
 
 #endif

@@ -47,6 +47,7 @@ enum eDT_leapsecond {
 	els_none,
 	/**
 	 * leap second should always be 0 if present :
+	 *
 	 * http://www.ptb.de/cms/en/fachabteilungen/abt4/fb-44/ag-442/dissemination-of-legal-time/dcf77/dcf77-time-code.html
 	 */
 	els_one,
@@ -100,16 +101,16 @@ struct DT_result {
  *   0 = normal, first two minute marks passed
  *   1 = first minute mark passed
  *   2 = just starting
- * @param minlen The length of this minute in bits (normally 59 or 60 in
- *   case of a leap second).
+ * @param minlen The length of this minute in bits (normally 59 or 60 in case
+ * of a leap second).
  * @param acc_minlen The accumulated minute length of this minute in
- *   milliseconds.
+ * milliseconds.
  * @param buffer The bit buffer.
  * @param time The current time, to be updated.
  * @return A structure containing the results of all the checks performed on
- *   the calculated time.
+ * the calculated time.
  */
-struct DT_result decode_time(unsigned init_min, int minlen,
-    unsigned acc_minlen, const int buffer[], struct tm * const time);
+struct DT_result decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
+    const int buffer[], struct tm * const time);
 
 #endif

@@ -13,19 +13,19 @@
 #include <time.h>
 
 static void
-check_handle_new_minute(struct GB_result bit, struct ML_result *mlr, int bitpos,
-    struct tm *curtime, int minlen, bool was_toolong, unsigned *init_min,
-    void (*display_minute)(int),
+check_handle_new_minute(struct GB_result bit, struct ML_result *mlr,
+    int bitpos, struct tm *curtime, int minlen, bool was_toolong,
+    unsigned *init_min, void (*display_minute)(int),
     void (*display_thirdparty_buffer)(const unsigned[]),
-    void (*display_alarm)(struct alm),
-    void (*display_unknown)(void),
+    void (*display_alarm)(struct alm), void (*display_unknown)(void),
     void (*display_weather)(void),
     void (*display_time)(struct DT_result, struct tm),
     struct ML_result (*process_setclock_result)(struct ML_result, int))
 {
 	bool have_result = false;
 
-	if ((bit.marker == emark_minute || bit.marker == emark_late) && !was_toolong) {
+	if ((bit.marker == emark_minute || bit.marker == emark_late) &&
+	    !was_toolong) {
 		struct DT_result dt;
 
 		display_minute(minlen);
@@ -39,13 +39,13 @@ check_handle_new_minute(struct GB_result bit, struct ML_result *mlr, int bitpos,
 			display_thirdparty_buffer(tpbuf);
 			switch (get_thirdparty_type()) {
 			case eTP_alarm:
-				{
-					struct alm civwarn;
+			{
+				struct alm civwarn;
 
-					decode_alarm(tpbuf, &civwarn);
-					display_alarm(civwarn);
-				}
+				decode_alarm(tpbuf, &civwarn);
+				display_alarm(civwarn);
 				break;
+			}
 			case eTP_unknown:
 				display_unknown();
 				break;
@@ -58,31 +58,30 @@ check_handle_new_minute(struct GB_result bit, struct ML_result *mlr, int bitpos,
 
 		if (mlr->settime) {
 			have_result = true;
-			if (setclock_ok(*init_min, dt, bit))
+			if (setclock_ok(*init_min, dt, bit)) {
 				mlr->settime_result = setclock(*curtime);
-			else
+			} else {
 				mlr->settime_result = esc_unsafe;
+			}
 		}
-		if (bit.marker == emark_minute ||
-		    bit.marker == emark_late)
+		if (bit.marker == emark_minute || bit.marker == emark_late) {
 			reset_acc_minlen();
-		if (*init_min > 0)
+		}
+		if (*init_min > 0) {
 			(*init_min)--;
+		}
 	}
-	if (have_result && process_setclock_result != NULL)
+	if (have_result && process_setclock_result != NULL) {
 		*mlr = process_setclock_result(*mlr, bitpos);
+	}
 }
 
 void
-mainloop(char *logfilename,
-    struct GB_result (*get_bit)(void),
+mainloop(char *logfilename, struct GB_result (*get_bit)(void),
     void (*display_bit)(struct GB_result, int),
-    void (*display_long_minute)(void),
-    void (*display_minute)(int),
-    void (*display_new_second)(void),
-    void (*display_alarm)(struct alm),
-    void (*display_unknown)(void),
-    void (*display_weather)(void),
+    void (*display_long_minute)(void), void (*display_minute)(int),
+    void (*display_new_second)(void), void (*display_alarm)(struct alm),
+    void (*display_unknown)(void), void (*display_weather)(void),
     void (*display_time)(struct DT_result, struct tm),
     void (*display_thirdparty_buffer)(const unsigned[]),
     struct ML_result (*process_setclock_result)(struct ML_result, int),
@@ -106,18 +105,22 @@ mainloop(char *logfilename,
 		bit = get_bit();
 		if (process_input != NULL) {
 			mlr = process_input(mlr, bitpos);
-			if (bit.done || mlr.quit)
+			if (bit.done || mlr.quit) {
 				break;
+			}
 		}
 
 		bitpos = get_bitpos();
-		if (post_process_input != NULL)
+		if (post_process_input != NULL) {
 			mlr = post_process_input(mlr, bitpos);
-		if (!bit.skip && !mlr.quit)
+		}
+		if (!bit.skip && !mlr.quit) {
 			display_bit(bit, bitpos);
+		}
 
-		if (init_min < 2)
+		if (init_min < 2) {
 			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
+		}
 
 		bit = next_bit();
 		if (minlen == -1) {
@@ -132,25 +135,27 @@ mainloop(char *logfilename,
 		if (bit.marker == emark_minute) {
 			minlen = bitpos + 1;
 			/* handle the missing bit due to the minute marker */
-		} else if (bit.marker == emark_toolong || bit.marker == emark_late) {
+		} else if (bit.marker == emark_toolong ||
+		    bit.marker == emark_late) {
 			minlen = -1;
 			/*
-			 * leave acc_minlen alone,
-			 * any minute marker already processed
+			 * leave acc_minlen alone, any minute marker already
+			 * processed
 			 */
 			display_long_minute();
 		}
-		if (display_new_second != NULL)
+		if (display_new_second != NULL) {
 			display_new_second();
+		}
 
 		check_handle_new_minute(bit, &mlr, bitpos, &curtime, minlen,
 		    was_toolong, &init_min, display_minute,
-		    display_thirdparty_buffer, display_alarm,
-		    display_unknown, display_weather, display_time,
-		    process_setclock_result);
+		    display_thirdparty_buffer, display_alarm, display_unknown,
+		    display_weather, display_time, process_setclock_result);
 		was_toolong = false;
-		if (bit.done || mlr.quit)
+		if (bit.done || mlr.quit) {
 			break;
+		}
 	}
 	cleanup();
 }

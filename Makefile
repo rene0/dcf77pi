@@ -1,8 +1,8 @@
-# Copyright 2013-2017 René Ladan
+# Copyright 2013-2018 René Ladan
 # SPDX-License-Identifier: BSD-2-Clause
 
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
-	uninstall-doxygen cppcheck iwyu test
+	uninstall-doxygen cppcheck iwyu
 
 PREFIX?=.
 ETCDIR?=etc/dcf77pi
@@ -20,10 +20,8 @@ all: libdcf77.so dcf77pi dcf77pi-analyze readpin
 
 hdrlib=input.h decode_time.h decode_alarm.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
-srclib=input.c decode_time.c decode_alarm.c setclock.c mainloop.c \
-	bits1to14.c calendar.c
-objlib=input.o decode_time.o decode_alarm.o setclock.o mainloop.o \
-	bits1to14.o calendar.o
+srclib=${hdrlib:.h=.c}
+objlib=${hdrlib:.h=.o}
 objbin=dcf77pi.o dcf77pi-analyze.o readpin.o
 
 input.o: input.h
@@ -43,11 +41,12 @@ calendar.o: calendar.h
 	$(CC) -fpic $(CFLAGS) -c calendar.c -o $@
 
 libdcf77.so: $(objlib)
-	$(CC) -shared -o $@ $(objlib) -lm -lrt $(JSON_L)
+	$(CC) -shared -o $@ $(objlib) -lm -lpthread -lrt $(JSON_L)
 
+# set __BSD_VISIBLE to 1 in dcf77pi for SIGWINCH, which is not part of POSIX_C_SOURCE=200809L
 dcf77pi.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h
-	$(CC) -fpic $(CFLAGS) $(JSON_C) -c dcf77pi.c -o $@
+	$(CC) -fpic $(CFLAGS) -D__BSD_VISIBLE=1 $(JSON_C) -c dcf77pi.c -o $@
 dcf77pi: dcf77pi.o libdcf77.so
 	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so $(JSON_L)
 
@@ -84,7 +83,7 @@ install: libdcf77.so dcf77pi dcf77pi-analyze readpin
 	$(INSTALL) -m 0644 etc/dcf77pi/config.json \
 		$(DESTDIR)$(PREFIX)/$(ETCDIR)/config.json.sample
 	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
-	$(INSTALL) -m 0644 LICENSE.md
+	$(INSTALL) -m 0644 LICENSE.md \
 		$(DESTDIR)$(PREFIX)/share/doc/dcf77pi
 
 install-strip:

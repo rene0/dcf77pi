@@ -1,0 +1,5 @@
+*.core
+*.o
+*.so
+test_bits1to14
+test_calendar

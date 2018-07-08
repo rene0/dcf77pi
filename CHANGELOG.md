@@ -1,34 +1,57 @@
-Version 3.7.0 --
+Version 3.7.0 -- 2018-07-08
 * Replace verbose license texts in source files by SPDX identifiers.
 * Makefile: always install LICENSE.md and fix uninstall target.
+* Replace config.txt by config.json, its equivalent in JSON. Update Makefile
+  to compile/link various source files against json-c. set\_mode\_live() now
+  takes a json\_object\* parameter that contains the parsed configuration.
+  Remove now obsolete config.c and config.h [closes issue #11]
 * Fix revival of issue #19.
 * Do not use leapsecmonth to determine when a leap second announcement is
   valid, but count the number of valid 1 values of bit 19 in the preceding
   hour. If at least 50% of them are valid, the announcement is considered
-  valid [closes issue #24].
+  valid [closes issue #24 #31].
 * Anologous to the leap second announcement, use the number of valid 1 values
-  of bit 16 instead of summermonth and wintermonth. [closes issue #24]
+  of bit 16 instead of summermonth and wintermonth. [closes issue #24 #31]
 * Make fields dst\_announce and leap\_announce of DT\_result a boolean as
   invalid announcements are now impossible [closes issue #24].
 * Do not insist on DST changes only being valid on the last Sunday of the
   month at 01:00 UTC in add\_minute() and substract\_minute() [closes issue #24]
 * Remove leapsecmonth, summermonth and wintermonth from config.txt [closes
   issue #24]
-* Replace config.txt by config.json, its equivalent in JSON. Update Makefile
-  to compile/link various source files against json-c. set\_mode\_live() now
-  takes a json\_object\* parameter that contains the parsed configuration.
-  Remove now obsolete config.c and config.h [closes issue #11]
+* replace get\_utchour() by get\_utctime() which takes date changes into
+  account [closes issue #28]
+* dcf77pi: key 'u' toggles between UTC and local time [closes issue #28]
 * Makefile: link testcentury only against calendar.o instead of libdcf77.so
+* Rename testcentury to test\_calendar and add tests for all public functions
+  in calendar.h
+* Move unit tests into their own subdirectory "tests"
+* Add a unit test for bits1to14.c [issue #3]
 * dcf77pi-analyze: no need to depend on the configuration file after removal
   of the month parameters.
-* Only allow to set the system clock on the hour.
+* Only allow to set the system clock on the minute.
 * Use new enumeration eSC\_status to report the result of setting the system
   clock instead of an integer, return this value via a new field in
   ML\_result instead of using get\_mainloop\_result()
 * Rename show\_mainloop\_result() into process\_setclock\_result()
 * Return move values from sysexists.h in set\_mode\_live()
-* dcf77pi: increase the the of status bar messages to four seconds.
-* Update README for #11 and #24
+* dcf77pi: increase the time of status bar messages to four seconds.
+* Update README for #11, #24 and #30.3
+* Return the modified time of add\_minute() and substract\_minute() as a
+  value instead of as a pointer.
+* Convert get\_utchour() into get\_utctime(), take date into account and
+  only covert to UTC when the time offset is valid [issue #28]
+* dcf77pi: show the status of the 'S' button in the status bar
+* Makefile: remove "test" target
+* Improve reception algorithm in get\_bit\_live(), be more strict on updating
+  realfreq and the lengths of bit 0 and bit 20.
+* Flush the log file every 60 seconds [issue #10]
+* Add an SVG version of the receiver schematics
+* Fix initializing the signal GPIO pin under FreeBSD, this happened to work
+  by chance on the Raspberry Pi
+* Check against NULL filenames in input.c
+* Redraw the static parts of the screen when the window size changes
+  [issue #30.2]
+* Doxygen fixes
 
 Version 3.6.1 -- 2017-11-19
 * Makefile: drop splint target, does not work with Clang 4.0.0/FreeBSD 12

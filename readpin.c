@@ -1,4 +1,4 @@
-// Copyright 2013-2017 René Ladan
+// Copyright 2013-2018 René Ladan
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "input.h"
@@ -12,10 +12,20 @@
 #include <time.h>
 #include <unistd.h>
 
+static struct json_object *config;
+
 static void
-do_cleanup(/*@unused@*/ int sig)
+client_cleanup()
 {
+	/* Caller is supposed to exit the program after this. */
 	cleanup();
+	free(config);
+}
+
+static void
+sigint_handler(/*@unused@*/ int sig)
+{
+	client_cleanup();
 	printf("done\n");
 	exit(0);
 }
@@ -25,16 +35,15 @@ main(int argc, char *argv[])
 {
 	struct sigaction sigact;
 	struct hardware hw;
-	struct json_object *config;
 	int ch, min, res;
 	bool raw = false, verbose = true;
 
 	while ((ch = getopt(argc, argv, "qr")) != -1) {
 		switch (ch) {
-		case 'q' :
+		case 'q':
 			verbose = false;
 			break;
-		case 'r' :
+		case 'r':
 			raw = true;
 			break;
 		default:
@@ -43,22 +52,22 @@ main(int argc, char *argv[])
 		}
 	}
 
-	config = json_object_from_file(ETCDIR"/config.json");
+	config = json_object_from_file(ETCDIR "/config.json");
 	if (config == NULL) {
-		cleanup();
+		client_cleanup();
 		return EX_NOINPUT;
 	}
 	res = set_mode_live(config);
 	if (res != 0) {
-		cleanup();
+		client_cleanup();
 		return res;
 	}
 	hw = get_hardware_parameters();
 
-	sigact.sa_handler = do_cleanup;
+	sigact.sa_handler = sigint_handler;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
-	sigaction(SIGINT, &sigact, (struct sigaction *)NULL);
+	sigaction(SIGINT, &sigact, NULL);
 
 	min = -1;
 
@@ -73,38 +82,41 @@ main(int argc, char *argv[])
 			printf("%i", get_pulse());
 			fflush(stdout);
 			while (nanosleep(&slp, &slp))
-				;
+				; /* empty loop */
 			continue;
 		}
 
 		bit = get_bit_live();
 		bi = get_bitinfo();
 		if (verbose) {
-			if (bi.freq_reset)
+			if (bi.freq_reset) {
 				printf("!");
+			}
 			/* display first bi->t pulses */
-			for (unsigned long long i = 0; i < bi.t / 8; i++)
-				for (unsigned j = 0; j < 8; j++)
-					printf("%c",
-					    (bi.signal[i] & (1 << j)) > 0 ?
-					    '+' : '-');
+			for (unsigned long long i = 0; i < bi.t / 8; i++) {
+				for (unsigned j = 0; j < 8; j++) {
+					printf("%c", (bi.signal[i] & (1 << j)) >
+					    0 ? '+' : '-');
+				}
+			}
 			/*
 			 * display pulses in the last partially filled item
 			 * bi.t is 0-based, hence the <= comparison
 			 */
-			for (unsigned j = 0; j <= (bi.t & 7); j++)
-				printf("%c",
-				    (bi.signal[bi.t / 8] & (1 << j)) > 0 ?
-				    '+' : '-');
+			for (unsigned j = 0; j <= (bi.t & 7); j++) {
+				printf("%c", (bi.signal[bi.t / 8] & (1 << j)) >
+				    0 ? '+' : '-');
+			}
 			printf("\n");
 		}
-		if (bit.marker == emark_toolong || bit.marker == emark_late)
+		if (bit.marker == emark_toolong || bit.marker == emark_late) {
 			min++;
-		printf("%i %i %u %llu %llu %llu %i:%i\n",
-		    bi.tlow, bi.tlast0, bi.t, bi.bit0, bi.bit20, bi.realfreq,
-		    min, get_bitpos());
-		if (bit.marker == emark_minute)
+		}
+		printf("%i %i %u %llu %llu %llu %i:%i\n", bi.tlow, bi.tlast0,
+		    bi.t, bi.bit0, bi.bit20, bi.realfreq, min, get_bitpos());
+		if (bit.marker == emark_minute) {
 			min++;
+		}
 		bit = next_bit();
 	}
 	/* NOTREACHED */
