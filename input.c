@@ -64,6 +64,10 @@ set_mode_file(const char * const infilename)
 		cleanup();
 		return -1;
 	}
+	if (infilename == NULL) {
+		fprintf(stderr, "infilename is NULL\n");
+		return -1;
+	}
 	logfile = fopen(infilename, "r");
 	if (logfile == NULL) {
 		perror("fopen(logfile)");
@@ -774,6 +778,10 @@ void
 int
 append_logfile(const char * const logfilename)
 {
+	if (logfilename == NULL) {
+		fprintf(stderr, "logfilename is NULL\n");
+		return -1;
+	}
 	logfile = fopen(logfilename, "a");
 	if (logfile == NULL) {
 		return errno;
