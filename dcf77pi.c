@@ -78,7 +78,7 @@ curses_cleanup(const char * const reason)
 	}
 	endwin();
 	if (reason != NULL) {
-		printf("%s", reason);
+		printf("%s\n", reason);
 		cleanup();
 	}
 }
@@ -543,7 +543,7 @@ main(int argc, char *argv[])
 	res = set_mode_live(config);
 	if (res != 0) {
 		/* something went wrong */
-		client_cleanup("set_mode_live() failed\n", logfilename);
+		client_cleanup("set_mode_live() failed", logfilename);
 		return res;
 	}
 
@@ -554,7 +554,7 @@ main(int argc, char *argv[])
 
 	initscr();
 	if (has_colors() == FALSE) {
-		client_cleanup("No required color support.\n", logfilename);
+		client_cleanup("No required color support.", logfilename);
 		return 0;
 	}
 
@@ -577,22 +577,22 @@ main(int argc, char *argv[])
 	/* allocate windows */
 	decode_win = newwin(2, 80, 0, 0);
 	if (decode_win == NULL) {
-		client_cleanup("Creating decode_win failed.\n", logfilename);
+		client_cleanup("Creating decode_win failed.", logfilename);
 		return 0;
 	}
 	tp_win = newwin(2, 80, 3, 0);
 	if (tp_win == NULL) {
-		client_cleanup("Creating tp_win failed.\n", logfilename);
+		client_cleanup("Creating tp_win failed.", logfilename);
 		return 0;
 	}
 	input_win = newwin(4, 80, 6, 0);
 	if (input_win == NULL) {
-		client_cleanup("Creating input_win failed.\n", logfilename);
+		client_cleanup("Creating input_win failed.", logfilename);
 		return 0;
 	}
 	main_win = newwin(2, 80, 23, 0);
 	if (main_win == NULL) {
-		client_cleanup("Creating main_win failed.\n", logfilename);
+		client_cleanup("Creating main_win failed.", logfilename);
 		return 0;
 	}
 
