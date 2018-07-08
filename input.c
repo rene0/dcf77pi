@@ -778,6 +778,8 @@ void
 int
 append_logfile(const char * const logfilename)
 {
+	pthread_t flush_thread;
+
 	if (logfilename == NULL) {
 		fprintf(stderr, "logfilename is NULL\n");
 		return -1;
@@ -787,7 +789,6 @@ append_logfile(const char * const logfilename)
 		return errno;
 	}
 	fprintf(logfile, "\n--new log--\n\n");
-	pthread_t flush_thread;
 	pthread_create(&flush_thread, NULL, flush_logfile, NULL);
 	return 0;
 }
