@@ -183,6 +183,7 @@ main(int argc, char *argv[])
 	if (res != 0) {
 		/* something went wrong */
 		cleanup();
+		free(logfilename);
 		return res;
 	}
 
