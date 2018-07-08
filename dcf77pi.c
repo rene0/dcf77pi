@@ -84,6 +84,16 @@ curses_cleanup(const char * const reason)
 }
 
 static void
+client_cleanup(const char * const reason, char *logfilename)
+{
+	/* Caller is supposed to exit the program after this */
+	curses_cleanup(reason);
+	if (logfilename != NULL) {
+		free(logfilename);
+	}
+}
+
+static void
 display_bit(struct GB_result bit, int bitpos)
 {
 	int bp, xpos;
@@ -518,7 +528,7 @@ main(int argc, char *argv[])
 	config = json_object_from_file(ETCDIR "/config.json");
 	if (config == NULL) {
 		/* non-existent file? */
-		cleanup();
+		client_cleanup(NULL, logfilename);
 		return EX_NOINPUT;
 	}
 	if (json_object_object_get_ex(config, "outlogfile", &value)) {
@@ -528,13 +538,14 @@ main(int argc, char *argv[])
 		res = append_logfile(logfilename);
 		if (res != 0) {
 			perror("fopen(logfile)");
+			client_cleanup(NULL, logfilename);
 			return res;
 		}
 	}
 	res = set_mode_live(config);
 	if (res != 0) {
 		/* something went wrong */
-		cleanup();
+		client_cleanup("set_mode_live() failed\n", logfilename);
 		return res;
 	}
 
@@ -545,7 +556,7 @@ main(int argc, char *argv[])
 
 	initscr();
 	if (has_colors() == FALSE) {
-		curses_cleanup("No required color support.\n");
+		client_cleanup("No required color support.\n", logfilename);
 		return 0;
 	}
 
@@ -568,22 +579,22 @@ main(int argc, char *argv[])
 	/* allocate windows */
 	decode_win = newwin(2, 80, 0, 0);
 	if (decode_win == NULL) {
-		curses_cleanup("Creating decode_win failed.\n");
+		client_cleanup("Creating decode_win failed.\n", logfilename);
 		return 0;
 	}
 	tp_win = newwin(2, 80, 3, 0);
 	if (tp_win == NULL) {
-		curses_cleanup("Creating tp_win failed.\n");
+		client_cleanup("Creating tp_win failed.\n", logfilename);
 		return 0;
 	}
 	input_win = newwin(4, 80, 6, 0);
 	if (input_win == NULL) {
-		curses_cleanup("Creating input_win failed.\n");
+		client_cleanup("Creating input_win failed.\n", logfilename);
 		return 0;
 	}
 	main_win = newwin(2, 80, 23, 0);
 	if (main_win == NULL) {
-		curses_cleanup("Creating main_win failed.\n");
+		client_cleanup("Creating main_win failed.\n", logfilename);
 		return 0;
 	}
 
@@ -611,9 +622,6 @@ main(int argc, char *argv[])
 	    display_weather, display_time, display_thirdparty_buffer,
 	    process_setclock_result, process_input, post_process_input);
 
-	curses_cleanup(NULL);
-	if (logfilename != NULL) {
-		free(logfilename);
-	}
+	client_cleanup(NULL, logfilename);
 	return res;
 }
