@@ -83,7 +83,7 @@ curses_cleanup(const char * const reason)
 	}
 }
 
-void
+static void
 display_bit(struct GB_result bit, int bitpos)
 {
 	int bp, xpos;
@@ -153,7 +153,7 @@ display_bit(struct GB_result bit, int bitpos)
 	doupdate();
 }
 
-void
+static void
 display_time(struct DT_result dt, struct tm time)
 {
 	if (show_utc) {
@@ -239,7 +239,7 @@ display_time(struct DT_result dt, struct tm time)
 	wrefresh(decode_win);
 }
 
-void
+static void
 display_thirdparty_buffer(const unsigned buf[])
 {
 	for (int i = 0; i < TPBUFLEN; i++) {
@@ -253,7 +253,7 @@ display_thirdparty_buffer(const unsigned buf[])
  * In live mode, reaching this point means a decoding error as alarm messages
  * were only broadcasted for testing between 2003-10-13 and 2003-12-10.
  */
-void
+static void
 display_alarm(struct alm alarm)
 {
 	wattron(tp_win, COLOR_PAIR(3) | A_BOLD);
@@ -263,7 +263,7 @@ display_alarm(struct alm alarm)
 	wrefresh(tp_win);
 }
 
-void
+static void
 display_unknown(void)
 {
 	wattron(tp_win, COLOR_PAIR(1));
@@ -273,7 +273,7 @@ display_unknown(void)
 	wrefresh(tp_win);
 }
 
-void
+static void
 display_weather(void)
 {
 	wattron(tp_win, COLOR_PAIR(2));
@@ -443,7 +443,7 @@ wipe_input()
 	wrefresh(input_win);
 }
 
-void
+static void
 display_long_minute(void)
 {
 	wattron(input_win, COLOR_PAIR(1));
@@ -451,7 +451,7 @@ display_long_minute(void)
 	wattroff(input_win, COLOR_PAIR(1));
 }
 
-void
+static void
 display_minute(int minlen)
 {
 	int bp, cutoff, xpos;

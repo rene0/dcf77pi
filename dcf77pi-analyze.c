@@ -14,7 +14,7 @@
 #include <sysexits.h>
 #include <time.h>
 
-void
+static void
 display_bit(struct GB_result bit, int bitpos)
 {
 	if (is_space_bit(bitpos)) {
@@ -33,7 +33,7 @@ display_bit(struct GB_result bit, int bitpos)
 	}
 }
 
-void
+static void
 display_time(struct DT_result dt, struct tm time)
 {
 	printf("%s %04d-%02d-%02d %s %02d:%02d\n",
@@ -113,7 +113,7 @@ display_time(struct DT_result dt, struct tm time)
 	printf("\n");
 }
 
-void
+static void
 display_alarm(struct alm alarm)
 {
 	printf("German civil warning for: %s\n", get_region_name(alarm));
@@ -124,25 +124,25 @@ display_alarm(struct alm alarm)
 	}
 }
 
-void
+static void
 display_unknown(void)
 {
 	printf("Unknown third party contents\n");
 }
 
-void
+static void
 display_weather(void)
 {
 	printf("Meteotime weather\n");
 }
 
-void
+static void
 display_long_minute(void)
 {
 	printf(" L ");
 }
 
-void
+static void
 display_minute(int minlen)
 {
 	int cutoff;
@@ -156,7 +156,7 @@ display_minute(int minlen)
 	}
 }
 
-void
+static void
 display_thirdparty_buffer(const unsigned tpbuf[])
 {
 	printf("Third party buffer: ");
