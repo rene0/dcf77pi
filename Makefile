@@ -1,4 +1,4 @@
-# Copyright 2013-2017 René Ladan
+# Copyright 2013-2018 René Ladan
 # SPDX-License-Identifier: BSD-2-Clause
 
 .PHONY: all clean install install-strip doxygen install-doxygen uninstall \
@@ -43,9 +43,10 @@ calendar.o: calendar.h
 libdcf77.so: $(objlib)
 	$(CC) -shared -o $@ $(objlib) -lm -lpthread -lrt $(JSON_L)
 
+# set __BSD_VISIBLE to 1 in dcf77pi for SIGWINCH, which is not part of POSIX_C_SOURCE=200809L
 dcf77pi.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h
-	$(CC) -fpic $(CFLAGS) $(JSON_C) -c dcf77pi.c -o $@
+	$(CC) -fpic $(CFLAGS) -D__BSD_VISIBLE=1 $(JSON_C) -c dcf77pi.c -o $@
 dcf77pi: dcf77pi.o libdcf77.so
 	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so $(JSON_L)
 

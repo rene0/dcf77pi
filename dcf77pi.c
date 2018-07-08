@@ -12,6 +12,7 @@
 #include <curses.h>
 #include <errno.h>
 #include <json.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -19,6 +20,7 @@
 #include <string.h>
 #include <sysexits.h>
 #include <time.h>
+#include <sys/ioctl.h>
 
 #define MAXBUF 255
 
@@ -27,10 +29,18 @@ static WINDOW *decode_win;
 static WINDOW *tp_win;
 static WINDOW *main_win;
 
+static char *logfilename;
 static int old_bitpos = -1; /* timer for statusbar inactive */
 static int input_mode;      /* normal input (statusbar) or string input */
 static char keybuf[MAXBUF]; /* accumulator for string input */
 static bool show_utc;       /* show time in UTC */
+static bool window_changed; /* window size changed */
+
+static void
+sigwinch_handler(int sig)
+{
+	window_changed = 1;
+}
 
 static void
 statusbar(int bitpos, const char * const fmt, ...)
@@ -62,7 +72,7 @@ draw_keys(void)
 }
 
 static void
-curses_cleanup(const char * const reason)
+curses_cleanup(void)
 {
 	if (decode_win != NULL) {
 		delwin(decode_win);
@@ -77,18 +87,65 @@ curses_cleanup(const char * const reason)
 		delwin(main_win);
 	}
 	endwin();
+}
+
+static void
+client_cleanup(const char * const reason)
+{
+	/* Caller is supposed to exit the program after this */
+	curses_cleanup();
 	if (reason != NULL) {
 		printf("%s\n", reason);
 		cleanup();
 	}
+	free(logfilename);
+	logfilename = NULL;
+}
+
+static int
+allocate_windows(void)
+{
+	decode_win = newwin(2, 80, 0, 0);
+	if (decode_win == NULL) {
+		client_cleanup("Creating decode_win failed.");
+		return -1;
+	}
+	tp_win = newwin(2, 80, 3, 0);
+	if (tp_win == NULL) {
+		client_cleanup("Creating tp_win failed.");
+		return -1;
+	}
+	input_win = newwin(4, 80, 6, 0);
+	if (input_win == NULL) {
+		client_cleanup("Creating input_win failed.");
+		return -1;
+	}
+	main_win = newwin(2, 80, 23, 0);
+	if (main_win == NULL) {
+		client_cleanup("Creating main_win failed.");
+		return -1;
+	}
+	return 0;
 }
 
 static void
-client_cleanup(const char * const reason, char *logfilename)
+draw_initial_screen(void)
 {
-	/* Caller is supposed to exit the program after this */
-	curses_cleanup(reason);
-	free(logfilename);
+	mvwprintw(decode_win, 0, 0, "old");
+	mvwprintw(decode_win, 1, 50, "txcall dst leap");
+	mvwchgat(decode_win, 1, 50, 15, A_NORMAL, 8, NULL);
+	wnoutrefresh(decode_win);
+
+	mvwprintw(tp_win, 0, 0, "Third party buffer  :");
+	mvwprintw(tp_win, 1, 0, "Third party contents:");
+	wnoutrefresh(tp_win);
+
+	mvwprintw(input_win, 0, 0, "new");
+	mvwprintw(input_win, 2, 0, "bit    act  last0  total   "
+	    "realfreq         b0        b20 state     radio");
+	wnoutrefresh(input_win);
+
+	draw_keys();
 }
 
 static void
@@ -97,6 +154,19 @@ display_bit(struct GB_result bit, int bitpos)
 	int bp, xpos;
 	struct bitinfo bitinf;
 
+	/* Redraw static parts if needed (window changed size) */
+	if (window_changed) {
+		window_changed = 0;
+		curses_cleanup();
+		initscr();
+		clear();
+		refresh();
+		if (allocate_windows() == -1) {
+			client_cleanup(NULL);
+			exit(0);
+		}
+		draw_initial_screen();
+	}
 	bitinf = get_bitinfo();
 
 	mvwprintw(input_win, 3, 1, "%2u %6u %6u %6u %10.3f %10.3f %10.3f",
@@ -521,12 +591,12 @@ main(int argc, char *argv[])
 {
 	struct json_object *config, *value;
 	int res;
-	char *logfilename = NULL;
+	struct sigaction sa;
 
 	config = json_object_from_file(ETCDIR "/config.json");
 	if (config == NULL) {
 		/* non-existent file? */
-		client_cleanup(NULL, logfilename);
+		client_cleanup(NULL);
 		return EX_NOINPUT;
 	}
 	if (json_object_object_get_ex(config, "outlogfile", &value)) {
@@ -536,14 +606,14 @@ main(int argc, char *argv[])
 		res = append_logfile(logfilename);
 		if (res != 0) {
 			perror("fopen(logfile)");
-			client_cleanup(NULL, logfilename);
+			client_cleanup(NULL);
 			return res;
 		}
 	}
 	res = set_mode_live(config);
 	if (res != 0) {
 		/* something went wrong */
-		client_cleanup("set_mode_live() failed", logfilename);
+		client_cleanup("set_mode_live() failed");
 		return res;
 	}
 
@@ -554,7 +624,7 @@ main(int argc, char *argv[])
 
 	initscr();
 	if (has_colors() == FALSE) {
-		client_cleanup("No required color support.", logfilename);
+		client_cleanup("No required color support.");
 		return 0;
 	}
 
@@ -574,45 +644,20 @@ main(int argc, char *argv[])
 	curs_set(0);
 	refresh(); /* prevent clearing windows upon getch() */
 
-	/* allocate windows */
-	decode_win = newwin(2, 80, 0, 0);
-	if (decode_win == NULL) {
-		client_cleanup("Creating decode_win failed.", logfilename);
-		return 0;
-	}
-	tp_win = newwin(2, 80, 3, 0);
-	if (tp_win == NULL) {
-		client_cleanup("Creating tp_win failed.", logfilename);
-		return 0;
-	}
-	input_win = newwin(4, 80, 6, 0);
-	if (input_win == NULL) {
-		client_cleanup("Creating input_win failed.", logfilename);
-		return 0;
-	}
-	main_win = newwin(2, 80, 23, 0);
-	if (main_win == NULL) {
-		client_cleanup("Creating main_win failed.", logfilename);
-		return 0;
+	if (allocate_windows() == -1) {
+		client_cleanup(NULL);
+		return -1;
 	}
 
-	/* draw initial screen */
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = sigwinch_handler;
+	if (sigaction(SIGWINCH, &sa, NULL) == -1) {
+		client_cleanup(strerror(errno));
+		return errno;
+	}
 
-	mvwprintw(decode_win, 0, 0, "old");
-	mvwprintw(decode_win, 1, 50, "txcall dst leap");
-	mvwchgat(decode_win, 1, 50, 15, A_NORMAL, 8, NULL);
-	wnoutrefresh(decode_win);
-
-	mvwprintw(tp_win, 0, 0, "Third party buffer  :");
-	mvwprintw(tp_win, 1, 0, "Third party contents:");
-	wnoutrefresh(tp_win);
-
-	mvwprintw(input_win, 0, 0, "new");
-	mvwprintw(input_win, 2, 0, "bit    act  last0  total   "
-	    "realfreq         b0        b20 state     radio");
-	wnoutrefresh(input_win);
-
-	draw_keys();
+	draw_initial_screen();
 	doupdate();
 
 	mainloop(logfilename, get_bit_live, display_bit, display_long_minute,
@@ -620,6 +665,6 @@ main(int argc, char *argv[])
 	    display_weather, display_time, display_thirdparty_buffer,
 	    process_setclock_result, process_input, post_process_input);
 
-	client_cleanup(NULL, logfilename);
+	client_cleanup(NULL);
 	return res;
 }
