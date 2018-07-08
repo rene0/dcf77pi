@@ -1,4 +1,4 @@
-Version 3.7.0 --
+Version 3.7.0 -- 2018-07-08
 * Replace verbose license texts in source files by SPDX identifiers.
 * Makefile: always install LICENSE.md and fix uninstall target.
 * Replace config.txt by config.json, its equivalent in JSON. Update Makefile
