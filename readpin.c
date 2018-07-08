@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 static struct json_object *config;
+bool running = true;
 
 static void
 client_cleanup()
@@ -25,9 +26,7 @@ client_cleanup()
 static void
 sigint_handler(/*@unused@*/ int sig)
 {
-	client_cleanup();
-	printf("done\n");
-	exit(0);
+	running = false;
 }
 
 int
@@ -71,7 +70,7 @@ main(int argc, char *argv[])
 
 	min = -1;
 
-	for (;;) {
+	while (running) {
 		struct bitinfo bi;
 		struct GB_result bit;
 
@@ -119,5 +118,8 @@ main(int argc, char *argv[])
 		}
 		bit = next_bit();
 	}
-	/* NOTREACHED */
+
+	client_cleanup();
+	printf("done\n");
+	return 0;
 }
