@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 static struct json_object *config;
-bool running = true;
+static volatile sig_atomic_t running = 1;
 
 static void
 client_cleanup()
@@ -26,7 +26,7 @@ client_cleanup()
 static void
 sigint_handler(/*@unused@*/ int sig)
 {
-	running = false;
+	running = 0;
 }
 
 int
@@ -70,7 +70,7 @@ main(int argc, char *argv[])
 
 	min = -1;
 
-	while (running) {
+	while (running == 1) {
 		struct bitinfo bi;
 		struct GB_result bit;
 
