@@ -12,7 +12,6 @@
 #include <curses.h>
 #include <errno.h>
 #include <json.h>
-#include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -34,13 +33,6 @@ static int old_bitpos = -1; /* timer for statusbar inactive */
 static int input_mode;      /* normal input (statusbar) or string input */
 static char keybuf[MAXBUF]; /* accumulator for string input */
 static bool show_utc;       /* show time in UTC */
-static bool window_changed; /* window size changed */
-
-static void
-sigwinch_handler(int sig)
-{
-	window_changed = 1;
-}
 
 static void
 statusbar(int bitpos, const char * const fmt, ...)
@@ -154,19 +146,6 @@ display_bit(struct GB_result bit, int bitpos)
 	int bp, xpos;
 	struct bitinfo bitinf;
 
-	/* Redraw static parts if needed (window changed size) */
-	if (window_changed) {
-		window_changed = 0;
-		curses_cleanup();
-		initscr();
-		clear();
-		refresh();
-		if (allocate_windows() == -1) {
-			client_cleanup(NULL);
-			exit(0);
-		}
-		draw_initial_screen();
-	}
 	bitinf = get_bitinfo();
 
 	mvwprintw(input_win, 3, 1, "%2u %6u %6u %6u %10.3f %10.3f %10.3f",
@@ -401,6 +380,17 @@ process_input(struct ML_result in_ml, int bitpos)
 			mvwprintw(main_win, 1, 63, show_utc ? "off" : "on ");
 			wnoutrefresh(main_win);
 			break;
+		case KEY_RESIZE:
+			curses_cleanup();
+			initscr();
+			clear();
+			refresh();
+			if (allocate_windows() == -1) {
+				client_cleanup(NULL);
+				exit(0);
+			}
+			draw_initial_screen();
+			break;
 		}
 		doupdate();
 	}
@@ -591,7 +581,6 @@ main(int argc, char *argv[])
 {
 	struct json_object *config, *value;
 	int res;
-	struct sigaction sa;
 
 	config = json_object_from_file(ETCDIR "/config.json");
 	if (config == NULL) {
@@ -647,14 +636,6 @@ main(int argc, char *argv[])
 	if (allocate_windows() == -1) {
 		client_cleanup(NULL);
 		return -1;
-	}
-
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sa.sa_handler = sigwinch_handler;
-	if (sigaction(SIGWINCH, &sa, NULL) == -1) {
-		client_cleanup(strerror(errno));
-		return errno;
 	}
 
 	draw_initial_screen();
