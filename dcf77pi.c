@@ -480,6 +480,7 @@ display_minute(int minlen)
 		}
 		mvprintw(0, xpos, "%u", get_buffer()[bp]);
 	}
+	move(1, 47);
 	clrtoeol();
 	mvchgat(0, 0, 80, A_NORMAL, 7, NULL);
 
