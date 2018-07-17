@@ -391,6 +391,8 @@ process_input(struct ML_result in_ml, int bitpos)
 			}
 			draw_initial_screen();
 			break;
+		default:
+			break;
 		}
 		doupdate();
 	}
