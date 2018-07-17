@@ -118,7 +118,9 @@ display_bit(struct GB_result bit, int bitpos)
 	} else if (bit.marker == emark_none && bit.bitval != ebv_none) {
 		mvprintw(9, 58, "OK       ");
 	} else {
+		attron(COLOR_PAIR(3) | A_BOLD);
 		mvprintw(9, 58, "?        ");
+		attroff(COLOR_PAIR(3) | A_BOLD);
 	}
 	attroff(COLOR_PAIR(2));
 
