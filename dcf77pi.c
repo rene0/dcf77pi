@@ -558,6 +558,10 @@ main(int argc, char *argv[])
 		client_cleanup("No required color support.");
 		return 0;
 	}
+	if (getmaxx(stdscr) < 80 || getmaxy(stdscr) < 25) {
+		client_cleanup("Window too small, minimum is 80 columns by 25 rows.");
+		return 0;
+	}
 
 	start_color();
 	init_pair(1, COLOR_RED, COLOR_BLACK);
