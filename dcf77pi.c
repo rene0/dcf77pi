@@ -87,7 +87,6 @@ draw_initial_screen(void)
 	    "realfreq         b0        b20 state     radio");
 
 	draw_keys();
-	refresh();
 }
 
 static void
