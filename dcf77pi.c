@@ -304,7 +304,6 @@ process_input(struct ML_result in_ml, int bitpos)
 		default:
 			break;
 		}
-		refresh();
 	}
 
 	while (input_mode == 1 && inkey != ERR) {
@@ -345,7 +344,6 @@ process_input(struct ML_result in_ml, int bitpos)
 			}
 			refresh();
 		}
-		refresh();
 		inkey = getch();
 	}
 	return mlr;
@@ -419,8 +417,8 @@ wipe_input()
 	if (get_bitpos() == 0) {
 		move(6, 3);
 		clrtoeol();
+		refresh();
 	}
-	refresh();
 }
 
 static void
@@ -484,7 +482,6 @@ process_setclock_result(struct ML_result in_ml, int bitpos)
 		statusbar(bitpos, "Time set");
 		break;
 	}
-	refresh();
 	return mlr;
 }
 
