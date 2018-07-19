@@ -95,6 +95,7 @@ draw_initial_screen(void)
 	mvprintw(8, 0, "bit    act  last0  total   "
 	    "realfreq         b0        b20 state     radio");
 
+	toosmall = false;
 	draw_keys();
 }
 
