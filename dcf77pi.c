@@ -446,7 +446,7 @@ display_minute(int minlen)
 		mvprintw(0, xpos, "%u", get_buffer()[bp]);
 	}
 	clrtoeol();
-	mvchgat(0, 0, 80, A_NORMAL, 7, NULL);
+	mvchgat(0, 0, -1, A_NORMAL, 7, NULL);
 
 	/* display minute cutoff value */
 	cutoff = get_cutoff();
