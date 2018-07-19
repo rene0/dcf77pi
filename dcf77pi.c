@@ -100,16 +100,8 @@ display_bit(struct GB_result bit, int bitpos)
 	mvprintw(9, 1, "%2u %6u %6u %6u %10.3f %10.3f %10.3f",
 	    bitpos, bitinf.tlow, bitinf.tlast0, bitinf.t, bitinf.realfreq / 1e6,
 	    bitinf.bit0 / 1e6, bitinf.bit20 / 1e6);
-	if (bitinf.freq_reset) {
-		mvchgat(9, 25, 10, A_BOLD, 3, NULL);
-	} else {
-		mvchgat(9, 25, 10, A_NORMAL, 7, NULL);
-	}
-	if (bitinf.bitlen_reset) {
-		mvchgat(9, 36, 21, A_BOLD, 3, NULL);
-	} else {
-		mvchgat(9, 36, 21, A_NORMAL, 7, NULL);
-	}
+	mvchgat(9, 25, 10, A_NORMAL, bitinf.freq_reset ? 3 : 7, NULL);
+	mvchgat(9, 36, 21, A_NORMAL, bitinf.bitlen_reset ? 3 : 7, NULL);
 
 	if (bit.marker == emark_minute && bit.bitval != ebv_none) {
 		mvprintw(9, 58, "minute   ");
@@ -152,7 +144,7 @@ display_bit(struct GB_result bit, int bitpos)
 
 	mvprintw(6, xpos, "%u", get_buffer()[bitpos]);
 	if (bit.bitval == ebv_none) {
-		mvchgat(6, xpos, 1, A_BOLD, 3, NULL);
+		mvchgat(6, xpos, 1, A_NORMAL, 3, NULL);
 	}
 
 	mvprintw(1, 29, "%10u", get_acc_minlen());
@@ -193,45 +185,22 @@ display_time(struct DT_result dt, struct tm time)
 	    time.tm_mon, time.tm_mday, weekday[time.tm_wday], time.tm_hour,
 	    time.tm_min);
 
-	mvchgat(1, 0, 80, A_NORMAL, 7, NULL);
-
 	/* color date/time string value depending on the results */
-	if (dt.dst_status == eDST_jump) {
-		mvchgat(1, 0, 6, A_BOLD, 3, NULL);
-	}
-	if (dt.year_status == eval_jump) {
-		mvchgat(1, 7, 4, A_BOLD, 3, NULL);
-	}
-	if (dt.month_status == eval_jump) {
-		mvchgat(1, 12, 2, A_BOLD, 3, NULL);
-	}
-	if (dt.mday_status == eval_jump) {
-		mvchgat(1, 15, 2, A_BOLD, 3, NULL);
-	}
-	if (dt.wday_status == eval_jump) {
-		mvchgat(1, 18, 3, A_BOLD, 3, NULL);
-	}
-	if (dt.hour_status == eval_jump) {
-		mvchgat(1, 22, 2, A_BOLD, 3, NULL);
-	}
-	if (dt.minute_status == eval_jump) {
-		mvchgat(1, 25, 2, A_BOLD, 3, NULL);
-	}
+	mvchgat(1, 0, 6, A_NORMAL, dt.dst_status == eDST_jump ? 3 : 7, NULL);
+	mvchgat(1, 7, 4, A_NORMAL, dt.year_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 12, 2, A_NORMAL, dt.month_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 15, 2, A_NORMAL, dt.mday_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 18, 3, A_NORMAL, dt.wday_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 22, 2, A_NORMAL, dt.hour_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 25, 2, A_NORMAL, dt.minute_status == eval_jump ? 3 : 7,
+	    NULL);
 
 	/* flip lights depending on the results */
-	if (!dt.transmit_call) {
-		mvchgat(1, 50, 6, A_NORMAL, 8, NULL);
-	}
-	if (!dt.dst_announce) {
-		mvchgat(1, 57, 3, A_NORMAL, 8, NULL);
-	} else if (dt.dst_status == eDST_done) {
-		mvchgat(1, 57, 3, A_NORMAL, 2, NULL);
-	}
-	if (!dt.leap_announce) {
-		mvchgat(1, 61, 4, A_NORMAL, 8, NULL);
-	} else if (dt.leapsecond_status == els_done) {
-		mvchgat(1, 61, 4, A_NORMAL, 2, NULL);
-	}
+	mvchgat(1, 50, 6, A_NORMAL, dt.transmit_call ? 7 : 8, NULL);
+	mvchgat(1, 57, 3, A_NORMAL, !dt.dst_announce ? 8 :
+	    dt.dst_status == eDST_done ? 2 : 7, NULL);
+	mvchgat(1, 61, 4, A_NORMAL, !dt.leap_announce ? 8 :
+	    dt.leapsecond_status == els_done ? 2 : 7, NULL);
 	if (dt.minute_length == emin_long) {
 		mvprintw(1, 67, "long ");
 		mvchgat(1, 67, 5, A_NORMAL, 1, NULL);
@@ -483,9 +452,10 @@ display_minute(int minlen)
 	cutoff = get_cutoff();
 	if (cutoff < 10000 || cutoff > 20000) {
 		mvprintw(1, 40, "?     ");
-		mvchgat(1, 40, 1, A_BOLD, 3, NULL);
+		mvchgat(1, 40, 1, A_NORMAL, 3, NULL);
 	} else {
 		mvprintw(1, 40, "%6.4f", cutoff / 1e4);
+		mvchgat(1, 40, 6, A_NORMAL, 7, NULL);
 	}
 
 	refresh();
@@ -561,7 +531,7 @@ main(int argc, char *argv[])
 	start_color();
 	init_pair(1, COLOR_RED, COLOR_BLACK);
 	init_pair(2, COLOR_GREEN, COLOR_BLACK);
-	init_pair(3, COLOR_YELLOW, COLOR_BLACK); /* turn on A_BOLD */
+	init_pair(3, COLOR_YELLOW, COLOR_BLACK);
 	init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
 	init_pair(7, COLOR_WHITE, COLOR_BLACK);
 	init_pair(8, COLOR_BLACK, COLOR_BLACK); /* A_INVIS does not work? */
