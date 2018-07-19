@@ -165,14 +165,14 @@ display_time(struct DT_result dt, struct tm time)
 	mvchgat(0, 29, 1, A_NORMAL, dt.bit20_ok ? 2 : 1, NULL);
 	mvchgat(0, 39, 1, A_NORMAL,
 	    dt.minute_status == eval_parity ? 1 :
-	    dt.minute_status == eval_bcd ? 5 : 2, NULL);
+	    dt.minute_status == eval_bcd ? 3 : 2, NULL);
 	mvchgat(0, 48, 1, A_NORMAL,
 	    dt.hour_status == eval_parity ? 1 :
-	    dt.hour_status == eval_bcd ? 5 : 2, NULL);
+	    dt.hour_status == eval_bcd ? 3 : 2, NULL);
 	mvchgat(0, 76, 1, A_NORMAL,
 	    dt.mday_status == eval_parity ? 1 :
 	    (dt.mday_status == eval_bcd || dt.wday_status == eval_bcd ||
-	    dt.month_status == eval_bcd || dt.year_status == eval_bcd) ? 5 : 2,
+	    dt.month_status == eval_bcd || dt.year_status == eval_bcd) ? 3 : 2,
 	    NULL);
 	if (dt.leapsecond_status == els_one) {
 		mvchgat(0, 78, 1, A_NORMAL, 3, NULL);
