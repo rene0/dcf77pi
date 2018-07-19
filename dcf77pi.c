@@ -450,7 +450,7 @@ display_minute(int minlen)
 
 	/* display minute cutoff value */
 	cutoff = get_cutoff();
-	if (cutoff < 10000 || cutoff > 20000) {
+	if (cutoff < 10000 || cutoff > 30000) {
 		mvprintw(1, 40, "?     ");
 		mvchgat(1, 40, 1, A_NORMAL, 3, NULL);
 	} else {
