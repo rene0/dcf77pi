@@ -534,7 +534,7 @@ main(int argc, char *argv[])
 	init_pair(3, COLOR_YELLOW, COLOR_BLACK);
 	init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
 	init_pair(7, COLOR_WHITE, COLOR_BLACK);
-	init_pair(8, COLOR_BLACK, COLOR_BLACK); /* A_INVIS does not work? */
+	init_pair(8, COLOR_BLACK, COLOR_BLACK); /* A_INVIS does not work */
 
 	noecho();
 	nonl();
