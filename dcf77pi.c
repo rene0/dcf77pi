@@ -519,7 +519,7 @@ main(int argc, char *argv[])
 	}
 
 	initscr();
-	if (has_colors() == FALSE) {
+	if (has_colors() == FALSE || start_color() == ERR) {
 		client_cleanup("No required color support.");
 		return 0;
 	}
@@ -528,7 +528,6 @@ main(int argc, char *argv[])
 		return 0;
 	}
 
-	start_color();
 	init_pair(1, COLOR_RED, COLOR_BLACK);
 	init_pair(2, COLOR_GREEN, COLOR_BLACK);
 	init_pair(3, COLOR_YELLOW, COLOR_BLACK);
