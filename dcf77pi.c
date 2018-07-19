@@ -111,37 +111,38 @@ display_bit(struct GB_result bit, int bitpos)
 		mvchgat(9, 36, 21, A_NORMAL, 7, NULL);
 	}
 
-	attron(COLOR_PAIR(2));
 	if (bit.marker == emark_minute && bit.bitval != ebv_none) {
 		mvprintw(9, 58, "minute   ");
+		mvchgat(9, 58, 6, A_NORMAL, 2, NULL);
 	} else if (bit.marker == emark_none && bit.bitval != ebv_none) {
 		mvprintw(9, 58, "OK       ");
+		mvchgat(9, 58, 2, A_NORMAL, 2, NULL);
 	} else {
-		attron(COLOR_PAIR(3) | A_BOLD);
 		mvprintw(9, 58, "?        ");
-		attroff(COLOR_PAIR(3) | A_BOLD);
+		mvchgat(9, 58, 1, A_NORMAL, 3, NULL);
 	}
-	attroff(COLOR_PAIR(2));
-
-	attron(COLOR_PAIR(1));
 	if (bit.bitval == ebv_none) {
 		mvprintw(9, 58, "read     ");
+		mvchgat(9, 58, 4, A_NORMAL, 1, NULL);
 	}
+
 	if (bit.hwstat == ehw_receive) {
 		mvprintw(9, 68, "receive ");
+		mvchgat(9, 68, 4, A_NORMAL, 1, NULL);
 	} else if (bit.hwstat == ehw_transmit) {
 		mvprintw(9, 68, "transmit");
+		mvchgat(9, 68, 4, A_NORMAL, 1, NULL);
 	} else if (bit.hwstat == ehw_random) {
 		mvprintw(9, 68, "random  ");
+		mvchgat(9, 68, 4, A_NORMAL, 1, NULL);
 	} else if (bit.bad_io) {
 		mvprintw(9, 68, "IO      ");
+		mvchgat(9, 68, 4, A_NORMAL, 1, NULL);
 	} else {
 		/* bit.hwstat == ehw_ok */
-		attron(COLOR_PAIR(2));
 		mvprintw(9, 68, "OK      ");
-		attroff(COLOR_PAIR(2));
+		mvchgat(9, 68, 4, A_NORMAL, 2, NULL);
 	}
-	attroff(COLOR_PAIR(1));
 
 	for (xpos = bitpos + 4, bp = 0; bp <= bitpos; bp++) {
 		if (is_space_bit(bp)) {
@@ -261,30 +262,27 @@ display_thirdparty_buffer(const unsigned buf[])
 static void
 display_alarm(struct alm alarm)
 {
-	attron(COLOR_PAIR(3) | A_BOLD);
 	mvprintw(4, 22, "German civil warning (decoding error)");
-	attroff(COLOR_PAIR(3) | A_BOLD);
 	clrtoeol();
+	mvchgat(4, 22, -1, A_NORMAL, 3, NULL);
 	refresh();
 }
 
 static void
 display_unknown(void)
 {
-	attron(COLOR_PAIR(1));
 	mvprintw(4, 22, "unknown contents");
-	attroff(COLOR_PAIR(1));
 	clrtoeol();
+	mvchgat(4, 22, -1, A_NORMAL, 1, NULL);
 	refresh();
 }
 
 static void
 display_weather(void)
 {
-	attron(COLOR_PAIR(2));
 	mvprintw(4, 22, "Meteotime weather");
-	attroff(COLOR_PAIR(2));
 	clrtoeol();
+	mvchgat(4, 22, -1, A_NORMAL, 2, NULL);
 	refresh();
 }
 
@@ -459,9 +457,8 @@ wipe_input()
 static void
 display_long_minute(void)
 {
-	attron(COLOR_PAIR(1));
 	mvprintw(9, 58, "no minute");
-	attroff(COLOR_PAIR(1));
+	mvchgat(9, 58, 9, A_NORMAL, 1, NULL);
 }
 
 static void
