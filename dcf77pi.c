@@ -28,6 +28,7 @@ static int old_bitpos = -1; /* timer for statusbar inactive */
 static int input_mode;      /* normal input (statusbar) or string input */
 static char keybuf[MAXBUF]; /* accumulator for string input */
 static bool show_utc;       /* show time in UTC */
+static bool toosmall;       /* terminal is less than 80x25 after a KEY_RESIZE */
 
 static void
 statusbar(int bitpos, const char * const fmt, ...)
@@ -35,6 +36,10 @@ statusbar(int bitpos, const char * const fmt, ...)
 	va_list ap;
 
 	old_bitpos = bitpos;
+
+	if (toosmall) {
+		return;
+	}
 
 	move(23, 0);
 	va_start(ap, fmt);
@@ -47,6 +52,10 @@ statusbar(int bitpos, const char * const fmt, ...)
 static void
 draw_keys(void)
 {
+	if (toosmall) {
+		return;
+	}
+
 	mvprintw(24, 0,
 	    "[Q] quit [L] change log file [S] time sync on  "
 	    "[u] UTC display on ");
@@ -94,6 +103,10 @@ display_bit(struct GB_result bit, int bitpos)
 {
 	int bp, xpos;
 	struct bitinfo bitinf;
+
+	if (toosmall) {
+		return;
+	}
 
 	bitinf = get_bitinfo();
 
@@ -154,6 +167,11 @@ display_bit(struct GB_result bit, int bitpos)
 static void
 display_time(struct DT_result dt, struct tm time)
 {
+
+	if (toosmall) {
+		return;
+	}
+
 	if (show_utc) {
 		time = get_utctime(time);
 	}
@@ -217,6 +235,10 @@ display_time(struct DT_result dt, struct tm time)
 static void
 display_thirdparty_buffer(const unsigned buf[])
 {
+	if (toosmall) {
+		return;
+	}
+
 	for (int i = 0; i < TPBUFLEN; i++) {
 		mvprintw(3, i + 22, "%u", buf[i]);
 	}
@@ -231,6 +253,10 @@ display_thirdparty_buffer(const unsigned buf[])
 static void
 display_alarm(struct alm alarm)
 {
+	if (toosmall) {
+		return;
+	}
+
 	mvprintw(4, 22, "German civil warning (decoding error)");
 	clrtoeol();
 	mvchgat(4, 22, -1, A_NORMAL, 3, NULL);
@@ -240,6 +266,10 @@ display_alarm(struct alm alarm)
 static void
 display_unknown(void)
 {
+	if (toosmall) {
+		return;
+	}
+
 	mvprintw(4, 22, "unknown contents");
 	clrtoeol();
 	mvchgat(4, 22, -1, A_NORMAL, 1, NULL);
@@ -249,6 +279,10 @@ display_unknown(void)
 static void
 display_weather(void)
 {
+	if (toosmall) {
+		return;
+	}
+
 	mvprintw(4, 22, "Meteotime weather");
 	clrtoeol();
 	mvchgat(4, 22, -1, A_NORMAL, 2, NULL);
@@ -272,6 +306,9 @@ process_input(struct ML_result in_ml, int bitpos)
 			mlr.quit = true; /* quit main loop */
 			break;
 		case 'L':
+			if (toosmall) {
+				break;
+			}
 			inkey = ERR; /* prevent key repeat */
 			mvprintw(23, 0, "Current log (.): %s",
 			    (mlr.logfilename != NULL &&
@@ -286,27 +323,42 @@ process_input(struct ML_result in_ml, int bitpos)
 			mlr.change_logfile = true;
 			break;
 		case 'S':
+			if (toosmall) {
+				break;
+			}
 			mlr.settime = !mlr.settime;
 			mvprintw(24, 43, mlr.settime ? "off" : "on ");
 			refresh();
 			break;
 		case 'u':
+			if (toosmall) {
+				break;
+			}
 			show_utc = !show_utc;
 			mvprintw(24, 63, show_utc ? "off" : "on ");
 			refresh();
 			break;
 		case KEY_RESIZE:
 			endwin();
-			initscr();
-			clear();
-			draw_initial_screen();
+			if (toosmall && getmaxx(stdscr) >= 80 &&
+			    getmaxy(stdscr) >= 25) {
+				/*
+				 * Restore parts of the screen which were wiped
+				 * when the screen was too small.
+				*/
+				draw_initial_screen();
+			} else {
+				refresh();
+			}
+			toosmall = (getmaxx(stdscr) < 80) |
+			    (getmaxy(stdscr) < 25);
 			break;
 		default:
 			break;
 		}
 	}
 
-	while (input_mode == 1 && inkey != ERR) {
+	while (!toosmall && input_mode == 1 && inkey != ERR) {
 		char dispbuf[80];
 
 		if (input_count > 0 &&
@@ -365,7 +417,7 @@ post_process_input(struct ML_result in_ml, int bitpos)
 		old_bitpos = -1;
 		draw_keys();
 	}
-	if (input_mode == -1) {
+	if (!toosmall && input_mode == -1) {
 		if (in_ml.change_logfile) {
 			char *old_logfilename;
 
@@ -414,7 +466,7 @@ post_process_input(struct ML_result in_ml, int bitpos)
 static void
 wipe_input()
 {
-	if (get_bitpos() == 0) {
+	if (!toosmall && get_bitpos() == 0) {
 		move(6, 3);
 		clrtoeol();
 		refresh();
@@ -424,6 +476,10 @@ wipe_input()
 static void
 display_long_minute(void)
 {
+	if (toosmall) {
+		return;
+	}
+
 	mvprintw(9, 58, "no minute");
 	mvchgat(9, 58, 9, A_NORMAL, 1, NULL);
 }
@@ -432,6 +488,10 @@ static void
 display_minute(int minlen)
 {
 	int bp, cutoff, xpos;
+
+	if (toosmall) {
+		return;
+	}
 
 	/* display bits of previous minute */
 	for (xpos = 4, bp = 0; bp < minlen; bp++, xpos++) {
