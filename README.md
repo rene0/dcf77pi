@@ -69,7 +69,7 @@ example, on FreeBSD:
 On Linux, you will also have to install an (n)curses development package using
 your package manager. For example, on Raspbian:
 ```sh
-% sudo apt-get install libncurses5-dev libncursesw5-dev libjson-c-dev
+% sudo apt-get install libncurses5-dev libjson-c-dev pkgconf
 ```
 
 To build and install the program into /usr/bin , the library into /usr/lib and
