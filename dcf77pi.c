@@ -41,7 +41,7 @@ statusbar(int bitpos, const char * const fmt, ...)
 		return;
 	}
 
-	move(23, 0);
+	move(24, 0);
 	va_start(ap, fmt);
 	vw_printw(stdscr, fmt, ap);
 	va_end(ap);
