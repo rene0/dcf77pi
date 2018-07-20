@@ -561,7 +561,7 @@ main(int argc, char *argv[])
 		return EX_NOINPUT;
 	}
 	if (json_object_object_get_ex(config, "outlogfile", &value)) {
-		logfilename = (char *)(json_object_get_string(value));
+		logfilename = (char *)json_object_get_string(value);
 	}
 	if (logfilename != NULL && strlen(logfilename) != 0) {
 		res = append_logfile(logfilename);
