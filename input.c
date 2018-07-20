@@ -3,7 +3,8 @@
 
 #include "input.h"
 
-#include <json.h>
+#include "json_object.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>

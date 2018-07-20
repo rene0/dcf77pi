@@ -9,9 +9,11 @@
 #include "mainloop.h"
 #include "setclock.h"
 
+#include "json_object.h"
+#include "json_util.h"
+
 #include <curses.h>
 #include <errno.h>
-#include <json.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>

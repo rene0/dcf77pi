@@ -3,7 +3,8 @@
 
 #include "input.h"
 
-#include <json.h>
+#include "json_util.h"
+
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
