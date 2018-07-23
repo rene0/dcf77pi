@@ -790,8 +790,7 @@ append_logfile(const char * const logfilename)
 		return errno;
 	}
 	fprintf(logfile, "\n--new log--\n\n");
-	pthread_create(&flush_thread, NULL, flush_logfile, NULL);
-	return 0;
+	return pthread_create(&flush_thread, NULL, flush_logfile, NULL);
 }
 
 int
