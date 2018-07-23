@@ -767,7 +767,7 @@ get_hardware_parameters(void)
 }
 
 void
-*flush_logfile()
+*flush_logfile(/*@unused@*/ void *arg)
 {
 	for (;;)
 	{

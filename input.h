@@ -240,7 +240,9 @@ int get_cutoff(void);
 
 /**
  * Flush the current log file to its storage location.
+ *
+ * @param arg Unused argument because of pthread_create()
  */
-void *flush_logfile();
+void *flush_logfile(/*@unused*/ void *arg);
 
 #endif
