@@ -236,14 +236,14 @@ display_time(struct DT_result dt, struct tm time)
 }
 
 static void
-display_thirdparty_buffer(const unsigned buf[])
+display_thirdparty_buffer(const unsigned tpbuf[])
 {
 	if (toosmall) {
 		return;
 	}
 
 	for (int i = 0; i < TPBUFLEN; i++) {
-		mvprintw(3, i + 22, "%u", buf[i]);
+		mvprintw(3, i + 22, "%u", tpbuf[i]);
 	}
 	clrtoeol();
 	refresh();
