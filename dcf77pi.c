@@ -136,20 +136,20 @@ display_bit(struct GB_result bit, int bitpos)
 
 	if (bit.hwstat == ehw_receive) {
 		mvprintw(9, 68, "receive ");
-		mvchgat(9, 68, 4, A_NORMAL, 1, NULL);
+		mvchgat(9, 68, 7, A_NORMAL, 1, NULL);
 	} else if (bit.hwstat == ehw_transmit) {
 		mvprintw(9, 68, "transmit");
-		mvchgat(9, 68, 4, A_NORMAL, 1, NULL);
+		mvchgat(9, 68, 8, A_NORMAL, 1, NULL);
 	} else if (bit.hwstat == ehw_random) {
 		mvprintw(9, 68, "random  ");
-		mvchgat(9, 68, 4, A_NORMAL, 1, NULL);
+		mvchgat(9, 68, 6, A_NORMAL, 1, NULL);
 	} else if (bit.bad_io) {
 		mvprintw(9, 68, "IO      ");
-		mvchgat(9, 68, 4, A_NORMAL, 1, NULL);
+		mvchgat(9, 68, 2, A_NORMAL, 1, NULL);
 	} else {
 		/* bit.hwstat == ehw_ok */
 		mvprintw(9, 68, "OK      ");
-		mvchgat(9, 68, 4, A_NORMAL, 2, NULL);
+		mvchgat(9, 68, 2, A_NORMAL, 2, NULL);
 	}
 
 	for (xpos = bitpos + 4, bp = 0; bp <= bitpos; bp++) {
