@@ -405,7 +405,7 @@ get_bit_live(void)
 		}
 
 		if (bit.t > bit.realfreq * 2500000) {
-			if (bit.tlow * 100 / bit.t < 1) {
+			if (bit.tlow <= hw.freq / 20) {
 				gb_res.hwstat = ehw_receive;
 				outch = 'r';
 			} else if (bit.tlow * 100 / bit.t >= 99) {
