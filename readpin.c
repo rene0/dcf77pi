@@ -81,7 +81,7 @@ main(int argc, char *argv[])
 			slp.tv_nsec = 1e9 / hw.freq;
 			printf("%i", get_pulse());
 			fflush(stdout);
-			while (nanosleep(&slp, &slp))
+			while (nanosleep(&slp, &slp) > 0)
 				; /* empty loop */
 			continue;
 		}

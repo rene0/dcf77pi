@@ -473,7 +473,7 @@ get_bit_live(void)
 #endif
 		slp.tv_sec = twait / 1000000000;
 		slp.tv_nsec = twait % 1000000000;
-		while (twait > 0 && nanosleep(&slp, &slp))
+		while (twait > 0 && nanosleep(&slp, &slp) > 0)
 			; /* empty loop */
 	}
 	if (bit.t >= hw.freq * 4) {
