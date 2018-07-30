@@ -250,19 +250,35 @@ display_thirdparty_buffer(const unsigned tpbuf[])
 }
 
 /*
- * In live mode, reaching this point means a decoding error as alarm messages
- * were only broadcasted for testing between 2003-10-13 and 2003-12-10.
+ * In live mode, reaching this point likely means a decoding error as alarm
+ * messages were only broadcasted as tests between 2003-10-13 and 2003-12-10.
  */
 static void
 display_alarm(struct alm alarm)
 {
+	int i;
+
 	if (toosmall) {
 		return;
 	}
 
-	mvprintw(4, 22, "German civil warning (decoding error)");
+	mvprintw(4, 22, "German civil warning (decoding error?)");
 	clrtoeol();
 	mvchgat(4, 22, -1, A_NORMAL, 3, NULL);
+
+	for (i = 11; i < 23; i++) {
+		move(i, 0);
+		clrtoeol();
+	}
+
+	mvprintw(19, 0, "Regions: %s", get_region_name(alarm));
+	for (i = 0; i < 2; i++) {
+		mvprintw(20 + i, 0, "%u Regions: %x %x %x %x parities %x %x",
+		    i, alarm.region[i].r1, alarm.region[i].r2,
+		    alarm.region[i].r3, alarm.region[i].r4,
+		    alarm.parity[i].ps, alarm.parity[i].pl);
+	}
+
 	refresh();
 }
 
