@@ -26,20 +26,17 @@ objbin=dcf77pi.o dcf77pi-analyze.o readpin.o
 
 input.o: input.c input.h
 	$(CC) -fpic $(CFLAGS) $(JSON_C) -c input.c -o $@
-decode_time.o: decode_time.c decode_time.h calendar.c calendar.h
+decode_time.o: decode_time.c decode_time.h calendar.h
 	$(CC) -fpic $(CFLAGS) -c decode_time.c -o $@
 decode_alarm.o: decode_alarm.c decode_alarm.h
 	$(CC) -fpic $(CFLAGS) -c decode_alarm.c -o $@
-setclock.o: setclock.c setclock.h decode_time.h input.h calendar.c calendar.h
+setclock.o: setclock.c setclock.h decode_time.h input.h calendar.h
 	$(CC) -fpic $(CFLAGS) -c setclock.c -o $@
-	# decode_time.c input.c not used
-mainloop.o: mainloop.c mainloop.h input.c input.h bits1to14.c bits1to14.h \
-	decode_alarm.c decode_alarm.h decode_time.c decode_time.h setclock.c \
-	setclock.h
+mainloop.o: mainloop.c mainloop.h input.h bits1to14.h decode_alarm.h \
+	decode_time.h setclock.h
 	$(CC) -fpic $(CFLAGS) -c mainloop.c -o $@
 bits1to14.o: bits1to14.c bits1to14.h input.h
 	$(CC) -fpic $(CFLAGS) -c bits1to14.c -o $@
-	# input.c not used
 calendar.o: calendar.c calendar.h
 	$(CC) -fpic $(CFLAGS) -c calendar.c -o $@
 
