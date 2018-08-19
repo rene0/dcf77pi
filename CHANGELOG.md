@@ -1,3 +1,22 @@
+Version 3.7.1 --
+* Adjust test for reception errors in case the transmitter is switched off.
+* readpin: tidy up signal handling, no functional changes.
+* dcf77pi: show (partial) alarm messages when they are (falsely) received.
+* dcf77pi: use KEY\_RESIZE instead of rolling our own SIGWINCH handler.
+* dcf77pi: insist on a minimum screen size of 80x25.
+* dcf77pi: make resizing the terminal more reliable, pause any updates if the
+  window is too small.
+* dcf77pi: color unknown minute state yellow.
+* dcf77pi: color key codes magenta instead of blue and color warnings brown
+  instead of yellow, A\_BOLD is unreliable.
+* dcf77pi: use a question mark for extreme cutoff values.
+* dcf77pi: color BCD errors in the previous minute brown instead of magenta.
+* dcf77pi: show bit.tlow and bit.tlast0 as signed values.
+* Makefile: fix detection of mofified sources when using GNU Make.
+* Makefile: ensure iwyu target works by cleaning first.
+* README.md: update instructions for Linux
+* Doxyfile: update from doxygen 1.8.10 to 1.8.14, no functional changes.
+
 Version 3.7.0 -- 2018-07-08
 * Replace verbose license texts in source files by SPDX identifiers.
 * Makefile: always install LICENSE.md and fix uninstall target.
