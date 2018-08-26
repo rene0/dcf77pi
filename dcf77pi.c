@@ -30,6 +30,7 @@ static int old_bitpos = -1; /* timer for statusbar inactive */
 static int input_mode;      /* normal input (statusbar) or string input */
 static char keybuf[MAXBUF]; /* accumulator for string input */
 static bool show_utc;       /* show time in UTC */
+static bool set_time;       /* set host time, copy from mlr in [post_]process_input() */
 static bool toosmall;       /* terminal is less than 80x25 after a KEY_RESIZE */
 
 static void
@@ -59,8 +60,9 @@ draw_keys(void)
 	}
 
 	mvprintw(24, 0,
-	    "[Q] quit [L] change log file [S] time sync on  "
-	    "[u] UTC display on ");
+	    "[Q] quit [L] change log file [S] time sync %s "
+	    "[u] UTC display %s", set_time ? "off" : "on ",
+	    show_utc ? "off" : "on ");
 	clrtoeol();
 	mvchgat(24, 1, 1, A_NORMAL, 5, NULL); /* [Q] */
 	mvchgat(24, 10, 1, A_NORMAL, 5, NULL); /* [L] */
@@ -346,6 +348,7 @@ process_input(struct ML_result in_ml, int bitpos)
 				break;
 			}
 			mlr.settime = !mlr.settime;
+			set_time = mlr.settime;
 			mvprintw(24, 43, mlr.settime ? "off" : "on ");
 			refresh();
 			break;
