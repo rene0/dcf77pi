@@ -16,13 +16,13 @@ CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 JSON_C?=`pkg-config --cflags json-c`
 JSON_L?=`pkg-config --libs json-c`
 
-all: libdcf77.so dcf77pi dcf77pi-analyze readpin
+all: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin kevent-demo
 
 hdrlib=input.h decode_time.h decode_alarm.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
 srclib=${hdrlib:.h=.c}
 objlib=${hdrlib:.h=.o}
-objbin=dcf77pi.o dcf77pi-analyze.o readpin.o
+objbin=dcf77pi.o dcf77pi-analyze.o dcf77pi-readpin.o kevent-demo.o
 
 input.o: input.c input.h
 	$(CC) -fpic $(CFLAGS) $(JSON_C) -c input.c -o $@
@@ -47,7 +47,7 @@ dcf77pi.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h dcf77pi.c
 	$(CC) -fpic $(CFLAGS) $(JSON_C) -c dcf77pi.c -o $@
 dcf77pi: dcf77pi.o libdcf77.so
-	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so $(JSON_L)
+	$(CC) -o $@ dcf77pi.o -lncursesw libdcf77.so -lpthread $(JSON_L)
 
 dcf77pi-analyze.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h dcf77pi-analyze.c
@@ -55,10 +55,10 @@ dcf77pi-analyze: dcf77pi-analyze.o libdcf77.so
 	$(CC) -fpic $(CFLAGS) -c dcf77pi-analyze.c -o $@
 	$(CC) -o $@ dcf77pi-analyze.o libdcf77.so
 
-readpin.o: input.h readpin.c
-	$(CC) -fpic $(CFLAGS) $(JSON_C) -c readpin.c -o $@
-readpin: readpin.o libdcf77.so
-	$(CC) -o $@ readpin.o libdcf77.so $(JSON_L)
+dcf77pi-readpin.o: input.h dcf77pi-readpin.c
+	$(CC) -fpic $(CFLAGS) $(JSON_C) -c dcf77pi-readpin.c -o $@
+dcf77pi-readpin: dcf77pi-readpin.o libdcf77.so
+	$(CC) -o $@ dcf77pi-readpin.o libdcf77.so $(JSON_L)
 
 doxygen:
 	doxygen
@@ -66,15 +66,15 @@ doxygen:
 clean:
 	rm -f dcf77pi
 	rm -f dcf77pi-analyze
-	rm -f readpin
+	rm -f dcf77pi-readpin
 	rm -f $(objbin)
 	rm -f libdcf77.so $(objlib)
 
-install: libdcf77.so dcf77pi dcf77pi-analyze readpin
+install: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	$(INSTALL_PROGRAM) libdcf77.so $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	$(INSTALL_PROGRAM) dcf77pi dcf77pi-analyze readpin \
+	$(INSTALL_PROGRAM) dcf77pi dcf77pi-analyze dcf77pi-readpin \
 		$(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(PREFIX)/include/dcf77pi
 	$(INSTALL) -m 0644 $(hdrlib) $(DESTDIR)$(PREFIX)/include/dcf77pi
@@ -101,7 +101,7 @@ uninstall: uninstall-doxygen uninstall-md
 	rm -f $(DESTDIR)$(PREFIX)/lib/libdcf77.so
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi-analyze
-	rm -f $(DESTDIR)$(PREFIX)/bin/readpin
+	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi-readpin
 	rm -rf $(DESTDIR)$(PREFIX)/include/dcf77pi
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
 	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi

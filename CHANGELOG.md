@@ -16,6 +16,7 @@ Version 3.7.1 --
 * Makefile: ensure iwyu target works by cleaning first.
 * README.md: update instructions for Linux
 * Doxyfile: update from doxygen 1.8.10 to 1.8.14, no functional changes.
+* readpin: rename to dcf77pi-readpin to avoid conflict with nplpi-readpin
 
 Version 3.7.0 -- 2018-07-08
 * Replace verbose license texts in source files by SPDX identifiers.
