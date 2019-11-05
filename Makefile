@@ -16,13 +16,13 @@ CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 JSON_C?=`pkg-config --cflags json-c`
 JSON_L?=`pkg-config --libs json-c`
 
-all: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin kevent-demo
+all: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin
 
 hdrlib=input.h decode_time.h decode_alarm.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
 srclib=${hdrlib:.h=.c}
 objlib=${hdrlib:.h=.o}
-objbin=dcf77pi.o dcf77pi-analyze.o dcf77pi-readpin.o kevent-demo.o
+objbin=dcf77pi.o dcf77pi-analyze.o dcf77pi-readpin.o
 
 input.o: input.c input.h
 	$(CC) -fpic $(CFLAGS) $(JSON_C) -c input.c -o $@
@@ -41,13 +41,13 @@ calendar.o: calendar.c calendar.h
 	$(CC) -fpic $(CFLAGS) -c calendar.c -o $@
 
 libdcf77.so: $(objlib)
-	$(CC) -shared -o $@ $(objlib) -lm -lpthread $(JSON_L)
+	$(CC) -shared -o $@ $(objlib) -lm $(JSON_L)
 
 dcf77pi.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h dcf77pi.c
 	$(CC) -fpic $(CFLAGS) $(JSON_C) -c dcf77pi.c -o $@
 dcf77pi: dcf77pi.o libdcf77.so
-	$(CC) -o $@ dcf77pi.o -lncursesw libdcf77.so -lpthread $(JSON_L)
+	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so $(JSON_L)
 
 dcf77pi-analyze.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h dcf77pi-analyze.c
