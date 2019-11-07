@@ -21,7 +21,6 @@
 #include <string.h>
 #include <sysexits.h>
 #include <time.h>
-#include <sys/ioctl.h>
 
 #define MAXBUF 255
 

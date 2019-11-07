@@ -20,7 +20,7 @@
 #  include <sys/param.h>
 #  if __FreeBSD_version >= 900022
 #    include <sys/gpio.h>
-#    include <sys/ioctl.h>
+#    include <sys/ioccom.h>
 #  else
 #    define NOLIVE 1
 #  endif
