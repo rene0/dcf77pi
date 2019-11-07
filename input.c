@@ -431,9 +431,6 @@ get_bit_live(void)
 		}
 		if (y > 500000000 && stv == 0) {
 			/* end of low part of second */
-			y = 1000000000;
-			stv = 1;
-
 			newminute = bit.t * 2000000 > bit.realfreq * 3;
 			if (init_bit == 2) {
 				init_bit--;
