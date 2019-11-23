@@ -1,4 +1,4 @@
-// Copyright 2013-2018 René Ladan and Udo Klein and "JsBergbau"
+// Copyright 2013-2019 René Ladan and Udo Klein and "JsBergbau"
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "input.h"
@@ -370,7 +370,7 @@ get_bit_live(void)
 	bit.tlow = -1;
 	bit.tlast0 = -1;
 
-	for (bit.t = 0; bit.t < hw.freq * 4; bit.t++) {
+	for (bit.t = 0; bit.t < hw.freq * 2; bit.t++) {
 #if !defined(MACOS)
 		(void)clock_gettime(CLOCK_MONOTONIC, &tp0);
 #endif
@@ -473,7 +473,7 @@ get_bit_live(void)
 		while (twait > 0 && nanosleep(&slp, &slp) > 0)
 			; /* empty loop */
 	}
-	if (bit.t >= hw.freq * 4) {
+	if (bit.t >= hw.freq * 2) {
 		/* this can actually happen */
 		if (gb_res.hwstat == ehw_ok) {
 			gb_res.hwstat = ehw_random;
