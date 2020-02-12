@@ -16,13 +16,13 @@ CPPCHECK_ARGS?=--enable=all --inconclusive --language=c --std=c99 \
 JSON_C?=`pkg-config --cflags json-c`
 JSON_L?=`pkg-config --libs json-c`
 
-all: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin
+all: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin kevent-demo
 
 hdrlib=input.h decode_time.h decode_alarm.h setclock.h mainloop.h \
 	bits1to14.h calendar.h
 srclib=${hdrlib:.h=.c}
 objlib=${hdrlib:.h=.o}
-objbin=dcf77pi.o dcf77pi-analyze.o dcf77pi-readpin.o
+objbin=dcf77pi.o dcf77pi-analyze.o dcf77pi-readpin.o kevent-demo.o
 
 input.o: input.c input.h
 	$(CC) -fpic $(CFLAGS) $(JSON_C) -c input.c -o $@
@@ -47,7 +47,7 @@ dcf77pi.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h dcf77pi.c
 	$(CC) -fpic $(CFLAGS) $(JSON_C) -c dcf77pi.c -o $@
 dcf77pi: dcf77pi.o libdcf77.so
-	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so $(JSON_L)
+	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so -lpthread $(JSON_L)
 
 dcf77pi-analyze.o: bits1to14.h decode_alarm.h decode_time.h input.h \
 	mainloop.h calendar.h dcf77pi-analyze.c
@@ -60,6 +60,12 @@ dcf77pi-readpin.o: input.h dcf77pi-readpin.c
 dcf77pi-readpin: dcf77pi-readpin.o libdcf77.so
 	$(CC) -o $@ dcf77pi-readpin.o libdcf77.so $(JSON_L)
 
+kevent-demo.o: input.h kevent-demo.c
+	# __BSD_VISIBLE for FreeBSD < 12.0
+	$(CC) -fpic $(CFLAGS) $(JSON_C) -c kevent-demo.c -o $@ -D__BSD_VISIBLE=1
+kevent-demo: kevent-demo.o libdcf77.so
+	$(CC) -o $@ kevent-demo.o libdcf77.so $(JSON_L)
+
 doxygen:
 	doxygen
 
@@ -67,15 +73,16 @@ clean:
 	rm -f dcf77pi
 	rm -f dcf77pi-analyze
 	rm -f dcf77pi-readpin
+	rm -f kevent-demo
 	rm -f $(objbin)
 	rm -f libdcf77.so $(objlib)
 
-install: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin
+install: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin kevent-demo
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	$(INSTALL_PROGRAM) libdcf77.so $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL_PROGRAM) dcf77pi dcf77pi-analyze dcf77pi-readpin \
-		$(DESTDIR)$(PREFIX)/bin
+		kevent-demo $(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(PREFIX)/include/dcf77pi
 	$(INSTALL) -m 0644 $(hdrlib) $(DESTDIR)$(PREFIX)/include/dcf77pi
 	mkdir -p $(DESTDIR)$(PREFIX)/$(ETCDIR)
@@ -102,6 +109,7 @@ uninstall: uninstall-doxygen uninstall-md
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi-analyze
 	rm -f $(DESTDIR)$(PREFIX)/bin/dcf77pi-readpin
+	rm -f $(DESTDIR)$(PREFIX)/bin/kevent-demo
 	rm -rf $(DESTDIR)$(PREFIX)/include/dcf77pi
 	rm -rf $(DESTDIR)$(PREFIX)/$(ETCDIR)
 	rm -rf $(DESTDIR)$(PREFIX)/share/doc/dcf77pi
