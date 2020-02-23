@@ -62,9 +62,9 @@ dcf77pi-readpin: dcf77pi-readpin.o libdcf77.so
 
 kevent-demo.o: input.h kevent-demo.c
 	# __BSD_VISIBLE for FreeBSD < 12.0
-	$(CC) -fpic $(CFLAGS) $(JSON_C) -c kevent-demo.c -o $@ -D__BSD_VISIBLE=1
+	[ `uname -s` = "FreeBSD" ] && $(CC) -fpic $(CFLAGS) $(JSON_C) -c kevent-demo.c -o $@ -D__BSD_VISIBLE=1
 kevent-demo: kevent-demo.o libdcf77.so
-	$(CC) -o $@ kevent-demo.o libdcf77.so $(JSON_L)
+	[ `uname -s` = "FreeBSD" ] && $(CC) -o $@ kevent-demo.o libdcf77.so $(JSON_L)
 
 doxygen:
 	doxygen
