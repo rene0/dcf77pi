@@ -62,9 +62,9 @@ dcf77pi-readpin: dcf77pi-readpin.o libdcf77.so
 
 kevent-demo.o: input.h kevent-demo.c
 	# __BSD_VISIBLE for FreeBSD < 12.0
-	[ `uname -s` = "FreeBSD" ] && $(CC) -fpic $(CFLAGS) $(JSON_C) -c kevent-demo.c -o $@ -D__BSD_VISIBLE=1
+	[ `uname -s` = "FreeBSD" ] && $(CC) -fpic $(CFLAGS) $(JSON_C) -c kevent-demo.c -o $@ -D__BSD_VISIBLE=1 || true
 kevent-demo: kevent-demo.o libdcf77.so
-	[ `uname -s` = "FreeBSD" ] && $(CC) -o $@ kevent-demo.o libdcf77.so $(JSON_L)
+	[ `uname -s` = "FreeBSD" ] && $(CC) -o $@ kevent-demo.o libdcf77.so $(JSON_L) || true
 
 doxygen:
 	doxygen
@@ -82,7 +82,9 @@ install: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin kevent-demo
 	$(INSTALL_PROGRAM) libdcf77.so $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL_PROGRAM) dcf77pi dcf77pi-analyze dcf77pi-readpin \
-		kevent-demo $(DESTDIR)$(PREFIX)/bin
+		$(DESTDIR)$(PREFIX)/bin
+	[ `uname -s` = "FreeBSD" ] && $(INSTALL_PROGRAM) kevent-demo \
+		$(DESTDIR)$(PREFIX)/bin || true
 	mkdir -p $(DESTDIR)$(PREFIX)/include/dcf77pi
 	$(INSTALL) -m 0644 $(hdrlib) $(DESTDIR)$(PREFIX)/include/dcf77pi
 	mkdir -p $(DESTDIR)$(PREFIX)/$(ETCDIR)
