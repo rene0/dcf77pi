@@ -1,22 +1,29 @@
-Version 3.7.1 --
-* Adjust test for reception errors in case the transmitter is switched off.
-* readpin: tidy up signal handling, no functional changes.
+Version 3.7.1 -- 2020-04-
+* Makefile: fix detection of mofified sources when using GNU Make.
+* Makefile: ensure iwyu target works by cleaning first.
+* Doxyfile: update from doxygen 1.8.10 to 1.8.15, no functional changes.
+* README.md: update instructions for Linux.
+* receiver.fcd: add a 10nF capacitor to filter high frequency noise, add units,
+  redraw external wires. Regenerate SVG version.
+* lib: Adjust test for reception errors in case the transmitter is switched off.
+* lib: return a useful value in append\_logfile()
+* lib: limit the bit pulse counter to 2 * hw.freq, which is always enough.
+* readpin: rename to dcf77pi-readpin to avoid conflict with nplpi-readpin.
+* dcf77pi-readpin: show bit value again in non-raw mode.
+* dcf77pi-readpin: note when the minute is too long.
 * dcf77pi: show (partial) alarm messages when they are (falsely) received.
-* dcf77pi: use KEY\_RESIZE instead of rolling our own SIGWINCH handler.
 * dcf77pi: insist on a minimum screen size of 80x25.
 * dcf77pi: make resizing the terminal more reliable, pause any updates if the
-  window is too small.
-* dcf77pi: color unknown minute state yellow.
+  window is too small [closes issue #30.2]
+* dcf77pi: color unknown minute state brown.
 * dcf77pi: color key codes magenta instead of blue and color warnings brown
   instead of yellow, A\_BOLD is unreliable.
 * dcf77pi: use a question mark for extreme cutoff values.
 * dcf77pi: color BCD errors in the previous minute brown instead of magenta.
 * dcf77pi: show bit.tlow and bit.tlast0 as signed values.
-* Makefile: fix detection of mofified sources when using GNU Make.
-* Makefile: ensure iwyu target works by cleaning first.
-* README.md: update instructions for Linux
-* Doxyfile: update from doxygen 1.8.10 to 1.8.14, no functional changes.
-* readpin: rename to dcf77pi-readpin to avoid conflict with nplpi-readpin
+* dcf77pi: show the actual values of [S] and [u] when redrawing the keys.
+* kevent-demo: add experimental program, for FreeBSD only, for the interrupt
+  branch.
 
 Version 3.7.0 -- 2018-07-08
 * Replace verbose license texts in source files by SPDX identifiers.
