@@ -14,7 +14,7 @@ Version 3.7.1 -- 2020-04-
 * dcf77pi: show (partial) alarm messages when they are (falsely) received.
 * dcf77pi: insist on a minimum screen size of 80x25.
 * dcf77pi: make resizing the terminal more reliable, pause any updates if the
-  window is too small [closes issue #30.2]
+  window is too small [closes issue #30]
 * dcf77pi: color unknown minute state brown.
 * dcf77pi: color key codes magenta instead of blue and color warnings brown
   instead of yellow, A\_BOLD is unreliable.
