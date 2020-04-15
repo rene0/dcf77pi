@@ -86,7 +86,7 @@ main(int argc, char *argv[])
 	struct tm time, time2;
 	int i;
 
-	/* isleeapyear() and lastday() are OK by definition */
+	/* isleapyear() and lastday() are OK by definition */
 
 	/* century_offset(): check for every date if it matches */
 	time.tm_wday = 1; /* base_year-01-01 is a Monday */
