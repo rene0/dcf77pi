@@ -1,4 +1,4 @@
-Version 3.7.1 -- 2020-04-
+Version 3.7.1 -- 2020-04-17
 * Makefile: fix detection of mofified sources when using GNU Make.
 * Makefile: ensure iwyu target works by cleaning first.
 * Doxyfile: update from doxygen 1.8.10 to 1.8.15, no functional changes.
