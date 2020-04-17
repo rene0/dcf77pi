@@ -1,3 +1,6 @@
+Version 3.7.1.1 -- 2020-04-17
+* Fix a compiler warning which would lead to wrong calculations.
+
 Version 3.7.1 -- 2020-04-17
 * Makefile: fix detection of mofified sources when using GNU Make.
 * Makefile: ensure iwyu target works by cleaning first.
