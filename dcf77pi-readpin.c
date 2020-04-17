@@ -1,4 +1,4 @@
-// Copyright 2013-2019 René Ladan
+// Copyright 2013-2020 René Ladan
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "input.h"

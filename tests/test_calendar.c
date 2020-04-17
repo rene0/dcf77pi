@@ -1,4 +1,4 @@
-// Copyright 2016-2018 René Ladan
+// Copyright 2016-2020 René Ladan
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "calendar.h"

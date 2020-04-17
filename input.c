@@ -1,4 +1,4 @@
-// Copyright 2013-2019 René Ladan and Udo Klein and "JsBergbau"
+// Copyright 2013-2020 René Ladan and Udo Klein and "JsBergbau"
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "input.h"
