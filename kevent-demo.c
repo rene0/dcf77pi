@@ -45,7 +45,7 @@ int main(void)
 	}
 
 	clock_getres(CLOCK_MONOTONIC, &ts);
-	printf("hw.freq=%i resolution=%li:%li\n", hw.freq, ts.tv_sec, ts.tv_nsec);
+	printf("hw.freq=%u resolution=%li:%li\n", hw.freq, ts.tv_sec, ts.tv_nsec);
 	/* initalise kevent structure */
 	/* timing is rather sloppy, sometimes 6 ms (!) late and skews behind (~0.8s/hour) */
 	/* also drifts over time, but correction is overdone? */

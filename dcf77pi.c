@@ -371,7 +371,7 @@ process_input(struct ML_result in_ml, int bitpos)
 			} else {
 				refresh();
 			}
-			toosmall = (getmaxx(stdscr) < 80) |
+			toosmall = (getmaxx(stdscr) < 80) ||
 			    (getmaxy(stdscr) < 25);
 			break;
 		default:
