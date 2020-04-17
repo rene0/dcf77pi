@@ -219,7 +219,7 @@ calculate_date_time(unsigned init_min, unsigned errflags, int increase,
 			}
 		}
 	}
-	return (errflags << 3) || ((!p3) << 2) || ((!p2) << 1) || (!p1);
+	return (errflags << 3) | ((!p3) << 2) | ((!p2) << 1) | (!p1);
 }
 
 static void
