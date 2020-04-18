@@ -1,12 +1,14 @@
-// Copyright 2013-2018 René Ladan and Udo Klein and "JsBergbau"
+// Copyright 2013-2020 René Ladan and Udo Klein and "JsBergbau"
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "input.h"
 
-#include <json.h>
+#include "json_object.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
+#include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +16,6 @@
 #include <sysexits.h>
 #include <time.h>
 #include <unistd.h>
-#include <pthread.h>
 
 #include <sys/time.h>
 
@@ -22,7 +23,7 @@
 #  include <sys/param.h>
 #  if __FreeBSD_version >= 900022
 #    include <sys/gpio.h>
-#    include <sys/ioctl.h>
+#    include <sys/ioccom.h>
 #  else
 #    define NOLIVE 1
 #  endif
@@ -380,7 +381,7 @@ get_bit_live(void)
 	bit.tlow = -1;
 	bit.tlast0 = -1;
 
-	for (bit.t = 0; bit.t < hw.freq * 4; bit.t++) {
+	for (bit.t = 0; bit.t < hw.freq * 2; bit.t++) {
 		if (pulse == 2) {
 			gb_res.bad_io = true;
 			outch = '*';
@@ -411,7 +412,7 @@ get_bit_live(void)
 		}
 
 		if (bit.t > bit.realfreq * 2500000) {
-			if (bit.tlow * 100 / bit.t < 1) {
+			if (bit.tlow <= hw.freq / 20) {
 				gb_res.hwstat = ehw_receive;
 				outch = 'r';
 			} else if (bit.tlow * 100 / bit.t >= 99) {
@@ -437,9 +438,6 @@ get_bit_live(void)
 		}
 		if (y > 500000000 && stv == 0) {
 			/* end of low part of second */
-			y = 1000000000;
-			stv = 1;
-
 			newminute = bit.t * 2000000 > bit.realfreq * 3;
 			if (init_bit == 2) {
 				init_bit--;
@@ -472,7 +470,7 @@ get_bit_live(void)
 			break; /* start of new second */
 		}
 	}
-	if (bit.t >= hw.freq * 4) {
+	if (bit.t >= hw.freq * 2) {
 		/* this can actually happen */
 		if (gb_res.hwstat == ehw_ok) {
 			gb_res.hwstat = ehw_random;
@@ -763,7 +761,7 @@ get_hardware_parameters(void)
 }
 
 void
-*flush_logfile()
+*flush_logfile(/*@unused@*/ void *arg)
 {
 	for (;;)
 	{
@@ -786,8 +784,7 @@ append_logfile(const char * const logfilename)
 		return errno;
 	}
 	fprintf(logfile, "\n--new log--\n\n");
-	pthread_create(&flush_thread, NULL, flush_logfile, NULL);
-	return 0;
+	return pthread_create(&flush_thread, NULL, flush_logfile, NULL);
 }
 
 int

@@ -1,9 +1,10 @@
-// Copyright 2013-2018 René Ladan
+// Copyright 2013-2020 René Ladan
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "input.h"
 
-#include <json.h>
+#include "json_util.h"
+
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -80,7 +81,7 @@ main(int argc, char *argv[])
 			slp.tv_nsec = 1e9 / hw.freq;
 			printf("%i", get_pulse());
 			fflush(stdout);
-			while (nanosleep(&slp, &slp))
+			while (nanosleep(&slp, &slp) > 0)
 				; /* empty loop */
 			continue;
 		}
@@ -109,10 +110,12 @@ main(int argc, char *argv[])
 			printf("\n");
 		}
 		if (bit.marker == emark_toolong || bit.marker == emark_late) {
+			printf("Too long minute!\n");
 			min++;
 		}
-		printf("%i %i %u %llu %llu %llu %i:%i\n", bi.tlow, bi.tlast0,
-		    bi.t, bi.bit0, bi.bit20, bi.realfreq, min, get_bitpos());
+		printf("%i %i %i %u %llu %llu %llu %i:%i\n", bit.bitval, bi.tlow,
+		    bi.tlast0, bi.t, bi.bit0, bi.bit20, bi.realfreq, min,
+		    get_bitpos());
 		if (bit.marker == emark_minute) {
 			min++;
 		}

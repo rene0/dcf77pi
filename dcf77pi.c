@@ -1,4 +1,4 @@
-// Copyright 2013-2018 René Ladan
+// Copyright 2013-2020 René Ladan
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "bits1to14.h"
@@ -9,9 +9,11 @@
 #include "mainloop.h"
 #include "setclock.h"
 
+#include "json_object.h"
+#include "json_util.h"
+
 #include <curses.h>
 #include <errno.h>
-#include <json.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -19,7 +21,6 @@
 #include <string.h>
 #include <sysexits.h>
 #include <time.h>
-#include <sys/ioctl.h>
 
 #define MAXBUF 255
 
@@ -28,6 +29,8 @@ static int old_bitpos = -1; /* timer for statusbar inactive */
 static int input_mode;      /* normal input (statusbar) or string input */
 static char keybuf[MAXBUF]; /* accumulator for string input */
 static bool show_utc;       /* show time in UTC */
+static bool set_time;       /* set host time, copy from mlr in [post_]process_input() */
+static bool toosmall;       /* terminal is less than 80x25 after a KEY_RESIZE */
 
 static void
 statusbar(int bitpos, const char * const fmt, ...)
@@ -36,7 +39,11 @@ statusbar(int bitpos, const char * const fmt, ...)
 
 	old_bitpos = bitpos;
 
-	move(23, 0);
+	if (toosmall) {
+		return;
+	}
+
+	move(24, 0);
 	va_start(ap, fmt);
 	vw_printw(stdscr, fmt, ap);
 	va_end(ap);
@@ -47,14 +54,19 @@ statusbar(int bitpos, const char * const fmt, ...)
 static void
 draw_keys(void)
 {
+	if (toosmall) {
+		return;
+	}
+
 	mvprintw(24, 0,
-	    "[Q] quit [L] change log file [S] time sync on  "
-	    "[u] UTC display on ");
+	    "[Q] quit [L] change log file [S] time sync %s "
+	    "[u] UTC display %s", set_time ? "off" : "on ",
+	    show_utc ? "off" : "on ");
 	clrtoeol();
-	mvchgat(24, 1, 1, A_BOLD, 4, NULL); /* [Q] */
-	mvchgat(24, 10, 1, A_BOLD, 4, NULL); /* [L] */
-	mvchgat(24, 30, 1, A_BOLD, 4, NULL); /* [S] */
-	mvchgat(24, 48, 1, A_BOLD, 4, NULL); /* [u] */
+	mvchgat(24, 1, 1, A_NORMAL, 5, NULL); /* [Q] */
+	mvchgat(24, 10, 1, A_NORMAL, 5, NULL); /* [L] */
+	mvchgat(24, 30, 1, A_NORMAL, 5, NULL); /* [S] */
+	mvchgat(24, 48, 1, A_NORMAL, 5, NULL); /* [u] */
 	refresh();
 }
 
@@ -86,8 +98,8 @@ draw_initial_screen(void)
 	mvprintw(8, 0, "bit    act  last0  total   "
 	    "realfreq         b0        b20 state     radio");
 
+	toosmall = false;
 	draw_keys();
-	refresh();
 }
 
 static void
@@ -96,53 +108,50 @@ display_bit(struct GB_result bit, int bitpos)
 	int bp, xpos;
 	struct bitinfo bitinf;
 
+	if (toosmall) {
+		return;
+	}
+
 	bitinf = get_bitinfo();
 
-	mvprintw(9, 1, "%2u %6u %6u %6u %10.3f %10.3f %10.3f",
+	mvprintw(9, 1, "%2u %6i %6i %6u %10.3f %10.3f %10.3f",
 	    bitpos, bitinf.tlow, bitinf.tlast0, bitinf.t, bitinf.realfreq / 1e6,
 	    bitinf.bit0 / 1e6, bitinf.bit20 / 1e6);
-	if (bitinf.freq_reset) {
-		mvchgat(9, 25, 10, A_BOLD, 3, NULL);
-	} else {
-		mvchgat(9, 25, 10, A_NORMAL, 7, NULL);
-	}
-	if (bitinf.bitlen_reset) {
-		mvchgat(9, 36, 21, A_BOLD, 3, NULL);
-	} else {
-		mvchgat(9, 36, 21, A_NORMAL, 7, NULL);
-	}
+	mvchgat(9, 25, 10, A_NORMAL, bitinf.freq_reset ? 3 : 7, NULL);
+	mvchgat(9, 36, 21, A_NORMAL, bitinf.bitlen_reset ? 3 : 7, NULL);
 
-	attron(COLOR_PAIR(2));
 	if (bit.marker == emark_minute && bit.bitval != ebv_none) {
 		mvprintw(9, 58, "minute   ");
+		mvchgat(9, 58, 6, A_NORMAL, 2, NULL);
 	} else if (bit.marker == emark_none && bit.bitval != ebv_none) {
 		mvprintw(9, 58, "OK       ");
+		mvchgat(9, 58, 2, A_NORMAL, 2, NULL);
 	} else {
-		attron(COLOR_PAIR(3) | A_BOLD);
 		mvprintw(9, 58, "?        ");
-		attroff(COLOR_PAIR(3) | A_BOLD);
+		mvchgat(9, 58, 1, A_NORMAL, 3, NULL);
 	}
-	attroff(COLOR_PAIR(2));
-
-	attron(COLOR_PAIR(1));
 	if (bit.bitval == ebv_none) {
 		mvprintw(9, 58, "read     ");
+		mvchgat(9, 58, 4, A_NORMAL, 1, NULL);
 	}
+
 	if (bit.hwstat == ehw_receive) {
 		mvprintw(9, 68, "receive ");
+		mvchgat(9, 68, 7, A_NORMAL, 1, NULL);
 	} else if (bit.hwstat == ehw_transmit) {
 		mvprintw(9, 68, "transmit");
+		mvchgat(9, 68, 8, A_NORMAL, 1, NULL);
 	} else if (bit.hwstat == ehw_random) {
 		mvprintw(9, 68, "random  ");
+		mvchgat(9, 68, 6, A_NORMAL, 1, NULL);
 	} else if (bit.bad_io) {
 		mvprintw(9, 68, "IO      ");
+		mvchgat(9, 68, 2, A_NORMAL, 1, NULL);
 	} else {
 		/* bit.hwstat == ehw_ok */
-		attron(COLOR_PAIR(2));
 		mvprintw(9, 68, "OK      ");
-		attroff(COLOR_PAIR(2));
+		mvchgat(9, 68, 2, A_NORMAL, 2, NULL);
 	}
-	attroff(COLOR_PAIR(1));
 
 	for (xpos = bitpos + 4, bp = 0; bp <= bitpos; bp++) {
 		if (is_space_bit(bp)) {
@@ -152,7 +161,7 @@ display_bit(struct GB_result bit, int bitpos)
 
 	mvprintw(6, xpos, "%u", get_buffer()[bitpos]);
 	if (bit.bitval == ebv_none) {
-		mvchgat(6, xpos, 1, A_BOLD, 3, NULL);
+		mvchgat(6, xpos, 1, A_NORMAL, 3, NULL);
 	}
 
 	mvprintw(1, 29, "%10u", get_acc_minlen());
@@ -162,6 +171,11 @@ display_bit(struct GB_result bit, int bitpos)
 static void
 display_time(struct DT_result dt, struct tm time)
 {
+
+	if (toosmall) {
+		return;
+	}
+
 	if (show_utc) {
 		time = get_utctime(time);
 	}
@@ -173,14 +187,14 @@ display_time(struct DT_result dt, struct tm time)
 	mvchgat(0, 29, 1, A_NORMAL, dt.bit20_ok ? 2 : 1, NULL);
 	mvchgat(0, 39, 1, A_NORMAL,
 	    dt.minute_status == eval_parity ? 1 :
-	    dt.minute_status == eval_bcd ? 4 : 2, NULL);
+	    dt.minute_status == eval_bcd ? 3 : 2, NULL);
 	mvchgat(0, 48, 1, A_NORMAL,
 	    dt.hour_status == eval_parity ? 1 :
-	    dt.hour_status == eval_bcd ? 4 : 2, NULL);
+	    dt.hour_status == eval_bcd ? 3 : 2, NULL);
 	mvchgat(0, 76, 1, A_NORMAL,
 	    dt.mday_status == eval_parity ? 1 :
 	    (dt.mday_status == eval_bcd || dt.wday_status == eval_bcd ||
-	    dt.month_status == eval_bcd || dt.year_status == eval_bcd) ? 4 : 2,
+	    dt.month_status == eval_bcd || dt.year_status == eval_bcd) ? 3 : 2,
 	    NULL);
 	if (dt.leapsecond_status == els_one) {
 		mvchgat(0, 78, 1, A_NORMAL, 3, NULL);
@@ -193,45 +207,22 @@ display_time(struct DT_result dt, struct tm time)
 	    time.tm_mon, time.tm_mday, weekday[time.tm_wday], time.tm_hour,
 	    time.tm_min);
 
-	mvchgat(1, 0, 80, A_NORMAL, 7, NULL);
-
 	/* color date/time string value depending on the results */
-	if (dt.dst_status == eDST_jump) {
-		mvchgat(1, 0, 6, A_BOLD, 3, NULL);
-	}
-	if (dt.year_status == eval_jump) {
-		mvchgat(1, 7, 4, A_BOLD, 3, NULL);
-	}
-	if (dt.month_status == eval_jump) {
-		mvchgat(1, 12, 2, A_BOLD, 3, NULL);
-	}
-	if (dt.mday_status == eval_jump) {
-		mvchgat(1, 15, 2, A_BOLD, 3, NULL);
-	}
-	if (dt.wday_status == eval_jump) {
-		mvchgat(1, 18, 3, A_BOLD, 3, NULL);
-	}
-	if (dt.hour_status == eval_jump) {
-		mvchgat(1, 22, 2, A_BOLD, 3, NULL);
-	}
-	if (dt.minute_status == eval_jump) {
-		mvchgat(1, 25, 2, A_BOLD, 3, NULL);
-	}
+	mvchgat(1, 0, 6, A_NORMAL, dt.dst_status == eDST_jump ? 3 : 7, NULL);
+	mvchgat(1, 7, 4, A_NORMAL, dt.year_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 12, 2, A_NORMAL, dt.month_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 15, 2, A_NORMAL, dt.mday_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 18, 3, A_NORMAL, dt.wday_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 22, 2, A_NORMAL, dt.hour_status == eval_jump ? 3 : 7, NULL);
+	mvchgat(1, 25, 2, A_NORMAL, dt.minute_status == eval_jump ? 3 : 7,
+	    NULL);
 
 	/* flip lights depending on the results */
-	if (!dt.transmit_call) {
-		mvchgat(1, 50, 6, A_NORMAL, 8, NULL);
-	}
-	if (!dt.dst_announce) {
-		mvchgat(1, 57, 3, A_NORMAL, 8, NULL);
-	} else if (dt.dst_status == eDST_done) {
-		mvchgat(1, 57, 3, A_NORMAL, 2, NULL);
-	}
-	if (!dt.leap_announce) {
-		mvchgat(1, 61, 4, A_NORMAL, 8, NULL);
-	} else if (dt.leapsecond_status == els_done) {
-		mvchgat(1, 61, 4, A_NORMAL, 2, NULL);
-	}
+	mvchgat(1, 50, 6, A_NORMAL, dt.transmit_call ? 7 : 8, NULL);
+	mvchgat(1, 57, 3, A_NORMAL, !dt.dst_announce ? 8 :
+	    dt.dst_status == eDST_done ? 2 : 7, NULL);
+	mvchgat(1, 61, 4, A_NORMAL, !dt.leap_announce ? 8 :
+	    dt.leapsecond_status == els_done ? 2 : 7, NULL);
 	if (dt.minute_length == emin_long) {
 		mvprintw(1, 67, "long ");
 		mvchgat(1, 67, 5, A_NORMAL, 1, NULL);
@@ -246,46 +237,75 @@ display_time(struct DT_result dt, struct tm time)
 }
 
 static void
-display_thirdparty_buffer(const unsigned buf[])
+display_thirdparty_buffer(const unsigned tpbuf[])
 {
+	if (toosmall) {
+		return;
+	}
+
 	for (int i = 0; i < TPBUFLEN; i++) {
-		mvprintw(3, i + 22, "%u", buf[i]);
+		mvprintw(3, i + 22, "%u", tpbuf[i]);
 	}
 	clrtoeol();
 	refresh();
 }
 
 /*
- * In live mode, reaching this point means a decoding error as alarm messages
- * were only broadcasted for testing between 2003-10-13 and 2003-12-10.
+ * In live mode, reaching this point likely means a decoding error as alarm
+ * messages were only broadcasted as tests between 2003-10-13 and 2003-12-10.
  */
 static void
 display_alarm(struct alm alarm)
 {
-	attron(COLOR_PAIR(3) | A_BOLD);
-	mvprintw(4, 22, "German civil warning (decoding error)");
-	attroff(COLOR_PAIR(3) | A_BOLD);
+	int i;
+
+	if (toosmall) {
+		return;
+	}
+
+	mvprintw(4, 22, "German civil warning (decoding error?)");
 	clrtoeol();
+	mvchgat(4, 22, -1, A_NORMAL, 3, NULL);
+
+	for (i = 11; i < 23; i++) {
+		move(i, 0);
+		clrtoeol();
+	}
+
+	mvprintw(19, 0, "Regions: %s", get_region_name(alarm));
+	for (i = 0; i < 2; i++) {
+		mvprintw(20 + i, 0, "%u Regions: %x %x %x %x parities %x %x",
+		    i, alarm.region[i].r1, alarm.region[i].r2,
+		    alarm.region[i].r3, alarm.region[i].r4,
+		    alarm.parity[i].ps, alarm.parity[i].pl);
+	}
+
 	refresh();
 }
 
 static void
 display_unknown(void)
 {
-	attron(COLOR_PAIR(1));
+	if (toosmall) {
+		return;
+	}
+
 	mvprintw(4, 22, "unknown contents");
-	attroff(COLOR_PAIR(1));
 	clrtoeol();
+	mvchgat(4, 22, -1, A_NORMAL, 1, NULL);
 	refresh();
 }
 
 static void
 display_weather(void)
 {
-	attron(COLOR_PAIR(2));
+	if (toosmall) {
+		return;
+	}
+
 	mvprintw(4, 22, "Meteotime weather");
-	attroff(COLOR_PAIR(2));
 	clrtoeol();
+	mvchgat(4, 22, -1, A_NORMAL, 2, NULL);
 	refresh();
 }
 
@@ -306,6 +326,9 @@ process_input(struct ML_result in_ml, int bitpos)
 			mlr.quit = true; /* quit main loop */
 			break;
 		case 'L':
+			if (toosmall) {
+				break;
+			}
 			inkey = ERR; /* prevent key repeat */
 			mvprintw(23, 0, "Current log (.): %s",
 			    (mlr.logfilename != NULL &&
@@ -320,28 +343,43 @@ process_input(struct ML_result in_ml, int bitpos)
 			mlr.change_logfile = true;
 			break;
 		case 'S':
+			if (toosmall) {
+				break;
+			}
 			mlr.settime = !mlr.settime;
+			set_time = mlr.settime;
 			mvprintw(24, 43, mlr.settime ? "off" : "on ");
 			refresh();
 			break;
 		case 'u':
+			if (toosmall) {
+				break;
+			}
 			show_utc = !show_utc;
 			mvprintw(24, 63, show_utc ? "off" : "on ");
 			refresh();
 			break;
 		case KEY_RESIZE:
 			endwin();
-			initscr();
-			clear();
-			draw_initial_screen();
+			if (toosmall && getmaxx(stdscr) >= 80 &&
+			    getmaxy(stdscr) >= 25) {
+				/*
+				 * Restore parts of the screen which were wiped
+				 * when the screen was too small.
+				*/
+				draw_initial_screen();
+			} else {
+				refresh();
+			}
+			toosmall = (getmaxx(stdscr) < 80) ||
+			    (getmaxy(stdscr) < 25);
 			break;
 		default:
 			break;
 		}
-		refresh();
 	}
 
-	while (input_mode == 1 && inkey != ERR) {
+	while (!toosmall && input_mode == 1 && inkey != ERR) {
 		char dispbuf[80];
 
 		if (input_count > 0 &&
@@ -379,7 +417,6 @@ process_input(struct ML_result in_ml, int bitpos)
 			}
 			refresh();
 		}
-		refresh();
 		inkey = getch();
 	}
 	return mlr;
@@ -401,7 +438,7 @@ post_process_input(struct ML_result in_ml, int bitpos)
 		old_bitpos = -1;
 		draw_keys();
 	}
-	if (input_mode == -1) {
+	if (!toosmall && input_mode == -1) {
 		if (in_ml.change_logfile) {
 			char *old_logfilename;
 
@@ -450,19 +487,22 @@ post_process_input(struct ML_result in_ml, int bitpos)
 static void
 wipe_input()
 {
-	if (get_bitpos() == 0) {
+	if (!toosmall && get_bitpos() == 0) {
 		move(6, 3);
 		clrtoeol();
+		refresh();
 	}
-	refresh();
 }
 
 static void
 display_long_minute(void)
 {
-	attron(COLOR_PAIR(1));
+	if (toosmall) {
+		return;
+	}
+
 	mvprintw(9, 58, "no minute");
-	attroff(COLOR_PAIR(1));
+	mvchgat(9, 58, 9, A_NORMAL, 1, NULL);
 }
 
 static void
@@ -470,26 +510,28 @@ display_minute(int minlen)
 {
 	int bp, cutoff, xpos;
 
+	if (toosmall) {
+		return;
+	}
+
 	/* display bits of previous minute */
-	for (xpos = 4, bp = 0; bp < minlen; bp++, xpos++) {
-		if (bp > 59) {
-			break;
-		}
+	for (xpos = 4, bp = 0; bp < minlen && bp < 60; bp++, xpos++) {
 		if (is_space_bit(bp)) {
 			xpos++;
 		}
 		mvprintw(0, xpos, "%u", get_buffer()[bp]);
 	}
 	clrtoeol();
-	mvchgat(0, 0, 80, A_NORMAL, 7, NULL);
+	mvchgat(0, 0, -1, A_NORMAL, 7, NULL);
 
 	/* display minute cutoff value */
 	cutoff = get_cutoff();
-	if (cutoff == -1) {
+	if (cutoff < 10000 || cutoff > 30000) {
 		mvprintw(1, 40, "?     ");
-		mvchgat(1, 40, 1, A_BOLD, 3, NULL);
+		mvchgat(1, 40, 1, A_NORMAL, 3, NULL);
 	} else {
 		mvprintw(1, 40, "%6.4f", cutoff / 1e4);
+		mvchgat(1, 40, 6, A_NORMAL, 7, NULL);
 	}
 
 	refresh();
@@ -518,7 +560,6 @@ process_setclock_result(struct ML_result in_ml, int bitpos)
 		statusbar(bitpos, "Time set");
 		break;
 	}
-	refresh();
 	return mlr;
 }
 
@@ -535,7 +576,7 @@ main(int argc, char *argv[])
 		return EX_NOINPUT;
 	}
 	if (json_object_object_get_ex(config, "outlogfile", &value)) {
-		logfilename = (char *)(json_object_get_string(value));
+		logfilename = (char *)json_object_get_string(value);
 	}
 	if (logfilename != NULL && strlen(logfilename) != 0) {
 		res = append_logfile(logfilename);
@@ -553,18 +594,21 @@ main(int argc, char *argv[])
 	}
 
 	initscr();
-	if (has_colors() == FALSE) {
+	if (has_colors() == FALSE || start_color() == ERR) {
 		client_cleanup("No required color support.");
 		return 0;
 	}
+	if (getmaxx(stdscr) < 80 || getmaxy(stdscr) < 25) {
+		client_cleanup("Window too small, minimum is 80 columns by 25 rows.");
+		return 0;
+	}
 
-	start_color();
 	init_pair(1, COLOR_RED, COLOR_BLACK);
 	init_pair(2, COLOR_GREEN, COLOR_BLACK);
-	init_pair(3, COLOR_YELLOW, COLOR_BLACK); /* turn on A_BOLD */
-	init_pair(4, COLOR_BLUE, COLOR_BLACK);
+	init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+	init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
 	init_pair(7, COLOR_WHITE, COLOR_BLACK);
-	init_pair(8, COLOR_BLACK, COLOR_BLACK); /* A_INVIS does not work? */
+	init_pair(8, COLOR_BLACK, COLOR_BLACK); /* A_INVIS does not work */
 
 	noecho();
 	nonl();

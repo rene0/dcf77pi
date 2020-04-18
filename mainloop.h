@@ -1,4 +1,4 @@
-// Copyright 2014-2017 René Ladan
+// Copyright 2014-2018 René Ladan
 // SPDX-License-Identifier: BSD-2-Clause
 
 #ifndef DCF77PI_MAINLOOP_H

@@ -1,4 +1,4 @@
-// Copyright 2016-2018 René Ladan
+// Copyright 2016-2020 René Ladan
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "calendar.h"
@@ -86,7 +86,7 @@ main(int argc, char *argv[])
 	struct tm time, time2;
 	int i;
 
-	/* isleeapyear() and lastday() are OK by definition */
+	/* isleapyear() and lastday() are OK by definition */
 
 	/* century_offset(): check for every date if it matches */
 	time.tm_wday = 1; /* base_year-01-01 is a Monday */

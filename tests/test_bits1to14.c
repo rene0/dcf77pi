@@ -1,4 +1,4 @@
-// Copyright 2017 René Ladan
+// Copyright 2017-2018 René Ladan
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "bits1to14.h"

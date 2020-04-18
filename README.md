@@ -19,9 +19,9 @@ The software comes with three binaries and a library:
   the log file).
 * dcf77pi-analyze filename : Decode from filename instead of the GPIO pins.
   Output is generated in report mode.
-* readpin [-qr] : Program to test reading from the GPIO pins and decode the
-  resulting bit. Send a SIGINT (Ctrl-C) to stop the program. Optional parameters
-  are:
+* dcf77pi-readpin [-qr] : Program to test reading from the GPIO pins and decode
+  the resulting bit. Send a SIGINT (Ctrl-C) to stop the program. Optional
+  parameters are:
   * -q do not show the raw input, default is to show it.
   * -r raw mode, bypass the normal bit reception routine, default is to use it.
 * libdcf77.so: The shared library containing common routines for reading bits
@@ -69,7 +69,7 @@ example, on FreeBSD:
 On Linux, you will also have to install an (n)curses development package using
 your package manager. For example, on Raspbian:
 ```sh
-% sudo apt-get install libncurses5-dev libncursesw5-dev libjson-c-dev
+% sudo apt-get install libncurses5-dev libjson-c-dev pkgconf
 ```
 
 To build and install the program into /usr/bin , the library into /usr/lib and
@@ -79,9 +79,9 @@ the configuration file into /usr/etc/dcf77pi :
 % sudo make install PREFIX=/usr
 ```
 
-On FreeBSD, dcf77pi and readpin need to be run as root due to the permissions
-of /dev/gpioc\* , but this can be prevented by changing the permissions of the
-device node:
+On FreeBSD, dcf77pi and dcf77pi-readpin need to be run as root due to the
+permissions of /dev/gpioc\* , but this can be prevented by changing the
+permissions of the device node:
 ```sh
 # chmod 0660 /dev/gpioc*
 ```
@@ -90,8 +90,9 @@ And to make the change persistent across reboots:
 # echo "perm gpioc* 0660" >> /etc/devfs.conf
 ```
 
-On Raspbian Linux, the default permissions allow running dcf77pi and readpin as
-a normal user (typically "pi"), no extra configuration is needed.
+On Raspbian Linux, the default permissions allow running dcf77pi and
+dcf77pi-readpin as a normal user (typically "pi"), no extra configuration is
+needed.
 
 Setting the system time via dcf77pi still requires enhanced privileges (e.g.,
 root).
