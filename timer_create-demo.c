@@ -171,7 +171,7 @@ main(void)
 			} else {
 				count = 0;
 			}
-			if (pas > 0 && pas < 2 * hw.freq && interval < 1e6 / hw.freq) {
+			if (pas > 0 && pas < 2 * hw.freq) {
 				interval++;
 				printf("> ");
 				change_interval = true;
@@ -208,7 +208,7 @@ main(void)
 					printf("R ");
 				}
 				printf("P %i %i %i\n", act, pas, count);
-				if (count > 0 && hw.freq / 2 > count && interval < 1e6 / hw.freq) {
+				if (count > 0 && hw.freq / 2 > count) {
 					interval++;
 					change_interval = true;
 					printf("+ ");
