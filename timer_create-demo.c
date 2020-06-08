@@ -228,12 +228,6 @@ main(void)
 				minute++;
 				printf("%i:%i\n", minute, second);
 			}
-			if (act > 0.4 * hw.freq) { // NPL
-				bump_second = 0;
-				second = 1;
-				minute++;
-				printf("%i:%i\n", minute, second);
-			}
 			if (act + pas > 0.8 * hw.freq) {
 			//if (act + pas == hw.freq || act + pas == 2 * hw.freq) {
 				act = pas = 0;
