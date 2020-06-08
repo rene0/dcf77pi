@@ -21,7 +21,6 @@
 
 struct hardware hw;
 int fd;
-volatile sig_atomic_t wakenup = 0;
 
 /* like set_mode_live() */
 int
@@ -71,7 +70,6 @@ init_live(struct json_object *config)
 void
 sigalrm_handler(/*union sigval sv*/ int sig)
 {
-	wakenup = 1;
 }
 
 int
@@ -145,11 +143,6 @@ main(void)
 	printf("%i:%i\n", minute, second);
 	/* loop forever */
 	for (;;) {
-		if (wakenup == 0) {
-			//printf("@");
-			continue; // should not happen if we sleep forever with sigalrm interruption?
-		}
-		wakenup = 0;
 #if defined(MODERN_API) && defined(DEBUG_OVERRUN)
 		printf("(%i)", timer_getoverrun(timerId));
 #endif
