@@ -19,6 +19,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <errno.h>
+
 struct hardware hw;
 int fd;
 
@@ -81,6 +83,7 @@ main(void)
 	struct itimerspec its;
 	timer_t timerId;
 #endif
+	sigset_t myset;
 	long long interval;
 	int oldpulse, count, second, res, act, pas, minute, pulse, bump_second;
 	struct gpio_req req;
@@ -130,6 +133,12 @@ main(void)
 	memcpy(&itv.it_value, &itv.it_interval, sizeof(struct timeval));
 	(void)setitimer(ITIMER_REAL, &itv, NULL);
 #endif
+
+	(void)sigfillset(&myset);
+	if (sigdelset(&myset, SIGALRM)) {
+		printf("Failed removing SIGALRM\n");
+		return errno;
+	}
 	req.gp_pin = hw.pin;
 
 	pulse = 3; /* nothing yet */
@@ -246,10 +255,7 @@ main(void)
 		}
 		oldpulse = pulse;
 		count++;
-#ifdef MODERN_API
-#else
-		(void)pause();
-#endif
+		(void)sigsuspend(&myset);
 	}
 
 	cleanup();
