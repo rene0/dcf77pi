@@ -150,7 +150,7 @@ main(void)
 			continue; // should not happen if we sleep forever with sigalrm interruption?
 		}
 		wakenup = 0;
-#ifdef MODERN_API
+#if defined(MODERN_API) && defined(DEBUG_OVERRUN)
 		printf("(%i)", timer_getoverrun(timerId));
 #endif
 		res = ioctl(fd, GPIOGET, &req);
