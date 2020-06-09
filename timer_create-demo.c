@@ -78,11 +78,6 @@ int
 main(void)
 {
 	struct json_object *config;
-#ifdef MODERN_API
-	struct sigevent evp;
-	struct itimerspec its;
-	timer_t timerId;
-#endif
 	sigset_t myset;
 	long long interval;
 	int oldpulse, count, second, res, act, pas, minute, pulse, bump_second;
@@ -102,22 +97,6 @@ main(void)
 		exit(res);
 	}
 
-#ifdef MODERN_API
-	memset((void*)&evp, 0, sizeof evp);
-	evp.sigev_notify = SIGEV_THREAD; // TODO what other options are there?
-	evp.sigev_notify_function = &sigalrm_handler;
-	evp.sigev_signo = SIGALRM; // TODO other signal?
-	//evp.sigev_value.sigval_ptr = (void*)this;
-	its.it_value.tv_sec = its.it_interval.tv_sec = 0;
-	its.it_value.tv_nsec = its.it_interval.tv_nsec = 1e9 / hw.freq;
-	res = timer_create(CLOCK_REALTIME, &evp, &timerId);
-	if (timer_settime(timerId, 0, &its, NULL) == -1) {
-		cleanup();
-		free(config);
-		printf("timer_settime failed\n");
-		exit(EX_OK);
-	}
-#else
 	/* set up the signal handler */
 	struct sigaction sigact;
 	sigact.sa_handler = sigalrm_handler;
@@ -132,7 +111,6 @@ main(void)
 	itv.it_interval.tv_usec = interval;
 	memcpy(&itv.it_value, &itv.it_interval, sizeof(struct timeval));
 	(void)setitimer(ITIMER_REAL, &itv, NULL);
-#endif
 
 	(void)sigfillset(&myset);
 	if (sigdelset(&myset, SIGALRM)) {
@@ -152,9 +130,6 @@ main(void)
 	printf("%i:%i\n", minute, second);
 	/* loop forever */
 	for (;;) {
-#if defined(MODERN_API) && defined(DEBUG_OVERRUN)
-		printf("(%i)", timer_getoverrun(timerId));
-#endif
 		res = ioctl(fd, GPIOGET, &req);
 		if (res == -1) {
 			printf("*\n");
@@ -241,12 +216,9 @@ main(void)
 		}
 		if (change_interval) {
 			change_interval = false;
-#ifdef MODERN_API
-#else
 			itv.it_interval.tv_sec = 0;
 			itv.it_interval.tv_usec = interval;
 			(void)setitimer(ITIMER_REAL, &itv, NULL);
-#endif
 			printf("I %lli\n", interval);
 		}
 		if (bump_second != 0) {
