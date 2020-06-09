@@ -235,6 +235,10 @@ main(void)
 				act = pas = 0;
 			}
 		}
+		if (interval < 0.8 * (1e6 / hw.freq) || interval > 1.2 * (1e6 / hw.freq)) {
+			printf("# %lli -> %f\n", interval, 1e6 / hw.freq);
+			interval = 1e6 / hw.freq;
+		}
 		if (change_interval) {
 			change_interval = false;
 #ifdef MODERN_API
