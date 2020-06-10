@@ -69,11 +69,6 @@ init_live(struct json_object *config)
 	return 0;
 }
 
-void
-sigalrm_handler(/*union sigval sv*/ int sig)
-{
-}
-
 int
 main(void)
 {
@@ -81,6 +76,7 @@ main(void)
 	sigset_t myset;
 	long long interval;
 	int oldpulse, count, second, res, act, pas, minute, pulse, bump_second;
+	int dummy; /* for sigsuspend */
 	struct gpio_req req;
 	bool change_interval, synced;
 
@@ -97,12 +93,6 @@ main(void)
 		exit(res);
 	}
 
-	/* set up the signal handler */
-	struct sigaction sigact;
-	sigact.sa_handler = sigalrm_handler;
-	(void)sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-	sigaction(SIGALRM, &sigact, (struct sigaction *)NULL);
 	/* set up the timer */
 	struct itimerval itv;
 	itv.it_interval.tv_sec = 0;
@@ -112,9 +102,13 @@ main(void)
 	memcpy(&itv.it_value, &itv.it_interval, sizeof(struct timeval));
 	(void)setitimer(ITIMER_REAL, &itv, NULL);
 
-	(void)sigfillset(&myset);
-	if (sigdelset(&myset, SIGALRM)) {
+	(void)sigemptyset(&myset);
+	if (sigaddset(&myset, SIGALRM)) {
 		printf("Failed removing SIGALRM\n");
+		return errno;
+	}
+	if (sigprocmask(SIG_BLOCK, &myset, NULL)) {
+		perror("Failed sigprocmask\n");
 		return errno;
 	}
 	req.gp_pin = hw.pin;
@@ -231,7 +225,7 @@ main(void)
 		}
 		oldpulse = pulse;
 		count++;
-		(void)sigsuspend(&myset);
+		(void)sigwait(&myset, &dummy);
 	}
 
 	cleanup();
