@@ -14,12 +14,9 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>	/* for strerror() */
 #include <sysexits.h>
 #include <time.h>
 #include <unistd.h>
-
-#include <errno.h>
 
 struct hardware hw;
 int fd;
@@ -73,6 +70,7 @@ int
 main(void)
 {
 	struct json_object *config;
+	struct itimerval itv;
 	sigset_t myset;
 	long long interval;
 	int oldpulse, count, second, res, act, pas, minute, pulse, bump_second;
@@ -93,25 +91,24 @@ main(void)
 		exit(res);
 	}
 
-	/* set up the timer */
-	struct itimerval itv;
-	itv.it_interval.tv_sec = 0;
+	req.gp_pin = hw.pin;
 	change_interval = false;
-	interval = 1e6 / hw.freq; // initial value
-	itv.it_interval.tv_usec = interval;
-	memcpy(&itv.it_value, &itv.it_interval, sizeof(struct timeval));
+	interval = 1e6 / hw.freq; /* initial value */
+
+	/* set up the timer */
+	itv.it_interval.tv_sec = itv.it_value.tv_sec = 0;
+	itv.it_interval.tv_usec = itv.it_value.tv_usec = interval;
 	(void)setitimer(ITIMER_REAL, &itv, NULL);
 
 	(void)sigemptyset(&myset);
 	if (sigaddset(&myset, SIGALRM)) {
-		printf("Failed removing SIGALRM\n");
+		perror("Failed adding SIGALRM\n");
 		return errno;
 	}
 	if (sigprocmask(SIG_BLOCK, &myset, NULL)) {
 		perror("Failed sigprocmask\n");
 		return errno;
 	}
-	req.gp_pin = hw.pin;
 
 	pulse = 3; /* nothing yet */
 	count = 0; /* invariant : count == act+pas ? */
