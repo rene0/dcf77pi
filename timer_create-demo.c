@@ -198,10 +198,11 @@ main(void)
 			}
 			if (act + pas > 0.8 * hw.freq) {
 			//if (act + pas == hw.freq || act + pas == 2 * hw.freq) {
+				/* reset here instead of above because of the act/pas minute tests */
 				act = pas = 0;
 			}
 		}
-		if (interval < 0.8 * (1e6 / hw.freq) || interval > 1.2 * (1e6 / hw.freq)) {
+		if (interval < 8e5 / hw.freq || interval > 1.2e6 / hw.freq) {
 			printf("# %lli -> %f\n", interval, 1e6 / hw.freq);
 			interval = 1e6 / hw.freq;
 		}
