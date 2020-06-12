@@ -130,7 +130,7 @@ main(void)
 		if (!hw.active_high) {
 			pulse = 1 - pulse;
 		}
-		if (count == hw.freq) {
+		if (count >= hw.freq) {
 			if (act > 0 && pas == 0) {
 				interval--;
 				printf("< ");
