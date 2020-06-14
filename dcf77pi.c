@@ -6,7 +6,7 @@
 #include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
-#include "mainloop.h"
+#include "mainloop_live.h"
 #include "setclock.h"
 
 #include "json_object.h"
@@ -619,7 +619,7 @@ main(int argc, char *argv[])
 
 	draw_initial_screen();
 
-	mainloop(logfilename, get_bit_live, display_bit, display_long_minute,
+	mainloop_live(logfilename, display_bit, display_long_minute,
 	    display_minute, wipe_input, display_alarm, display_unknown,
 	    display_weather, display_time, display_thirdparty_buffer,
 	    process_setclock_result, process_input, post_process_input);

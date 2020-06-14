@@ -1,5 +1,6 @@
-Version 4.0 --
+Version 4.0.0 --
 * Removed kevent-demo again, it was never suitable for production anyway.
+* Split mainloop() into mainloop\_analyze() and mainloop\_live()
 
 Version 3.7.1.1 -- 2020-04-17
 * Fix a compiler warning which would lead to wrong calculations.

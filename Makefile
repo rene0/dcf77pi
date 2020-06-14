@@ -18,8 +18,8 @@ JSON_L?=`pkg-config --libs json-c`
 
 all: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin
 
-hdrlib=input.h decode_time.h decode_alarm.h setclock.h mainloop.h \
-	bits1to14.h calendar.h
+hdrlib=input.h decode_time.h decode_alarm.h setclock.h mainloop_analyze.h \
+	mainloop_live.h bits1to14.h calendar.h
 srclib=${hdrlib:.h=.c}
 objlib=${hdrlib:.h=.o}
 objbin=dcf77pi.o dcf77pi-analyze.o dcf77pi-readpin.o
@@ -32,9 +32,12 @@ decode_alarm.o: decode_alarm.c decode_alarm.h
 	$(CC) -fpic $(CFLAGS) -c decode_alarm.c -o $@
 setclock.o: setclock.c setclock.h decode_time.h input.h calendar.h
 	$(CC) -fpic $(CFLAGS) -c setclock.c -o $@
-mainloop.o: mainloop.c mainloop.h input.h bits1to14.h decode_alarm.h \
-	decode_time.h setclock.h
-	$(CC) -fpic $(CFLAGS) -c mainloop.c -o $@
+mainloop_analyze.o: mainloop_analyze.c mainloop_analyze.h input.h bits1to14.h \
+	decode_alarm.h decode_time.h setclock.h
+	$(CC) -fpic $(CFLAGS) -c mainloop_analyze.c -o $@
+mainloop_live.o: mainloop_live.c mainloop_live.h input.h bits1to14.h \
+	decode_alarm.h decode_time.h setclock.h
+	$(CC) -fpic $(CFLAGS) -c mainloop_live.c -o $@
 bits1to14.o: bits1to14.c bits1to14.h input.h
 	$(CC) -fpic $(CFLAGS) -c bits1to14.c -o $@
 calendar.o: calendar.c calendar.h
@@ -44,13 +47,13 @@ libdcf77.so: $(objlib)
 	$(CC) -shared -o $@ $(objlib) -lm -lpthread $(JSON_L)
 
 dcf77pi.o: bits1to14.h decode_alarm.h decode_time.h input.h \
-	mainloop.h calendar.h dcf77pi.c
+	mainloop_live.h calendar.h dcf77pi.c
 	$(CC) -fpic $(CFLAGS) $(JSON_C) -c dcf77pi.c -o $@
 dcf77pi: dcf77pi.o libdcf77.so
 	$(CC) -o $@ dcf77pi.o -lncurses libdcf77.so -lpthread $(JSON_L)
 
 dcf77pi-analyze.o: bits1to14.h decode_alarm.h decode_time.h input.h \
-	mainloop.h calendar.h dcf77pi-analyze.c
+	mainloop_analyze.h calendar.h dcf77pi-analyze.c
 dcf77pi-analyze: dcf77pi-analyze.o libdcf77.so
 	$(CC) -fpic $(CFLAGS) -c dcf77pi-analyze.c -o $@
 	$(CC) -o $@ dcf77pi-analyze.o libdcf77.so

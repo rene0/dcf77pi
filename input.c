@@ -596,7 +596,7 @@ get_bit_file(void)
 	inch = skip_invalid();
 	/*
 	 * bit.t is set to fake value for compatibility with old log files not
-	 * storing acc_minlen values or to increase time when mainloop() splits
+	 * storing acc_minlen values or to increase time when mainloop*() splits
 	 * too long minutes.
 	 */
 

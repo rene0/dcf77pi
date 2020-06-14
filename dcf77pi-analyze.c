@@ -1,4 +1,4 @@
-// Copyright 2013-2018 René Ladan
+// Copyright 2013-2020 René Ladan
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "bits1to14.h"
@@ -6,7 +6,7 @@
 #include "decode_alarm.h"
 #include "decode_time.h"
 #include "input.h"
-#include "mainloop.h"
+#include "mainloop_analyze.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -187,10 +187,9 @@ main(int argc, char *argv[])
 		return res;
 	}
 
-	mainloop(NULL, get_bit_file, display_bit, display_long_minute,
-	    display_minute, NULL, display_alarm, display_unknown,
-	    display_weather, display_time, display_thirdparty_buffer, NULL,
-	    NULL, NULL);
+	mainloop_analyze(display_bit, display_long_minute,
+	    display_minute, display_alarm, display_unknown,
+	    display_weather, display_time, display_thirdparty_buffer);
 	free(logfilename);
 	return res;
 }
