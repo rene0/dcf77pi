@@ -9,15 +9,12 @@
 #include <fcntl.h>
 #include <math.h>
 #include <pthread.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
 #include <time.h>
 #include <unistd.h>
-
-#include <sys/time.h>
 
 #if defined(__FreeBSD__)
 #  include <sys/param.h>
@@ -93,8 +90,6 @@ set_mode_live(struct json_object *config)
 #if defined(__FreeBSD__)
 	struct gpio_pin pin;
 #endif
-	struct itimerval itv;
-	struct sigaction sigact;
 	char buf[64];
 	struct json_object *value;
 	int res;
@@ -224,18 +219,6 @@ set_mode_live(struct json_object *config)
 		return errno;
 	}
 #endif
-	/* TODO this will move to the main porgram */
-	/* set up the signal handler */
-	sigact.sa_handler = NULL; //obtain_pulse;
-	(void)sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-	sigaction(SIGALRM, &sigact, (struct sigaction *)NULL);
-	/* set up the timer */
-	itv.it_interval.tv_sec = 0;
-	itv.it_interval.tv_usec = 1000000 / hw.freq;
-	memcpy(&itv.it_value, &itv.it_interval, sizeof(struct timeval));
-	(void)setitimer(ITIMER_REAL, &itv, NULL);
-
 	filemode = 1;
 	return 0;
 #endif
