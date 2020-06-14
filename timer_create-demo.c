@@ -6,17 +6,12 @@
 #include "json_util.h"
 
 #include <sys/types.h> /* FreeBSD < 12.0 */
-#include <sys/gpio.h>
-#include <sys/ioccom.h>
 #include <sys/time.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sysexits.h>
-#include <time.h>
-#include <unistd.h>
 
 int
 main(void)
@@ -28,7 +23,6 @@ main(void)
 	long long interval;
 	int oldpulse, count, second, res, act, pas, minute, pulse, bump_second;
 	int dummy; /* for sigwait */
-	struct gpio_req req;
 	bool change_interval, synced;
 
 	config = json_object_from_file(ETCDIR "/config.json");
@@ -45,7 +39,6 @@ main(void)
 	}
 	hw = get_hardware_parameters();
 
-	req.gp_pin = hw.pin;
 	change_interval = false;
 	interval = 1e6 / hw.freq; /* initial value */
 
@@ -99,12 +92,6 @@ main(void)
 				// no radio signal
 				act = pas = 0;
 				bump_second = 2;
-#ifdef DONT_TRUST_BUMP_SECOND
-				if (second > 58) {
-					minute++;
-					second = 0;
-				}
-#endif
 				printf("N ");
 			}
 		}
