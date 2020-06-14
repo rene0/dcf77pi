@@ -18,63 +18,16 @@
 #include <time.h>
 #include <unistd.h>
 
-struct hardware hw;
-int fd;
-
-/* like set_mode_live() */
-int
-init_live(struct json_object *config)
-{
-	struct gpio_pin pin;
-	struct json_object *value;
-
-	if (json_object_object_get_ex(config, "pin", &value)) {
-		hw.pin = (unsigned)json_object_get_int(value);
-	} else {
-		printf("Key 'pin' not found\n");
-		cleanup();
-		return EX_DATAERR;
-	}
-	if (json_object_object_get_ex(config, "freq", &value)) {
-		hw.freq = (unsigned)json_object_get_int(value);
-	} else {
-		printf("Key 'freq' not found\n");
-		cleanup();
-		return EX_DATAERR;
-	}
-	if (json_object_object_get_ex(config, "activehigh", &value)) {
-		hw.active_high = (unsigned)json_object_get_boolean(value);
-	} else {
-		printf("Key 'activehigh' not found\n");
-		cleanup();
-		return EX_DATAERR;
-	}
-	fd = open("/dev/gpioc0", O_RDWR);
-	if (fd < 0) {
-		printf("open /dev/gpioc0 failed\n");
-		perror(NULL);
-		cleanup();
-		return errno;
-	}
-	pin.gp_pin = hw.pin;
-	pin.gp_flags = GPIO_PIN_INPUT;
-	if (ioctl(fd, GPIOSETCONFIG, &pin) < 0) {
-		perror("ioctl");
-		cleanup();
-		return errno;
-	}
-	return 0;
-}
-
 int
 main(void)
 {
+	struct hardware hw;
 	struct json_object *config;
 	struct itimerval itv;
 	sigset_t myset;
 	long long interval;
 	int oldpulse, count, second, res, act, pas, minute, pulse, bump_second;
-	int dummy; /* for sigsuspend */
+	int dummy; /* for sigwait */
 	struct gpio_req req;
 	bool change_interval, synced;
 
@@ -84,12 +37,13 @@ main(void)
 		free(config);
 		exit(EX_NOINPUT);
 	}
-	res = init_live(config);
+	res = set_mode_live(config);
 	if (res != 0) {
 		cleanup();
 		free(config);
 		exit(res);
 	}
+	hw = get_hardware_parameters();
 
 	req.gp_pin = hw.pin;
 	change_interval = false;
@@ -121,14 +75,10 @@ main(void)
 	printf("%i:%i\n", minute, second);
 	/* loop forever */
 	for (;;) {
-		res = ioctl(fd, GPIOGET, &req);
-		if (res == -1) {
+		pulse = get_pulse();
+		if (pulse == 2) {
 			printf("*\n");
 			continue;
-		}
-		pulse = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
-		if (!hw.active_high) {
-			pulse = 1 - pulse;
 		}
 		if (count >= hw.freq) {
 			if (act > 0 && pas == 0) {
@@ -166,7 +116,7 @@ main(void)
 		if (oldpulse == 0 && pulse == 1) {
 			// this now assumes a clean signal without a sw filter!
 			if (act + pas > 0.8 * hw.freq) {
-			//if (act + pas == hw.freq || act + pas == 2 * hw.freq) {
+			//if (act + pas == hw.freq || act + pas == 2 * hw.freq)
 				// start of new second
 				bump_second = 1;
 				if (!synced) {
@@ -197,7 +147,7 @@ main(void)
 				printf("%i:%i\n", minute, second);
 			}
 			if (act + pas > 0.8 * hw.freq) {
-			//if (act + pas == hw.freq || act + pas == 2 * hw.freq) {
+			//if (act + pas == hw.freq || act + pas == 2 * hw.freq)
 				/* reset here instead of above because of the act/pas minute tests */
 				act = pas = 0;
 			}
