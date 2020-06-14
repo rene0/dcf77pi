@@ -81,33 +81,6 @@ set_mode_file(const char * const infilename)
 	return 0;
 }
 
-void
-obtain_pulse(/*@unused@*/ int sig)
-{
-	pulse = 2;
-#if !defined(NOLIVE)
-	int tmpch;
-	int count = 0;
-#if defined(__FreeBSD__)
-	struct gpio_req req;
-
-	req.gp_pin = hw.pin;
-	count = ioctl(fd, GPIOGET, &req);
-	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
-	if (count < 0)
-#elif defined(__linux__)
-	count = read(fd, &tmpch, 1);
-	tmpch -= '0';
-	if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || count != 1)
-#endif
-		pulse = 2; /* hardware or virtual FS failure? */
-	else if (hw.active_high)
-		pulse = tmpch;
-	else
-		pulse = 1 - tmpch;
-#endif
-}
-
 int
 set_mode_live(struct json_object *config)
 {
@@ -251,8 +224,9 @@ set_mode_live(struct json_object *config)
 		return errno;
 	}
 #endif
+	/* TODO this will move to the main porgram */
 	/* set up the signal handler */
-	sigact.sa_handler = obtain_pulse;
+	sigact.sa_handler = NULL; //obtain_pulse;
 	(void)sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 	sigaction(SIGALRM, &sigact, (struct sigaction *)NULL);
@@ -291,7 +265,30 @@ cleanup(void)
 int
 get_pulse(void)
 {
-	return pulse;
+	int tmpch;
+#if defined(NOLIVE)
+	tmpch = 2;
+#else
+	int count = 0;
+#if defined(__FreeBSD__)
+	struct gpio_req req;
+
+	req.gp_pin = hw.pin;
+	count = ioctl(fd, GPIOGET, &req);
+	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
+	if (count < 0) {
+#elif defined(__linux__)
+	count = read(fd, &tmpch, 1);
+	tmpch -= '0';
+	if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || count != 1) {
+#endif
+		return 2; /* hardware or virtual FS failure? */
+	}
+	if (!hw.active_high) {
+		tmpch = 1 - tmpch;
+	}
+#endif
+	return tmpch;
 }
 
 /*
