@@ -297,12 +297,10 @@ set_new_state(void)
 static void
 reset_frequency(void)
 {
+	// TODO adjust for interval = 1e6 / hw.freq ?
 	if (logfile != NULL) {
-		fprintf(logfile, "%s",
-		    bit.realfreq <= hw.freq * 500000 ? "<" :
-		    bit.realfreq > hw.freq * 1000000 ? ">" : "");
+		fprintf(logfile, "=");
 	}
-	bit.realfreq = hw.freq * 1000000;
 	bit.freq_reset = true;
 }
 
@@ -312,8 +310,8 @@ reset_bitlen(void)
 	if (logfile != NULL) {
 		fprintf(logfile, "!");
 	}
-	bit.bit0 = bit.realfreq / 10;
-	bit.bit20 = bit.realfreq / 5;
+	bit.bit0 = hw.freq * 1e5;
+	bit.bit20 = hw.freq * 2e5;
 	bit.bitlen_reset = true;
 }
 
@@ -327,7 +325,6 @@ struct GB_result
 get_bit_live(void)
 {
 	char outch = '?';
-	bool adj_freq = true;
 	bool newminute = false;
 	unsigned stv = 1;
 	long long a, y = 1000000000;
@@ -347,14 +344,13 @@ get_bit_live(void)
 	 * specified as half the value and the whole value of the lengths of
 	 * bit 0 and bit 20 respectively.
 	 *
-	 * ~A > 3/2 * realfreq: end-of-minute
-	 * ~A > 5/2 * realfreq: timeout
+	 * ~A > 1.5e6 * hw.freq: end-of-minute
+	 * ~A > 2.5e6 * hw.freq: timeout
 	 */
 
 	if (init_bit == 2) {
-		bit.realfreq = hw.freq * 1000000;
-		bit.bit0 = bit.realfreq / 10;
-		bit.bit20 = bit.realfreq / 5;
+		bit.bit0 = hw.freq * 1e5;
+		bit.bit20 = hw.freq * 2e5;
 	}
 	/* Set up filter, reach 50% after hw.freq/20 samples (i.e. 50 ms) */
 	a = 1000000000 - (long long)(1000000000 * exp2(-20.0 / hw.freq));
@@ -385,13 +381,8 @@ get_bit_live(void)
 		 * Prevent algorithm collapse during thunderstorms or
 		 * scheduler abuse
 		 */
-		if (bit.realfreq <= hw.freq * 500000 ||
-		    bit.realfreq > hw.freq * 1000000) {
-			reset_frequency();
-			adj_freq = false;
-		}
 
-		if (bit.t > bit.realfreq * 2500000) {
+		if (bit.t > hw.freq * 2.5) {
 			if (bit.tlow <= hw.freq / 20) {
 				gb_res.hwstat = ehw_receive;
 				outch = 'r';
@@ -402,7 +393,6 @@ get_bit_live(void)
 				gb_res.hwstat = ehw_random;
 				outch = '#';
 			}
-			adj_freq = false;
 			break; /* timeout */
 		}
 
@@ -418,7 +408,7 @@ get_bit_live(void)
 		}
 		if (y > 500000000 && stv == 0) {
 			/* end of low part of second */
-			newminute = bit.t * 2000000 > bit.realfreq * 3;
+			newminute = bit.t * 2 > hw.freq * 3;
 			if (init_bit == 2) {
 				init_bit--;
 			}
@@ -437,7 +427,6 @@ get_bit_live(void)
 						gb_res.marker = emark_toolong;
 					}
 					reset_frequency();
-					adj_freq = false;
 				} else {
 					if (gb_res.marker == emark_none) {
 						gb_res.marker = emark_minute;
@@ -457,17 +446,16 @@ get_bit_live(void)
 			outch = '#';
 		}
 		reset_frequency();
-		adj_freq = false;
 	}
 
 	if (!gb_res.bad_io && gb_res.hwstat == ehw_ok) {
-		if (2 * bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
+		if (2 * hw.freq * 1e6 * bit.tlow * (1 + (newminute ? 1 : 0)) <
 		    (bit.bit0 + bit.bit20) * bit.t) {
 			/* zero bit, ~100 ms active signal */
 			gb_res.bitval = ebv_0;
 			outch = '0';
 			buffer[bitpos] = 0;
-		} else if (bit.realfreq * bit.tlow * (1 + (newminute ? 1 : 0)) <
+		} else if (hw.freq * 1e6 * bit.tlow * (1 + (newminute ? 1 : 0)) <
 		    (bit.bit0 + bit.bit20) * bit.t) {
 			/* one bit, ~200 ms active signal */
 			gb_res.bitval = ebv_1;
@@ -477,7 +465,6 @@ get_bit_live(void)
 			/* bad radio signal, retain old value */
 			gb_res.bitval = ebv_none;
 			outch = '_';
-			adj_freq = false;
 		}
 	}
 
@@ -501,41 +488,24 @@ get_bit_live(void)
 			if (2 * bit.bit20 < bit.bit0 * 3 ||
 			    bit.bit20 > bit.bit0 * 3) {
 				reset_bitlen();
-				adj_freq = false;
 			}
 			avg = (bit.bit20 - bit.bit0) / 2;
-			if (bit.bit0 + avg < bit.realfreq / 10 ||
-			    bit.bit0 - avg > bit.realfreq / 10) {
+			if (bit.bit0 + avg < hw.freq * 1e5 ||
+			    bit.bit0 - avg > hw.freq * 1e5) {
 				reset_bitlen();
-				adj_freq = false;
 			}
-			if (bit.bit20 + avg < bit.realfreq / 5 ||
-			    bit.bit20 - avg > bit.realfreq / 5) {
+			if (bit.bit20 + avg < hw.freq * 2e5 ||
+			    bit.bit20 - avg > hw.freq * 2e5) {
 				reset_bitlen();
-				adj_freq = false;
 			}
 		}
 	}
-	if (adj_freq) {
-		if (newminute) {
-			bit.realfreq +=
-			    ((long long)(bit.t * 500000 - bit.realfreq) / 20);
-		} else {
-			bit.realfreq +=
-			    ((long long)(bit.t * 1000000 - bit.realfreq) / 20);
-		}
-	}
-	acc_minlen += 1000000 * bit.t / (bit.realfreq / 1000);
 	if (logfile != NULL) {
 		fprintf(logfile, "%c", outch);
 		if (gb_res.marker == emark_minute ||
 		    gb_res.marker == emark_late) {
-			fprintf(logfile, "a%uc%6.4f\n", acc_minlen,
-			    (double)((bit.t * 1e6) / bit.realfreq));
+			fprintf(logfile, "\n");
 		}
-	}
-	if (gb_res.marker == emark_minute || gb_res.marker == emark_late) {
-		cutoff = bit.t * 1000000 / (bit.realfreq / 10000);
 	}
 	return gb_res;
 }

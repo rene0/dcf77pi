@@ -96,7 +96,7 @@ draw_initial_screen(void)
 
 	mvprintw(6, 0, "new");
 	mvprintw(8, 0, "bit    act  last0  total   "
-	    "realfreq         b0        b20 state     radio");
+	    "b0        b20 state     radio");
 
 	toosmall = false;
 	draw_keys();
@@ -114,10 +114,9 @@ display_bit(struct GB_result bit, int bitpos)
 
 	bitinf = get_bitinfo();
 
-	mvprintw(9, 1, "%2u %6i %6i %6u %10.3f %10.3f %10.3f",
-	    bitpos, bitinf.tlow, bitinf.tlast0, bitinf.t, bitinf.realfreq / 1e6,
+	mvprintw(9, 1, "%2u %6i %6i %6u %10.3f %10.3f",
+	    bitpos, bitinf.tlow, bitinf.tlast0, bitinf.t,
 	    bitinf.bit0 / 1e6, bitinf.bit20 / 1e6);
-	mvchgat(9, 25, 10, A_NORMAL, bitinf.freq_reset ? 3 : 7, NULL);
 	mvchgat(9, 36, 21, A_NORMAL, bitinf.bitlen_reset ? 3 : 7, NULL);
 
 	if (bit.marker == emark_minute && bit.bitval != ebv_none) {
@@ -164,7 +163,6 @@ display_bit(struct GB_result bit, int bitpos)
 		mvchgat(6, xpos, 1, A_NORMAL, 3, NULL);
 	}
 
-	mvprintw(1, 29, "%10u", get_acc_minlen());
 	refresh();
 }
 
@@ -508,7 +506,7 @@ display_long_minute(void)
 static void
 display_minute(int minlen)
 {
-	int bp, cutoff, xpos;
+	int bp, xpos;
 
 	if (toosmall) {
 		return;
@@ -523,16 +521,6 @@ display_minute(int minlen)
 	}
 	clrtoeol();
 	mvchgat(0, 0, -1, A_NORMAL, 7, NULL);
-
-	/* display minute cutoff value */
-	cutoff = get_cutoff();
-	if (cutoff < 10000 || cutoff > 30000) {
-		mvprintw(1, 40, "?     ");
-		mvchgat(1, 40, 1, A_NORMAL, 3, NULL);
-	} else {
-		mvprintw(1, 40, "%6.4f", cutoff / 1e4);
-		mvchgat(1, 40, 6, A_NORMAL, 7, NULL);
-	}
 
 	refresh();
 }

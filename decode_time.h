@@ -104,7 +104,7 @@ struct DT_result {
  * @param minlen The length of this minute in bits (normally 59 or 60 in case
  * of a leap second).
  * @param acc_minlen The accumulated minute length of this minute in
- * milliseconds.
+ * milliseconds (optional, legacy for log files).
  * @param buffer The bit buffer.
  * @param time The current time, to be updated.
  * @return A structure containing the results of all the checks performed on

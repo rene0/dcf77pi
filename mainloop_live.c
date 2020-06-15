@@ -36,7 +36,7 @@ check_handle_new_minute(
 		struct DT_result dt;
 
 		display_minute(minlen);
-		dt = decode_time(*init_min, minlen, get_acc_minlen(),
+		dt = decode_time(*init_min, minlen, 0,
 		    get_buffer(), curtime);
 
 		if (curtime->tm_min % 3 == 0 && *init_min == 0) {
@@ -70,9 +70,6 @@ check_handle_new_minute(
 			} else {
 				mlr->settime_result = esc_unsafe;
 			}
-		}
-		if (bit.marker == emark_minute || bit.marker == emark_late) {
-			reset_acc_minlen();
 		}
 		if (*init_min > 0) {
 			(*init_min)--;
@@ -145,10 +142,6 @@ mainloop_live(
 		} else if (bit.marker == emark_toolong ||
 		    bit.marker == emark_late) {
 			minlen = -1;
-			/*
-			 * leave acc_minlen alone, any minute marker already
-			 * processed
-			 */
 			display_long_minute();
 		}
 		display_new_second();

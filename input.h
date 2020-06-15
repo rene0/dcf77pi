@@ -99,8 +99,6 @@ struct bitinfo {
 	 * with each item holding 8 bits
 	 */
 	unsigned char *signal;
-	/** the average length of a bit in samples */
-	unsigned long long realfreq;
 	/**
 	 * the average length of the high part of bit 0 (a 0 bit) in samples
 	 */

@@ -79,25 +79,31 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 	static unsigned acc_minlen_partial;
 	int increase;
 
-	/* See if there are any partial / split minutes to be combined: */
-	if (acc_minlen <= 59000) {
-		acc_minlen_partial += acc_minlen;
-		if (acc_minlen_partial >= 60000) {
-			acc_minlen = acc_minlen_partial;
+	if (acc_minlen != 0) {
+		/*
+		 * See if there are any partial / split minutes to be combined.
+		 * Legacy code for old log files.
+		 */
+		if (acc_minlen <= 59000) {
+			acc_minlen_partial += acc_minlen;
+			if (acc_minlen_partial >= 60000) {
+				acc_minlen = acc_minlen_partial;
+				acc_minlen_partial %= 60000;
+			}
+		}
+		/* Calculate number of minutes to increase time with: */
+		increase = acc_minlen / 60000;
+		if (acc_minlen >= 60000) {
 			acc_minlen_partial %= 60000;
 		}
+		/* Account for complete minutes with a short acc_minlen: */
+		if (acc_minlen % 60000 > 59000) {
+			increase++;
+			acc_minlen_partial %= 60000;
+		}
+	} else {
+		increase = 1;
 	}
-	/* Calculate number of minutes to increase time with: */
-	increase = acc_minlen / 60000;
-	if (acc_minlen >= 60000) {
-		acc_minlen_partial %= 60000;
-	}
-	/* Account for complete minutes with a short acc_minlen: */
-	if (acc_minlen % 60000 > 59000) {
-		increase++;
-		acc_minlen_partial %= 60000;
-	}
-
 	/* There is no previous time on the very first (partial) minute: */
 	if (init_min < 2) {
 		for (int i = increase; increase > 0 && i > 0; i--) {
