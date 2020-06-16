@@ -102,11 +102,11 @@ struct bitinfo {
 	/**
 	 * the average length of the high part of bit 0 (a 0 bit) in samples
 	 */
-	unsigned long long bit0;
+	float bit0;
 	/**
 	 * the average length of the high part of bit 20 (a 1 bit) in samples
 	 */
-	unsigned long long bit20;
+	float bit20;
 };
 
 /**
@@ -232,9 +232,9 @@ void reset_acc_minlen(void);
 /**
  * Retrieve the cutoff value written to the log file.
  *
- * @return The cutoff value (multiplied by 10,000)
+ * @return The cutoff value.
  */
-int get_cutoff(void);
+float get_cutoff(void);
 
 /**
  * Flush the current log file to its storage location.

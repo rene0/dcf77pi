@@ -145,14 +145,14 @@ display_long_minute(void)
 static void
 display_minute(int minlen)
 {
-	int cutoff;
+	float cutoff;
 
 	cutoff = get_cutoff();
 	printf(" (%u) %i ", get_acc_minlen(), minlen);
 	if (cutoff == -1) {
 		printf("?\n");
 	} else {
-		printf("%6.4f\n", cutoff / 1e4);
+		printf("%6.4f\n", cutoff);
 	}
 }
 

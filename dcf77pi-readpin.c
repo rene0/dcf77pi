@@ -113,7 +113,7 @@ main(int argc, char *argv[])
 			printf("Too long minute!\n");
 			min++;
 		}
-		printf("%i %i %i %u %llu %llu %i:%i\n", bit.bitval, bi.tlow,
+		printf("%i %i %i %u %f %f %i:%i\n", bit.bitval, bi.tlow,
 		    bi.tlast0, bi.t, bi.bit0, bi.bit20, min,
 		    get_bitpos());
 		if (bit.marker == emark_minute) {

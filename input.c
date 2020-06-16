@@ -52,7 +52,7 @@ static int fd;                  /* gpio file */
 static struct hardware hw;
 static struct bitinfo bit;
 static unsigned acc_minlen;
-static int cutoff;
+static float cutoff;
 static int pulse;
 static struct GB_result gb_res;
 static unsigned filemode = 0;   /* 0 = no file, 1 = input, 2 = output */
@@ -310,8 +310,8 @@ reset_bitlen(void)
 	if (logfile != NULL) {
 		fprintf(logfile, "!");
 	}
-	bit.bit0 = hw.freq * 1e5;
-	bit.bit20 = hw.freq * 2e5;
+	bit.bit0 = hw.freq / 10;
+	bit.bit20 = hw.freq / 5;
 	bit.bitlen_reset = true;
 }
 
@@ -327,7 +327,7 @@ get_bit_live(void)
 	char outch = '?';
 	bool newminute = false;
 	unsigned stv = 1;
-	long long a, y = 1000000000;
+	float a, y = 1;
 	static int init_bit = 2;
 	bool is_eom = gb_res.marker == emark_minute ||
 	    gb_res.marker == emark_late;
@@ -344,16 +344,16 @@ get_bit_live(void)
 	 * specified as half the value and the whole value of the lengths of
 	 * bit 0 and bit 20 respectively.
 	 *
-	 * ~A > 1.5e6 * hw.freq: end-of-minute
-	 * ~A > 2.5e6 * hw.freq: timeout
+	 * ~A > 1.5 * hw.freq: end-of-minute
+	 * ~A > 2.5 * hw.freq: timeout
 	 */
 
 	if (init_bit == 2) {
-		bit.bit0 = hw.freq * 1e5;
-		bit.bit20 = hw.freq * 2e5;
+		bit.bit0 = hw.freq / 10;
+		bit.bit20 = hw.freq / 5;
 	}
 	/* Set up filter, reach 50% after hw.freq/20 samples (i.e. 50 ms) */
-	a = 1000000000 - (long long)(1000000000 * exp2(-20.0 / hw.freq));
+	a = 1.0 - exp2(-20.0 / hw.freq);
 	bit.tlow = -1;
 	bit.tlast0 = -1;
 
@@ -375,7 +375,7 @@ get_bit_live(void)
 		if (y >= 0 && y < a / 2) {
 			bit.tlast0 = (int)bit.t;
 		}
-		y += a * (pulse * 1000000000 - y) / 1000000000;
+		y += a * (pulse - y);
 
 		/*
 		 * Prevent algorithm collapse during thunderstorms or
@@ -400,15 +400,15 @@ get_bit_live(void)
 		 * Schmitt trigger, maximize value to introduce hysteresis and
 		 * to avoid infinite memory.
 		 */
-		if (y < 500000000 && stv == 1) {
+		if (y < 0.5 && stv == 1) {
 			/* end of high part of second */
 			y = 0;
 			stv = 0;
 			bit.tlow = (int)bit.t;
 		}
-		if (y > 500000000 && stv == 0) {
+		if (y > 0.5 && stv == 0) {
 			/* end of low part of second */
-			newminute = bit.t * 2 > hw.freq * 3;
+			newminute = bit.t  > hw.freq * 1.5;
 			if (init_bit == 2) {
 				init_bit--;
 			}
@@ -449,13 +449,13 @@ get_bit_live(void)
 	}
 
 	if (!gb_res.bad_io && gb_res.hwstat == ehw_ok) {
-		if (2 * hw.freq * 1e6 * bit.tlow * (1 + (newminute ? 1 : 0)) <
-		    (bit.bit0 + bit.bit20) * bit.t) {
+		if (hw.freq * bit.tlow * (1 + (newminute ? 1 : 0)) <
+		    (bit.bit0 + bit.bit20) * bit.t / 2) {
 			/* zero bit, ~100 ms active signal */
 			gb_res.bitval = ebv_0;
 			outch = '0';
 			buffer[bitpos] = 0;
-		} else if (hw.freq * 1e6 * bit.tlow * (1 + (newminute ? 1 : 0)) <
+		} else if (hw.freq * bit.tlow * (1 + (newminute ? 1 : 0)) <
 		    (bit.bit0 + bit.bit20) * bit.t) {
 			/* one bit, ~200 ms active signal */
 			gb_res.bitval = ebv_1;
@@ -473,29 +473,27 @@ get_bit_live(void)
 			init_bit--;
 		} else if (gb_res.hwstat == ehw_ok &&
 		    gb_res.marker == emark_none) {
-			unsigned long long avg;
+			float avg;
 			if (bitpos == 0 && gb_res.bitval == ebv_0) {
 				bit.bit0 +=
-				    ((long long)(bit.tlow * 1000000 -
-				    bit.bit0) / 2);
+				    (bit.tlow - bit.bit0) / 2;
 			}
 			if (bitpos == 20 && gb_res.bitval == ebv_1) {
 				bit.bit20 +=
-				    ((long long)(bit.tlow * 1000000 -
-				    bit.bit20) / 2);
+				    (bit.tlow - bit.bit20) / 2;
 			}
 			/* Force sane values during e.g. a thunderstorm */
-			if (2 * bit.bit20 < bit.bit0 * 3 ||
+			if (bit.bit20 < bit.bit0 * 1.5 ||
 			    bit.bit20 > bit.bit0 * 3) {
 				reset_bitlen();
 			}
 			avg = (bit.bit20 - bit.bit0) / 2;
-			if (bit.bit0 + avg < hw.freq * 1e5 ||
-			    bit.bit0 - avg > hw.freq * 1e5) {
+			if (bit.bit0 + avg < hw.freq / 10 ||
+			    bit.bit0 - avg > hw.freq / 10) {
 				reset_bitlen();
 			}
-			if (bit.bit20 + avg < hw.freq * 2e5 ||
-			    bit.bit20 - avg > hw.freq * 2e5) {
+			if (bit.bit20 + avg < hw.freq / 5 ||
+			    bit.bit20 - avg > hw.freq / 5) {
 				reset_bitlen();
 			}
 		}
@@ -542,7 +540,6 @@ get_bit_file(void)
 	static int oldinch;
 	static bool read_acc_minlen;
 	int inch;
-	char co[6];
 
 	set_new_state();
 
@@ -620,12 +617,8 @@ get_bit_file(void)
 		/* cutoff for newminute */
 		gb_res.skip = true;
 		bit.t = 0;
-		if (fscanf(logfile, "%6c", co) != 1) {
+		if (fscanf(logfile, "%6f", &cutoff) != 1) {
 			gb_res.done = true;
-		}
-		if (!gb_res.done && (co[1] == '.')) {
-			cutoff = (co[0] - '0') * 10000 +
-			    (int)strtol(co + 2, NULL, 10);
 		}
 		break;
 	default:
@@ -764,7 +757,7 @@ reset_acc_minlen(void)
 	acc_minlen = 0;
 }
 
-int
+float
 get_cutoff(void)
 {
 	return cutoff;

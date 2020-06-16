@@ -116,7 +116,7 @@ display_bit(struct GB_result bit, int bitpos)
 
 	mvprintw(9, 1, "%2u %6i %6i %6u %10.3f %10.3f",
 	    bitpos, bitinf.tlow, bitinf.tlast0, bitinf.t,
-	    bitinf.bit0 / 1e6, bitinf.bit20 / 1e6);
+	    bitinf.bit0, bitinf.bit20);
 	mvchgat(9, 36, 21, A_NORMAL, bitinf.bitlen_reset ? 3 : 7, NULL);
 
 	if (bit.marker == emark_minute && bit.bitval != ebv_none) {
