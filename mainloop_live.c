@@ -9,8 +9,11 @@
 #include "input.h"
 #include "setclock.h"
 
+#include <signal.h>
 #include <string.h>
 #include <time.h>
+
+#include <sys/time.h>
 
 static void
 check_handle_new_minute(
@@ -101,59 +104,157 @@ mainloop_live(
 	unsigned init_min = 2;
 	struct tm curtime;
 	struct ML_result mlr;
+	struct hardware hw;
 	bool was_toolong = false;
+	long long interval;
+	bool change_interval, synced;
+	struct itimerval itv;
+	sigset_t signalset;
+	int dummy; /* for sigwait() */
+	int pulse, oldpulse;
+	int count;
+	int act, pas;
+	int second, bump_second;
 
 	(void)memset(&curtime, 0, sizeof(curtime));
 	(void)memset(&mlr, 0, sizeof(mlr));
 	mlr.logfilename = logfilename;
 
+	hw = get_hardware_parameters();
+
+	change_interval = false;
+	interval = 1e6 / hw.freq;
+	/* set up the timer */
+	itv.it_interval.tv_sec = itv.it_value.tv_sec = 0;
+	itv.it_interval.tv_usec = itv.it_value.tv_usec = interval;
+	(void)setitimer(ITIMER_REAL, &itv, NULL);
+
+	/* set up the signal trap for the timer */
+	(void)sigemptyset(&signalset);
+	(void)sigaddset(&signalset, SIGALRM);
+	(void)sigprocmask(SIG_BLOCK, &signalset, NULL);
+
+	pulse = 3; /* nothing yet */
+	oldpulse = -1;
+	count = 0;
+	act = pas = 0;
+	second = 0;
+	bump_second = 0;
+	synced = false;
+
 	for (;;) {
 		struct GB_result bit;
+		pulse = get_pulse();
+		// perhaps handle pulse == 2 (hw error)
 
-		bit = get_bit_live();
-		mlr = process_input(mlr, bitpos);
-		if (mlr.quit) {
-			break;
+		if (count >= hw.freq) {
+			if (act > 0 && pas == 0) {
+				interval--;
+				change_interval = true;
+				count = act;
+			} else {
+				count = 0;
+			}
+			if (pas > 0 && pas < 2 * hw.freq) {
+				interval++;
+				change_interval = true;
+			}
+			if (act >= 2 * hw.freq || pas >= 2 * hw.freq) {
+				// no radio signal
+				act = pas = 0;
+				bump_second = 2;
+			}
+		} // count >= hw.freq
+		if (pulse == 1) {
+			act++;
+		} else {
+			pas++;
 		}
-
-		bitpos = get_bitpos();
-		mlr = post_process_input(mlr, bitpos);
-		if (!mlr.quit) {
-			display_bit(bit, bitpos);
+		if (oldpulse == 0 && pulse == 1) {
+			// this assumes a clean signal without a software filter
+			if (act + pas > 0.8 * hw.freq) {
+				/* start of new second */
+				bump_second = 1;
+				if (!synced) {
+					// first scond
+					synced = true;
+					count = 0;
+				}
+				if (count > 0 && count < hw.freq / 2) {
+					interval++;
+					change_interval = true;
+				}
+				if (count > hw.freq / 2) {
+					interval--;
+					change_interval = true;
+				}
+			}
+			if (pas > 1.5 * hw.freq) {
+				bump_second = -1;
+				second = 0;
+			}
+			if (act + pas > 0.8 * hw.freq) {
+				// reset here instead of above bcause of the
+				// pas minute test
+				act = pas = 0;
+			}
+		} // rising edge
+		if (interval < 8e5 / hw.freq || interval > 1.2e6 / hw.freq) {
+			interval = 1e6 / hw.freq; // something went wrong
 		}
-
-		if (init_min < 2) {
-			fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
+		if (change_interval) {
+			change_interval = false;
+			itv.it_interval.tv_usec = interval;
+			(void)setitimer(ITIMER_REAL, &itv, NULL);
 		}
-
-		bit = next_bit();
-		if (minlen == -1) {
-			check_handle_new_minute(bit, &mlr, bitpos, &curtime,
-			    minlen, was_toolong, &init_min, display_minute,
-			    display_thirdparty_buffer, display_alarm,
-			    display_unknown, display_weather, display_time,
-			    process_setclock_result);
-			was_toolong = true;
+		if (bump_second != 0) {
+			if (bump_second != -1) {
+				second += bump_second;
+				if (second > 60) {
+					second = 0;
+				}
+			}
+			bump_second = 0;
+			mlr = process_input(mlr, bitpos);
+			if (mlr.quit) {
+				break;
+			}
+			bitpos = get_bitpos();
+			mlr = post_process_input(mlr, bitpos);
+			if (mlr.quit) {
+				break;
+			} else {
+				display_bit(bit, bitpos);
+			}
+			if (init_min < 2) {
+				fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
+			}
+			bit = next_bit();
+			if (minlen == -1) {
+				check_handle_new_minute(bit, &mlr, bitpos, &curtime, minlen,
+				    was_toolong, &init_min, display_minute,
+				    display_thirdparty_buffer, display_alarm, display_unknown,
+				    display_weather, display_time, process_setclock_result);
+				was_toolong = true;
+			}
+			if (bit.marker == emark_minute) {
+				minlen = bitpos + 1;
+				/* handle the missing bit due to the minute marker */
+			} else if (bit.marker == emark_toolong ||
+			    bit.marker == emark_late) {
+				minlen = -1;
+				display_long_minute();
+			}
+			display_new_second();
+			check_handle_new_minute(bit, &mlr, bitpos, &curtime, minlen,
+			    was_toolong, &init_min, display_minute,
+			    display_thirdparty_buffer, display_alarm, display_unknown,
+			    display_weather, display_time, process_setclock_result);
+			was_toolong = false;
 		}
-
-		if (bit.marker == emark_minute) {
-			minlen = bitpos + 1;
-			/* handle the missing bit due to the minute marker */
-		} else if (bit.marker == emark_toolong ||
-		    bit.marker == emark_late) {
-			minlen = -1;
-			display_long_minute();
-		}
-		display_new_second();
-
-		check_handle_new_minute(bit, &mlr, bitpos, &curtime, minlen,
-		    was_toolong, &init_min, display_minute,
-		    display_thirdparty_buffer, display_alarm, display_unknown,
-		    display_weather, display_time, process_setclock_result);
-		was_toolong = false;
-		if (mlr.quit) {
-			break;
-		}
+		oldpulse = pulse;
+		count++;
+		(void)sigwait(&signalset, &dummy);
 	}
 	cleanup();
 }
