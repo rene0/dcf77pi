@@ -24,9 +24,9 @@ enum eTP {
  *
  * @param minute The current value of the minute.
  * @param bitpos The current bit position.
- * @param bit The current bit information.
+ * @param gbr The current bit information.
  */
-void fill_thirdparty_buffer(int minute, int bitpos, struct GB_result bit);
+void fill_thirdparty_buffer(int minute, int bitpos, struct GB_result gbr);
 
 /**
  * Retrieve the third party buffer.

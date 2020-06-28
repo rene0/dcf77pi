@@ -103,7 +103,7 @@ draw_initial_screen(void)
 }
 
 static void
-display_bit(struct GB_result bit, int bitpos)
+display_bit(struct GB_result gbr, int bitpos)
 {
 	int bp, xpos;
 	struct bitinfo bitinf;
@@ -119,35 +119,35 @@ display_bit(struct GB_result bit, int bitpos)
 	    bitinf.bit0, bitinf.bit20);
 	mvchgat(9, 36, 21, A_NORMAL, bitinf.bitlen_reset ? 3 : 7, NULL);
 
-	if (bit.marker == emark_minute && bit.bitval != ebv_none) {
+	if (gbr.marker == emark_minute && gbr.bitval != ebv_none) {
 		mvprintw(9, 58, "minute   ");
 		mvchgat(9, 58, 6, A_NORMAL, 2, NULL);
-	} else if (bit.marker == emark_none && bit.bitval != ebv_none) {
+	} else if (gbr.marker == emark_none && gbr.bitval != ebv_none) {
 		mvprintw(9, 58, "OK       ");
 		mvchgat(9, 58, 2, A_NORMAL, 2, NULL);
 	} else {
 		mvprintw(9, 58, "?        ");
 		mvchgat(9, 58, 1, A_NORMAL, 3, NULL);
 	}
-	if (bit.bitval == ebv_none) {
+	if (gbr.bitval == ebv_none) {
 		mvprintw(9, 58, "read     ");
 		mvchgat(9, 58, 4, A_NORMAL, 1, NULL);
 	}
 
-	if (bit.hwstat == ehw_receive) {
+	if (gbr.hwstat == ehw_receive) {
 		mvprintw(9, 68, "receive ");
 		mvchgat(9, 68, 7, A_NORMAL, 1, NULL);
-	} else if (bit.hwstat == ehw_transmit) {
+	} else if (gbr.hwstat == ehw_transmit) {
 		mvprintw(9, 68, "transmit");
 		mvchgat(9, 68, 8, A_NORMAL, 1, NULL);
-	} else if (bit.hwstat == ehw_random) {
+	} else if (gbr.hwstat == ehw_random) {
 		mvprintw(9, 68, "random  ");
 		mvchgat(9, 68, 6, A_NORMAL, 1, NULL);
-	} else if (bit.bad_io) {
+	} else if (gbr.bad_io) {
 		mvprintw(9, 68, "IO      ");
 		mvchgat(9, 68, 2, A_NORMAL, 1, NULL);
 	} else {
-		/* bit.hwstat == ehw_ok */
+		/* gbr.hwstat == ehw_ok */
 		mvprintw(9, 68, "OK      ");
 		mvchgat(9, 68, 2, A_NORMAL, 2, NULL);
 	}
@@ -159,7 +159,7 @@ display_bit(struct GB_result bit, int bitpos)
 	}
 
 	mvprintw(6, xpos, "%u", get_buffer()[bitpos]);
-	if (bit.bitval == ebv_none) {
+	if (gbr.bitval == ebv_none) {
 		mvchgat(6, xpos, 1, A_NORMAL, 3, NULL);
 	}
 

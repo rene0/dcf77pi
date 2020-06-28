@@ -26,10 +26,10 @@ enum eSC_status {
  *
  * @param init_min Indicates whether the state of the decoder is initial
  * @param dt The status of the currently decoded time
- * @param bit The current bit information
+ * @param gbr The current bit information
  * @return Whether it is OK to set the system clock
  */
-bool setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result bit);
+bool setclock_ok(unsigned init_min, struct DT_result dt, struct GB_result gbr);
 
 /**
  * Set the system clock according to the given time.

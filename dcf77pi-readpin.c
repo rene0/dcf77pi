@@ -72,9 +72,10 @@ main(int argc, char *argv[])
 	min = -1;
 
 	while (running == 1) {
+#if 0
 		struct bitinfo bi;
-		struct GB_result bit;
-
+		struct GB_result gbr;
+#endif
 		if (raw) {
 			struct timespec slp;
 			slp.tv_sec = 0;
@@ -85,8 +86,13 @@ main(int argc, char *argv[])
 				; /* empty loop */
 			continue;
 		}
-
-		bit = get_bit_live();
+/*
+ * Below code is similar itimer-signal-demo.c which probably needs to be made
+ * into a callback to mainloop_live(), or mainloop_live() needs a verbose
+ * mode.
+ */
+#if 0
+		gbr = get_bit_live();
 		bi = get_bitinfo();
 		if (verbose) {
 			if (bi.freq_reset) {
@@ -109,17 +115,18 @@ main(int argc, char *argv[])
 			}
 			printf("\n");
 		}
-		if (bit.marker == emark_toolong || bit.marker == emark_late) {
+		if (gbr.marker == emark_toolong || gbr.marker == emark_late) {
 			printf("Too long minute!\n");
 			min++;
 		}
-		printf("%i %i %i %u %f %f %i:%i\n", bit.bitval, bi.tlow,
+		printf("%i %i %i %u %f %f %i:%i\n", gbr.bitval, bi.tlow,
 		    bi.tlast0, bi.t, bi.bit0, bi.bit20, min,
 		    get_bitpos());
-		if (bit.marker == emark_minute) {
+		if (gbr.marker == emark_minute) {
 			min++;
 		}
-		bit = next_bit();
+		gbr = next_bit(gbr);
+#endif
 	}
 
 	client_cleanup();

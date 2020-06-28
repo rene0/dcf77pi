@@ -15,18 +15,18 @@
 #include <time.h>
 
 static void
-display_bit(struct GB_result bit, int bitpos)
+display_bit(struct GB_result gbr, int bitpos)
 {
 	if (is_space_bit(bitpos)) {
 		printf(" ");
 	}
-	if (bit.hwstat == ehw_receive) {
+	if (gbr.hwstat == ehw_receive) {
 		printf("r");
-	} else if (bit.hwstat == ehw_transmit) {
+	} else if (gbr.hwstat == ehw_transmit) {
 		printf("x");
-	} else if (bit.hwstat == ehw_random) {
+	} else if (gbr.hwstat == ehw_random) {
 		printf("#");
-	} else if (bit.bitval == ebv_none) {
+	} else if (gbr.bitval == ebv_none) {
 		printf("_");
 	} else {
 		printf("%i", get_buffer()[bitpos]);

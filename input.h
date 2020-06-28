@@ -158,20 +158,13 @@ int get_pulse(void);
 struct GB_result get_bit_file(void);
 
 /**
- * Retrieve one live bit from the hardware. This function determines several
- * values which can be retrieved using {@link get_bitinfo}.
- *
- * @return The currently received bit and its full status.
- */
-struct GB_result get_bit_live(void);
-
-/**
  * Prepare for the next bit: update the bit position or wrap it around.
  *
+ * @param in_gbr The current bit state structure.
  * @return The current bit state structure, with the marker field adjusted to
  * indicate state of the bit buffer and the minute end.
  */
-struct GB_result next_bit(void);
+struct GB_result next_bit(struct GB_result in_gbr);
 
 /**
  * Retrieve the current bit position.

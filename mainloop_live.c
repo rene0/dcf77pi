@@ -17,7 +17,7 @@
 
 static void
 check_handle_new_minute(
-    struct GB_result bit,
+    struct GB_result gbr,
     struct ML_result *mlr,
     int bitpos,
     struct tm *curtime,
@@ -34,7 +34,7 @@ check_handle_new_minute(
 {
 	bool have_result = false;
 
-	if ((bit.marker == emark_minute || bit.marker == emark_late) &&
+	if ((gbr.marker == emark_minute || gbr.marker == emark_late) &&
 	    !was_toolong) {
 		struct DT_result dt;
 
@@ -68,7 +68,7 @@ check_handle_new_minute(
 
 		if (mlr->settime) {
 			have_result = true;
-			if (setclock_ok(*init_min, dt, bit)) {
+			if (setclock_ok(*init_min, dt, gbr)) {
 				mlr->settime_result = setclock(*curtime);
 			} else {
 				mlr->settime_result = esc_unsafe;
@@ -143,7 +143,7 @@ mainloop_live(
 	synced = false;
 
 	for (;;) {
-		struct GB_result bit;
+		struct GB_result gbr;
 		pulse = get_pulse();
 		// perhaps handle pulse == 2 (hw error)
 
@@ -224,29 +224,29 @@ mainloop_live(
 			if (mlr.quit) {
 				break;
 			} else {
-				display_bit(bit, bitpos);
+				display_bit(gbr, bitpos);
 			}
 			if (init_min < 2) {
-				fill_thirdparty_buffer(curtime.tm_min, bitpos, bit);
+				fill_thirdparty_buffer(curtime.tm_min, bitpos, gbr);
 			}
-			bit = next_bit();
+			gbr = next_bit(gbr);
 			if (minlen == -1) {
-				check_handle_new_minute(bit, &mlr, bitpos, &curtime, minlen,
+				check_handle_new_minute(gbr, &mlr, bitpos, &curtime, minlen,
 				    was_toolong, &init_min, display_minute,
 				    display_thirdparty_buffer, display_alarm, display_unknown,
 				    display_weather, display_time, process_setclock_result);
 				was_toolong = true;
 			}
-			if (bit.marker == emark_minute) {
+			if (gbr.marker == emark_minute) {
 				minlen = bitpos + 1;
 				/* handle the missing bit due to the minute marker */
-			} else if (bit.marker == emark_toolong ||
-			    bit.marker == emark_late) {
+			} else if (gbr.marker == emark_toolong ||
+			    gbr.marker == emark_late) {
 				minlen = -1;
 				display_long_minute();
 			}
 			display_new_second();
-			check_handle_new_minute(bit, &mlr, bitpos, &curtime, minlen,
+			check_handle_new_minute(gbr, &mlr, bitpos, &curtime, minlen,
 			    was_toolong, &init_min, display_minute,
 			    display_thirdparty_buffer, display_alarm, display_unknown,
 			    display_weather, display_time, process_setclock_result);

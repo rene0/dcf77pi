@@ -53,8 +53,6 @@ static struct hardware hw;
 static struct bitinfo bit;
 static unsigned acc_minlen;
 static float cutoff;
-static int pulse;
-static struct GB_result gb_res;
 static unsigned filemode = 0;   /* 0 = no file, 1 = input, 2 = output */
 
 int
@@ -278,234 +276,25 @@ get_pulse(void)
  * Clear the cutoff value and the state values, except emark_toolong and
  * emark_late to be able to determine if this flag can be cleared again.
  */
-static void
-set_new_state(void)
+struct GB_result
+set_new_state(struct GB_result in_gbr)
 {
-	if (!gb_res.skip) {
+	struct GB_result gbr;
+
+	memcpy(&gbr, &in_gbr, sizeof(struct GB_result));
+	if (!in_gbr.skip) {
 		cutoff = -1;
 	}
-	gb_res.bad_io = false;
-	gb_res.bitval = ebv_none;
-	if (gb_res.marker != emark_toolong && gb_res.marker != emark_late) {
-		gb_res.marker = emark_none;
+	gbr.bad_io = false;
+	gbr.bitval = ebv_none;
+	if (in_gbr.marker != emark_toolong && in_gbr.marker != emark_late) {
+		gbr.marker = emark_none;
 	}
-	gb_res.hwstat = ehw_ok;
-	gb_res.done = false;
-	gb_res.skip = false;
-}
+	gbr.hwstat = ehw_ok;
+	gbr.done = false;
+	gbr.skip = false;
 
-static void
-reset_frequency(void)
-{
-	// TODO adjust for interval = 1e6 / hw.freq ?
-	if (logfile != NULL) {
-		fprintf(logfile, "=");
-	}
-	bit.freq_reset = true;
-}
-
-static void
-reset_bitlen(void)
-{
-	if (logfile != NULL) {
-		fprintf(logfile, "!");
-	}
-	bit.bit0 = hw.freq / 10;
-	bit.bit20 = hw.freq / 5;
-	bit.bitlen_reset = true;
-}
-
-/*
- * The bits are decoded from the signal using an exponential low-pass filter
- * in conjunction with a Schmitt trigger. The idea and the initial
- * implementation for this come from Udo Klein, with permission.
- * http://blog.blinkenlight.net/experiments/dcf77/binary-clock/#comment-5916
- */
-struct GB_result
-get_bit_live(void)
-{
-	char outch = '?';
-	bool newminute = false;
-	unsigned stv = 1;
-	float a, y = 1;
-	static int init_bit = 2;
-	bool is_eom = gb_res.marker == emark_minute ||
-	    gb_res.marker == emark_late;
-
-	bit.freq_reset = false;
-	bit.bitlen_reset = false;
-
-	set_new_state();
-
-	/*
-	 * One period is either 1000 ms or 2000 ms long (normal or padding for
-	 * last). The active part is either 100 ms ('0') or 200 ms ('1') long.
-	 * The maximum allowed values as percentage of the second length are
-	 * specified as half the value and the whole value of the lengths of
-	 * bit 0 and bit 20 respectively.
-	 *
-	 * ~A > 1.5 * hw.freq: end-of-minute
-	 * ~A > 2.5 * hw.freq: timeout
-	 */
-
-	if (init_bit == 2) {
-		bit.bit0 = hw.freq / 10;
-		bit.bit20 = hw.freq / 5;
-	}
-	/* Set up filter, reach 50% after hw.freq/20 samples (i.e. 50 ms) */
-	a = 1.0 - exp2(-20.0 / hw.freq);
-	bit.tlow = -1;
-	bit.tlast0 = -1;
-
-	for (bit.t = 0; bit.t < hw.freq * 2; bit.t++) {
-		if (pulse == 2) {
-			gb_res.bad_io = true;
-			outch = '*';
-			break;
-		}
-		if (bit.signal != NULL) {
-			if ((bit.t & 7) == 0) {
-				bit.signal[bit.t / 8] = 0;
-				/* clear data from previous second */
-			}
-			bit.signal[bit.t / 8] |= pulse <<
-			    (unsigned char)(bit.t & 7);
-		}
-
-		if (y >= 0 && y < a / 2) {
-			bit.tlast0 = (int)bit.t;
-		}
-		y += a * (pulse - y);
-
-		/*
-		 * Prevent algorithm collapse during thunderstorms or
-		 * scheduler abuse
-		 */
-
-		if (bit.t > hw.freq * 2.5) {
-			if (bit.tlow <= hw.freq / 20) {
-				gb_res.hwstat = ehw_receive;
-				outch = 'r';
-			} else if (bit.tlow * 100 / bit.t >= 99) {
-				gb_res.hwstat = ehw_transmit;
-				outch = 'x';
-			} else {
-				gb_res.hwstat = ehw_random;
-				outch = '#';
-			}
-			break; /* timeout */
-		}
-
-		/*
-		 * Schmitt trigger, maximize value to introduce hysteresis and
-		 * to avoid infinite memory.
-		 */
-		if (y < 0.5 && stv == 1) {
-			/* end of high part of second */
-			y = 0;
-			stv = 0;
-			bit.tlow = (int)bit.t;
-		}
-		if (y > 0.5 && stv == 0) {
-			/* end of low part of second */
-			newminute = bit.t  > hw.freq * 1.5;
-			if (init_bit == 2) {
-				init_bit--;
-			}
-
-			if (newminute) {
-				/*
-				 * Reset the frequency and the EOM flag if two
-				 * consecutive EOM markers come in, which means
-				 * something is wrong.
-				 */
-				if (is_eom) {
-					if (gb_res.marker == emark_minute) {
-						gb_res.marker = emark_none;
-					} else if (gb_res.marker ==
-					    emark_late) {
-						gb_res.marker = emark_toolong;
-					}
-					reset_frequency();
-				} else {
-					if (gb_res.marker == emark_none) {
-						gb_res.marker = emark_minute;
-					} else if (gb_res.marker ==
-					    emark_toolong) {
-						gb_res.marker = emark_late;
-					}
-				}
-			}
-			break; /* start of new second */
-		}
-	}
-	if (bit.t >= hw.freq * 2) {
-		/* this can actually happen */
-		if (gb_res.hwstat == ehw_ok) {
-			gb_res.hwstat = ehw_random;
-			outch = '#';
-		}
-		reset_frequency();
-	}
-
-	if (!gb_res.bad_io && gb_res.hwstat == ehw_ok) {
-		if (hw.freq * bit.tlow * (1 + (newminute ? 1 : 0)) <
-		    (bit.bit0 + bit.bit20) * bit.t / 2) {
-			/* zero bit, ~100 ms active signal */
-			gb_res.bitval = ebv_0;
-			outch = '0';
-			buffer[bitpos] = 0;
-		} else if (hw.freq * bit.tlow * (1 + (newminute ? 1 : 0)) <
-		    (bit.bit0 + bit.bit20) * bit.t) {
-			/* one bit, ~200 ms active signal */
-			gb_res.bitval = ebv_1;
-			outch = '1';
-			buffer[bitpos] = 1;
-		} else {
-			/* bad radio signal, retain old value */
-			gb_res.bitval = ebv_none;
-			outch = '_';
-		}
-	}
-
-	if (!gb_res.bad_io) {
-		if (init_bit == 1) {
-			init_bit--;
-		} else if (gb_res.hwstat == ehw_ok &&
-		    gb_res.marker == emark_none) {
-			float avg;
-			if (bitpos == 0 && gb_res.bitval == ebv_0) {
-				bit.bit0 +=
-				    (bit.tlow - bit.bit0) / 2;
-			}
-			if (bitpos == 20 && gb_res.bitval == ebv_1) {
-				bit.bit20 +=
-				    (bit.tlow - bit.bit20) / 2;
-			}
-			/* Force sane values during e.g. a thunderstorm */
-			if (bit.bit20 < bit.bit0 * 1.5 ||
-			    bit.bit20 > bit.bit0 * 3) {
-				reset_bitlen();
-			}
-			avg = (bit.bit20 - bit.bit0) / 2;
-			if (bit.bit0 + avg < hw.freq / 10 ||
-			    bit.bit0 - avg > hw.freq / 10) {
-				reset_bitlen();
-			}
-			if (bit.bit20 + avg < hw.freq / 5 ||
-			    bit.bit20 - avg > hw.freq / 5) {
-				reset_bitlen();
-			}
-		}
-	}
-	if (logfile != NULL) {
-		fprintf(logfile, "%c", outch);
-		if (gb_res.marker == emark_minute ||
-		    gb_res.marker == emark_late) {
-			fprintf(logfile, "\n");
-		}
-	}
-	return gb_res;
+	return gbr;
 }
 
 /* Skip over invalid characters */
@@ -537,11 +326,12 @@ skip_invalid(void)
 struct GB_result
 get_bit_file(void)
 {
+	static struct GB_result gbr;
 	static int oldinch;
 	static bool read_acc_minlen;
 	int inch;
 
-	set_new_state();
+	gbr = set_new_state(gbr);
 
 	inch = skip_invalid();
 	/*
@@ -552,21 +342,21 @@ get_bit_file(void)
 
 	switch (inch) {
 	case EOF:
-		gb_res.done = true;
-		return gb_res;
+		gbr.done = true;
+		return gbr;
 	case '0':
 	case '1':
 		buffer[bitpos] = inch - (int)'0';
-		gb_res.bitval = (inch == (int)'0') ? ebv_0 : ebv_1;
+		gbr.bitval = (inch == (int)'0') ? ebv_0 : ebv_1;
 		bit.t = 1000;
 		break;
 	case '\n':
 		/*
 		 * Skip multiple consecutive EOM markers, these are made
 		 * impossible by the reset_minlen() invocation in
-		 * get_bit_live()
+		 * mainloop_live()
 		 */
-		gb_res.skip = true;
+		gbr.skip = true;
 		if (oldinch != '\n') {
 			bit.t = read_acc_minlen ? 0 : 1000;
 			read_acc_minlen = false;
@@ -574,51 +364,51 @@ get_bit_file(void)
 			 * The marker checks must be inside the oldinch
 			 * check to prevent spurious emin_short errors.
 			 */
-			if (gb_res.marker == emark_none) {
-				gb_res.marker = emark_minute;
-			} else if (gb_res.marker == emark_toolong) {
-				gb_res.marker = emark_late;
+			if (gbr.marker == emark_none) {
+				gbr.marker = emark_minute;
+			} else if (gbr.marker == emark_toolong) {
+				gbr.marker = emark_late;
 			}
 		} else {
 			bit.t = 0;
 		}
 		break;
 	case 'x':
-		gb_res.hwstat = ehw_transmit;
+		gbr.hwstat = ehw_transmit;
 		bit.t = 2500;
 		break;
 	case 'r':
-		gb_res.hwstat = ehw_receive;
+		gbr.hwstat = ehw_receive;
 		bit.t = 2500;
 		break;
 	case '#':
-		gb_res.hwstat = ehw_random;
+		gbr.hwstat = ehw_random;
 		bit.t = 2500;
 		break;
 	case '*':
-		gb_res.bad_io = true;
+		gbr.bad_io = true;
 		bit.t = 0;
 		break;
 	case '_':
 		/* retain old value in buffer[bitpos] */
-		gb_res.bitval = ebv_none;
+		gbr.bitval = ebv_none;
 		bit.t = 1000;
 		break;
 	case 'a':
 		/* acc_minlen, up to 2^32-1 ms */
-		gb_res.skip = true;
+		gbr.skip = true;
 		bit.t = 0;
 		if (fscanf(logfile, "%10u", &acc_minlen) != 1) {
-			gb_res.done = true;
+			gbr.done = true;
 		}
-		read_acc_minlen = !gb_res.done;
+		read_acc_minlen = !gbr.done;
 		break;
 	case 'c':
 		/* cutoff for newminute */
-		gb_res.skip = true;
+		gbr.skip = true;
 		bit.t = 0;
 		if (fscanf(logfile, "%6f", &cutoff) != 1) {
-			gb_res.done = true;
+			gbr.done = true;
 		}
 		break;
 	default:
@@ -641,11 +431,11 @@ get_bit_file(void)
 			dec_bp = 1;
 		}
 	} else {
-		gb_res.done = true;
+		gbr.done = true;
 	}
 	ungetc(inch, logfile);
 
-	return gb_res;
+	return gbr;
 }
 
 bool
@@ -659,30 +449,34 @@ is_space_bit(int bitpos)
 }
 
 struct GB_result
-next_bit(void)
+next_bit(struct GB_result in_gbr)
 {
+	struct GB_result gbr;
+
+	memcpy(&gbr, &in_gbr, sizeof(struct GB_result));
+
 	if (dec_bp == 1) {
 		bitpos--;
 		dec_bp = 2;
 	}
-	if (gb_res.marker == emark_minute || gb_res.marker == emark_late) {
+	if (in_gbr.marker == emark_minute || in_gbr.marker == emark_late) {
 		bitpos = 0;
 		dec_bp = 0;
-	} else if (!gb_res.skip) {
+	} else if (!in_gbr.skip) {
 		bitpos++;
 	}
 	if (bitpos == BUFLEN) {
-		gb_res.marker = emark_toolong;
+		gbr.marker = emark_toolong;
 		bitpos = 0;
-		return gb_res;
+		return gbr;
 	}
-	if (gb_res.marker == emark_toolong) {
-		gb_res.marker = emark_none; /* fits again */
+	if (in_gbr.marker == emark_toolong) {
+		gbr.marker = emark_none; /* fits again */
 	}
-	else if (gb_res.marker == emark_late) {
-		gb_res.marker = emark_minute; /* cannot happen? */
+	else if (in_gbr.marker == emark_late) {
+		gbr.marker = emark_minute; /* cannot happen? */
 	}
-	return gb_res;
+	return gbr;
 }
 
 int
