@@ -238,4 +238,11 @@ float get_cutoff(void);
  */
 void *flush_logfile(/*@unused*/ void *arg);
 
+/**
+ * Write a character to the log file if it is open.
+ *
+ * @param chr The character to write.
+ */
+void write_to_logfile(char chr);
+
 #endif

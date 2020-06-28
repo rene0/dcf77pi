@@ -524,6 +524,14 @@ append_logfile(const char * const logfilename)
 	return pthread_create(&flush_thread, NULL, flush_logfile, NULL);
 }
 
+void
+write_to_logfile(char chr)
+{
+	if (logfile != NULL) {
+		fprintf(logfile, "%c", chr);
+	}
+}
+
 int
 close_logfile(void)
 {
