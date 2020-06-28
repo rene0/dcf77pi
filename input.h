@@ -161,8 +161,9 @@ struct GB_result get_bit_file(void);
  * Prepare for the next bit: update the bit position or wrap it around.
  *
  * @param in_gbr The current bit state structure.
- * @return The current bit state structure, with the marker field adjusted to
- * indicate state of the bit buffer and the minute end.
+ *
+ * @return The new bit state structure, with the marker field adjusted to
+ * indicate state of the bit buffer and the minute ending.
  */
 struct GB_result next_bit(struct GB_result in_gbr);
 
@@ -185,6 +186,7 @@ const int * const get_buffer(void);
  * bit when displaying the bit buffer.
  *
  * @param bitpos The current bit position.
+ * @return If a space is desired.
  */
 bool is_space_bit(int bitpos);
 
