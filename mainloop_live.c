@@ -126,6 +126,7 @@ mainloop_live(
 	int act, pas;
 	int second, bump_second;
 	struct bitinfo bit;
+	char outch = '?';
 
 	(void)memset(&curtime, 0, sizeof(curtime));
 	(void)memset(&gbr, 0, sizeof(gbr));
@@ -154,11 +155,19 @@ mainloop_live(
 	bump_second = 0;
 	synced = false;
 
+	bit.bit0 = hw.freq / 10;
+	bit.bit20 = hw.freq / 5;
+
 	for (;;) {
 		gbr = set_new_state(gbr);
 		is_eom = gbr.marker == emark_minute || gbr.marker == emark_late;
+
 		pulse = get_pulse();
-		// perhaps handle pulse == 2 (hw error)
+		if (pulse == 2) {
+			gbr.bad_io = true;
+			outch = '*';
+			continue;
+		}
 
 		if (count >= hw.freq) {
 			if (act > 0 && pas == 0) {
@@ -174,6 +183,19 @@ mainloop_live(
 			}
 			if (act >= 2 * hw.freq || pas >= 2 * hw.freq) {
 				// no radio signal
+				if (act == 0) {
+					gbr.hwstat = ehw_receive;
+					outch = 'r';
+				} else if (pas == 0) {
+					/* This assumes no AGC in the hardware. */
+					gbr.hwstat = ehw_transmit;
+					outch = 'x';
+				} else {
+					/* Is this actually possible? */
+					gbr.hwstat = ehw_random;
+					outch = '#';
+					reset_interval(&bit, hw);
+				}
 				act = pas = 0;
 				bump_second = 2;
 			}
@@ -209,8 +231,20 @@ mainloop_live(
 				second = 0;
 			}
 			if (act + pas > 0.8 * hw.freq) {
-				// reset here instead of above bcause of the
-				// pas minute test
+				if (hw.freq * act * (newminute ? 2 : 1) <
+				    (bit.bit0 + bit.bit20) / 2 * count) {
+					gbr.bitval = ebv_0;
+					outch = '0';
+					buffer[bitpos] = 0;
+				} else if (hw.freq * act * (newminute ? 2 : 1) <
+				    (bit.bit0 + bit.bit20) * count) {
+					gbr.bitval = ebv_1;
+					outch = '1';
+					buffer[bitpos] = 1;
+				} else {
+					gbr.bitval = ebv_none;
+					outch = '_';
+				}
 				act = pas = 0;
 			}
 		}
@@ -255,6 +289,13 @@ mainloop_live(
 				}
 			}
 			bump_second = 0;
+
+			write_to_logfile(outch);
+			if (gbr.marker == emark_minute ||
+			    gbr.marker == emark_late) {
+				write_to_logfile('\n');
+			}
+
 			mlr = process_input(mlr, bitpos);
 			if (mlr.quit) {
 				break;
