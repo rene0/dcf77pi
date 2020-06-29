@@ -16,6 +16,14 @@
 #include <sys/time.h>
 
 static void
+reset_interval(struct bitinfo *bit, struct hardware hw)
+{
+	write_to_logfile('=');
+	bit->interval = 1e6 / hw.freq;
+	bit->change_interval = true;
+}
+
+static void
 check_handle_new_minute(
     struct GB_result gbr,
     struct ML_result *mlr,
@@ -105,28 +113,32 @@ mainloop_live(
 	struct tm curtime;
 	struct ML_result mlr;
 	struct hardware hw;
+	struct GB_result gbr;
+	bool is_eom;
 	bool was_toolong = false;
-	long long interval;
-	bool change_interval, synced;
+	bool synced;
 	struct itimerval itv;
 	sigset_t signalset;
 	int dummy; /* for sigwait() */
+	bool newminute;
 	int pulse, oldpulse;
 	int count;
 	int act, pas;
 	int second, bump_second;
+	struct bitinfo bit;
 
 	(void)memset(&curtime, 0, sizeof(curtime));
+	(void)memset(&gbr, 0, sizeof(gbr));
 	(void)memset(&mlr, 0, sizeof(mlr));
 	mlr.logfilename = logfilename;
 
 	hw = get_hardware_parameters();
 
-	change_interval = false;
-	interval = 1e6 / hw.freq;
+	bit.change_interval = false;
+	bit.interval = 1e6 / hw.freq;
 	/* set up the timer */
 	itv.it_interval.tv_sec = itv.it_value.tv_sec = 0;
-	itv.it_interval.tv_usec = itv.it_value.tv_usec = interval;
+	itv.it_interval.tv_usec = itv.it_value.tv_usec = bit.interval;
 	(void)setitimer(ITIMER_REAL, &itv, NULL);
 
 	/* set up the signal trap for the timer */
@@ -143,21 +155,22 @@ mainloop_live(
 	synced = false;
 
 	for (;;) {
-		struct GB_result gbr;
+		gbr = set_new_state(gbr);
+		is_eom = gbr.marker == emark_minute || gbr.marker == emark_late;
 		pulse = get_pulse();
 		// perhaps handle pulse == 2 (hw error)
 
 		if (count >= hw.freq) {
 			if (act > 0 && pas == 0) {
-				interval--;
-				change_interval = true;
+				bit.interval--;
+				bit.change_interval = true;
 				count = act;
 			} else {
 				count = 0;
 			}
 			if (pas > 0 && pas < 2 * hw.freq) {
-				interval++;
-				change_interval = true;
+				bit.interval++;
+				bit.change_interval = true;
 			}
 			if (act >= 2 * hw.freq || pas >= 2 * hw.freq) {
 				// no radio signal
@@ -181,15 +194,17 @@ mainloop_live(
 					count = 0;
 				}
 				if (count > 0 && count < hw.freq / 2) {
-					interval++;
-					change_interval = true;
+					bit.interval++;
+					bit.change_interval = true;
 				}
 				if (count > hw.freq / 2) {
-					interval--;
-					change_interval = true;
+					bit.interval--;
+					bit.change_interval = true;
 				}
 			}
+			newminute = false;
 			if (pas > 1.5 * hw.freq) {
+				newminute = true;
 				bump_second = -1;
 				second = 0;
 			}
@@ -198,13 +213,38 @@ mainloop_live(
 				// pas minute test
 				act = pas = 0;
 			}
-		} // rising edge
-		if (interval < 8e5 / hw.freq || interval > 1.2e6 / hw.freq) {
-			interval = 1e6 / hw.freq; // something went wrong
 		}
-		if (change_interval) {
-			change_interval = false;
-			itv.it_interval.tv_usec = interval;
+		/*
+		 * Prevent algorithm collapse during thunderstorms or
+		 * scheduler abuse
+		 */
+		if (bit.interval < 8e5 / hw.freq || bit.interval > 1.2e6 / hw.freq) {
+			reset_interval(&bit, hw);
+		}
+		/*
+		 * Reset the frequency and the EOM flag if two
+		 * consecutive EOM markers come in, which means
+		 * something is wrong.
+		 */
+		if (newminute) {
+			if (is_eom) {
+				if (gbr.marker == emark_minute) {
+					gbr.marker = emark_none;
+				} else if (gbr.marker == emark_late) {
+					gbr.marker = emark_toolong;
+				}
+				reset_interval(&bit, hw);
+			} else {
+				if (gbr.marker == emark_none) {
+					gbr.marker = emark_minute;
+				} else if (gbr.marker == emark_toolong) {
+					gbr.marker = emark_late;
+				}
+			}
+		}
+		if (bit.change_interval) {
+			bit.change_interval = false;
+			itv.it_interval.tv_usec = bit.interval;
 			(void)setitimer(ITIMER_REAL, &itv, NULL);
 		}
 		if (bump_second != 0) {

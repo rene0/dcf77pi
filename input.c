@@ -272,10 +272,6 @@ get_pulse(void)
 	return tmpch;
 }
 
-/*
- * Clear the cutoff value and the state values, except emark_toolong and
- * emark_late to be able to determine if this flag can be cleared again.
- */
 struct GB_result
 set_new_state(struct GB_result in_gbr)
 {

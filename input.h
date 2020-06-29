@@ -82,10 +82,13 @@ struct bitinfo {
 	 */
 	bool bitlen_reset;
 	/**
-	 * realfreq was reset to {@link hardware.freq} (normally because of
-	 * reception errors or fluctuations in CPU usage)
+	 * The current value of the interval between two samples in microseconds.
 	 */
-	bool freq_reset;
+	long interval;
+	/**
+	 * The interval between taking two samples (in microseconds) was changed.
+	 */
+	bool change_interval;
 	/** time in samples when the signal went low again, -1 initially */
 	int tlow;
 	/**
@@ -244,5 +247,14 @@ void *flush_logfile(/*@unused*/ void *arg);
  * @param chr The character to write.
  */
 void write_to_logfile(char chr);
+
+/**
+ * Clear the cutoff value and the state values, except emark_toolong and
+ * emark_late to be able to determine if this flag can be cleared again.
+ *
+ * @param in_gbr The current state.
+ * @return The adjusted state.
+ */
+struct GB_result set_new_state(struct GB_result in_gbr);
 
 #endif

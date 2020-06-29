@@ -95,7 +95,7 @@ main(int argc, char *argv[])
 		gbr = get_bit_live();
 		bi = get_bitinfo();
 		if (verbose) {
-			if (bi.freq_reset) {
+			if (bi.change_interval) {
 				printf("!");
 			}
 			/* display first bi->t pulses */
