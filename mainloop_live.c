@@ -119,7 +119,7 @@ mainloop_live(
 	bool synced;
 	struct itimerval itv;
 	sigset_t signalset;
-	int dummy; /* for sigwait() */
+	int sigwait_clr;
 	bool newminute;
 	int pulse, oldpulse;
 	int count;
@@ -294,7 +294,7 @@ mainloop_live(
 		}
 		oldpulse = pulse;
 		count++;
-		(void)sigwait(&signalset, &dummy);
+		(void)sigwait(&signalset, &sigwait_clr);
 	}
 	cleanup();
 }
