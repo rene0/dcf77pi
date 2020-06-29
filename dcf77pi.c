@@ -158,7 +158,7 @@ display_bit(struct GB_result gbr, int bitpos)
 		}
 	}
 
-	mvprintw(6, xpos, "%u", get_buffer()[bitpos]);
+	mvprintw(6, xpos, "%u", buffer[bitpos]);
 	if (gbr.bitval == ebv_none) {
 		mvchgat(6, xpos, 1, A_NORMAL, 3, NULL);
 	}
@@ -517,7 +517,7 @@ display_minute(int minlen)
 		if (is_space_bit(bp)) {
 			xpos++;
 		}
-		mvprintw(0, xpos, "%u", get_buffer()[bp]);
+		mvprintw(0, xpos, "%u", buffer[bp]);
 	}
 	clrtoeol();
 	mvchgat(0, 0, -1, A_NORMAL, 7, NULL);

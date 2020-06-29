@@ -33,7 +33,7 @@ check_handle_new_minute(
 
 		display_minute(minlen);
 		dt = decode_time(*init_min, minlen, get_acc_minlen(),
-		    get_buffer(), curtime);
+		    buffer, curtime);
 
 		if (curtime->tm_min % 3 == 0 && *init_min == 0) {
 			const unsigned *tpbuf;

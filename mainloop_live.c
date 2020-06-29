@@ -47,8 +47,7 @@ check_handle_new_minute(
 		struct DT_result dt;
 
 		display_minute(minlen);
-		dt = decode_time(*init_min, minlen, 0,
-		    get_buffer(), curtime);
+		dt = decode_time(*init_min, minlen, 0, buffer, curtime);
 
 		if (curtime->tm_min % 3 == 0 && *init_min == 0) {
 			const unsigned *tpbuf;

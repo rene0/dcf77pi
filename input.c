@@ -41,12 +41,8 @@
 #  error Unsupported operating system, please send a patch to the author
 #endif
 
-/** maximum number of bits in a minute */
-#define BUFLEN 60
-
 static int bitpos;              /* second */
 static unsigned dec_bp;         /* bitpos decrease in file mode */
-static int buffer[BUFLEN];      /* wrap after BUFLEN positions */
 static FILE *logfile;           /* auto-appended in live mode */
 static int fd;                  /* gpio file */
 static struct hardware hw;
@@ -54,6 +50,8 @@ static struct bitinfo bit;
 static unsigned acc_minlen;
 static float cutoff;
 static unsigned filemode = 0;   /* 0 = no file, 1 = input, 2 = output */
+
+int buffer[BUFLEN];      /* wrap after BUFLEN positions */
 
 int
 set_mode_file(const char * const infilename)
@@ -479,12 +477,6 @@ int
 get_bitpos(void)
 {
 	return bitpos;
-}
-
-const int * const
-get_buffer(void)
-{
-	return buffer;
 }
 
 struct hardware

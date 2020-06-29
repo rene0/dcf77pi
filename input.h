@@ -8,6 +8,12 @@
 
 struct json_object;
 
+/** maximum number of bits in a minute */
+#define BUFLEN 60
+
+/** The current bit buffer */
+extern int buffer[BUFLEN];
+
 /** Value of the bit received by radio or log file */
 enum eGB_bitvalue {
 	/** this bit has value 0 */
@@ -176,13 +182,6 @@ struct GB_result next_bit(struct GB_result in_gbr);
  * @return The current bit position (0..60).
  */
 int get_bitpos(void);
-
-/**
- * Retrieve the current bit buffer.
- *
- * @return The bit buffer, an array of 0 and 1 values.
- */
-const int * const get_buffer(void);
 
 /**
  * Determine if there should be a space between the last bit and the current
