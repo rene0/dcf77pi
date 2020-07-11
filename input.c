@@ -313,7 +313,7 @@ skip_invalid(void)
 			ungetc(inch, logfile);
 			inch = '\n';
 		}
-	} while (strchr("01\nxr#*_ac", inch) == NULL);
+	} while (strchr("01\nxr#*_acRX@", inch) == NULL);
 	return inch;
 }
 
@@ -368,13 +368,25 @@ get_bit_file(void)
 			t = 0;
 		}
 		break;
+	case 'X':
+		gbr.hwstat = ehw_transmit;
+		t = 2000;
+		break;
 	case 'x':
 		gbr.hwstat = ehw_transmit;
 		t = 2500;
 		break;
+	case 'R':
+		gbr.hwstat = ehw_receive;
+		t = 2000;
+		break;
 	case 'r':
 		gbr.hwstat = ehw_receive;
 		t = 2500;
+		break;
+	case '@':
+		gbr.hwstat = ehw_random;
+		t = 2000;
 		break;
 	case '#':
 		gbr.hwstat = ehw_random;

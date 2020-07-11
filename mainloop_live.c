@@ -205,15 +205,15 @@ mainloop_live(
 				// no radio signal
 				if (bit.act == 0) {
 					gbr.hwstat = ehw_receive;
-					outch = 'r';
+					outch = 'R';
 				} else if (pas == 0) {
 					/* This assumes no AGC in the hardware. */
 					gbr.hwstat = ehw_transmit;
-					outch = 'x';
+					outch = 'X';
 				} else {
 					/* Is this actually possible? */
 					gbr.hwstat = ehw_random;
-					outch = '#';
+					outch = '@';
 					reset_interval(&bit, hw);
 				}
 				bit.act = pas = 0;
