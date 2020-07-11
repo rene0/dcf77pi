@@ -79,8 +79,6 @@ install: libdcf77.so dcf77pi dcf77pi-analyze dcf77pi-readpin
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL_PROGRAM) dcf77pi dcf77pi-analyze dcf77pi-readpin \
 		$(DESTDIR)$(PREFIX)/bin
-	[ `uname -s` = "FreeBSD" ] && $(INSTALL_PROGRAM) \
-		$(DESTDIR)$(PREFIX)/bin || true
 	mkdir -p $(DESTDIR)$(PREFIX)/include/dcf77pi
 	$(INSTALL) -m 0644 $(hdrlib) $(DESTDIR)$(PREFIX)/include/dcf77pi
 	mkdir -p $(DESTDIR)$(PREFIX)/$(ETCDIR)
