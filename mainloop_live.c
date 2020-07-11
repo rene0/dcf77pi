@@ -122,7 +122,7 @@ mainloop_live(
 	bool newminute;
 	int pulse, oldpulse;
 	int count;
-	int act, pas;
+	int pas;
 	int second, bump_second;
 	struct bitinfo bit;
 	char outch = '?';
@@ -149,7 +149,7 @@ mainloop_live(
 	pulse = 3; /* nothing yet */
 	oldpulse = -1;
 	count = 0;
-	act = pas = 0;
+	bit.act = pas = 0;
 	second = 0;
 	bump_second = 0;
 	synced = false;
@@ -169,10 +169,10 @@ mainloop_live(
 		}
 
 		if (count >= hw.freq) {
-			if (act > 0 && pas == 0) {
+			if (bit.act > 0 && pas == 0) {
 				bit.interval--;
 				bit.change_interval = true;
-				count = act;
+				count = bit.act;
 			} else {
 				count = 0;
 			}
@@ -180,9 +180,9 @@ mainloop_live(
 				bit.interval++;
 				bit.change_interval = true;
 			}
-			if (act >= 2 * hw.freq || pas >= 2 * hw.freq) {
+			if (bit.act >= 2 * hw.freq || pas >= 2 * hw.freq) {
 				// no radio signal
-				if (act == 0) {
+				if (bit.act == 0) {
 					gbr.hwstat = ehw_receive;
 					outch = 'r';
 				} else if (pas == 0) {
@@ -195,18 +195,18 @@ mainloop_live(
 					outch = '#';
 					reset_interval(&bit, hw);
 				}
-				act = pas = 0;
+				bit.act = pas = 0;
 				bump_second = 2;
 			}
 		} // count >= hw.freq
 		if (pulse == 1) {
-			act++;
+			bit.act++;
 		} else {
 			pas++;
 		}
 		if (oldpulse == 0 && pulse == 1) {
 			// this assumes a clean signal without a software filter
-			if (act + pas > 0.8 * hw.freq) {
+			if (bit.act + pas > 0.8 * hw.freq) {
 				/* start of new second */
 				bump_second = 1;
 				if (!synced) {
@@ -229,13 +229,13 @@ mainloop_live(
 				bump_second = -1;
 				second = 0;
 			}
-			if (act + pas > 0.8 * hw.freq) {
-				if (hw.freq * act * (newminute ? 2 : 1) <
+			if (bit.act + pas > 0.8 * hw.freq) {
+				if (hw.freq * bit.act * (newminute ? 2 : 1) <
 				    (bit.bit0 + bit.bit20) / 2 * count) {
 					gbr.bitval = ebv_0;
 					outch = '0';
 					buffer[bitpos] = 0;
-				} else if (hw.freq * act * (newminute ? 2 : 1) <
+				} else if (hw.freq * bit.act * (newminute ? 2 : 1) <
 				    (bit.bit0 + bit.bit20) * count) {
 					gbr.bitval = ebv_1;
 					outch = '1';
@@ -244,7 +244,7 @@ mainloop_live(
 					gbr.bitval = ebv_none;
 					outch = '_';
 				}
-				act = pas = 0;
+				bit.act = pas = 0;
 			}
 		}
 		/*

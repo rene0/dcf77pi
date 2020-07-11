@@ -115,7 +115,7 @@ display_bit(struct GB_result gbr, int bitpos)
 	bitinf = get_bitinfo();
 
 	mvprintw(9, 1, "%2u %6i %10.3f %10.3f",
-	    bitpos, bitinf.tlow,
+	    bitpos, bitinf.act,
 	    bitinf.bit0, bitinf.bit20);
 	mvchgat(9, 36, 21, A_NORMAL, bitinf.bitlen_reset ? 3 : 7, NULL);
 

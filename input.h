@@ -95,8 +95,10 @@ struct bitinfo {
 	 * The interval between taking two samples (in microseconds) was changed.
 	 */
 	bool change_interval;
-	/** time in samples when the signal went low again, -1 initially */
-	int tlow;
+	/**
+	 * The length of the active part of this bit in samples.
+	 */
+	int act;
 	/**
 	 * the raw received radio signal, {@link hardware.freq} / 2 items,
 	 * with each item holding 8 bits
