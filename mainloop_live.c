@@ -163,6 +163,17 @@ mainloop_live(
 	bump_second = 0;
 	synced = false;
 
+	/*
+	 * One period is either 1000 ms or 2000 ms long (normal or padding for
+	 * last). The active part is either 100 ms ('0') or 200 ms ('1') long.
+	 * The maximum allowed values as percentage of the second length are
+	 * specified as half the value and the whole value of the lengths of
+	 * bit 0 and bit 20 respectively.
+	 *
+	 * ~A > 1.5 * hw.freq: end-of-minute
+	 * ~A > 2 * hw.freq: timeout
+	 */
+
 	bit.bitlen_reset = false;
 	bit.bit0 = hw.freq / 10;
 	bit.bit20 = hw.freq / 5;
