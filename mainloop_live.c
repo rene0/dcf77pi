@@ -327,11 +327,6 @@ mainloop_live(
 				}
 			}
 		}
-		if (bit.change_interval) {
-			bit.change_interval = false;
-			itv.it_interval.tv_usec = bit.interval;
-			(void)setitimer(ITIMER_REAL, &itv, NULL);
-		}
 		if (bump_second != 0) {
 			if (bump_second != -1) {
 				second += bump_second;
@@ -386,6 +381,11 @@ mainloop_live(
 		}
 		oldpulse = pulse;
 		count++;
+		if (bit.change_interval) {
+			bit.change_interval = false;
+			itv.it_interval.tv_usec = bit.interval;
+			(void)setitimer(ITIMER_REAL, &itv, NULL);
+		}
 		(void)sigwait(&signalset, &sigwait_clr);
 	}
 	cleanup();
