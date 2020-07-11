@@ -24,6 +24,15 @@ reset_interval(struct bitinfo *bit, struct hardware hw)
 }
 
 static void
+reset_bitlen(struct bitinfo *bit, struct hardware hw)
+{
+	write_to_logfile('!');
+	bit->bit0 = hw.freq / 10;
+	bit->bit20 = hw.freq / 5;
+	bit->bitlen_reset = true;
+}
+
+static void
 check_handle_new_minute(
     struct GB_result gbr,
     struct ML_result *mlr,
@@ -154,6 +163,7 @@ mainloop_live(
 	bump_second = 0;
 	synced = false;
 
+	bit.bitlen_reset = false;
 	bit.bit0 = hw.freq / 10;
 	bit.bit20 = hw.freq / 5;
 
@@ -261,6 +271,29 @@ mainloop_live(
 		 */
 		if (bit.interval < 8e5 / hw.freq || bit.interval > 1.2e6 / hw.freq) {
 			reset_interval(&bit, hw);
+		}
+		if (gbr.hwstat == ehw_ok && gbr.marker == emark_none) {
+			float avg;
+			if (bitpos == 0 && gbr.bitval == ebv_0) {
+				bit.bit0 += (bit.act - bit.bit0) / 2;
+			}
+			if (bitpos == 20 && gbr.bitval == ebv_1) {
+				bit.bit20 += (bit.act - bit.bit20) / 2;
+			}
+			/* Force sane values during e.g. a thunderstorm */
+			if (bit.bit20 < bit.bit0 * 1.5 ||
+			    bit.bit20 > bit.bit0 * 3) {
+				reset_bitlen(&bit, hw);
+			}
+			avg = (bit.bit20 - bit.bit0) / 2;
+			if (bit.bit0 + avg < hw.freq / 10 ||
+			    bit.bit0 - avg > hw.freq / 10) {
+				reset_bitlen(&bit, hw);
+			}
+			if (bit.bit20 + avg < hw.freq / 5 ||
+			    bit.bit20 - avg > hw.freq / 5) {
+				reset_bitlen(&bit, hw);
+			}
 		}
 		/*
 		 * Reset the frequency and the EOM flag if two
