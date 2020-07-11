@@ -204,6 +204,14 @@ mainloop_live(
 		} else {
 			pas++;
 		}
+		if (bit.signal != NULL) {
+			if ((count & 7) == 0) {
+				bit.signal[count / 8] = 0;
+				/* clear data from previous second */
+			}
+			bit.signal[count / 8] |= pulse <<
+			    (unsigned char)(count & 7);
+		}
 		if (oldpulse == 0 && pulse == 1) {
 			// this assumes a clean signal without a software filter
 			if (bit.act + pas > 0.8 * hw.freq) {
