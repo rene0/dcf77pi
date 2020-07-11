@@ -97,8 +97,6 @@ struct bitinfo {
 	bool change_interval;
 	/** time in samples when the signal went low again, -1 initially */
 	int tlow;
-	/** length of this bit in samples */
-	unsigned t;
 	/**
 	 * the raw received radio signal, {@link hardware.freq} / 2 items,
 	 * with each item holding 8 bits

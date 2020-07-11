@@ -95,7 +95,7 @@ draw_initial_screen(void)
 	mvprintw(4, 0, "Third party contents:");
 
 	mvprintw(6, 0, "new");
-	mvprintw(8, 0, "bit    act  total   "
+	mvprintw(8, 0, "bit    act  "
 	    "b0        b20 state     radio");
 
 	toosmall = false;
@@ -114,8 +114,8 @@ display_bit(struct GB_result gbr, int bitpos)
 
 	bitinf = get_bitinfo();
 
-	mvprintw(9, 1, "%2u %6i %6u %10.3f %10.3f",
-	    bitpos, bitinf.tlow, bitinf.t,
+	mvprintw(9, 1, "%2u %6i %10.3f %10.3f",
+	    bitpos, bitinf.tlow,
 	    bitinf.bit0, bitinf.bit20);
 	mvchgat(9, 36, 21, A_NORMAL, bitinf.bitlen_reset ? 3 : 7, NULL);
 

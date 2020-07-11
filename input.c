@@ -323,13 +323,14 @@ get_bit_file(void)
 	static struct GB_result gbr;
 	static int oldinch;
 	static bool read_acc_minlen;
+	unsigned t;
 	int inch;
 
 	gbr = set_new_state(gbr);
 
 	inch = skip_invalid();
 	/*
-	 * bit.t is set to fake value for compatibility with old log files not
+	 * t is set to fake value for compatibility with old (or new) log files not
 	 * storing acc_minlen values or to increase time when mainloop*() splits
 	 * too long minutes.
 	 */
@@ -342,7 +343,7 @@ get_bit_file(void)
 	case '1':
 		buffer[bitpos] = inch - (int)'0';
 		gbr.bitval = (inch == (int)'0') ? ebv_0 : ebv_1;
-		bit.t = 1000;
+		t = 1000;
 		break;
 	case '\n':
 		/*
@@ -352,7 +353,7 @@ get_bit_file(void)
 		 */
 		gbr.skip = true;
 		if (oldinch != '\n') {
-			bit.t = read_acc_minlen ? 0 : 1000;
+			t = read_acc_minlen ? 0 : 1000;
 			read_acc_minlen = false;
 			/*
 			 * The marker checks must be inside the oldinch
@@ -364,34 +365,34 @@ get_bit_file(void)
 				gbr.marker = emark_late;
 			}
 		} else {
-			bit.t = 0;
+			t = 0;
 		}
 		break;
 	case 'x':
 		gbr.hwstat = ehw_transmit;
-		bit.t = 2500;
+		t = 2500;
 		break;
 	case 'r':
 		gbr.hwstat = ehw_receive;
-		bit.t = 2500;
+		t = 2500;
 		break;
 	case '#':
 		gbr.hwstat = ehw_random;
-		bit.t = 2500;
+		t = 2500;
 		break;
 	case '*':
 		gbr.bad_io = true;
-		bit.t = 0;
+		t = 0;
 		break;
 	case '_':
 		/* retain old value in buffer[bitpos] */
 		gbr.bitval = ebv_none;
-		bit.t = 1000;
+		t = 1000;
 		break;
 	case 'a':
 		/* acc_minlen, up to 2^32-1 ms */
 		gbr.skip = true;
-		bit.t = 0;
+		t = 0;
 		if (fscanf(logfile, "%10u", &acc_minlen) != 1) {
 			gbr.done = true;
 		}
@@ -400,7 +401,7 @@ get_bit_file(void)
 	case 'c':
 		/* cutoff for newminute */
 		gbr.skip = true;
-		bit.t = 0;
+		t = 0;
 		if (fscanf(logfile, "%6f", &cutoff) != 1) {
 			gbr.done = true;
 		}
@@ -410,7 +411,7 @@ get_bit_file(void)
 	}
 
 	if (!read_acc_minlen) {
-		acc_minlen += bit.t;
+		acc_minlen += t;
 	}
 
 	/*
