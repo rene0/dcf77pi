@@ -57,6 +57,5 @@ setclock(struct tm settime)
 	if (t1 == t2) {
 		ts.tv_sec -= 3600 * (1 + settime.tm_isdst);
 	}
-	ts.tv_nsec = 50000000; /* adjust for bit reception algorithm */
 	return (clock_settime(CLOCK_REALTIME, &ts) == -1) ? esc_fail : esc_ok;
 }
