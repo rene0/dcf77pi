@@ -98,19 +98,15 @@ main(int argc, char *argv[])
 			if (bi.change_interval) {
 				printf("!");
 			}
-			/* display first bi->t pulses */
-			for (unsigned long long i = 0; i < bi.t / 8; i++) {
+			/* display first hw.freq pulses */
+			for (int i = 0; i < hw.freq / 8; i++) {
 				for (unsigned j = 0; j < 8; j++) {
 					printf("%c", (bi.signal[i] & (1 << j)) >
 					    0 ? '+' : '-');
 				}
 			}
-			/*
-			 * display pulses in the last partially filled item
-			 * bi.t is 0-based, hence the <= comparison
-			 */
-			for (unsigned j = 0; j <= (bi.t & 7); j++) {
-				printf("%c", (bi.signal[bi.t / 8] & (1 << j)) >
+			for (int i = 0; i <= (hw.freq & 7); i++) {
+				printf("%c", (bi.signal[hw.freq / 8] & (1 << i)) >
 				    0 ? '+' : '-');
 			}
 			printf("\n");
@@ -120,8 +116,7 @@ main(int argc, char *argv[])
 			min++;
 		}
 		printf("%i %i %f %f %i:%i\n", gbr.bitval, bit.act,
-		    bi.bit0, bi.bit20, min,
-		    get_bitpos());
+		    bi.bit0, bi.bit20, min, get_bitpos());
 		if (gbr.marker == emark_minute) {
 			min++;
 		}
