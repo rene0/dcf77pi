@@ -258,19 +258,18 @@ mainloop_live(
 				second = 0;
 			}
 			if (act + pas > 0.8 * hw.freq) {
-				if (hw.freq * bitinfo.act * (newminute ? 2 : 1) <
-				    (bitinfo.bit0 + bitinfo.bit20) / 2 * count) {
+				if (act < (bitinfo.bit0 + bitinfo.bit20) / 2) {
 					gbr.bitval = ebv_0;
 					outch = '0';
 					buffer[bitpos] = 0;
-				} else if (hw.freq * bitinfo.act * (newminute ? 2 : 1) <
-				    (bitinfo.bit0 + bitinfo.bit20) * count) {
+				} else if (act < (bitinfo.bit0 + bitinfo.bit20)) {
 					gbr.bitval = ebv_1;
 					outch = '1';
 					buffer[bitpos] = 1;
 				} else {
 					gbr.bitval = ebv_none;
 					outch = '_';
+					/* retain old buffer value */
 				}
 				bitinfo.act = act;
 				act = pas = 0;
