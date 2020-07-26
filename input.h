@@ -81,7 +81,7 @@ struct hardware {
 /**
  * Detailed information about the radio reception:
  */
-struct bitinfo {
+struct sGB_bitinfo {
 	/**
 	 * bit0 and bit20 were reset to their initial values (normally
 	 * because of reception errors or fluctuations in CPU usage)
@@ -113,6 +113,7 @@ struct bitinfo {
 	 */
 	float bit20;
 };
+extern struct sGB_bitinfo bitinfo;
 
 /**
  * Prepare for input from a log file.
@@ -202,13 +203,6 @@ int append_logfile(const char * const logfilename);
  * @return The log file was closed successfully (0), or errno otherwise.
  */
 int close_logfile(void);
-
-/**
- * Retrieve "internal" information about the currently received bit.
- *
- * @return The bit information as described for {@link bitinfo}.
- */
-struct bitinfo get_bitinfo(void);
 
 /**
  * Retrieve the accumulated minute length in milliseconds.

@@ -106,18 +106,15 @@ static void
 display_bit(struct GB_result gbr, int bitpos)
 {
 	int bp, xpos;
-	struct bitinfo bitinf;
 
 	if (toosmall) {
 		return;
 	}
 
-	bitinf = get_bitinfo();
-
 	mvprintw(9, 1, "%2u %6i %10.3f %10.3f",
-	    bitpos, bitinf.act,
-	    bitinf.bit0, bitinf.bit20);
-	mvchgat(9, 36, 21, A_NORMAL, bitinf.bitlen_reset ? 3 : 7, NULL);
+	    bitpos, bitinfo.act,
+	    bitinfo.bit0, bitinfo.bit20);
+	mvchgat(9, 36, 21, A_NORMAL, bitinfo.bitlen_reset ? 3 : 7, NULL);
 
 	if (gbr.marker == emark_minute && gbr.bitval != ebv_none) {
 		mvprintw(9, 58, "minute   ");

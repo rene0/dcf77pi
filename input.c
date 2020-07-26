@@ -46,11 +46,11 @@ static unsigned dec_bp;         /* bitpos decrease in file mode */
 static FILE *logfile;           /* auto-appended in live mode */
 static int fd;                  /* gpio file */
 static struct hardware hw;
-static struct bitinfo bit;
 static unsigned acc_minlen;
 static float cutoff;
 static unsigned filemode = 0;   /* 0 = no file, 1 = input, 2 = output */
 
+struct sGB_bitinfo bitinfo;
 int buffer[BUFLEN];      /* wrap after BUFLEN positions */
 
 int
@@ -123,7 +123,7 @@ set_mode_live(struct json_object *config)
 		cleanup();
 		return EX_DATAERR;
 	}
-	bit.signal = malloc(hw.freq / 2);
+	bitinfo.signal = malloc(hw.freq / 2);
 #if defined(__FreeBSD__)
 	if (json_object_object_get_ex(config, "iodev", &value)) {
 		hw.iodev = (unsigned)json_object_get_int(value);
@@ -238,7 +238,7 @@ cleanup(void)
 			logfile = NULL;
 		}
 	}
-	free(bit.signal);
+	free(bitinfo.signal);
 }
 
 int
@@ -540,12 +540,6 @@ close_logfile(void)
 
 	f = fclose(logfile);
 	return (f == EOF) ? errno : 0;
-}
-
-struct bitinfo
-get_bitinfo(void)
-{
-	return bit;
 }
 
 unsigned

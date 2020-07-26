@@ -16,7 +16,7 @@
 #include <sys/time.h>
 
 static void
-reset_interval(struct bitinfo *bit, struct hardware hw)
+reset_interval(struct sGB_bitinfo *bit, struct hardware hw)
 {
 	write_to_logfile('=');
 	bit->interval = 1e6 / hw.freq;
@@ -24,7 +24,7 @@ reset_interval(struct bitinfo *bit, struct hardware hw)
 }
 
 static void
-reset_bitlen(struct bitinfo *bit, struct hardware hw)
+reset_bitlen(struct sGB_bitinfo *bit, struct hardware hw)
 {
 	write_to_logfile('!');
 	bit->bit0 = hw.freq / 10;
@@ -131,9 +131,8 @@ mainloop_live(
 	bool newminute;
 	int pulse, oldpulse;
 	int count;
-	int pas;
+	int act, pas; /* act is a throw-away version of bitinfo.act */
 	int second, bump_second;
-	struct bitinfo bit;
 	char outch = '?';
 
 	(void)memset(&curtime, 0, sizeof(curtime));
@@ -143,11 +142,11 @@ mainloop_live(
 
 	hw = get_hardware_parameters();
 
-	bit.change_interval = false;
-	bit.interval = 1e6 / hw.freq;
+	bitinfo.change_interval = false;
+	bitinfo.interval = 1e6 / hw.freq;
 	/* set up the timer */
 	itv.it_interval.tv_sec = itv.it_value.tv_sec = 0;
-	itv.it_interval.tv_usec = itv.it_value.tv_usec = bit.interval;
+	itv.it_interval.tv_usec = itv.it_value.tv_usec = bitinfo.interval;
 	(void)setitimer(ITIMER_REAL, &itv, NULL);
 
 	/* set up the signal trap for the timer */
@@ -158,7 +157,7 @@ mainloop_live(
 	pulse = 3; /* nothing yet */
 	oldpulse = -1;
 	count = 0;
-	bit.act = pas = 0;
+	act = pas = 0;
 	second = 0;
 	bump_second = 0;
 	synced = false;
@@ -174,9 +173,9 @@ mainloop_live(
 	 * ~A > 2 * hw.freq: timeout
 	 */
 
-	bit.bitlen_reset = false;
-	bit.bit0 = hw.freq / 10;
-	bit.bit20 = hw.freq / 5;
+	bitinfo.bitlen_reset = false;
+	bitinfo.bit0 = hw.freq / 10;
+	bitinfo.bit20 = hw.freq / 5;
 
 	for (;;) {
 		gbr = set_new_state(gbr);
@@ -190,20 +189,20 @@ mainloop_live(
 		}
 
 		if (count >= hw.freq) {
-			if (bit.act > 0 && pas == 0) {
-				bit.interval--;
-				bit.change_interval = true;
-				count = bit.act;
+			if (act > 0 && pas == 0) {
+				bitinfo.interval--;
+				bitinfo.change_interval = true;
+				count = act;
 			} else {
 				count = 0;
 			}
 			if (pas > 0 && pas < 2 * hw.freq) {
-				bit.interval++;
-				bit.change_interval = true;
+				bitinfo.interval++;
+				bitinfo.change_interval = true;
 			}
-			if (bit.act >= 2 * hw.freq || pas >= 2 * hw.freq) {
+			if (act >= 2 * hw.freq || pas >= 2 * hw.freq) {
 				// no radio signal
-				if (bit.act == 0) {
+				if (act == 0) {
 					gbr.hwstat = ehw_receive;
 					outch = 'R';
 				} else if (pas == 0) {
@@ -214,28 +213,28 @@ mainloop_live(
 					/* Is this actually possible? */
 					gbr.hwstat = ehw_random;
 					outch = '@';
-					reset_interval(&bit, hw);
+					reset_interval(&bitinfo, hw);
 				}
-				bit.act = pas = 0;
+				bitinfo.act = act;
+				act = pas = 0;
 				bump_second = 2;
 			}
 		} // count >= hw.freq
 		if (pulse == 1) {
-			bit.act++;
+			act++;
 		} else {
 			pas++;
 		}
-		if (bit.signal != NULL) {
+		if (bitinfo.signal != NULL) {
 			if ((count & 7) == 0) {
-				bit.signal[count / 8] = 0;
+				bitinfo.signal[count / 8] = 0;
 				/* clear data from previous second */
 			}
-			bit.signal[count / 8] |= pulse <<
-			    (unsigned char)(count & 7);
+			bitinfo.signal[count / 8] |= pulse << (count & 7);
 		}
 		if (oldpulse == 0 && pulse == 1) {
 			// this assumes a clean signal without a software filter
-			if (bit.act + pas > 0.8 * hw.freq) {
+			if (act + pas > 0.8 * hw.freq) {
 				/* start of new second */
 				bump_second = 1;
 				if (!synced) {
@@ -244,12 +243,12 @@ mainloop_live(
 					count = 0;
 				}
 				if (count > 0 && count < hw.freq / 2) {
-					bit.interval++;
-					bit.change_interval = true;
+					bitinfo.interval++;
+					bitinfo.change_interval = true;
 				}
 				if (count > hw.freq / 2) {
-					bit.interval--;
-					bit.change_interval = true;
+					bitinfo.interval--;
+					bitinfo.change_interval = true;
 				}
 			}
 			newminute = false;
@@ -258,14 +257,14 @@ mainloop_live(
 				bump_second = -1;
 				second = 0;
 			}
-			if (bit.act + pas > 0.8 * hw.freq) {
-				if (hw.freq * bit.act * (newminute ? 2 : 1) <
-				    (bit.bit0 + bit.bit20) / 2 * count) {
+			if (act + pas > 0.8 * hw.freq) {
+				if (hw.freq * bitinfo.act * (newminute ? 2 : 1) <
+				    (bitinfo.bit0 + bitinfo.bit20) / 2 * count) {
 					gbr.bitval = ebv_0;
 					outch = '0';
 					buffer[bitpos] = 0;
-				} else if (hw.freq * bit.act * (newminute ? 2 : 1) <
-				    (bit.bit0 + bit.bit20) * count) {
+				} else if (hw.freq * bitinfo.act * (newminute ? 2 : 1) <
+				    (bitinfo.bit0 + bitinfo.bit20) * count) {
 					gbr.bitval = ebv_1;
 					outch = '1';
 					buffer[bitpos] = 1;
@@ -273,37 +272,38 @@ mainloop_live(
 					gbr.bitval = ebv_none;
 					outch = '_';
 				}
-				bit.act = pas = 0;
+				bitinfo.act = act;
+				act = pas = 0;
 			}
 		}
 		/*
 		 * Prevent algorithm collapse during thunderstorms or
 		 * scheduler abuse
 		 */
-		if (bit.interval < 8e5 / hw.freq || bit.interval > 1.2e6 / hw.freq) {
-			reset_interval(&bit, hw);
+		if (bitinfo.interval < 8e5 / hw.freq || bitinfo.interval > 1.2e6 / hw.freq) {
+			reset_interval(&bitinfo, hw);
 		}
 		if (gbr.hwstat == ehw_ok && gbr.marker == emark_none) {
 			float avg;
 			if (bitpos == 0 && gbr.bitval == ebv_0) {
-				bit.bit0 += (bit.act - bit.bit0) / 2;
+				bitinfo.bit0 += (bitinfo.act - bitinfo.bit0) / 2;
 			}
 			if (bitpos == 20 && gbr.bitval == ebv_1) {
-				bit.bit20 += (bit.act - bit.bit20) / 2;
+				bitinfo.bit20 += (bitinfo.act - bitinfo.bit20) / 2;
 			}
 			/* Force sane values during e.g. a thunderstorm */
-			if (bit.bit20 < bit.bit0 * 1.5 ||
-			    bit.bit20 > bit.bit0 * 3) {
-				reset_bitlen(&bit, hw);
+			if (bitinfo.bit20 < bitinfo.bit0 * 1.5 ||
+			    bitinfo.bit20 > bitinfo.bit0 * 3) {
+				reset_bitlen(&bitinfo, hw);
 			}
-			avg = (bit.bit20 - bit.bit0) / 2;
-			if (bit.bit0 + avg < hw.freq / 10 ||
-			    bit.bit0 - avg > hw.freq / 10) {
-				reset_bitlen(&bit, hw);
+			avg = (bitinfo.bit20 - bitinfo.bit0) / 2;
+			if (bitinfo.bit0 + avg < hw.freq / 10 ||
+			    bitinfo.bit0 - avg > hw.freq / 10) {
+				reset_bitlen(&bitinfo, hw);
 			}
-			if (bit.bit20 + avg < hw.freq / 5 ||
-			    bit.bit20 - avg > hw.freq / 5) {
-				reset_bitlen(&bit, hw);
+			if (bitinfo.bit20 + avg < hw.freq / 5 ||
+			    bitinfo.bit20 - avg > hw.freq / 5) {
+				reset_bitlen(&bitinfo, hw);
 			}
 		}
 		/*
@@ -318,7 +318,7 @@ mainloop_live(
 				} else if (gbr.marker == emark_late) {
 					gbr.marker = emark_toolong;
 				}
-				reset_interval(&bit, hw);
+				reset_interval(&bitinfo, hw);
 			} else {
 				if (gbr.marker == emark_none) {
 					gbr.marker = emark_minute;
@@ -381,9 +381,9 @@ mainloop_live(
 		}
 		oldpulse = pulse;
 		count++;
-		if (bit.change_interval) {
-			bit.change_interval = false;
-			itv.it_interval.tv_usec = bit.interval;
+		if (bitinfo.change_interval) {
+			bitinfo.change_interval = false;
+			itv.it_interval.tv_usec = bitinfo.interval;
 			(void)setitimer(ITIMER_REAL, &itv, NULL);
 		}
 		(void)sigwait(&signalset, &sigwait_clr);
