@@ -284,11 +284,13 @@ mainloop_live(
 		}
 		if (gbr.hwstat == ehw_ok && gbr.marker == emark_none) {
 			float avg;
-			if (bitpos == 0 && gbr.bitval == ebv_0) {
-				bitinfo.bit0 += (bitinfo.act - bitinfo.bit0) / 2;
-			}
-			if (bitpos == 20 && gbr.bitval == ebv_1) {
-				bitinfo.bit20 += (bitinfo.act - bitinfo.bit20) / 2;
+			if (!newminute) {
+				if (bitpos == 0 && gbr.bitval == ebv_0) {
+					bitinfo.bit0 += (bitinfo.act - bitinfo.bit0) / 2;
+				}
+				if (bitpos == 20 && gbr.bitval == ebv_1) {
+					bitinfo.bit20 += (bitinfo.act - bitinfo.bit20) / 2;
+				}
 			}
 			/* Force sane values during e.g. a thunderstorm */
 			if (bitinfo.bit20 < bitinfo.bit0 * 1.5 ||
