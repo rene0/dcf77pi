@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 #include "input.h"
+#include "mainloop_live.h"
 
 #include "json_util.h"
 
@@ -14,7 +15,55 @@
 #include <unistd.h>
 
 static struct json_object *config;
+static struct hardware hw;
 static volatile sig_atomic_t running = 1;
+static int min = -1;
+static bool verbose = true;
+
+/** filler method */
+void
+nope()
+{
+}
+
+/** another filler method */
+struct ML_result
+nope_mlr(struct ML_result _1, int _2)
+{
+	struct ML_result nothing = {};
+	return nothing;
+}
+
+void
+display_long_minute(void)
+{
+	printf("Too long minute!\n");
+	min++;
+}
+
+void
+display_minute(int _1)
+{
+	min++;
+}
+
+void
+display_bit(struct GB_result gbr, int bitpos)
+{
+	printf("%i:%i %i %i %li %f %f %i ", min, bitpos, gbr.bitval,
+	    bitinfo.act, bitinfo.interval, bitinfo.bit0, bitinfo.bit20,
+	    hw.freq);
+	if (verbose) {
+		/* display all pulses */
+		for (int i = 0; i < hw.freq / 2; i++) {
+			for (unsigned j = 0; j < 8; j++) {
+				printf("%c", (bitinfo.signal[i] & (1 << j)) >
+				    0 ? '+' : '-');
+			}
+		}
+	}
+	printf("\n");
+}
 
 static void
 client_cleanup()
@@ -25,7 +74,7 @@ client_cleanup()
 }
 
 static void
-sigint_handler(/*@unused@*/ int sig)
+sigint_handler(int _1)
 {
 	running = 0;
 }
@@ -34,9 +83,8 @@ int
 main(int argc, char *argv[])
 {
 	struct sigaction sigact;
-	struct hardware hw;
-	int ch, min, res;
-	bool raw = false, verbose = true;
+	int ch, res;
+	bool raw = false;
 
 	while ((ch = getopt(argc, argv, "qr")) != -1) {
 		switch (ch) {
@@ -64,19 +112,14 @@ main(int argc, char *argv[])
 	}
 	hw = get_hardware_parameters();
 
+#if 0 //SIGALRM from mainloop_live eats this SIGINT
 	sigact.sa_handler = sigint_handler;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 	sigaction(SIGINT, &sigact, NULL);
-
-	min = -1;
-
-	while (running == 1) {
-#if 0
-		struct bitinfo bi;
-		struct GB_result gbr;
 #endif
-		if (raw) {
+	if (raw) {
+		while (running == 1) {
 			struct timespec slp;
 			slp.tv_sec = 0;
 			slp.tv_nsec = 1e9 / hw.freq;
@@ -86,42 +129,10 @@ main(int argc, char *argv[])
 				; /* empty loop */
 			continue;
 		}
-/*
- * Below code is similar itimer-signal-demo.c which probably needs to be made
- * into a callback to mainloop_live(), or mainloop_live() needs a verbose
- * mode.
- */
-#if 0
-		gbr = get_bit_live();
-		bi = get_bitinfo();
-		if (verbose) {
-			if (bi.change_interval) {
-				printf("!");
-			}
-			/* display first hw.freq pulses */
-			for (int i = 0; i < hw.freq / 8; i++) {
-				for (unsigned j = 0; j < 8; j++) {
-					printf("%c", (bi.signal[i] & (1 << j)) >
-					    0 ? '+' : '-');
-				}
-			}
-			for (int i = 0; i <= (hw.freq & 7); i++) {
-				printf("%c", (bi.signal[hw.freq / 8] & (1 << i)) >
-				    0 ? '+' : '-');
-			}
-			printf("\n");
-		}
-		if (gbr.marker == emark_toolong || gbr.marker == emark_late) {
-			printf("Too long minute!\n");
-			min++;
-		}
-		printf("%i %i %f %f %i:%i\n", gbr.bitval, bit.act,
-		    bi.bit0, bi.bit20, min, get_bitpos());
-		if (gbr.marker == emark_minute) {
-			min++;
-		}
-		gbr = next_bit(gbr);
-#endif
+	} else {
+		mainloop_live(NULL, display_bit, display_long_minute,
+		    display_minute, nope, nope, nope, nope, nope, nope,
+		    nope_mlr, nope_mlr, nope_mlr);
 	}
 
 	client_cleanup();
