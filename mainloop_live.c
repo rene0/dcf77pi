@@ -205,15 +205,10 @@ mainloop_live(
 				if (act == 0) {
 					gbr.hwstat = ehw_receive;
 					outch = 'R';
-				} else if (pas == 0) {
+				} else { /* pas == 0 */
 					/* This assumes no AGC in the hardware. */
 					gbr.hwstat = ehw_transmit;
 					outch = 'X';
-				} else {
-					/* Is this actually possible? */
-					gbr.hwstat = ehw_random;
-					outch = '@';
-					reset_interval(&bitinfo, hw);
 				}
 				bitinfo.act = act;
 				act = pas = 0;
