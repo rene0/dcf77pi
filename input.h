@@ -100,7 +100,7 @@ struct sGB_bitinfo {
 	 */
 	int act;
 	/**
-	 * the raw received radio signal, {@link hardware.freq} / 2 items,
+	 * the raw received radio signal, {@link hardware.freq} / 4 items,
 	 * with each item holding 8 bits
 	 */
 	unsigned char *signal;

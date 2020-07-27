@@ -123,7 +123,7 @@ set_mode_live(struct json_object *config)
 		cleanup();
 		return EX_DATAERR;
 	}
-	bitinfo.signal = malloc(hw.freq / 2);
+	bitinfo.signal = malloc(hw.freq / 4);
 #if defined(__FreeBSD__)
 	if (json_object_object_get_ex(config, "iodev", &value)) {
 		hw.iodev = (unsigned)json_object_get_int(value);

@@ -55,7 +55,7 @@ display_bit(struct GB_result gbr, int bitpos)
 	    hw.freq);
 	if (verbose) {
 		/* display all pulses */
-		for (int i = 0; i < hw.freq / 2; i++) {
+		for (int i = 0; i < hw.freq / 4; i++) {
 			for (unsigned j = 0; j < 8; j++) {
 				printf("%c", (bitinfo.signal[i] & (1 << j)) >
 				    0 ? '+' : '-');
