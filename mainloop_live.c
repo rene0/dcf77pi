@@ -214,7 +214,7 @@ mainloop_live(
 				act = pas = 0;
 				bump_second = 2;
 			}
-		} // count >= hw.freq
+		}
 		if (pulse == 1) {
 			act++;
 		} else {
@@ -222,8 +222,8 @@ mainloop_live(
 		}
 		if (bitinfo.signal != NULL) {
 			if ((count & 7) == 0) {
-				bitinfo.signal[count / 8] = 0;
 				/* clear data from previous second */
+				bitinfo.signal[count / 8] = 0;
 			}
 			bitinfo.signal[count / 8] |= pulse << (count & 7);
 		}
