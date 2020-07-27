@@ -130,7 +130,7 @@ mainloop_live(
 	int sigwait_clr;
 	bool newminute;
 	int pulse, oldpulse;
-	int count;
+	int count, cursor;
 	int act, pas; /* act is a throw-away version of bitinfo.act */
 	int second, bump_second;
 	char outch = '?';
@@ -157,6 +157,7 @@ mainloop_live(
 	pulse = 3; /* nothing yet */
 	oldpulse = -1;
 	count = 0;
+	cursor = 0; /* like count, but writes in the signal buffer and does not bump */
 	act = pas = 0;
 	second = 0;
 	bump_second = 0;
@@ -221,11 +222,11 @@ mainloop_live(
 			pas++;
 		}
 		if (bitinfo.signal != NULL) {
-			if ((count & 7) == 0) {
+			if ((cursor & 7) == 0) {
 				/* clear data from previous second */
-				bitinfo.signal[count / 8] = 0;
+				bitinfo.signal[cursor / 8] = 0;
 			}
-			bitinfo.signal[count / 8] |= pulse << (count & 7);
+			bitinfo.signal[cursor / 8] |= pulse << (cursor & 7);
 		}
 		if (oldpulse == 0 && pulse == 1) {
 			// this assumes a clean signal without a software filter
@@ -266,6 +267,8 @@ mainloop_live(
 					outch = '_';
 					/* retain old buffer value */
 				}
+				bitinfo.cursor = cursor;
+				cursor = 0;
 				bitinfo.act = act;
 				act = pas = 0;
 			}
@@ -377,6 +380,7 @@ mainloop_live(
 		}
 		oldpulse = pulse;
 		count++;
+		cursor++;
 		if (bitinfo.change_interval) {
 			bitinfo.change_interval = false;
 			itv.it_interval.tv_usec = bitinfo.interval;
