@@ -236,7 +236,7 @@ mainloop_live(
 				second = 0;
 			}
 			// this assumes a clean signal without a software filter
-			if (act + pas > 0.8 * hw.freq) {
+			if (act + pas > 0.95 * hw.freq) {
 				if (newminute) {
 					act *= 2;
 					pas *= 2;
@@ -258,8 +258,6 @@ mainloop_live(
 					bitinfo.interval--;
 					bitinfo.change_interval = true;
 				}
-			}
-			if (act + pas > 0.8 * hw.freq) {
 				if (act < (bitinfo.bit0 + bitinfo.bit20) / 2) {
 					gbr.bitval = ebv_0;
 					outch = '0';
