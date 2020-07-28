@@ -229,8 +229,20 @@ mainloop_live(
 			bitinfo.signal[cursor / 8] |= pulse << (cursor & 7);
 		}
 		if (oldpulse == 0 && pulse == 1) {
+			newminute = false;
+			if (pas > 1.5 * hw.freq) {
+				newminute = true;
+				bump_second = -1;
+				second = 0;
+			}
 			// this assumes a clean signal without a software filter
 			if (act + pas > 0.8 * hw.freq) {
+				if (newminute) {
+					act *= 2;
+					pas *= 2;
+				}
+				act *= hw.freq / (float)cursor;
+				pas *= hw.freq / (float)cursor;
 				/* start of new second */
 				bump_second = 1;
 				if (!synced) {
@@ -246,12 +258,6 @@ mainloop_live(
 					bitinfo.interval--;
 					bitinfo.change_interval = true;
 				}
-			}
-			newminute = false;
-			if (pas > 1.5 * hw.freq) {
-				newminute = true;
-				bump_second = -1;
-				second = 0;
 			}
 			if (act + pas > 0.8 * hw.freq) {
 				if (act < (bitinfo.bit0 + bitinfo.bit20) / 2) {
