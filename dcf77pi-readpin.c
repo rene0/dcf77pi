@@ -15,7 +15,6 @@
 #include <unistd.h>
 
 static struct json_object *config;
-static struct hardware hw;
 static volatile sig_atomic_t running = 1;
 static int min = -1;
 static bool verbose = true;
@@ -121,7 +120,6 @@ main(int argc, char *argv[])
 		client_cleanup();
 		return res;
 	}
-	hw = get_hardware_parameters();
 
 #if 0 //SIGALRM from mainloop_live eats this SIGINT
 	sigact.sa_handler = sigint_handler;
@@ -130,6 +128,7 @@ main(int argc, char *argv[])
 	sigaction(SIGINT, &sigact, NULL);
 #endif
 	if (raw) {
+		struct hardware hw = get_hardware_parameters();
 		while (running == 1) {
 			struct timespec slp;
 			slp.tv_sec = 0;
