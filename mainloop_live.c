@@ -125,6 +125,7 @@ mainloop_live(
 	bool is_eom;
 	bool was_toolong = false;
 	bool synced;
+	bool spike_seen;
 	struct itimerval itv;
 	sigset_t signalset;
 	int sigwait_clr;
@@ -162,6 +163,7 @@ mainloop_live(
 	second = 0;
 	bump_second = 0;
 	synced = false;
+	spike_seen = false;
 
 	/*
 	 * One period is either 1000 ms or 2000 ms long (normal or padding for
@@ -216,7 +218,7 @@ mainloop_live(
 				bump_second = 2;
 			}
 		}
-		if (pulse == 1) {
+		if (pulse == 1 && !spike_seen) {
 			act++;
 		} else {
 			pas++;
@@ -237,6 +239,7 @@ mainloop_live(
 			}
 			// this assumes a clean signal without a software filter
 			if (act + pas > 0.95 * hw.freq) {
+				spike_seen = false;
 				if (newminute) {
 					act *= 2;
 					pas *= 2;
@@ -275,6 +278,9 @@ mainloop_live(
 				cursor = 0;
 				bitinfo.act = act;
 				act = pas = 0;
+			} else {
+				/* mute spurious spike to prevent false 1 bits */
+				spike_seen = true;
 			}
 		}
 		/*
