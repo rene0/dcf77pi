@@ -125,7 +125,7 @@ extern struct sGB_bitinfo bitinfo;
  * @param infilename The name of the log file to use.
  * @return Preparation was succesful (0), -1 or errno otherwise.
  */
-int set_mode_file(const char * const infilename);
+int set_mode_file(const char * infilename);
 
 /**
  * Prepare for live input.
@@ -199,7 +199,7 @@ bool is_space_bit(int bitpos);
  * @param logfilename The name of the log file to use.
  * @return The log file was opened succesfully (0), or errno on error.
  */
-int append_logfile(const char * const logfilename);
+int append_logfile(const char * logfilename);
 
 /**
  * Close the currently opened log file.

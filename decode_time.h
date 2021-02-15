@@ -111,6 +111,6 @@ struct DT_result {
  * the calculated time.
  */
 struct DT_result decode_time(unsigned init_min, int minlen, unsigned acc_minlen,
-    const int buffer[], struct tm * const time);
+    const int buffer[], struct tm * time);
 
 #endif

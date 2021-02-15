@@ -33,7 +33,7 @@ void fill_thirdparty_buffer(int minute, int bitpos, struct GB_result gbr);
  *
  * @return The third party buffer.
  */
-const unsigned * const get_thirdparty_buffer(void);
+const unsigned * get_thirdparty_buffer(void);
 
 /**
  * Retrieve the type of the third party contents.

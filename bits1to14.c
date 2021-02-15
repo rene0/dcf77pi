@@ -63,7 +63,7 @@ fill_thirdparty_buffer(int minute, int bitpos, struct GB_result gbr)
 	}
 }
 
-const unsigned * const
+const unsigned *
 get_thirdparty_buffer(void)
 {
 	return tpbuf;
