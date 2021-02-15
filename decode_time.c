@@ -110,7 +110,7 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 			*time = add_minute(*time, dt_res.dst_announce);
 		}
 		for (int i = increase; increase < 0 && i < 0; i++) {
-			*time = substract_minute(*time, dt_res.dst_announce);
+			*time = subtract_minute(*time, dt_res.dst_announce);
 		}
 	}
 	return increase;

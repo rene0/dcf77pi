@@ -38,7 +38,7 @@ struct ML_result {
  * minute.
  * @param display_new_second The callback for additional actions
  * after the bit is displayed and the minute information is updated.
- * @param display_alarm The callback to display third party alarm messsages.
+ * @param display_alarm The callback to display third party alarm messages.
  * @param display_unknown The callback to display unknown third party
  * messages.
  * @param display_weather The callback to display third party weather

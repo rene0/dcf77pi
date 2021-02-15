@@ -83,7 +83,7 @@ struct tm add_minute(struct tm time, bool dst_changes);
  * @param dst_changes The daylight saving time is about to start or end.
  * @return The decreased time.
  */
-struct tm substract_minute(struct tm time, bool dst_changes);
+struct tm subtract_minute(struct tm time, bool dst_changes);
 
 /**
  * Convert the given time in ISO format to DCF77 format.

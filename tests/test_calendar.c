@@ -175,7 +175,7 @@ main(int argc, char *argv[])
 		}
 	}
 
-	/* substract_minute(): check for every minute increase if it matches */
+	/* subtract_minute(): check for every minute increase if it matches */
 	time2.tm_year = base_year + 399;
 	time2.tm_mon = 12;
 	time2.tm_mday = 31;

@@ -17,7 +17,7 @@ struct tm;
  * long (eGB_too_long is set).
  * @param display_minute The callback to display information about the current
  * minute.
- * @param display_alarm The callback to display third party alarm messsages.
+ * @param display_alarm The callback to display third party alarm messages.
  * @param display_unknown The callback to display unknown third party
  * messages.
  * @param display_weather The callback to display third party weather

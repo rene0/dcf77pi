@@ -249,7 +249,7 @@ mainloop_live(
 				/* start of new second */
 				bump_second = 1;
 				if (!synced) {
-					// first scond
+					// first second
 					synced = true;
 					count = 0;
 				}

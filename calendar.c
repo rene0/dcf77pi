@@ -20,7 +20,7 @@ century_offset(struct tm time)
 	int d, nw, nd, wd;
 	int tmp; /* resulting day of year, 02-28 if xx00 is leap */
 
-	/* substract year days from weekday, including normal leap years */
+	/* subtract year days from weekday, including normal leap years */
 	wd = (time.tm_wday - time.tm_year - time.tm_year / 4 -
 	    (((time.tm_year % 4) > 0) ? 1 : 0)) % 7;
 	if (wd < 1) {
@@ -156,7 +156,7 @@ add_minute(struct tm time, bool dst_changes)
 }
 
 struct tm
-substract_minute(struct tm time, bool dst_changes)
+subtract_minute(struct tm time, bool dst_changes)
 {
 	struct tm dt;
 
