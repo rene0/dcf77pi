@@ -29,7 +29,7 @@ struct alm {
 void decode_alarm(const unsigned civbuf[], struct alm * alarm);
 
 /**
- * Determines the name of the region which the alarm is broadcasted for.
+ * Determines the name of the region which the alarm is broadcast for.
  *
  * @param alarm The structure containing the alarm information.
  * @return The region name.

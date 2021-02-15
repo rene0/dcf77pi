@@ -15,7 +15,7 @@ enum eSC_status {
 	esc_ok,
 	/** Time was invalid */
 	esc_invalid,
-	/** Settting the clock failed */
+	/** Setting the clock failed */
 	esc_fail,
 	/** Too early or unsafe to set the time */
 	esc_unsafe

@@ -123,7 +123,7 @@ extern struct sGB_bitinfo bitinfo;
  * Prepare for input from a log file.
  *
  * @param infilename The name of the log file to use.
- * @return Preparation was succesful (0), -1 or errno otherwise.
+ * @return Preparation was successful (0), -1 or errno otherwise.
  */
 int set_mode_file(const char * infilename);
 
@@ -135,7 +135,7 @@ int set_mode_file(const char * infilename);
  *
  * @param config The JSON object containing the parsed configuration from
  * config.json
- * @return Preparation was succesful (0), -1 or errno otherwise.
+ * @return Preparation was successful (0), -1 or errno otherwise.
  */
 int set_mode_live(struct json_object *config);
 
@@ -197,7 +197,7 @@ bool is_space_bit(int bitpos);
  * Open the log file and append a "new log" marker to it.
  *
  * @param logfilename The name of the log file to use.
- * @return The log file was opened succesfully (0), or errno on error.
+ * @return The log file was opened successfully (0), or errno on error.
  */
 int append_logfile(const char * logfilename);
 
