@@ -287,7 +287,6 @@ mainloop_live(
 		 * Prevent algorithm collapse during thunderstorms or
 		 * scheduler abuse
 		 */
-		if (bitinfo.interval < 8e5 / hw.freq || bitinfo.interval > 1.2e6 / hw.freq) {
 			reset_interval(&bitinfo, hw);
 		}
 		if (gbr.hwstat == ehw_ok && gbr.marker == emark_none) {
@@ -314,6 +313,7 @@ mainloop_live(
 			    bitinfo.bit20 - avg > hw.freq / 5.0) {
 				reset_bitlen(&bitinfo, hw);
 			}
+		if (bitinfo.interval < (long)8e5 / hw.freq || bitinfo.interval > (long)1.2e6 / hw.freq) {
 		}
 		/*
 		 * Reset the frequency and the EOM flag if two
