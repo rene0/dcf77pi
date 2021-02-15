@@ -446,13 +446,13 @@ get_bit_file(void)
 }
 
 bool
-is_space_bit(int bitpos)
+is_space_bit(int _bp)
 {
-	return (bitpos == 1 || bitpos == 15 || bitpos == 16 ||
-	    bitpos == 19 || bitpos == 20 || bitpos == 21 || bitpos == 28 ||
-	    bitpos == 29 || bitpos == 35 || bitpos == 36 || bitpos == 42 ||
-	    bitpos == 45 || bitpos == 50 || bitpos == 58 || bitpos == 59 ||
-	    bitpos == 60);
+	return (_bp == 1 || _bp == 15 || _bp == 16 ||
+	    _bp == 19 || _bp == 20 || _bp == 21 || _bp == 28 ||
+	    _bp == 29 || _bp == 35 || _bp == 36 || _bp == 42 ||
+	    _bp == 45 || _bp == 50 || _bp == 58 || _bp == 59 ||
+	    _bp == 60);
 }
 
 struct GB_result
