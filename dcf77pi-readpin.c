@@ -137,7 +137,6 @@ main(int argc, char *argv[])
 			fflush(stdout);
 			while (nanosleep(&slp, &slp) > 0)
 				; /* empty loop */
-			continue;
 		}
 	} else {
 		mainloop_live(NULL, display_bit, display_long_minute,

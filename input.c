@@ -248,7 +248,7 @@ get_pulse(void)
 #if defined(NOLIVE)
 	tmpch = 2;
 #else
-	int count = 0;
+	int count;
 #if defined(__FreeBSD__)
 	struct gpio_req req;
 

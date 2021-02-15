@@ -80,7 +80,7 @@ mainloop_analyze(
     void (*display_thirdparty_buffer)(const unsigned[]))
 {
 	int minlen = 0;
-	int bitpos = 0;
+	int bitpos;
 	unsigned init_min = 2;
 	struct tm curtime;
 	bool was_toolong = false;

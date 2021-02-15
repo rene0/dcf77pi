@@ -116,7 +116,7 @@ mainloop_live(
     struct ML_result (*post_process_input)(struct ML_result, int))
 {
 	int minlen = 0;
-	int bitpos = 0;
+	int bitpos;
 	unsigned init_min = 2;
 	struct tm curtime;
 	struct ML_result mlr;
