@@ -399,7 +399,7 @@ process_input(struct ML_result in_ml, int bitpos)
 			draw_keys();
 			input_mode = -1;
 		} else {
-			keybuf[input_count++] = inkey;
+			keybuf[input_count++] = (char)inkey;
 			input_xpos++;
 			if (input_xpos > 79) {
 				/* Shift displayed line one character left */

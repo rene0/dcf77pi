@@ -92,7 +92,7 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 			}
 		}
 		/* Calculate number of minutes to increase time with: */
-		increase = acc_minlen / 60000;
+		increase = (int)(acc_minlen / 60000);
 		if (acc_minlen >= 60000) {
 			acc_minlen_partial %= 60000;
 		}

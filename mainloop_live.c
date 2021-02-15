@@ -19,7 +19,7 @@ static void
 reset_interval(struct sGB_bitinfo *bit, struct hardware hw)
 {
 	write_to_logfile('=');
-	bit->interval = 1e6 / hw.freq;
+	bit->interval = (long)(1e6 / hw.freq);
 	bit->change_interval = true;
 }
 
@@ -27,8 +27,8 @@ static void
 reset_bitlen(struct sGB_bitinfo *bit, struct hardware hw)
 {
 	write_to_logfile('!');
-	bit->bit0 = hw.freq / 10;
-	bit->bit20 = hw.freq / 5;
+	bit->bit0 = (float)hw.freq / 10;
+	bit->bit20 = (float)hw.freq / 5;
 	bit->bitlen_reset = true;
 }
 
@@ -144,7 +144,7 @@ mainloop_live(
 	hw = get_hardware_parameters();
 
 	bitinfo.change_interval = false;
-	bitinfo.interval = 1e6 / hw.freq;
+	bitinfo.interval = (long)(1e6 / hw.freq);
 	/* set up the timer */
 	itv.it_interval.tv_sec = itv.it_value.tv_sec = 0;
 	itv.it_interval.tv_usec = itv.it_value.tv_usec = bitinfo.interval;
@@ -177,8 +177,8 @@ mainloop_live(
 	 */
 
 	bitinfo.bitlen_reset = false;
-	bitinfo.bit0 = hw.freq / 10;
-	bitinfo.bit20 = hw.freq / 5;
+	bitinfo.bit0 = (float)hw.freq / 10;
+	bitinfo.bit20 = (float)hw.freq / 5;
 
 	for (;;) {
 		gbr = set_new_state(gbr);
@@ -244,8 +244,8 @@ mainloop_live(
 					act *= 2;
 					pas *= 2;
 				}
-				act *= hw.freq / (float)cursor;
-				pas *= hw.freq / (float)cursor;
+				act = (int)((float)act * (float)hw.freq / (float)cursor);
+				pas =(int) ((float)pas * (float)hw.freq / (float)cursor);
 				/* start of new second */
 				bump_second = 1;
 				if (!synced) {
@@ -261,11 +261,11 @@ mainloop_live(
 					bitinfo.interval--;
 					bitinfo.change_interval = true;
 				}
-				if (act < (bitinfo.bit0 + bitinfo.bit20) / 2) {
+				if ((float)act < (bitinfo.bit0 + bitinfo.bit20) / 2) {
 					gbr.bitval = ebv_0;
 					outch = '0';
 					buffer[bitpos] = 0;
-				} else if (act < (bitinfo.bit0 + bitinfo.bit20)) {
+				} else if ((float)act < (bitinfo.bit0 + bitinfo.bit20)) {
 					gbr.bitval = ebv_1;
 					outch = '1';
 					buffer[bitpos] = 1;
@@ -294,10 +294,10 @@ mainloop_live(
 			float avg;
 			if (!newminute) {
 				if (bitpos == 0 && gbr.bitval == ebv_0) {
-					bitinfo.bit0 += (bitinfo.act - bitinfo.bit0) / 2;
+					bitinfo.bit0 += ((float)bitinfo.act - bitinfo.bit0) / 2.0f; // FIXME bitpos one bit too late
 				}
 				if (bitpos == 20 && gbr.bitval == ebv_1) {
-					bitinfo.bit20 += (bitinfo.act - bitinfo.bit20) / 2;
+					bitinfo.bit20 += ((float)bitinfo.act - bitinfo.bit20) / 2.0f; // FIXME bitpos one bit too late
 				}
 			}
 			/* Force sane values during e.g. a thunderstorm */
@@ -306,12 +306,12 @@ mainloop_live(
 				reset_bitlen(&bitinfo, hw);
 			}
 			avg = (bitinfo.bit20 - bitinfo.bit0) / 2;
-			if (bitinfo.bit0 + avg < hw.freq / 10 ||
-			    bitinfo.bit0 - avg > hw.freq / 10) {
+			if (bitinfo.bit0 + avg < hw.freq / 10.0 ||
+			    bitinfo.bit0 - avg > hw.freq / 10.0) {
 				reset_bitlen(&bitinfo, hw);
 			}
-			if (bitinfo.bit20 + avg < hw.freq / 5 ||
-			    bitinfo.bit20 - avg > hw.freq / 5) {
+			if (bitinfo.bit20 + avg < hw.freq / 5.0 ||
+			    bitinfo.bit20 - avg > hw.freq / 5.0) {
 				reset_bitlen(&bitinfo, hw);
 			}
 		}
