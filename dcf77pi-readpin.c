@@ -113,7 +113,7 @@ main(int argc, char *argv[])
 		return res;
 	}
 
-#if 0 //SIGALRM from mainloop_live eats this SIGINT
+	//SIGALRM from mainloop_live eats this SIGINT
 	sigact.sa_handler = sigint_handler;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
