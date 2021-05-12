@@ -94,18 +94,12 @@ main(int argc, char *argv[])
 {
 	struct sigaction sigact;
 	int ch, res;
-	bool raw = false;
 
-	while ((ch = getopt(argc, argv, "qr")) != -1) {
-		switch (ch) {
-		case 'q':
-			verbose = false;
-			break;
-		case 'r':
-			raw = true;
-			break;
-		default:
-			printf("usage: %s [-qr]\n", argv[0]);
+	while ((ch = getopt(argc, argv, "q")) != -1) {
+	    if (ch == 'q') {
+	        verbose = false;
+	    } else {
+			printf("usage: %s [-q]\n", argv[0]);
 			return EX_USAGE;
 		}
 	}
@@ -126,23 +120,10 @@ main(int argc, char *argv[])
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 	sigaction(SIGINT, &sigact, NULL);
-#endif
-	if (raw) {
-		struct hardware hw = get_hardware_parameters();
-		while (running == 1) {
-			struct timespec slp;
-			slp.tv_sec = 0;
-			slp.tv_nsec = 1e9 / hw.freq;
-			printf("%i", get_pulse());
-			fflush(stdout);
-			while (nanosleep(&slp, &slp) > 0)
-				; /* empty loop */
-		}
-	} else {
-		mainloop_live(NULL, display_bit, display_long_minute,
-		    display_minute, nope, nope, nope, nope, nope, nope,
-		    nope_mlr, nope_mlr, nope_mlr);
-	}
+
+	mainloop_live(NULL, display_bit, display_long_minute,
+               display_minute, nope, nope, nope, nope, nope, nope,
+               nope_mlr, nope_mlr, nope_mlr);
 
 	client_cleanup();
 	printf("done\n");
