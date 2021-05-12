@@ -76,7 +76,6 @@ static int
 increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
     struct tm * const time)
 {
-	static unsigned acc_minlen_partial;
 	int increase;
 
 	if (acc_minlen != 0) {
@@ -84,6 +83,7 @@ increase_old_time(unsigned init_min, int minlen, unsigned acc_minlen,
 		 * See if there are any partial / split minutes to be combined.
 		 * Legacy code for old log files.
 		 */
+		static unsigned acc_minlen_partial;
 		if (acc_minlen <= 59000) {
 			acc_minlen_partial += acc_minlen;
 			if (acc_minlen_partial >= 60000) {
@@ -225,7 +225,7 @@ calculate_date_time(unsigned init_min, unsigned errflags, int increase,
 			}
 		}
 	}
-	return (errflags << 3) | ((!p3) << 2) | ((!p2) << 1) | (!p1);
+	return (errflags << 3) | ((!p3) << 2) | ((!p2) << 1) | (!p1 << 0);
 }
 
 static void

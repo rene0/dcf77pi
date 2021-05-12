@@ -122,7 +122,6 @@ mainloop_live(
 	struct ML_result mlr;
 	struct hardware hw;
 	struct GB_result gbr;
-	bool is_eom;
 	bool was_toolong = false;
 	bool synced;
 	bool spike_seen;
@@ -130,7 +129,7 @@ mainloop_live(
 	sigset_t signalset;
 	int sigwait_clr;
 	bool newminute;
-	int pulse, oldpulse;
+	int oldpulse;
 	int count, cursor;
 	int act, pas; /* act is a throw-away version of bitinfo.act */
 	int second, bump_second;
@@ -181,9 +180,9 @@ mainloop_live(
 
 	for (;;) {
 		gbr = set_new_state(gbr);
-		is_eom = gbr.marker == emark_minute || gbr.marker == emark_late;
+		bool is_eom = gbr.marker == emark_minute || gbr.marker == emark_late;
 
-		pulse = get_pulse();
+		int pulse = get_pulse();
 		if (pulse == 2) {
 			gbr.bad_io = true;
 			outch = '*';

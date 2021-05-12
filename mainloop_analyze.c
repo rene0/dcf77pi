@@ -79,7 +79,6 @@ mainloop_analyze(
     void (*display_thirdparty_buffer)(const unsigned[]))
 {
 	int minlen = 0;
-	int bitpos;
 	unsigned init_min = 2;
 	struct tm curtime;
 	bool was_toolong = false;
@@ -91,7 +90,7 @@ mainloop_analyze(
 
 		gbr = get_bit_file();
 
-		bitpos = get_bitpos();
+		int bitpos = get_bitpos();
 		if (!gbr.skip) {
 			display_bit(gbr, bitpos);
 		}
