@@ -15,7 +15,6 @@
 static void
 check_handle_new_minute(
     struct GB_result gbr,
-    int bitpos,
     struct tm *curtime,
     int minlen,
     bool was_toolong,
@@ -103,7 +102,7 @@ mainloop_analyze(
 
 		gbr = next_bit(gbr);
 		if (minlen == -1) {
-			check_handle_new_minute(gbr, bitpos, &curtime,
+			check_handle_new_minute(gbr, &curtime,
 			    minlen, was_toolong, &init_min, display_minute,
 			    display_thirdparty_buffer, display_alarm,
 			    display_unknown, display_weather, display_time);
@@ -123,7 +122,7 @@ mainloop_analyze(
 			display_long_minute();
 		}
 
-		check_handle_new_minute(gbr, bitpos, &curtime, minlen,
+		check_handle_new_minute(gbr, &curtime, minlen,
 		    was_toolong, &init_min, display_minute,
 		    display_thirdparty_buffer, display_alarm, display_unknown,
 		    display_weather, display_time);

@@ -155,7 +155,6 @@ mainloop_live(
 	(void)sigaddset(&signalset, SIGALRM);
 	(void)sigprocmask(SIG_BLOCK, &signalset, NULL);
 
-	pulse = 3; /* nothing yet */
 	oldpulse = -1;
 	count = 0;
 	cursor = 0; /* like count, but writes in the signal buffer and does not bump */
@@ -245,7 +244,7 @@ mainloop_live(
 					pas *= 2;
 				}
 				act = (int)((float)act * (float)hw.freq / (float)cursor);
-				pas =(int) ((float)pas * (float)hw.freq / (float)cursor);
+				pas = (int)((float)pas * (float)hw.freq / (float)cursor);
 				/* start of new second */
 				bump_second = 1;
 				if (!synced) {

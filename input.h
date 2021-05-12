@@ -232,7 +232,7 @@ float get_cutoff(void);
  *
  * @param arg Unused argument because of pthread_create()
  */
-void *flush_logfile(/*@unused*/ void *arg);
+_Noreturn void *flush_logfile(void *arg);
 
 /**
  * Write a character to the log file if it is open.

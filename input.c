@@ -257,7 +257,7 @@ get_pulse(void)
 	tmpch = (req.gp_value == GPIO_PIN_HIGH) ? 1 : 0;
 	if (count < 0) {
 #elif defined(__linux__)
-	count = read(fd, &tmpch, 1);
+	count = (int)read(fd, &tmpch, 1);
 	tmpch -= '0';
 	if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || count != 1) {
 #endif
@@ -498,8 +498,8 @@ get_hardware_parameters(void)
 	return hw;
 }
 
-void
-*flush_logfile(/*@unused@*/ void *arg)
+_Noreturn void
+*flush_logfile(void *_arg)
 {
 	for (;;)
 	{
