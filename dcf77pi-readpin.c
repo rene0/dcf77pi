@@ -53,10 +53,8 @@ display_bit(struct GB_result gbr, int bitpos)
 	    bitinfo.act, bitinfo.interval, bitinfo.bit0, bitinfo.bit20,
 	    bitinfo.cursor);
 	if (verbose) {
-		int i;
-
 		/* display all valid pulses */
-		for (i = 0; i < bitinfo.cursor / 8; i++) {
+		for (int i = 0; i < bitinfo.cursor / 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				printf("%c", (bitinfo.signal[i] & (1 << j)) >
 				    0 ? '+' : '-');
@@ -66,7 +64,7 @@ display_bit(struct GB_result gbr, int bitpos)
 		 * display pulses in the last partially filled item
 		 * cursor is 0-based, hence the <= comparison
 		 */
-		i = bitinfo.cursor / 8;
+		int i = bitinfo.cursor / 8;
 		for (int j = 0; j <= (bitinfo.cursor & 7); j++) {
 			printf("%c", (bitinfo.signal[i] & (1 << j)) >
 			    0 ? '+' : '-');
