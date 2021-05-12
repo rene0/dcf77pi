@@ -7,13 +7,11 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <math.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
-#include <time.h>
 #include <unistd.h>
 
 #if defined(__FreeBSD__)

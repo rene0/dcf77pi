@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sysexits.h>
-#include <time.h>
 #include <unistd.h>
 
 static struct json_object *config;
