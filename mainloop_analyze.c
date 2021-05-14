@@ -58,9 +58,7 @@ check_handle_new_minute(
 		}
 		display_time(dt, *curtime);
 
-		if (gbr.marker == emark_minute || gbr.marker == emark_late) {
-			reset_acc_minlen();
-		}
+		reset_acc_minlen();
 		if (*init_min > 0) {
 			(*init_min)--;
 		}
