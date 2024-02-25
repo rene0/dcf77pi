@@ -1,6 +1,10 @@
 dcf77pi
 =======
 
+**This repository has been migrated to https://codeberg.org/rene0/dcf77pi and archived here.**
+
+---
+
 Yet another DCF77 decoder. This one is intended for the Raspberry Pi platform
 but might work on other devices using GPIO pins too.
 
